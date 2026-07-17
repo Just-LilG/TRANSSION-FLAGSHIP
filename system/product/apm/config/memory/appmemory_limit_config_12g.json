@@ -1,0 +1,33 @@
+{
+  "major_version": 2,
+  "version": 1002,
+  "update_time": 20260715,
+  "author": "LIL G TECH LABS - TransFlagship V3",
+  "appmemory_limit_list": [
+    { "package": "com.google.android.youtube",         "limit_mb": 768 },
+    { "package": "com.ss.android.ugc.trill",           "limit_mb": 600 },
+    { "package": "com.zhiliaoapp.musically.go",        "limit_mb": 500 },
+    { "package": "com.facebook.katana",                "limit_mb": 700 },
+    { "package": "com.facebook.orca",                  "limit_mb": 500 },
+    { "package": "com.instagram.android",              "limit_mb": 650 },
+    { "package": "com.snapchat.android",               "limit_mb": 600 },
+    { "package": "com.whatsapp",                       "limit_mb": 400 },
+    { "package": "com.android.chrome",                 "limit_mb": 900 },
+    { "package": "com.netflix.mediaclient",            "limit_mb": 600 },
+    { "package": "com.spotify.music",                  "limit_mb": 350 },
+    { "package": "com.shopee.id",                      "limit_mb": 500 },
+    { "package": "com.shopee.sg",                      "limit_mb": 500 },
+    { "package": "com.shopee.ph",                      "limit_mb": 500 },
+    { "package": "com.tokopedia.tkpd",                 "limit_mb": 500 },
+    { "package": "com.lazada.android",                 "limit_mb": 450 },
+    { "package": "com.kwai.go",                        "limit_mb": 500 },
+    { "package": "com.google.android.apps.maps",       "limit_mb": 600 },
+    { "package": "com.microsoft.teams",                "limit_mb": 600 },
+    { "package": "com.zoom.videomeetings",             "limit_mb": 500 },
+    { "package": "com.tencent.tmgp.pubgmhd",          "limit_mb": 1024 },
+    { "package": "com.dts.freefiremax",                "limit_mb": 900 },
+    { "package": "com.mobile.legends",                 "limit_mb": 800 },
+    { "package": "com.miHoYo.GenshinImpact",          "limit_mb": 1200 },
+    { "package": "com.roblox.client",                  "limit_mb": 700 }
+  ]
+}

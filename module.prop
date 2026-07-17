@@ -1,0 +1,8 @@
+id=transsion-flagship
+name=Transsion Flagship // All OS Edition
+version=V3.16 (worker-encode-fix)
+versionCode=19
+author=𝙻𝙸𝙻 𝙶 𝚃𝙴𝙲𝙷 𝙻𝙰𝙱𝚂
+description=Full flagship unlock for XOS, HiOS & iTel OS. Animations, AI, Gaming, Gallery, Social Turbo, AOD and more. Includes WebUI.
+minMagisk=20400
+updateJson=https://raw.githubusercontent.com/Just-LilG/TRANSSION-FLAGSHIP/main/update.json

@@ -1,0 +1,29 @@
+{
+  "major_version": 2,
+  "version": 1002,
+  "update_time": 20260715,
+  "author": "LIL G TECH LABS - TransFlagship V3",
+  "appmemory_limit_list": [
+    { "package": "com.google.android.youtube",         "limit_mb": 512 },
+    { "package": "com.ss.android.ugc.trill",           "limit_mb": 400 },
+    { "package": "com.zhiliaoapp.musically.go",        "limit_mb": 350 },
+    { "package": "com.facebook.katana",                "limit_mb": 512 },
+    { "package": "com.facebook.orca",                  "limit_mb": 350 },
+    { "package": "com.instagram.android",              "limit_mb": 450 },
+    { "package": "com.snapchat.android",               "limit_mb": 400 },
+    { "package": "com.whatsapp",                       "limit_mb": 300 },
+    { "package": "com.android.chrome",                 "limit_mb": 600 },
+    { "package": "com.netflix.mediaclient",            "limit_mb": 400 },
+    { "package": "com.spotify.music",                  "limit_mb": 250 },
+    { "package": "com.shopee.id",                      "limit_mb": 350 },
+    { "package": "com.shopee.sg",                      "limit_mb": 350 },
+    { "package": "com.shopee.ph",                      "limit_mb": 350 },
+    { "package": "com.tokopedia.tkpd",                 "limit_mb": 350 },
+    { "package": "com.lazada.android",                 "limit_mb": 300 },
+    { "package": "com.opera.mini.native",              "limit_mb": 200 },
+    { "package": "com.kwai.go",                        "limit_mb": 350 },
+    { "package": "com.google.android.apps.maps",       "limit_mb": 400 },
+    { "package": "com.microsoft.teams",                "limit_mb": 400 },
+    { "package": "com.zoom.videomeetings",             "limit_mb": 350 }
+  ]
+}

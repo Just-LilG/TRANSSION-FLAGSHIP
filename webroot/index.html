@@ -1,0 +1,1367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Transsion Flagship</title>
+<style>
+/* ── Reset ──────────────────────────────────────────────────────────────────── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+
+:root{
+  --bg:#07070f;
+  --glass:rgba(255,255,255,0.07);
+  --glass-b:rgba(255,255,255,0.11);
+  --glass-h:rgba(255,255,255,0.11);
+  --accent:#a78bfa;
+  --accent2:#818cf8;
+  --accent-glow:rgba(167,139,250,0.22);
+  --danger:#f87171;
+  --success:#34d399;
+  --text:#f1f5f9;
+  --text2:rgba(241,245,249,0.55);
+  --text3:rgba(241,245,249,0.28);
+  --tab-h:64px;
+}
+
+html,body{
+  height:100%;
+  width:100%;
+  overflow:hidden;
+  background:var(--bg);
+  color:var(--text);
+  font-family:-apple-system,'SF Pro Display',BlinkMacSystemFont,'Segoe UI',sans-serif;
+  -webkit-font-smoothing:antialiased;
+  /* Force true fullscreen — cover status bar AND nav bar */
+  position:fixed;
+  top:0; left:0; right:0; bottom:0;
+}
+
+/* ── Ambient ────────────────────────────────────────────────────────────────── */
+.ambient{
+  position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden;
+}
+.ambient::before{
+  content:'';position:absolute;
+  width:500px;height:500px;border-radius:50%;
+  background:radial-gradient(circle,rgba(167,139,250,0.14) 0%,transparent 70%);
+  top:-150px;left:-100px;
+  animation:d1 18s ease-in-out infinite alternate;
+}
+.ambient::after{
+  content:'';position:absolute;
+  width:400px;height:400px;border-radius:50%;
+  background:radial-gradient(circle,rgba(129,140,248,0.1) 0%,transparent 70%);
+  bottom:-80px;right:-80px;
+  animation:d2 22s ease-in-out infinite alternate;
+}
+@keyframes d1{from{transform:translate(0,0)}to{transform:translate(70px,50px)}}
+@keyframes d2{from{transform:translate(0,0)}to{transform:translate(-50px,-70px)}}
+
+/* ── App Shell ──────────────────────────────────────────────────────────────── */
+.app{
+  position:fixed;inset:0;
+  display:flex;flex-direction:column;
+  z-index:1;
+}
+
+/* ── Scroll Area ────────────────────────────────────────────────────────────── */
+.pages{
+  flex:1;
+  overflow-y:auto;
+  overflow-x:hidden;
+  -webkit-overflow-scrolling:touch;
+  overscroll-behavior:contain;
+}
+.pages::-webkit-scrollbar{display:none;}
+
+.scroll-inner{
+  padding:24px 16px calc(var(--tab-h) + 24px);
+  max-width:480px;
+  margin:0 auto;
+}
+
+/* ── Page Header ────────────────────────────────────────────────────────────── */
+.page-header{padding:20px 4px 20px;}
+.page-header .eyebrow{
+  font-size:11px;font-weight:700;letter-spacing:0.14em;
+  text-transform:uppercase;color:var(--accent);margin-bottom:5px;
+}
+.page-header h1{
+  font-size:28px;font-weight:700;letter-spacing:-0.02em;color:var(--text);
+}
+.page-header .sub{font-size:13px;color:var(--text2);margin-top:3px;}
+
+/* ── Section Label ──────────────────────────────────────────────────────────── */
+.section-label{
+  font-size:11px;font-weight:700;letter-spacing:0.1em;
+  text-transform:uppercase;color:var(--text3);
+  padding:18px 4px 8px;
+}
+
+/* ── Glass Card ─────────────────────────────────────────────────────────────── */
+.glass-card{
+  background:rgba(20,20,40,0.85);
+  border:1px solid var(--glass-b);
+  border-radius:20px;
+  overflow:hidden;
+  position:relative;
+  /* Fallback for WebViews that don't support backdrop-filter */
+}
+.glass-card::before{
+  content:'';position:absolute;inset:0;border-radius:20px;
+  background:linear-gradient(135deg,rgba(255,255,255,0.06) 0%,transparent 60%);
+  pointer-events:none;
+}
+@supports(backdrop-filter:blur(1px)){
+  .glass-card{
+    background:rgba(10,10,25,0.6);
+    backdrop-filter:blur(40px) saturate(180%);
+    -webkit-backdrop-filter:blur(40px) saturate(180%);
+  }
+}
+
+/* ── Setting Row ────────────────────────────────────────────────────────────── */
+.setting-row{
+  display:flex;align-items:center;gap:13px;
+  padding:13px 16px;position:relative;
+  transition:background 0.12s;
+}
+.setting-row:active{background:rgba(255,255,255,0.04);}
+.setting-row+.setting-row::before{
+  content:'';position:absolute;
+  top:0;left:56px;right:16px;height:1px;
+  background:var(--glass-b);
+}
+
+/* ── Row Icon ───────────────────────────────────────────────────────────────── */
+.row-icon{
+  width:36px;height:36px;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+}
+.row-icon svg{width:20px;height:20px;fill:none;}
+
+/* ── Row Text ───────────────────────────────────────────────────────────────── */
+.row-text{flex:1;min-width:0;}
+.row-title{font-size:15px;font-weight:500;color:var(--text);line-height:1.2;}
+.row-sub{font-size:12px;color:var(--text2);margin-top:1px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+
+/* ── Toggle ─────────────────────────────────────────────────────────────────── */
+.toggle{position:relative;width:51px;height:31px;flex-shrink:0;cursor:pointer;}
+.toggle input{opacity:0;width:0;height:0;position:absolute;}
+.toggle-track{
+  position:absolute;inset:0;border-radius:999px;
+  background:rgba(255,255,255,0.13);
+  border:1px solid rgba(255,255,255,0.08);
+  transition:background 0.28s cubic-bezier(0.34,1.56,0.64,1),
+             box-shadow 0.28s ease;
+}
+.toggle input:checked~.toggle-track{
+  background:var(--accent);
+  border-color:var(--accent);
+  box-shadow:0 0 14px var(--accent-glow);
+}
+.toggle-thumb{
+  position:absolute;top:3px;left:3px;
+  width:23px;height:23px;border-radius:50%;
+  background:#fff;
+  box-shadow:0 2px 5px rgba(0,0,0,0.35);
+  transition:transform 0.28s cubic-bezier(0.34,1.56,0.64,1),width 0.12s;
+}
+.toggle input:checked~.toggle-thumb{transform:translateX(20px);}
+.toggle:active .toggle-thumb{width:27px;}
+
+/* ── Slider ─────────────────────────────────────────────────────────────────── */
+.slider-row{padding:8px 16px 14px;}
+.slider-row+.setting-row::before,
+.setting-row+.slider-row{border-top:1px solid var(--glass-b);}
+.slider-label{display:flex;justify-content:space-between;margin-bottom:10px;}
+.slider-label span{font-size:12px;color:var(--text2);}
+.slider-label strong{font-size:12px;color:var(--accent);font-weight:600;}
+input[type=range]{
+  -webkit-appearance:none;width:100%;height:4px;
+  border-radius:999px;background:rgba(255,255,255,0.1);outline:none;cursor:pointer;
+}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;width:22px;height:22px;border-radius:50%;
+  background:#fff;
+  box-shadow:0 2px 6px rgba(0,0,0,0.4),0 0 0 2px var(--accent);
+  transition:transform 0.12s,box-shadow 0.12s;
+}
+input[type=range]:active::-webkit-slider-thumb{
+  transform:scale(1.2);
+  box-shadow:0 2px 10px rgba(0,0,0,0.4),0 0 0 2px var(--accent),0 0 14px var(--accent-glow);
+}
+
+/* ── File Row ───────────────────────────────────────────────────────────────── */
+.file-row{padding:10px 16px 12px;}
+.file-row+.setting-row::before,
+.setting-row+.file-row{border-top:1px solid var(--glass-b);}
+.file-btn{
+  display:block;width:100%;
+  background:rgba(167,139,250,0.1);
+  border:1px dashed rgba(167,139,250,0.3);
+  border-radius:12px;padding:10px 14px;
+  color:var(--accent);font-size:13px;font-weight:500;
+  text-align:center;cursor:pointer;position:relative;overflow:hidden;
+  transition:background 0.15s,border-color 0.15s;
+}
+.file-btn:active{background:rgba(167,139,250,0.18);}
+.file-btn input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;}
+.file-name{font-size:11px;color:var(--text3);margin-top:6px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+
+/* ── Info Grid ──────────────────────────────────────────────────────────────── */
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;
+  background:var(--glass-b);border-radius:20px;overflow:hidden;}
+.info-cell{
+  background:rgba(20,20,40,0.9);
+  padding:16px;
+}
+@supports(backdrop-filter:blur(1px)){
+  .info-cell{background:rgba(10,10,25,0.65);backdrop-filter:blur(40px) saturate(180%);-webkit-backdrop-filter:blur(40px) saturate(180%);}
+}
+.info-cell .lbl{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.09em;}
+.info-cell .val{font-size:17px;font-weight:600;color:var(--text);margin-top:4px;}
+.info-cell .val.acc{color:var(--accent);}
+
+/* ── Status Badge ───────────────────────────────────────────────────────────── */
+.status-badge{
+  display:inline-flex;align-items:center;gap:6px;
+  background:rgba(52,211,153,0.12);
+  border:1px solid rgba(52,211,153,0.25);
+  border-radius:999px;padding:5px 12px;
+  font-size:12px;font-weight:500;color:var(--success);margin-top:12px;
+}
+.status-dot{
+  width:6px;height:6px;border-radius:50%;background:var(--success);
+  animation:pulse 2s ease-in-out infinite;
+}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.8)}}
+
+/* ── Log Box ────────────────────────────────────────────────────────────────── */
+.log-box{
+  font-family:'SF Mono','Fira Code','Courier New',monospace;
+  font-size:11px;line-height:1.7;
+  color:rgba(167,139,250,0.8);
+  background:rgba(0,0,0,0.35);border-radius:12px;
+  padding:12px;margin:10px 16px;
+  max-height:160px;overflow-y:auto;
+  white-space:pre-wrap;word-break:break-all;
+  border:1px solid rgba(167,139,250,0.1);
+}
+.log-box::-webkit-scrollbar{width:2px;}
+.log-box::-webkit-scrollbar-thumb{background:var(--accent);border-radius:999px;}
+
+/* ── Action Buttons ─────────────────────────────────────────────────────────── */
+.action-btn{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  width:100%;padding:14px;border-radius:14px;border:none;
+  font-size:15px;font-weight:600;cursor:pointer;
+  transition:transform 0.12s,opacity 0.12s;
+  -webkit-tap-highlight-color:transparent;
+}
+.action-btn:active{transform:scale(0.97);opacity:0.85;}
+.btn-primary{
+  background:linear-gradient(135deg,var(--accent) 0%,var(--accent2) 100%);
+  color:#fff;box-shadow:0 4px 18px var(--accent-glow);
+}
+.btn-danger{background:rgba(248,113,113,0.12);border:1px solid rgba(248,113,113,0.2);color:var(--danger);}
+.btn-ghost{background:rgba(255,255,255,0.06);border:1px solid var(--glass-b);color:var(--text2);}
+.btn-row{display:flex;gap:10px;padding:0 0 10px;}
+.btn-row .action-btn{font-size:13px;padding:11px;}
+
+/* ── Hero Card ──────────────────────────────────────────────────────────────── */
+.hero-card{
+  background:linear-gradient(135deg,rgba(167,139,250,0.2) 0%,rgba(99,102,241,0.1) 100%);
+  border:1px solid rgba(167,139,250,0.2);border-radius:22px;
+  padding:22px;position:relative;overflow:hidden;
+}
+.hero-card::after{
+  content:'';position:absolute;top:-50px;right:-50px;
+  width:200px;height:200px;border-radius:50%;
+  background:radial-gradient(circle,rgba(167,139,250,0.18) 0%,transparent 70%);
+}
+.hero-title{
+  font-size:21px;font-weight:700;letter-spacing:-0.02em;
+  background:linear-gradient(135deg,#fff 0%,rgba(167,139,250,.9) 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+}
+.hero-sub{font-size:13px;color:var(--text2);margin-top:3px;}
+
+/* ── Page visibility ────────────────────────────────────────────────────────── */
+.page{display:none;}
+.page.active{display:block;}
+
+/* ── Entrance animation ─────────────────────────────────────────────────────── */
+.glass-card,.hero-card{animation:cardIn 0.35s cubic-bezier(0.22,1,0.36,1) both;}
+.glass-card:nth-child(2){animation-delay:0.04s}
+.glass-card:nth-child(3){animation-delay:0.08s}
+.glass-card:nth-child(4){animation-delay:0.12s}
+.glass-card:nth-child(5){animation-delay:0.16s}
+@keyframes cardIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── Bottom Tab Bar ─────────────────────────────────────────────────────────── */
+.tab-bar{
+  height:var(--tab-h);
+  background:rgba(8,8,18,0.92);
+  border-top:1px solid var(--glass-b);
+  display:flex;align-items:center;
+  flex-shrink:0;
+}
+@supports(backdrop-filter:blur(1px)){
+  .tab-bar{background:rgba(6,6,16,0.7);backdrop-filter:blur(40px) saturate(200%);-webkit-backdrop-filter:blur(40px) saturate(200%);}
+}
+.tab-items{display:flex;width:100%;padding:0 4px;}
+.tab-item{
+  flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;
+  padding:8px 4px;cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+  position:relative;
+}
+.tab-icon{
+  width:26px;height:26px;display:flex;align-items:center;justify-content:center;
+  transition:transform 0.25s cubic-bezier(0.34,1.56,0.64,1);
+}
+.tab-icon svg{width:22px;height:22px;fill:none;stroke:var(--text3);stroke-width:1.8;
+  stroke-linecap:round;stroke-linejoin:round;transition:stroke 0.2s;}
+.tab-label{font-size:10px;font-weight:500;color:var(--text3);transition:color 0.2s;}
+.tab-pill{
+  position:absolute;top:5px;width:40px;height:32px;border-radius:10px;
+  background:rgba(167,139,250,0.13);opacity:0;transition:opacity 0.2s;
+}
+.tab-item.active .tab-pill{opacity:1;}
+.tab-item.active .tab-icon{transform:scale(1.12);}
+.tab-item.active .tab-icon svg{stroke:var(--accent);}
+.tab-item.active .tab-label{color:var(--accent);}
+
+/* ── Toast ──────────────────────────────────────────────────────────────────── */
+.toast{
+  position:fixed;bottom:calc(var(--tab-h) + 14px);left:50%;
+  transform:translateX(-50%) translateY(16px);
+  background:rgba(22,22,42,0.95);
+  border:1px solid var(--glass-b);border-radius:999px;
+  padding:9px 20px;font-size:13px;font-weight:500;color:var(--text);
+  z-index:999;opacity:0;pointer-events:none;white-space:nowrap;
+  transition:opacity 0.22s,transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* ── Confirm modal (replaces native confirm()) ────────────────────────────── */
+.modal-backdrop{
+  position:fixed;inset:0;background:rgba(6,6,14,0.72);backdrop-filter:blur(4px);
+  z-index:1000;display:flex;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;transition:opacity 0.2s;padding:24px;
+}
+.modal-backdrop.show{opacity:1;pointer-events:auto;}
+.modal-box{
+  background:rgba(22,22,42,0.98);border:1px solid var(--glass-b);
+  border-radius:20px;padding:22px 20px;max-width:340px;width:100%;
+  transform:translateY(10px) scale(0.97);transition:transform 0.25s cubic-bezier(0.34,1.56,0.64,1);
+  box-shadow:0 20px 50px rgba(0,0,0,0.5);
+}
+.modal-backdrop.show .modal-box{transform:translateY(0) scale(1);}
+.modal-title{font-size:16px;font-weight:700;color:var(--text);margin-bottom:8px;}
+.modal-msg{font-size:13.5px;color:#9aa;line-height:1.5;margin-bottom:20px;}
+.modal-actions{display:flex;gap:10px;}
+.modal-btn{
+  flex:1;padding:11px 0;border-radius:12px;font-size:14px;font-weight:600;
+  border:none;cursor:pointer;transition:opacity 0.15s;
+}
+.modal-btn:active{opacity:0.75;}
+.modal-btn-cancel{background:rgba(255,255,255,0.08);color:#ccc;}
+.modal-btn-confirm{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;}
+.modal-btn-danger{background:linear-gradient(135deg,#f87171,#dc2626);color:#fff;}
+
+/* ── Spacers ────────────────────────────────────────────────────────────────── */
+.h8{height:8px;}.h12{height:12px;}
+</style>
+
+</head>
+<body>
+<div class="ambient"></div>
+
+<div class="app">
+<div class="modal-backdrop" id="modal-backdrop">
+  <div class="modal-box">
+    <div class="modal-title" id="modal-title">Confirm</div>
+    <div class="modal-msg" id="modal-msg"></div>
+    <div class="modal-actions">
+      <button class="modal-btn modal-btn-cancel" id="modal-cancel">Cancel</button>
+      <button class="modal-btn modal-btn-confirm" id="modal-confirm">OK</button>
+    </div>
+  </div>
+</div>
+
+  <!-- ── PAGES ───────────────────────────────────────────────────────────── -->
+  <div class="pages" id="pages">
+    <div class="scroll-inner">
+
+      <!-- HOME -->
+      <div class="page active" id="page-home">
+        <div class="page-header">
+          <div class="eyebrow">LIL G TECH LABS</div>
+          <h1>Transsion Flagship</h1>
+          <div class="sub">All OS Edition · V3.1</div>
+        </div>
+
+        <div class="hero-card">
+          <div class="hero-title">Flagship Unlocked</div>
+          <div class="hero-sub" id="hero-sub">Loading device info...</div>
+          <div class="status-badge"><div class="status-dot"></div>Module Active</div>
+        </div>
+
+        <div class="section-label">Device</div>
+        <div class="info-grid">
+          <div class="info-cell"><div class="lbl">OS</div><div class="val acc" id="info-os">—</div></div>
+          <div class="info-cell"><div class="lbl">RAM</div><div class="val" id="info-ram">—</div></div>
+          <div class="info-cell"><div class="lbl">Device</div><div class="val" id="info-device">—</div></div>
+          <div class="info-cell"><div class="lbl">Android</div><div class="val" id="info-android">—</div></div>
+        </div>
+
+        <div class="section-label">Quick Toggles</div>
+        <div class="glass-card">
+          <div class="setting-row">
+            <div class="row-icon" style="background:linear-gradient(135deg,#34d399,#059669)">
+              <svg viewBox="0 0 24 24" stroke="#fff" stroke-width="2"><rect x="2" y="6" width="20" height="14" rx="3"/><path d="M18 6V4a2 2 0 00-2-2H8a2 2 0 00-2 2v2"/><circle cx="12" cy="13" r="2"/></svg>
+            </div>
+            <div class="row-text"><div class="row-title">Gaming Suite</div><div class="row-sub">eSports + frame boost</div></div>
+            <label class="toggle"><input type="checkbox" id="q-game" checked onchange="quickSave()"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+          </div>
+          <div class="setting-row">
+            <div class="row-icon" style="background:linear-gradient(135deg,#60a5fa,#3b82f6)">
+              <svg viewBox="0 0 24 24" stroke="#fff" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v2m0 16v2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M2 12h2m16 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+            </div>
+            <div class="row-text"><div class="row-title">AI Suite</div><div class="row-sub">Nova, Copilot, subtitles</div></div>
+            <label class="toggle"><input type="checkbox" id="q-ai" checked onchange="quickSave()"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+          </div>
+        </div>
+
+        <div class="section-label">Service Log</div>
+        <div class="glass-card">
+          <div class="log-box" id="log-box">Tap refresh to load log...</div>
+          <div class="btn-row" style="padding:0 12px 12px;">
+            <button class="action-btn btn-ghost" onclick="loadLog()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 4v6h6"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg>
+              Refresh
+            </button>
+            <button class="action-btn btn-ghost" onclick="clearLog()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+              Clear
+            </button>
+          </div>
+        </div>
+
+        <div class="h8"></div>
+        <button class="action-btn btn-primary" onclick="saveAll()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+          Apply &amp; Save
+        </button>
+        <div class="h8"></div>
+        <button class="action-btn btn-danger" onclick="confirmReboot()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 4v6h6"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg>
+          Reboot Device
+        </button>
+        <div class="h8"></div>
+        <button class="action-btn" style="background:rgba(255,255,255,.06);color:#aaa" onclick="confirmResetDefaults()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 12a9 9 0 109-9 9.75 9.75 0 00-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+          Reset to Defaults
+        </button>
+        <div class="h8"></div>
+      </div>
+
+      <!-- ANIMATIONS -->
+      <div class="page" id="page-anim">
+        <div class="page-header"><div class="eyebrow">Visual</div><h1>Animations</h1><div class="sub">Launcher, unlock &amp; blur</div></div>
+
+        <div class="section-label">Status</div>
+        <div class="glass-card">
+          <div class="setting-row">
+            <div class="row-icon" style="background:linear-gradient(135deg,#a78bfa,#818cf8)">
+              <svg viewBox="0 0 24 24" stroke="#fff" stroke-width="2"><path d="M12 3l1.9 5.8H20l-4.9 3.6 1.9 5.8L12 15l-5 3.4 1.9-5.8L4 9.8h6.1z"/></svg>
+            </div>
+            <div class="row-text"><div class="row-title">Unlock Animation</div><div class="row-sub">Active — level 3</div></div>
+          </div>
+          <div class="setting-row">
+            <div class="row-icon" style="background:linear-gradient(135deg,#10b981,#059669)">
+              <svg viewBox="0 0 24 24" stroke="#fff" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+            </div>
+            <div class="row-text"><div class="row-title">Recent Apps Animation</div><div class="row-sub">Active — level 3</div></div>
+          </div>
+          <div class="setting-row">
+            <div class="row-icon" style="background:linear-gradient(135deg,#6366f1,#4f46e5)">
+              <svg viewBox="0 0 24 24" stroke="#fff" stroke-width="2"><path d="M5 3l14 9-14 9V3z"/></svg>
+            </div>
+            <div class="row-text"><div class="row-title">Launch / Exit Animation</div><div class="row-sub">Active — level 3</div></div>
+          </div>
+          <div class="setting-row">
+            <div class="row-icon" style="background:linear-gradient(135deg,#34d399,#10b981)">
+              <svg viewBox="0 0 24 24" stroke="#fff" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+            </div>
+            <div class="row-text"><div class="row-title">Gaussian Blur</div><div class="row-sub">Active — level 2</div></div>
+          </div>
+        </div>
+        <div class="glass-card" style="margin-top:12px;padding:14px 16px">
+          <div style="font-size:13px;color:#9aa;line-height:1.5">
+            These are set to the smoothest configuration tested for this device
+            and aren't user-adjustable, since incorrect values can break app
+            open/close animation.
+          </div>
+        </div>
+
+        <div class="section-label">Launcher</div>
+        <div class="glass-card" style="padding:14px 16px">
+          <div style="font-size:13px;color:#9aa;line-height:1.5">
+            Dream animations, folder-close interrupt, and multitask arc are
+            enabled by default.
+          </div>
+        </div>
+      </div>
+
+      <!-- MEDIA -->
+      <div class="page" id="page-media">
+        <div class="page-header"><div class="eyebrow">Customise</div><h1>Media</h1><div class="sub">Boot, shutdown &amp; charging</div></div>
+
+        <div class="section-label">Boot Sound</div>
+        <div class="glass-card">
+          <div class="setting-row">
+            <div class="row-icon" style="background:linear-gradient(135deg,#fbbf24,#d97706)">
+              <svg viewBox="0 0 24 24" stroke="#fff" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 010 14.14M15.54 8.46a5 5 0 010 7.07"/></svg>
+            </div>
+
+            <div class="row-text"><div class="row-title">Boot Sound</div><div class="row-sub">Play on device startup</div></div>
+            <label class="toggle"><input type="checkbox" id="media-bootsound" checked onchange="save()"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+          </div>
+          <div class="file-row">
+            <label class="file-btn">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline;vertical-align:middle;margin-right:6px"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              Upload Boot Sound (.ogg)
+              <input type="file" accept=".ogg,audio/ogg" onchange="handleFile(this,'bootsound','media-bootsound-name')">
+            </label>
+            <div class="file-name" id="media-bootsound-name">Current: Waltz.ogg</div>
+          </div>
+        </div>
+
+        <div class="section-label">Boot Animation</div>
+        <div class="glass-card">
+          <div class="setting-row">
+            <div class="row-icon" style="background:linear-gradient(135deg,#a78bfa,#7c3aed)">
+              <svg viewBox="0 0 24 24" stroke="#fff" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+            </div>
+            <div class="row-text"><div class="row-title">Boot Animation</div><div class="row-sub">Startup splash screen</div></div>
+            <label class="toggle"><input type="checkbox" id="media-bootanim" checked onchange="save()"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+          </div>
+          <div class="file-row">
+            <label class="file-btn">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline;vertical-align:middle;margin-right:6px"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              Upload Boot Animation (.zip)
+              <input type="file" accept=".zip" onchange="handleFile(this,'bootanim','media-bootanim-name')">
+            </label>
+            <div class="file-name" id="media-bootanim-name">Current: bootanimation.zip</div>
+          </div>
+        </div>
+
+        <div class="section-label">Shutdown Animation</div>
+        <div class="glass-card">
+          <div class="setting-row">
+            <div class="row-icon" style="background:linear-gradient(135deg,#f87171,#dc2626)">
+              <svg viewBox="0 0 24 24" stroke="#fff" stroke-width="2"><path d="M18.36 6.64a9 9 0 11-12.73 0"/><line x1="12" y1="2" x2="12" y2="12"/></svg>
+            </div>
+            <div class="row-text"><div class="row-title">Shutdown Animation</div><div class="row-sub">Power off splash screen</div></div>
+            <label class="toggle"><input type="checkbox" id="media-shutdownanim" checked onchange="save()"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+          </div>
+          <div class="file-row">
+            <label class="file-btn">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline;vertical-align:middle;margin-right:6px"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              Upload Shutdown Animation (.zip)
+              <input type="file" accept=".zip" onchange="handleFile(this,'shutdownanim','media-shutdownanim-name')">
+            </label>
+            <div class="file-name" id="media-shutdownanim-name">Current: shutdownanimation.zip</div>
+          </div>
+        </div>
+
+        <div class="section-label">Charging Animation</div>
+        <div class="glass-card">
+          <div class="setting-row">
+            <div class="row-icon" style="background:linear-gradient(135deg,#34d399,#059669)">
+              <svg viewBox="0 0 24 24" stroke="#fff" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+            </div>
+            <div class="row-text"><div class="row-title">Charging Animation</div><div class="row-sub">Lockscreen charging style</div></div>
+            <label class="toggle"><input type="checkbox" id="media-chargeanim" checked onchange="save()"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+          </div>
+          <div class="file-row">
+            <label class="file-btn">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline;vertical-align:middle;margin-right:6px"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              Upload Charging Video (.mp4)
+              <input type="file" accept=".mp4,video/mp4" onchange="handleFile(this,'chargeanim','media-chargeanim-name')">
+            </label>
+            <div class="file-name" id="media-chargeanim-name">Current: hios_wire_charging_lockscreen.mp4</div>
+          </div>
+        </div>
+
+        <div class="section-label">Emoji Font</div>
+        <div class="glass-card">
+          <div class="setting-row">
+            <div class="row-icon" style="background:linear-gradient(135deg,#f59e0b,#d97706)">
+              <svg viewBox="0 0 24 24" stroke="#fff" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+            </div>
+            <div class="row-text"><div class="row-title">Custom Emoji Font</div><div class="row-sub">iOS-style high-res emoji</div></div>
+            <label class="toggle"><input type="checkbox" id="media-emoji" checked onchange="save()"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+          </div>
+          <div class="file-row">
+            <label class="file-btn">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline;vertical-align:middle;margin-right:6px"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              Upload Emoji Font (.ttf)
+              <input type="file" accept=".ttf" onchange="handleFile(this,'emoji','media-emoji-name')">
+            </label>
+            <div class="file-name" id="media-emoji-name">Current: NotoColorEmoji.ttf</div>
+          </div>
+        </div>
+        <div class="h8"></div>
+        <button class="action-btn btn-primary" onclick="saveAll()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+          Apply &amp; Save
+        </button>
+        <div class="h8"></div>
+      </div>
+
+      <!-- FEATURES -->
+      <div class="page" id="page-feat">
+        <div class="page-header"><div class="eyebrow">System</div><h1>Features</h1><div class="sub">AI, gaming &amp; display</div></div>
+
+        <div class="section-label">AI Suite</div>
+        <div class="glass-card">
+          <div class="setting-row">
+            <div class="row-icon" style="background:linear-gradient(135deg,#60a5fa,#3b82f6)">
+              <svg viewBox="0 0 24 24" stroke="#fff" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v2m0 16v2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M2 12h2m16 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+            </div>
+            <div class="row-text"><div class="row-title">AI Suite</div><div class="row-sub">Master toggle</div></div>
+            <label class="toggle"><input type="checkbox" id="feat-ai" checked onchange="syncQuick('q-ai',this.checked);save()"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+          </div>
+          <div class="setting-row">
+            <div class="row-icon" style="background:linear-gradient(135deg,#818cf8,#6366f1)">
+              <svg viewBox="0 0 24 24" stroke="#fff" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+            </div>
+            <div class="row-text"><div class="row-title">AI Subtitles</div><div class="row-sub">Live call transcription</div></div>
+            <label class="toggle"><input type="checkbox" id="feat-ai-sub" checked onchange="save()"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+          </div>
+          <div class="setting-row">
+            <div class="row-icon" style="background:linear-gradient(135deg,#34d399,#059669)">
+              <svg viewBox="0 0 24 24" stroke="#fff" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+            </div>
+            <div class="row-text"><div class="row-title">AI Call Summary</div><div class="row-sub">Auto-summarise calls</div></div>
+            <label class="toggle"><input type="checkbox" id="feat-ai-call" checked onchange="save()"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+          </div>
+          <div class="setting-row">
+            <div class="row-icon" style="background:linear-gradient(135deg,#f59e0b,#d97706)">
+              <svg viewBox="0 0 24 24" stroke="#fff" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+            </div>
+            <div class="row-text"><div class="row-title">AI Notification Summary</div><div class="row-sub">Smart notification digest</div></div>
+            <label class="toggle"><input type="checkbox" id="feat-ai-notif" checked onchange="save()"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+          </div>
+          <div class="setting-row">
+            <div class="row-icon" style="background:linear-gradient(135deg,#f472b6,#ec4899)">
+              <svg viewBox="0 0 24 24" stroke="#fff" stroke-width="2"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+            </div>
+            <div class="row-text"><div class="row-title">AI Sound Recorder</div><div class="row-sub">Transcription + summary</div></div>
+            <label class="toggle"><input type="checkbox" id="feat-ai-rec" checked onchange="save()"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+          </div>
+          <div class="setting-row">
+            <div class="row-icon" style="background:linear-gradient(135deg,#a78bfa,#7c3aed)">
+              <svg viewBox="0 0 24 24" stroke="#fff" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+            </div>
+            <div class="row-text"><div class="row-title">AI Notes</div><div class="row-sub">Drawing + backgrounds</div></div>
+            <label class="toggle"><input type="checkbox" id="feat-ai-note" checked onchange="save()"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+          </div>
+        </div>
+
+        <div class="section-label">Gaming</div>
+        <div class="glass-card">
+          <div class="setting-row">
+            <div class="row-icon" style="background:linear-gradient(135deg,#34d399,#059669)">
+              <svg viewBox="0 0 24 24" stroke="#fff" stroke-width="2"><rect x="2" y="6" width="20" height="14" rx="3"/><path d="M18 6V4a2 2 0 00-2-2H8a2 2 0 00-2 2v2"/><circle cx="12" cy="13" r="2"/></svg>
+            </div>
+            <div class="row-text"><div class="row-title">Gaming Suite</div><div class="row-sub">Master toggle</div></div>
+            <label class="toggle"><input type="checkbox" id="feat-game" checked onchange="syncQuick('q-game',this.checked);save()"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+          </div>
+          <div class="setting-row">
+            <div class="row-icon" style="background:linear-gradient(135deg,#f59e0b,#d97706)">
+              <svg viewBox="0 0 24 24" stroke="#fff" stroke-width="2"><path d="M18 11V6a2 2 0 00-2-2v0a2 2 0 00-2 2v0"/><path d="M14 10V4a2 2 0 00-2-2v0a2 2 0 00-2 2v2"/><path d="M10 10.5V6a2 2 0 00-2-2v0a2 2 0 00-2 2v8"/><path d="M18 11a2 2 0 112 2l-3 4H9l-3-3.8V11"/></svg>
+            </div>
+            <div class="row-text"><div class="row-title">eSports Touch</div><div class="row-sub">Enhanced touch response</div></div>
+            <label class="toggle"><input type="checkbox" id="feat-game-touch" checked onchange="save()"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+          </div>
+          <div class="slider-row">
+            <div class="slider-label"><span>eSports Level</span><strong id="feat-game-touch-val">3</strong></div>
+            <input type="range" min="1" max="3" value="3" id="feat-game-touch-level" oninput="document.getElementById('feat-game-touch-val').textContent=this.value;save()">
+          </div>
+          <div class="setting-row">
+            <div class="row-icon" style="background:linear-gradient(135deg,#60a5fa,#2563eb)">
+              <svg viewBox="0 0 24 24" stroke="#fff" stroke-width="2"><polyline points="13 17 18 12 13 7"/><polyline points="6 17 11 12 6 7"/></svg>
+            </div>
+            <div class="row-text"><div class="row-title">Frame Interpolation</div><div class="row-sub">AI frame generation</div></div>
+            <label class="toggle"><input type="checkbox" id="feat-game-interp" checked onchange="save()"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+          </div>
+          <div class="setting-row">
+            <div class="row-icon" style="background:linear-gradient(135deg,#f87171,#dc2626)">
+              <svg viewBox="0 0 24 24" stroke="#fff" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            </div>
+            <div class="row-text"><div class="row-title">Ray Tracing</div><div class="row-sub">Enhanced lighting flag</div></div>
+            <label class="toggle"><input type="checkbox" id="feat-game-rt" checked onchange="save()"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+          </div>
+          <div class="setting-row">
+            <div class="row-icon" style="background:linear-gradient(135deg,#a78bfa,#7c3aed)">
+              <svg viewBox="0 0 24 24" stroke="#fff" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+            </div>
+            <div class="row-text"><div class="row-title">Game HDR</div><div class="row-sub">HDR rendering in games</div></div>
+            <label class="toggle"><input type="checkbox" id="feat-game-hdr" checked onchange="save()"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+          </div>
+          <div class="setting-row">
+            <div class="row-icon" style="background:linear-gradient(135deg,#34d399,#059669)">
+              <svg viewBox="0 0 24 24" stroke="#fff" stroke-width="2"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+            </div>
+            <div class="row-text"><div class="row-title">Bypass Charging</div><div class="row-sub">Direct power while gaming</div></div>
+            <label class="toggle"><input type="checkbox" id="feat-game-bypass" checked onchange="save()"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+          </div>
+        </div>
+
+        <div class="section-label">Social Turbo</div>
+        <div class="glass-card">
+          <div class="setting-row">
+            <div class="row-icon" style="background:linear-gradient(135deg,#f472b6,#db2777)">
+              <svg viewBox="0 0 24 24" stroke="#fff" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+            </div>
+            <div class="row-text"><div class="row-title">Social Turbo v3</div><div class="row-sub">Master toggle</div></div>
+            <label class="toggle"><input type="checkbox" id="feat-social" checked onchange="save()"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+          </div>
+          <div class="setting-row">
+            <div class="row-icon" style="background:linear-gradient(135deg,#fb923c,#ea580c)">
+              <svg viewBox="0 0 24 24" stroke="#fff" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            </div>
+            <div class="row-text"><div class="row-title">Call Recording</div><div class="row-sub">Record voice &amp; video calls</div></div>
+            <label class="toggle"><input type="checkbox" id="feat-social-rec" checked onchange="save()"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+          </div>
+          <div class="setting-row">
+            <div class="row-icon" style="background:linear-gradient(135deg,#818cf8,#4f46e5)">
+              <svg viewBox="0 0 24 24" stroke="#fff" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
+            </div>
+            <div class="row-text"><div class="row-title">AI Translation</div><div class="row-sub">Live call translation</div></div>
+            <label class="toggle"><input type="checkbox" id="feat-social-trans" checked onchange="save()"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+          </div>
+          <div class="setting-row">
+            <div class="row-icon" style="background:linear-gradient(135deg,#f472b6,#ec4899)">
+              <svg viewBox="0 0 24 24" stroke="#fff" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+            </div>
+            <div class="row-text"><div class="row-title">Beauty &amp; Makeup</div><div class="row-sub">Filters in video calls</div></div>
+            <label class="toggle"><input type="checkbox" id="feat-social-beauty" checked onchange="save()"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+          </div>
+        </div>
+
+        <div class="section-label">Display</div>
+        <div class="glass-card">
+          <div class="setting-row">
+            <div class="row-icon" style="background:linear-gradient(135deg,#60a5fa,#3b82f6)">
+              <svg viewBox="0 0 24 24" stroke="#fff" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+            </div>
+            <div class="row-text"><div class="row-title">DC Dimming</div><div class="row-sub">Flicker-free low brightness</div></div>
+            <label class="toggle"><input type="checkbox" id="feat-dc" checked onchange="save()"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+          </div>
+          <div class="setting-row">
+            <div class="row-icon" style="background:linear-gradient(135deg,#fbbf24,#f59e0b)">
+              <svg viewBox="0 0 24 24" stroke="#fff" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+            </div>
+            <div class="row-text"><div class="row-title">Color Enhancement</div><div class="row-sub">Vivid display mode</div></div>
+            <label class="toggle"><input type="checkbox" id="feat-color" checked onchange="save()"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+          </div>
+          <div class="setting-row">
+            <div class="row-icon" style="background:linear-gradient(135deg,#f97316,#ea580c)">
+              <svg viewBox="0 0 24 24" stroke="#fff" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+            </div>
+            <div class="row-text"><div class="row-title">HDR Display</div><div class="row-sub">High dynamic range</div></div>
+            <label class="toggle"><input type="checkbox" id="feat-hdr" checked onchange="save()"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+          </div>
+          <div class="setting-row">
+            <div class="row-icon" style="background:linear-gradient(135deg,#f59e0b,#b45309)">
+              <svg viewBox="0 0 24 24" stroke="#fff" stroke-width="2"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
+            </div>
+            <div class="row-text"><div class="row-title">Reading Mode</div><div class="row-sub">Eye comfort filter</div></div>
+            <label class="toggle"><input type="checkbox" id="feat-reading" onchange="save()"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+          </div>
+        </div>
+
+        <div class="section-label">Privacy</div>
+        <div class="glass-card">
+          <div class="setting-row">
+            <div class="row-icon" style="background:linear-gradient(135deg,#34d399,#059669)">
+              <svg viewBox="0 0 24 24" stroke="#fff" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+            </div>
+            <div class="row-text"><div class="row-title">Hide Navigation Bar</div><div class="row-sub">Full gesture navigation</div></div>
+            <label class="toggle"><input type="checkbox" id="feat-navhide" onchange="save()"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+          </div>
+          <div class="setting-row">
+            <div class="row-icon" style="background:linear-gradient(135deg,#818cf8,#6366f1)">
+              <svg viewBox="0 0 24 24" stroke="#fff" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            </div>
+            <div class="row-text"><div class="row-title">AOD Always-On Display</div><div class="row-sub">Show clock &amp; notifications on lock screen</div></div>
+            <label class="toggle"><input type="checkbox" id="feat-aod" onchange="save()"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+          </div>
+        </div>
+        <div class="h8"></div>
+        <button class="action-btn btn-primary" onclick="saveAll()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+          Apply &amp; Save
+        </button>
+        <div class="h8"></div>
+      </div>
+
+    </div><!-- /scroll-inner -->
+  </div><!-- /pages -->
+
+  <!-- ── TAB BAR ───────────────────────────────────────────────────────────── -->
+  <nav class="tab-bar">
+    <div class="tab-items">
+      <div class="tab-item active" onclick="switchTab('home',this)">
+        <div class="tab-pill"></div>
+        <div class="tab-icon">
+          <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        </div>
+        <div class="tab-label">Home</div>
+      </div>
+      <div class="tab-item" onclick="switchTab('anim',this)">
+        <div class="tab-pill"></div>
+        <div class="tab-icon">
+          <svg viewBox="0 0 24 24"><path d="M5 3l14 9-14 9V3z"/></svg>
+        </div>
+        <div class="tab-label">Animations</div>
+      </div>
+      <div class="tab-item" onclick="switchTab('media',this)">
+        <div class="tab-pill"></div>
+        <div class="tab-icon">
+          <svg viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+        </div>
+        <div class="tab-label">Media</div>
+      </div>
+      <div class="tab-item" onclick="switchTab('feat',this)">
+        <div class="tab-pill"></div>
+        <div class="tab-icon">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+        </div>
+        <div class="tab-label">Features</div>
+      </div>
+    </div>
+  </nav>
+</div><!-- /app -->
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+const CONFIG_PATH='/data/adb/modules/transsion-flagship/config.json';
+const LOG_PATH='/data/adb/modules/transsion-flagship/transflagship_service.log';
+let cfg={};
+
+// ── exec bridge — uses KSU callback API via bridge.js ES module ──────────────
+let _exec = null;
+let _fullScreen = null;
+
+async function exec(cmd){
+  if(!_exec) return '';
+  try {
+    const result = await _exec(cmd);
+    return { stdout: result || '', stderr: '', returnCode: 0 };
+  } catch(e) {
+    return { stdout: '', stderr: String(e), returnCode: 1 };
+  }
+}
+
+// ── Toast ──────────────────────────────────────────────────────────────────────
+function toast(msg,dur=2400){
+  const el=document.getElementById('toast');
+  el.textContent=msg;el.classList.add('show');
+  clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('show'),dur);
+}
+
+// ── Themed confirm modal (replaces native confirm() so it matches the app) ────
+function showConfirm(title,msg,opts={}){
+  return new Promise(resolve=>{
+    const bd=document.getElementById('modal-backdrop');
+    const okBtn=document.getElementById('modal-confirm');
+    const cancelBtn=document.getElementById('modal-cancel');
+    document.getElementById('modal-title').textContent=title;
+    document.getElementById('modal-msg').textContent=msg;
+    okBtn.textContent=opts.okLabel||'OK';
+    okBtn.className='modal-btn '+(opts.danger?'modal-btn-danger':'modal-btn-confirm');
+    const cleanup=(result)=>{
+      bd.classList.remove('show');
+      okBtn.onclick=null;cancelBtn.onclick=null;
+      resolve(result);
+    };
+    okBtn.onclick=()=>cleanup(true);
+    cancelBtn.onclick=()=>cleanup(false);
+    bd.classList.add('show');
+  });
+}
+
+// ── Tab nav ───────────────────────────────────────────────────────────────────
+function switchTab(id,el){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-item').forEach(t=>t.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  el.classList.add('active');
+  document.getElementById('pages').scrollTop=0;
+}
+
+function syncQuick(id,val){const el=document.getElementById(id);if(el)el.checked=val;}
+
+// ── Load config ────────────────────────────────────────────────────────────────
+async function loadConfig(){
+  const r=await exec('cat "'+CONFIG_PATH+'" 2>/dev/null');
+  try{cfg=JSON.parse(r.stdout||'{}');}catch(e){cfg={};}
+  applyConfig();
+}
+
+// ── Reset to defaults — recovers from bad/stale config carried over from
+// an earlier broken version (e.g. animation levels stuck at their floor) ──────
+const DEFAULT_CONFIG={
+  boot_sound:true,boot_sound_name:"Waltz",boot_anim:true,
+  shutdown_anim:true,charge_anim:true,emoji_font:true,ai_master:true,ai_subtitles:true,
+  ai_call_summary:true,ai_notif_summary:true,ai_sound_rec:true,ai_notes:true,game_master:true,
+  game_esports_touch:true,game_esports_level:3,game_interpolation:true,game_raytracing:true,
+  game_hdr:true,game_bypass_charge:true,social_master:true,social_record:true,
+  social_translate:true,social_beauty:true,display_dc:true,display_color:true,display_hdr:true,
+  display_reading:false,nav_hide:false,aod:true
+};
+async function confirmResetDefaults(){
+  if(_uploadInProgress){toast('Please wait for the upload to finish first',3000);return;}
+  const ok=await showConfirm('Reset to Defaults','This discards your current toggle choices and restores the default settings.',{okLabel:'Reset',danger:true});
+  if(!ok) return;
+  cfg=JSON.parse(JSON.stringify(DEFAULT_CONFIG));
+  const json=JSON.stringify(cfg,null,2);
+  const esc=json.replace(/'/g,"'\\''");
+  await exec("echo '"+esc+"' > \""+CONFIG_PATH+"\"");
+  applyConfig();
+  await applyRuntime();
+  await exec('am force-stop com.android.systemui').catch(()=>{});
+  toast('Reset to defaults — reboot recommended');
+}
+
+function applyConfig(){
+  const get=(k,d)=>cfg[k]!==undefined?cfg[k]:d;
+  setT('q-game',get('game_master',true));
+  setT('q-ai',get('ai_master',true));
+  setT('media-bootsound',get('boot_sound',true));setT('media-bootanim',get('boot_anim',true));
+  setT('media-shutdownanim',get('shutdown_anim',true));setT('media-chargeanim',get('charge_anim',true));
+  setT('media-emoji',get('emoji_font',true));
+  if(cfg.bootsound_file)n('media-bootsound-name','Custom: '+cfg.bootsound_file);
+  if(cfg.bootanim_file)n('media-bootanim-name','Custom: '+cfg.bootanim_file);
+  if(cfg.shutdownanim_file)n('media-shutdownanim-name','Custom: '+cfg.shutdownanim_file);
+  if(cfg.chargeanim_file)n('media-chargeanim-name','Custom: '+cfg.chargeanim_file);
+  if(cfg.emoji_file)n('media-emoji-name','Custom: '+cfg.emoji_file);
+  setT('feat-ai',get('ai_master',true));setT('feat-ai-sub',get('ai_subtitles',true));
+  setT('feat-ai-call',get('ai_call_summary',true));setT('feat-ai-notif',get('ai_notif_summary',true));
+  setT('feat-ai-rec',get('ai_sound_rec',true));setT('feat-ai-note',get('ai_notes',true));
+  setT('feat-game',get('game_master',true));setT('feat-game-touch',get('game_esports_touch',true));
+  setT('feat-game-interp',get('game_interpolation',true));setT('feat-game-rt',get('game_raytracing',true));
+  setT('feat-game-hdr',get('game_hdr',true));setT('feat-game-bypass',get('game_bypass_charge',true));
+  setT('feat-social',get('social_master',true));setT('feat-social-rec',get('social_record',true));
+  setT('feat-social-trans',get('social_translate',true));setT('feat-social-beauty',get('social_beauty',true));
+  setT('feat-dc',get('display_dc',true));setT('feat-color',get('display_color',true));
+  setT('feat-hdr',get('display_hdr',true));setT('feat-reading',get('display_reading',false));
+  setT('feat-navhide',get('nav_hide',false));
+  setT('feat-aod',get('aod',true));
+  setS('feat-game-touch-level','feat-game-touch-val',get('game_esports_level',3));
+}
+
+function setT(id,v){const e=document.getElementById(id);if(e)e.checked=!!v;}
+function setS(id,lid,v){const e=document.getElementById(id);if(e){e.value=v;document.getElementById(lid).textContent=v;}}
+function n(id,t){const e=document.getElementById(id);if(e)e.textContent=t;}
+
+// ── Collect ────────────────────────────────────────────────────────────────────
+function collectConfig(){
+  const g=id=>document.getElementById(id);
+  const t=id=>g(id)?g(id).checked:false;
+  const s=id=>g(id)?parseInt(g(id).value):1;
+  return{
+    boot_sound:t('media-bootsound'),boot_anim:t('media-bootanim'),
+    shutdown_anim:t('media-shutdownanim'),charge_anim:t('media-chargeanim'),emoji_font:t('media-emoji'),
+    bootsound_file:cfg.bootsound_file||'',boot_sound_name:cfg.boot_sound_name||'Waltz',
+    bootanim_file:cfg.bootanim_file||'',shutdownanim_file:cfg.shutdownanim_file||'',
+    chargeanim_file:cfg.chargeanim_file||'',emoji_file:cfg.emoji_file||'',
+    ai_master:t('feat-ai'),ai_subtitles:t('feat-ai-sub'),ai_call_summary:t('feat-ai-call'),
+    ai_notif_summary:t('feat-ai-notif'),ai_sound_rec:t('feat-ai-rec'),ai_notes:t('feat-ai-note'),
+    game_master:t('feat-game'),game_esports_touch:t('feat-game-touch'),game_esports_level:s('feat-game-touch-level'),
+    game_interpolation:t('feat-game-interp'),game_raytracing:t('feat-game-rt'),
+    game_hdr:t('feat-game-hdr'),game_bypass_charge:t('feat-game-bypass'),
+    social_master:t('feat-social'),social_record:t('feat-social-rec'),
+    social_translate:t('feat-social-trans'),social_beauty:t('feat-social-beauty'),
+    display_dc:t('feat-dc'),display_color:t('feat-color'),display_hdr:t('feat-hdr'),
+    display_reading:t('feat-reading'),
+    nav_hide:t('feat-navhide'),aod:t('feat-aod'),
+  };
+}
+
+function save(){cfg=collectConfig();}
+
+async function saveAll(){
+  if(_uploadInProgress){toast('Please wait for the upload to finish first',3000);return;}
+  save();
+  const json=JSON.stringify(cfg,null,2);
+  const esc=json.replace(/'/g,"'\\''");
+  await exec("echo '"+esc+"' > \""+CONFIG_PATH+"\"");
+  await applyRuntime();
+  // SystemUI/launcher cache ro.* props at process start — restart them so
+  // AOD, animation, and nav-bar changes show up without a full device reboot.
+  // Deeper hooks (game engine, camera AI, etc.) still need a real reboot.
+  await exec('am force-stop com.android.systemui').catch(()=>{});
+  toast('Saved — SystemUI restarting. Some features need a full reboot.');
+}
+
+// ── settings_put helper — uses content update fallback for X6886 ──────────────
+async function sp(ns, key, val) {
+  // Try content update first (works on CMD_DISPATCHER_UNRELIABLE devices)
+  await exec(`content update --uri content://settings/${ns} --bind value:s:${val} --where "name='${key}'"`)
+    .catch(()=>{});
+  // Also try settings put (works on normal devices)
+  await exec(`settings put ${ns} ${key} ${val}`).catch(()=>{});
+}
+
+async function applyRuntime(){
+  const c=cfg;
+  const rp = async(k,v) => { try{ await exec(`resetprop ${k} ${v}`); }catch(e){} };
+
+  // NOTE: unlock/recent/launch/blur animation props are static in
+  // common/system.prop (proven values from confirmed-working builds) and
+  // are intentionally not touched here anymore — live resetprop toggling
+  // was unreliable and a bad saved value could break app open/close animation.
+  await sp('global','window_animation_scale','1.0');
+  await sp('global','transition_animation_scale','1.0');
+  await sp('global','animator_duration_scale','1.0');
+
+  // Display — content update first for X6886
+  await sp('system','tran_dc_dimming_enable', c.display_dc?1:0);
+  await sp('system','tran_display_color_enhance', c.display_color?1:0);
+  await sp('system','tran_reading_mode_enable', c.display_reading?1:0);
+  await rp('ro.tran.display_hdr_support', c.display_hdr?1:0);
+  await rp('ro.tran.display_dc_dimming_support', c.display_dc?1:0);
+
+  // Gaming — sub-features gated by game_master so turning off Game Mode
+  // actually turns everything under it off too
+  await rp('ro.os_game_tp_esports10.support', c.game_master?1:0);
+  await rp('ro.os_game_ray_tracing.support', c.game_master&&c.game_raytracing?1:0);
+  await rp('ro.os_game_frame_game_interpolation.support', c.game_master&&c.game_interpolation?1:0);
+  await rp('ro.os_game_graphic_hdr.support', c.game_master&&c.game_hdr?1:0);
+  await rp('ro.os_game_bypass_charging_support', c.game_master&&c.game_bypass_charge?1:0);
+
+  // Charging anim
+  await rp('ro.tran.charge_animation_support', c.charge_anim?1:0);
+  await rp('ro.tran.lockscreen_charge_anim', c.charge_anim?1:0);
+
+  // Nav bar
+  await rp('ro.tranos_hidenavigationbar_support', c.nav_hide?1:0);
+
+  // AI
+  await rp('ro.sys.tran.ai_subtitles_support', c.ai_subtitles?1:0);
+  await rp('ro.sys.tran.aiphone_summary_support', c.ai_call_summary?1:0);
+  await rp('ro.os_soundrecorder_speech_support', c.ai_sound_rec?1:0);
+
+  // AOD
+  await rp('ro.aod_alwaysshow_support', c.aod?1:0);
+}
+
+// ── File Upload ────────────────────────────────────────────────────────────────
+let _uploadInProgress=false;
+async function handleFile(input,type,nameId){
+  if(!input.files.length)return;
+  if(_uploadInProgress){
+    toast('Another upload is still in progress — please wait for it to finish',3000);
+    input.value=''; // reset so the same file can be re-selected after
+    return;
+  }
+  _uploadInProgress=true;
+  stopLogPolling(); // background polling still hits exec() every 2s otherwise —
+  // that's a second source of bridge concurrency during a long upload that
+  // the earlier "don't let the user trigger overlapping actions" fix didn't
+  // cover, since this timer isn't triggered by anything the user taps.
+  // Disable every upload button/toggle while this one is running — the
+  // shared bridge/exec() pipeline isn't safe for overlapping calls: a
+  // second upload started mid-flight was racing the first on the same temp
+  // file path, which could corrupt or hang the in-progress read/write and
+  // looked exactly like "the UI freezes when I tap something."
+  document.querySelectorAll('input[type="file"], input[type="checkbox"]').forEach(el=>el.disabled=true);
+  const file=input.files[0];const name=file.name;
+  const base='/data/adb/modules/transsion-flagship';
+  // NOTE: bootsound targets one fixed path. bootanim/shutdownanim/emoji all
+  // exist in BOTH /system/... and /system/product/... in this build — we
+  // don't know which one this specific device actually reads, so we write
+  // to both directly rather than write-then-copy (which failed silently
+  // before, since exec() can't report a command's real exit code).
+  const multiDestMap={
+    bootanim:[base+'/system/media/bootanimation.zip',base+'/system/product/media/bootanimation.zip'],
+    shutdownanim:[base+'/system/media/shutdownanimation.zip',base+'/system/product/media/shutdownanimation.zip'],
+    emoji:[base+'/system/fonts/NotoColorEmoji.ttf',base+'/system/product/fonts/NotoColorEmoji.ttf'],
+  };
+  const destMap={
+    bootsound:base+'/system/product/media/audio/bootsound/Waltz.ogg',
+    chargeanim:base+'/system/product/theme/charge/'+name,
+  };
+  const isMulti=!!multiDestMap[type];
+  const destList=isMulti?multiDestMap[type]:(destMap[type]?[destMap[type]]:null);
+  if(!destList){_uploadInProgress=false;document.querySelectorAll('input[type="file"], input[type="checkbox"]').forEach(el=>el.disabled=false);return;}
+  const dest=destList[0];
+
+  // Hard size guard — files above this are unlikely to cross the JS bridge
+  // reliably, and would otherwise hang the UI thread for a long time before
+  // possibly failing anyway. Better to fail fast with a clear reason.
+  const MAX_MB=40;
+  if(file.size>MAX_MB*1024*1024){
+    toast('File too large ('+(file.size/1048576).toFixed(1)+'MB) — max '+MAX_MB+'MB supported',5000);
+    _uploadInProgress=false;
+    document.querySelectorAll('input[type="file"], input[type="checkbox"]').forEach(el=>el.disabled=false);
+    return;
+  }
+
+  toast('Uploading '+name+' ('+(file.size/1048576).toFixed(1)+'MB)...',60000);
+  try{
+    const buf=await file.arrayBuffer();
+    const bytes=new Uint8Array(buf);
+    const CHUNK=32766; // must be a multiple of 3 — base64 encodes 3 bytes ->
+    // 4 chars with no padding, so only a multiple-of-3 chunk size lets us
+    // btoa() each piece independently and join with no corruption.
+    let b64;
+    if(typeof Worker!=='undefined'){
+      try{
+        const workerCode=`
+          self.onmessage=function(e){
+            const bytes=e.data;
+            const CHUNK=32766;
+            const parts=[];
+            for(let i=0;i<bytes.length;i+=CHUNK){
+              const slice=bytes.subarray(i,i+CHUNK);
+              let bin='';
+              for(let j=0;j<slice.length;j++) bin+=String.fromCharCode(slice[j]);
+              parts.push(btoa(bin));
+            }
+            self.postMessage(parts.join(''));
+          };
+        `;
+        const workerBlob=new Blob([workerCode],{type:'application/javascript'});
+        const workerUrl=URL.createObjectURL(workerBlob);
+        b64=await new Promise((resolve,reject)=>{
+          const worker=new Worker(workerUrl);
+          const workerTimeout=setTimeout(()=>{worker.terminate();reject(new Error('worker timeout'));},60000);
+          worker.onmessage=(e)=>{clearTimeout(workerTimeout);worker.terminate();URL.revokeObjectURL(workerUrl);resolve(e.data);};
+          worker.onerror=(e)=>{clearTimeout(workerTimeout);worker.terminate();URL.revokeObjectURL(workerUrl);reject(new Error('worker error'));};
+          worker.postMessage(bytes);
+        });
+      }catch(werr){b64=null;} // fall through to main-thread path below
+    }
+    if(b64===undefined||b64===null){
+      // Fallback for WebViews without Worker support: same chunked approach
+      // but on the main thread, with yields to at least stay somewhat
+      // responsive. Not as safe as the worker path on very large files, but
+      // better than nothing if Worker genuinely isn't available here.
+      const parts=[];
+      for(let i=0,c=0;i<bytes.length;i+=CHUNK,c++){
+        const slice=bytes.subarray(i,i+CHUNK);
+        let bin='';
+        for(let j=0;j<slice.length;j++) bin+=String.fromCharCode(slice[j]);
+        parts.push(btoa(bin));
+        if(c%32===0) await new Promise(r=>setTimeout(r,0));
+      }
+      b64=parts.join('');
+    }
+
+    // Hard timeout wrapper — if any exec() call hangs (bridge issue, huge
+    // payload, whatever) the upload fails cleanly instead of leaving the
+    // "Uploading..." toast on screen forever.
+    const withTimeout=(p,ms,label)=>Promise.race([
+      p,
+      new Promise((_,rej)=>setTimeout(()=>rej(new Error(label+' timed out after '+(ms/1000)+'s')),ms))
+    ]);
+
+    const tmp='/data/local/tmp/transflagship_upload_'+Date.now()+'.b64';
+    // Write the base64 payload to a temp file ONCE, then base64-decode it
+    // into every destination — avoids re-sending a multi-MB string through
+    // the JS bridge more than once when a file needs to land in two places.
+    await withTimeout(exec('cat > "'+tmp+'" << \'TFUPLOADEOF\'\n'+b64+'\nTFUPLOADEOF'),45000,'Bridge write');
+    for(const d of destList){
+      const dir=d.substring(0,d.lastIndexOf('/'));
+      await exec('mkdir -p "'+dir+'"');
+      const r=await withTimeout(exec('base64 -d "'+tmp+'" > "'+d+'" && echo OK || echo FAIL'),20000,'Decode to '+d);
+      if(!(r.stdout||'').includes('OK')) throw new Error('device write failed for '+d);
+      // Verify the written file's size actually matches the upload — exec()
+      // always resolves "successfully" even when the underlying shell command
+      // fails, so an empty/truncated write would otherwise look identical to
+      // a real success. This is the only reliable way to catch that.
+      const szr=await exec('stat -c%s "'+d+'" 2>/dev/null || wc -c < "'+d+'"');
+      const writtenSize=parseInt((szr.stdout||'0').trim(),10);
+      if(!writtenSize || Math.abs(writtenSize-bytes.length)>4){
+        throw new Error('written size ('+writtenSize+') for '+d+' does not match upload ('+bytes.length+') — write failed silently');
+      }
+      // Remove any stale .disabled sibling from a previous "off" toggle,
+      // otherwise post-fs-data.sh's rename logic gets confused about which
+      // file is the real one.
+      await exec('rm -f "'+d+'.disabled"').catch(()=>{});
+    }
+    await exec('rm -f "'+tmp+'"');
+    cfg[type+'_file']=name;
+    document.getElementById(nameId).textContent='Custom: '+name;
+    // Persist to config.json on disk immediately — cfg[...] alone only
+    // updates the in-memory object. Without this write, the filename record
+    // is lost the moment the app is closed/reloaded unless the user
+    // separately taps "Apply & Save", which nothing here prompts them to do.
+    const persistFilename=async()=>{
+      const json=JSON.stringify(cfg,null,2);
+      const esc=json.replace(/'/g,"'\\''");
+      await exec("echo '"+esc+"' > \""+CONFIG_PATH+"\"");
+    };
+    if(type==='chargeanim'){
+      // lockscreen_charge_config.xml pins an exact MD5 for the charging
+      // video — if it doesn't match, the animation may be silently rejected
+      // regardless of filename/location. Recompute and patch it in place.
+      const cfgXml=base+'/system/product/theme/charge/lockscreen_charge_config.xml';
+      const md5r=await exec('md5sum "'+dest+'" 2>/dev/null | cut -d" " -f1');
+      const md5=(md5r.stdout||'').trim();
+      if(md5 && md5.length===32){
+        await exec("sed -i 's/<fileMd5>[a-f0-9]*<\\/fileMd5>/<fileMd5>"+md5+"<\\/fileMd5>/g' \""+cfgXml+"\"");
+        await exec("sed -i 's/<fileName>[^<]*<\\/fileName>/<fileName>"+name+"<\\/fileName>/g' \""+cfgXml+"\"");
+        const verifyR=await exec('grep -c "'+md5+'" "'+cfgXml+'" 2>/dev/null');
+        const patchCount=parseInt((verifyR.stdout||'0').trim(),10);
+        if(patchCount<1) throw new Error('config XML patch did not take — check file permissions');
+        await persistFilename();
+        toast(name+' saved — config updated to match ('+patchCount+'x). Reboot to apply.');
+      } else {
+        throw new Error('could not compute MD5 of uploaded file');
+      }
+    } else {
+      await persistFilename();
+      toast(name+' saved to '+destList.length+' location(s) — reboot to apply');
+    }
+  }catch(e){toast('Upload failed: '+e.message,5000);}
+  finally{
+    _uploadInProgress=false;
+    document.querySelectorAll('input[type="file"], input[type="checkbox"]').forEach(el=>el.disabled=false);
+    input.value=''; // allow re-selecting the same file if the user wants to retry
+    startLogPolling();
+  }
+}
+
+// ── Log ───────────────────────────────────────────────────────────────────────
+let _lastLog='';
+async function loadLog(){
+  const r=await exec('cat "'+LOG_PATH+'" 2>/dev/null || echo "No log found."');
+  const box=document.getElementById('log-box');
+  const content=r.stdout||'Empty log.';
+  if(content===_lastLog) return; // avoid resetting scroll position on unchanged content
+  _lastLog=content;
+  const wasAtBottom=box.scrollTop+box.clientHeight>=box.scrollHeight-20;
+  box.textContent=content;
+  if(wasAtBottom) box.scrollTop=box.scrollHeight;
+}
+async function clearLog(){
+  await exec('echo "" > "'+LOG_PATH+'"');
+  _lastLog='';
+  document.getElementById('log-box').textContent='Log cleared.';toast('Log cleared');
+}
+let _logPoll=null;
+function startLogPolling(){
+  if(_logPoll) return;
+  _logPoll=setInterval(loadLog,2000);
+}
+function stopLogPolling(){
+  clearInterval(_logPoll);_logPoll=null;
+}
+
+// ── Reboot ────────────────────────────────────────────────────────────────────
+async function confirmReboot(){
+  const msg=_uploadInProgress
+    ? 'An upload is still in progress — rebooting now will cancel it. Restart anyway?'
+    : 'Your device will restart now to apply all changes.';
+  const ok=await showConfirm('Reboot Device',msg,{okLabel:'Reboot',danger:true});
+  if(ok) exec('reboot');
+}
+
+// ── Device Info ───────────────────────────────────────────────────────────────
+async function loadDeviceInfo(){
+  // Run each separately so one failure doesn't block others
+  const g = async(cmd) => {
+    try { const r = await exec(cmd); return (r.stdout||'').trim(); }
+    catch(e){ return ''; }
+  };
+
+  const os  = (await g('getprop ro.tran.os.type')) || 'XOS';
+  let dev = (await g('getprop ro.product.model'));
+  if(!dev) dev = (await g('getprop ro.product.marketname'));
+  if(!dev) dev = (await g('getprop ro.product.vendor.marketname'));
+  if(!dev) dev = (await g('getprop ro.vendor.product.model'));
+  if(!dev) dev = (await g('getprop ro.product.odm.marketname'));
+  if(!dev) dev = '—';
+  const and = (await g('getprop ro.build.version.release')) || '—';
+
+  // RAM: read MemTotal directly, do math in JS — no awk needed
+  let ram = '—';
+  try {
+    const memraw = await g('cat /proc/meminfo');
+    const match = memraw.match(/MemTotal:\s*(\d+)/);
+    if(match) {
+      const gb = Math.round(parseInt(match[1]) / 1024 / 1024);
+      ram = gb + 'GB';
+    }
+  } catch(e){}
+
+  n('info-os', os); n('info-ram', ram);
+  n('info-device', dev); n('info-android', and);
+  n('hero-sub', dev + ' · ' + os + ' · Android ' + and);
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+async function init(){
+  try {
+    const bridge = await import('./bridge.js');
+    _exec = bridge.exec;
+    _fullScreen = bridge.fullScreen;
+    if(_fullScreen) _fullScreen(true);
+  } catch(e) {
+    console.warn('[Init] bridge import failed:', e);
+  }
+  await loadConfig();
+  await loadDeviceInfo();
+  await loadLog();
+  startLogPolling();
+  document.addEventListener('visibilitychange',()=>{
+    if(document.hidden) stopLogPolling(); else startLogPolling();
+  });
+}
+
+if(document.readyState==='loading'){
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}
+
+function quickSave(){
+  // Quick toggles on Home mirror the master switches on their full pages.
+  // Write straight into cfg so collectConfig() (which reads the *other*
+  // element IDs) doesn't clobber this on the next Apply & Save.
+  cfg.game_master = document.getElementById('q-game').checked;
+  cfg.ai_master   = document.getElementById('q-ai').checked;
+  // Keep the full-page toggles in sync so switching tabs shows the same state
+  setT('feat-game', cfg.game_master);
+  setT('feat-ai', cfg.ai_master);
+  saveAll();
+}
+
+// ── Expose all functions called from HTML onclick to window ───────────────────
+// Required because <script type="module"> is scoped — onclick can't reach them
+window.switchTab      = switchTab;
+window.saveAll        = saveAll;
+window.loadLog        = loadLog;
+window.clearLog       = clearLog;
+window.confirmReboot  = confirmReboot;
+window.confirmResetDefaults = confirmResetDefaults;
+window.handleFile     = handleFile;
+window.quickSave      = quickSave;
+</script>
+</body>
+</html>
