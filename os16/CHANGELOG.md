@@ -1,5 +1,8 @@
 # Transsion Flagship 16
 
+## v1.24
+- **AI Gallery / video off.** V1.23 unhid GT Gallery and VEE menus, but **AI Gallery Edit keeps stopping** — this phone has the flags, not the GT editor/models. Those keys go back to `0`. Settings AI Suite stays on. Leave the Gallery and video toggles off.
+
 ## v1.23
 - **AI Gallery + video enhancement.** The Settings toggles were not the GT Gallery/video set. This build writes OS 16 Gallery keys (AI Studio lite, AI Art, eraser, expand, HD, group/shadow enhance, bokeh, compose) and `ro.tr_video.vee.support`. Stock often leaves those at `0` even on GT firmware — we force them on. Apply + reboot, then check Gallery (AI Studio / enhance) and video playback. Dump AI flags after reboot. These still need the Gallery/video engines on the phone; a missing model can show a menu that does nothing.
 

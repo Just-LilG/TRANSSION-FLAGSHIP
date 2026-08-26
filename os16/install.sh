@@ -41,8 +41,8 @@ write_os16_ai_prop() {
   notes=$(ai_01 "$cfg" "$master" ai_notes true)
   writing=$(ai_01 "$cfg" "$master" ai_writing true)
   call=$(ai_tf "$cfg" "$master" ai_call_summary false)
-  gal=$(ai_01 "$cfg" "$master" ai_gallery true)
-  vee=$(ai_01 "$cfg" "$master" ai_video true)
+  gal=$(ai_01 "$cfg" "$master" ai_gallery false)
+  vee=$(ai_01 "$cfg" "$master" ai_video false)
   cat > "$dest" <<EOF
 # Flagship 16 — OS 16 AI keys. Magisk loads this file at boot.
 # Apply in WebUI rewrites this file from the AI Suite toggles. Reboot to take effect.
@@ -71,7 +71,7 @@ print_modname() {
   ui_print " "
   ui_print "  ╔══════════════════════════════════════════╗"
   ui_print "  ║    TRANSSION FLAGSHIP 16                 ║"
-  ui_print "  ║    XOS · HiOS · iTel OS 16  ·  V1.23     ║"
+  ui_print "  ║    XOS · HiOS · iTel OS 16  ·  V1.24     ║"
   ui_print "  ╚══════════════════════════════════════════╝"
   ui_print " "
 }
@@ -224,9 +224,13 @@ on_install() {
     ui_ok "Existing Flagship 16 config preserved"
     cp "$CFG" "$MODPATH/config.json"
     # Keep existing AI toggles. Rename the old Notification Summary key.
+    # V1.23 unhid Gallery/video menus; AI Gallery Edit crashed (no GT
+    # editor on this phone). Force those toggles off.
     sed -i -e 's/"statusbar_style": *"ios"/"statusbar_style": "off"/' \
            -e 's/"statusbar_style": *"xos16"/"statusbar_style": "off"/' \
            -e 's/"ai_notif_summary"/"ai_writing"/' \
+           -e 's/"ai_gallery": true/"ai_gallery": false/' \
+           -e 's/"ai_video": true/"ai_video": false/' \
            "$MODPATH/config.json"
   else
     ui_ok "Default config: HiOS 16 boot + reboot, AI on, status bar stock"
@@ -250,7 +254,7 @@ set_permissions() {
   done
   ui_print " "
   ui_div
-  ui_print "  ✨  FLAGSHIP 16  ·  V1.23"
+  ui_print "  ✨  FLAGSHIP 16  ·  V1.24"
   ui_info "OS     : $OS_TYPE $OS_VER"
   ui_info "Feature: boot + reboot + overlay + OS 16 AI Suite"
   ui_div
