@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Flagship 16</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#07070f;--glass:rgba(255,255,255,0.07);--glass-b:rgba(255,255,255,0.11);
+  --accent:#a78bfa;--accent2:#818cf8;--accent-glow:rgba(167,139,250,0.22);
+  --danger:#f87171;--success:#34d399;--warn:#f59e0b;
+  --text:#f1f5f9;--text2:rgba(241,245,249,0.55);--text3:rgba(241,245,249,0.28);
+  --tab-h:86px;
+}
+html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(--text);
+  font-family:-apple-system,'SF Pro Display',BlinkMacSystemFont,'Segoe UI',sans-serif;
+  -webkit-font-smoothing:antialiased;position:fixed;inset:0;}
+.ambient{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden;}
+.ambient::before{content:'';position:absolute;width:500px;height:500px;border-radius:50%;
+  background:radial-gradient(circle,rgba(167,139,250,0.14) 0%,transparent 70%);top:-150px;left:-100px;}
+.ambient::after{content:'';position:absolute;width:400px;height:400px;border-radius:50%;
+  background:radial-gradient(circle,rgba(129,140,248,0.1) 0%,transparent 70%);bottom:-80px;right:-80px;}
+.app{position:fixed;inset:0;display:flex;flex-direction:column;z-index:1;}
+.pages{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;}
+.pages::-webkit-scrollbar{display:none;}
+.scroll-inner{padding:24px 16px calc(var(--tab-h) + 24px);max-width:480px;margin:0 auto;}
+.page{display:none;}
+.page.active{display:block;}
+.page-header{padding:20px 4px 16px;}
+.page-header .eyebrow{font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--accent);margin-bottom:5px;}
+.page-header h1{font-size:28px;font-weight:700;letter-spacing:-0.02em;}
+.page-header .sub{font-size:13px;color:var(--text2);margin-top:3px;}
+.section-label{font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);padding:18px 4px 8px;}
+.glass-card{background:rgba(20,20,40,0.85);border:1px solid var(--glass-b);border-radius:20px;overflow:hidden;position:relative;}
+@supports(backdrop-filter:blur(1px)){
+  .glass-card{background:rgba(10,10,25,0.6);backdrop-filter:blur(40px) saturate(180%);-webkit-backdrop-filter:blur(40px) saturate(180%);}
+}
+.hero-card{background:linear-gradient(135deg,rgba(167,139,250,0.2) 0%,rgba(99,102,241,0.1) 100%);
+  border:1px solid rgba(167,139,250,0.2);border-radius:22px;padding:22px;}
+.hero-title{font-size:21px;font-weight:700;background:linear-gradient(135deg,#fff 0%,rgba(167,139,250,.9) 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.hero-sub{font-size:13px;color:var(--text2);margin-top:3px;}
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--glass-b);border-radius:20px;overflow:hidden;}
+.info-cell{background:rgba(20,20,40,0.9);padding:16px;}
+.info-cell .lbl{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.09em;}
+.info-cell .val{font-size:17px;font-weight:600;margin-top:4px;}
+.info-cell .val.acc{color:var(--accent);}
+.setting-row{display:flex;align-items:center;gap:13px;padding:13px 16px;}
+.row-text{flex:1;min-width:0;}
+.row-title{font-size:15px;font-weight:500;line-height:1.2;}
+.row-sub{font-size:12px;color:var(--text2);margin-top:1px;}
+.segmented{display:flex;gap:4px;background:rgba(255,255,255,0.06);border-radius:12px;padding:4px;margin:0 16px 14px;}
+.segmented-opt{flex:1;text-align:center;padding:9px 4px;border-radius:9px;font-size:12.5px;font-weight:600;color:#9aa;cursor:pointer;}
+.segmented-opt.active{background:var(--accent);color:#fff;}
+.file-row{padding:10px 16px 14px;}
+.file-btn{display:block;width:100%;background:rgba(167,139,250,0.1);border:1px dashed rgba(167,139,250,0.3);
+  border-radius:12px;padding:10px 14px;color:var(--accent);font-size:13px;font-weight:500;text-align:center;cursor:pointer;position:relative;overflow:hidden;}
+.file-btn input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;}
+.file-name{font-size:11px;color:var(--text3);margin-top:6px;}
+.action-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:14px;border-radius:14px;border:none;
+  font-size:15px;font-weight:600;cursor:pointer;}
+.btn-primary{background:linear-gradient(135deg,var(--accent) 0%,var(--accent2) 100%);color:#fff;box-shadow:0 4px 18px var(--accent-glow);}
+.btn-danger{background:rgba(248,113,113,0.12);border:1px solid rgba(248,113,113,0.2);color:var(--danger);}
+.h8{height:8px;}
+.warn-card{margin:0 0 12px;padding:12px 14px;border-radius:14px;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.28);font-size:12.5px;color:#fbbf24;line-height:1.45;display:none;}
+.roadmap li{font-size:13px;color:var(--text2);padding:8px 16px;border-top:1px solid var(--glass-b);list-style:none;}
+.roadmap li.on{color:var(--success);}
+.roadmap li.next{color:var(--accent);}
+.log-box{font-family:ui-monospace,monospace;font-size:11px;line-height:1.7;color:rgba(167,139,250,0.85);
+  background:rgba(0,0,0,0.35);border-radius:12px;padding:12px;margin:10px 16px;max-height:180px;overflow-y:auto;
+  white-space:pre-wrap;word-break:break-all;border:1px solid rgba(167,139,250,0.1);}
+.tab-bar-wrap{position:absolute;left:0;right:0;bottom:0;z-index:50;padding:0 24px calc(env(safe-area-inset-bottom,0px) + 16px);
+  display:flex;justify-content:center;pointer-events:none;}
+.tab-bar{pointer-events:auto;display:flex;align-items:center;gap:2px;background:rgba(14,14,24,0.85);
+  border:1px solid rgba(255,255,255,0.08);border-radius:20px;padding:6px;}
+.tab-item{display:flex;align-items:center;gap:6px;padding:10px 14px;border-radius:14px;cursor:pointer;}
+.tab-icon svg{width:19px;height:19px;fill:none;stroke:var(--text2);stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+.tab-label{font-size:12.5px;font-weight:600;color:#fff;white-space:nowrap;max-width:0;overflow:hidden;opacity:0;}
+.tab-item.active{background:var(--accent);}
+.tab-item.active .tab-icon svg{stroke:#fff;}
+.tab-item.active .tab-label{max-width:80px;opacity:1;}
+.toast{position:fixed;bottom:calc(var(--tab-h) + 14px);left:50%;transform:translateX(-50%) translateY(16px);
+  background:rgba(22,22,42,0.95);border:1px solid var(--glass-b);border-radius:999px;padding:9px 20px;font-size:13px;
+  z-index:999;opacity:0;pointer-events:none;white-space:nowrap;transition:opacity .22s,transform .3s;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.modal-backdrop{position:fixed;inset:0;background:rgba(6,6,14,0.72);z-index:1000;display:flex;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;padding:24px;}
+.modal-backdrop.show{opacity:1;pointer-events:auto;}
+.modal-box{background:rgba(22,22,42,0.98);border:1px solid var(--glass-b);border-radius:20px;padding:22px 20px;max-width:340px;width:100%;}
+.modal-title{font-size:16px;font-weight:700;margin-bottom:8px;}
+.modal-msg{font-size:13.5px;color:#9aa;line-height:1.5;margin-bottom:20px;}
+.modal-actions{display:flex;gap:10px;}
+.modal-btn{flex:1;padding:11px;border:none;border-radius:12px;font-weight:600;cursor:pointer;}
+.modal-btn-cancel{background:rgba(255,255,255,0.08);color:#ccc;}
+.modal-btn-confirm{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;}
+.modal-btn-danger{background:linear-gradient(135deg,#f87171,#dc2626);color:#fff;}
+.splash{position:fixed;inset:0;z-index:999;display:flex;align-items:center;justify-content:center;background:var(--bg);transition:opacity .4s;}
+.splash.hide{opacity:0;visibility:hidden;pointer-events:none;}
+.splash-title{font-size:28px;font-weight:800;}
+.splash-title span{background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;color:transparent;}
+.splash-tagline{font-size:13px;color:var(--text2);margin-top:6px;}
+.splash-status{font-size:11px;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;margin-top:18px;}
+</style>
+</head>
+<body>
+<div class="ambient"></div>
+<div class="splash" id="splash">
+  <div style="text-align:center">
+    <div class="splash-title">Flagship <span>16</span></div>
+    <div class="splash-tagline">Transsion OS 16</div>
+    <div class="splash-status" id="splash-status">Loading</div>
+  </div>
+</div>
+<div class="modal-backdrop" id="modal-backdrop">
+  <div class="modal-box">
+    <div class="modal-title" id="modal-title">Confirm</div>
+    <div class="modal-msg" id="modal-msg"></div>
+    <div class="modal-actions">
+      <button class="modal-btn modal-btn-cancel" id="modal-cancel">Cancel</button>
+      <button class="modal-btn modal-btn-confirm" id="modal-confirm">OK</button>
+    </div>
+  </div>
+</div>
+<div class="app">
+  <div class="pages">
+    <div class="scroll-inner">
+      <div class="page active" id="page-home">
+        <div class="page-header">
+          <div class="eyebrow">Home</div>
+          <h1>Flagship 16</h1>
+          <div class="sub" id="hero-sub">Transsion OS 16</div>
+        </div>
+        <div class="hero-card">
+          <div class="hero-title">Transsion Flagship 16</div>
+          <div class="hero-sub" id="module-version-sub">V1.00 · boot animation</div>
+        </div>
+        <div class="h8"></div>
+        <div class="warn-card" id="old-mod-warn">Flagship 15 is still installed. This installer disables it. Remove it from Magisk/KSU so the two modules do not fight.</div>
+        <div class="section-label">Device</div>
+        <div class="info-grid">
+          <div class="info-cell"><div class="lbl">OS</div><div class="val acc" id="info-os">—</div></div>
+          <div class="info-cell"><div class="lbl">Device</div><div class="val" id="info-device">—</div></div>
+          <div class="info-cell"><div class="lbl">Android</div><div class="val" id="info-android">—</div></div>
+          <div class="info-cell"><div class="lbl">/tr_product</div><div class="val" id="info-trp">—</div></div>
+        </div>
+        <div class="section-label">Roadmap</div>
+        <div class="glass-card roadmap">
+          <ul>
+            <li class="on">Boot animation — shipping now</li>
+            <li class="next">Next feature — you pick, then send a dump</li>
+            <li>Boot sound, charging anim, FOD, AI, Gaming… one at a time</li>
+          </ul>
+        </div>
+        <div class="h8"></div>
+        <button class="action-btn btn-primary" onclick="saveAll()">Apply &amp; Save</button>
+        <div class="h8"></div>
+        <button class="action-btn btn-danger" onclick="confirmReboot()">Reboot Device</button>
+        <div class="section-label">Boot log</div>
+        <div class="glass-card"><div class="log-box" id="pfd-log">—</div></div>
+      </div>
+
+      <div class="page" id="page-media">
+        <div class="page-header">
+          <div class="eyebrow">Media</div>
+          <h1>Boot animation</h1>
+          <div class="sub">Only this feature is wired. Reboot after Apply.</div>
+        </div>
+        <div class="glass-card">
+          <div class="setting-row">
+            <div class="row-text">
+              <div class="row-title">Style</div>
+              <div class="row-sub">Replaces /tr_product/media/bootanimation.zip</div>
+            </div>
+          </div>
+          <div class="segmented" id="bootanim-style-picker">
+            <div class="segmented-opt" data-val="default" onclick="setStyle('default')">Default</div>
+            <div class="segmented-opt active" data-val="hios16" onclick="setStyle('hios16')">HiOS 16</div>
+            <div class="segmented-opt" data-val="custom" onclick="setStyle('custom')" id="bootanim-custom-opt" style="display:none">Custom</div>
+            <div class="segmented-opt" data-val="off" onclick="setStyle('off')">Off</div>
+          </div>
+          <div class="file-row">
+            <label class="file-btn">
+              Upload custom zip
+              <input type="file" accept=".zip" onchange="handleBootanim(this)">
+            </label>
+            <div class="file-name" id="bootanim-file-name">No custom animation uploaded</div>
+          </div>
+        </div>
+        <div class="h8"></div>
+        <button class="action-btn btn-primary" onclick="saveAll()">Apply &amp; Save</button>
+      </div>
+    </div>
+  </div>
+  <nav class="tab-bar-wrap">
+    <div class="tab-bar">
+      <div class="tab-item active" onclick="switchTab('home',this)">
+        <div class="tab-icon"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
+        <div class="tab-label">Home</div>
+      </div>
+      <div class="tab-item" onclick="switchTab('media',this)">
+        <div class="tab-icon"><svg viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg></div>
+        <div class="tab-label">Media</div>
+      </div>
+    </div>
+  </nav>
+</div>
+<div class="toast" id="toast"></div>
+<script type="module">
+const MOD='/data/adb/modules/transsion-flagship-16';
+const CONFIG_PATH=MOD+'/config.json';
+let cfg={bootanim_style:'hios16',bootanim_file:''};
+let _exec=null;
+
+async function exec(cmd){
+  if(!_exec) return {stdout:'',stderr:'no-bridge',returnCode:1};
+  try { return {stdout: (await _exec(cmd))||'', stderr:'', returnCode:0}; }
+  catch(e){ return {stdout:'', stderr:String(e), returnCode:1}; }
+}
+function toast(msg,dur=2400){
+  const el=document.getElementById('toast');
+  el.textContent=msg; el.classList.add('show');
+  clearTimeout(el._t); el._t=setTimeout(()=>el.classList.remove('show'),dur);
+}
+function n(id,v){ const el=document.getElementById(id); if(el) el.textContent=v; }
+function switchTab(id,el){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  document.querySelectorAll('.tab-item').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelector('.pages').scrollTop=0;
+}
+function setStyle(val){
+  cfg.bootanim_style=val;
+  document.querySelectorAll('#bootanim-style-picker .segmented-opt').forEach(o=>{
+    o.classList.toggle('active', o.dataset.val===val);
+  });
+}
+function showConfirm(title,msg,opts={}){
+  return new Promise(resolve=>{
+    const bd=document.getElementById('modal-backdrop');
+    document.getElementById('modal-title').textContent=title;
+    document.getElementById('modal-msg').textContent=msg;
+    const ok=document.getElementById('modal-confirm');
+    const cancel=document.getElementById('modal-cancel');
+    ok.textContent=opts.okLabel||'OK';
+    ok.className='modal-btn '+(opts.danger?'modal-btn-danger':'modal-btn-confirm');
+    const done=v=>{ bd.classList.remove('show'); ok.onclick=null; cancel.onclick=null; resolve(v); };
+    ok.onclick=()=>done(true);
+    cancel.onclick=()=>done(false);
+    bd.classList.add('show');
+  });
+}
+async function g(cmd){
+  const r=await exec(cmd);
+  return (r.stdout||'').trim();
+}
+async function saveAll(){
+  const json=JSON.stringify(cfg,null,2).replace(/'/g,"'\\''");
+  const r=await exec("echo '"+json+"' > \""+CONFIG_PATH+"\" && echo OK");
+  if((r.stdout||'').includes('OK')) toast('Saved — reboot to apply boot animation');
+  else toast('Save failed — is the module installed?');
+}
+async function confirmReboot(){
+  const ok=await showConfirm('Reboot Device','Restart now so the boot animation bind can apply.',{okLabel:'Reboot',danger:true});
+  if(ok) exec('reboot');
+}
+async function handleBootanim(input){
+  if(!input.files.length) return;
+  const file=input.files[0];
+  if(file.size>40*1024*1024){ toast('File too large (max 40MB)'); input.value=''; return; }
+  toast('Reading '+file.name+'…', 20000);
+  const bytes=new Uint8Array(await file.arrayBuffer());
+  const CHUNK=32766;
+  let b64='';
+  for(let i=0;i<bytes.length;i+=CHUNK){
+    const slice=bytes.subarray(i,i+CHUNK);
+    let bin='';
+    for(let j=0;j<slice.length;j++) bin+=String.fromCharCode(slice[j]);
+    b64+=btoa(bin);
+  }
+  const dests=[
+    MOD+'/tr_product/media/bootanimation_custom.zip',
+    MOD+'/system/product/media/bootanimation_custom.zip'
+  ];
+  toast('Writing custom zip…', 20000);
+  const tmp='/data/local/tmp/tf16_bootanim.b64';
+  await exec('rm -f "'+tmp+'"');
+  const W=8000;
+  for(let i=0;i<b64.length;i+=W){
+    const part=b64.slice(i,i+W).replace(/'/g,"'\\''");
+    await exec("printf '%s' '"+part+"' >> '"+tmp+"'");
+  }
+  for(const d of dests){
+    await exec('mkdir -p "$(dirname "'+d+'")"');
+    const wr=await exec('base64 -d "'+tmp+'" > "'+d+'" && echo OK');
+    if(!(wr.stdout||'').includes('OK')) { toast('Write failed for '+d); return; }
+  }
+  await exec('rm -f "'+tmp+'"');
+  cfg.bootanim_style='custom';
+  cfg.bootanim_file=file.name;
+  document.getElementById('bootanim-custom-opt').style.display='';
+  setStyle('custom');
+  n('bootanim-file-name','Custom: '+file.name);
+  await saveAll();
+  toast('Custom zip saved — reboot to apply');
+  input.value='';
+}
+async function loadDevice(){
+  const prop=await g('cat "'+MOD+'/module.prop" 2>/dev/null');
+  const ver=(prop.match(/^version=(.+)$/m)||[])[1]||'V1.00';
+  n('module-version-sub', ver+' · boot animation');
+  let type=await g('getprop ro.tran.os.type');
+  let verOs=await g('getprop ro.transsion.os.version');
+  const brand=(await g('getprop ro.product.brand')||'').toLowerCase();
+  const android=await g('getprop ro.build.version.release')||'—';
+  const trp=await g('[ -d /tr_product ] && echo yes || echo no');
+  if(!type){
+    if(brand.includes('tecno')) type='HiOS';
+    else if(brand.includes('itel')) type='iTelOS';
+    else type='XOS';
+  }
+  const branded=(await g('getprop ro.build.description')||'').match(/(xos|hios|itelos|itel)[-_. ]*([0-9]+)/i);
+  if(!verOs || verOs==='?'){
+    if(branded) verOs=branded[2];
+    else if(trp==='yes' && /^16/.test(android)) verOs='16';
+  }
+  if(/16/.test(String(verOs)) && !/^16/.test(String(verOs))) verOs='16';
+  n('info-os', type+' '+(verOs||'?'));
+  n('info-android', android);
+  n('info-trp', trp==='yes'?'present':'missing');
+  let dev=await g('getprop ro.product.model');
+  if(!dev) dev=await g('getprop ro.product.marketname');
+  if(!dev) dev=await g('getprop ro.product.device')||'—';
+  n('info-device', dev);
+  n('hero-sub', dev+' · '+type+' '+(verOs||'?')+' · Android '+android);
+  const old=await g('[ -d /data/adb/modules/transsion-flagship ] && echo yes || echo no');
+  if(old==='yes') document.getElementById('old-mod-warn').style.display='block';
+  const log=await g('cat "'+MOD+'/post_fs_data.log" 2>/dev/null');
+  document.getElementById('pfd-log').textContent=log||'(no boot log yet — reboot once)';
+}
+async function loadCfg(){
+  const raw=await g('cat "'+CONFIG_PATH+'" 2>/dev/null');
+  try{ if(raw) cfg={...cfg, ...JSON.parse(raw)}; }catch(e){}
+  setStyle(cfg.bootanim_style||'hios16');
+  if(cfg.bootanim_file){
+    document.getElementById('bootanim-custom-opt').style.display='';
+    n('bootanim-file-name','Custom: '+cfg.bootanim_file);
+  }
+}
+async function init(){
+  try{
+    const bridge=await import('./bridge.js');
+    _exec=bridge.exec;
+    if(bridge.fullScreen) bridge.fullScreen(true);
+  }catch(e){}
+  document.getElementById('splash-status').textContent='Reading device';
+  await loadCfg();
+  await loadDevice();
+  document.getElementById('splash').classList.add('hide');
+}
+init();
+window.switchTab=switchTab;
+window.setStyle=setStyle;
+window.saveAll=saveAll;
+window.confirmReboot=confirmReboot;
+window.handleBootanim=handleBootanim;
+</script>
+</body>
+</html>
