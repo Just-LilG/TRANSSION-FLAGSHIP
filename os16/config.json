@@ -10,5 +10,7 @@
   "ai_call_summary": false,
   "ai_writing": true,
   "ai_sound_rec": true,
-  "ai_notes": true
+  "ai_notes": true,
+  "ai_gallery": true,
+  "ai_video": true
 }

@@ -41,6 +41,8 @@ write_os16_ai_prop() {
   notes=$(ai_01 "$cfg" "$master" ai_notes true)
   writing=$(ai_01 "$cfg" "$master" ai_writing true)
   call=$(ai_tf "$cfg" "$master" ai_call_summary false)
+  gal=$(ai_01 "$cfg" "$master" ai_gallery true)
+  vee=$(ai_01 "$cfg" "$master" ai_video true)
   cat > "$dest" <<EOF
 # Flagship 16 — OS 16 AI keys. Magisk loads this file at boot.
 # Apply in WebUI rewrites this file from the AI Suite toggles. Reboot to take effect.
@@ -52,6 +54,16 @@ ro.tr_note.ai_draw.support=$notes
 ro.os_ai_writing.support=$writing
 ro.tr_aiassistant.aiphone.feature.support=$call
 ro.tr_aiassistant.aiphone_summany.feature.support=$call
+ro.tr_gallery.ai_art.support=$gal
+ro.tr_gallery.ai.studio.lite.support=$gal
+ro.tr_gallery.eraser.v2.support=$gal
+ro.tr_gallery.ext.image.support=$gal
+ro.tr_gallery.hd.support=$gal
+ro.tr_gallery.group.enhance.support=$gal
+ro.tr_gallery.shadow.enhance.support=$gal
+ro.tr_gallery.bokeh.support=$gal
+ro.tr_gallery.compose.support=$gal
+ro.tr_video.vee.support=$vee
 EOF
 }
 
@@ -59,7 +71,7 @@ print_modname() {
   ui_print " "
   ui_print "  ╔══════════════════════════════════════════╗"
   ui_print "  ║    TRANSSION FLAGSHIP 16                 ║"
-  ui_print "  ║    XOS · HiOS · iTel OS 16  ·  V1.22     ║"
+  ui_print "  ║    XOS · HiOS · iTel OS 16  ·  V1.23     ║"
   ui_print "  ╚══════════════════════════════════════════╝"
   ui_print " "
 }
@@ -211,14 +223,10 @@ on_install() {
   if [ -f "$CFG" ]; then
     ui_ok "Existing Flagship 16 config preserved"
     cp "$CFG" "$MODPATH/config.json"
-    # V1.21 hide-test forced master off. Restore on. Notification Summary
-    # had no OS 16 key — rename to AI Writing. Call summary stays stock-off
-    # (aiphone keys were already false on this phone).
+    # Keep existing AI toggles. Rename the old Notification Summary key.
     sed -i -e 's/"statusbar_style": *"ios"/"statusbar_style": "off"/' \
            -e 's/"statusbar_style": *"xos16"/"statusbar_style": "off"/' \
-           -e 's/"ai_master": false/"ai_master": true/' \
            -e 's/"ai_notif_summary"/"ai_writing"/' \
-           -e 's/"ai_call_summary": true/"ai_call_summary": false/' \
            "$MODPATH/config.json"
   else
     ui_ok "Default config: HiOS 16 boot + reboot, AI on, status bar stock"
@@ -242,7 +250,7 @@ set_permissions() {
   done
   ui_print " "
   ui_div
-  ui_print "  ✨  FLAGSHIP 16  ·  V1.22"
+  ui_print "  ✨  FLAGSHIP 16  ·  V1.23"
   ui_info "OS     : $OS_TYPE $OS_VER"
   ui_info "Feature: boot + reboot + overlay + OS 16 AI Suite"
   ui_div
