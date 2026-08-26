@@ -58,6 +58,12 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
   border-radius:12px;padding:10px 14px;color:var(--accent);font-size:13px;font-weight:500;text-align:center;cursor:pointer;position:relative;overflow:hidden;}
 .file-btn input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;}
 .file-name{font-size:11px;color:var(--text3);margin-top:6px;}
+.toggle{position:relative;width:51px;height:31px;flex-shrink:0;cursor:pointer;}
+.toggle input{opacity:0;width:0;height:0;position:absolute;}
+.toggle-track{position:absolute;inset:0;border-radius:999px;background:rgba(255,255,255,0.13);border:1px solid rgba(255,255,255,0.08);}
+.toggle input:checked~.toggle-track{background:var(--accent);border-color:var(--accent);box-shadow:0 0 14px var(--accent-glow);}
+.toggle-thumb{position:absolute;top:3px;left:3px;width:23px;height:23px;border-radius:50%;background:#fff;}
+.toggle input:checked~.toggle-thumb{transform:translateX(20px);}
 .action-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:14px;border-radius:14px;border:none;
   font-size:15px;font-weight:600;cursor:pointer;}
 .btn-primary{background:linear-gradient(135deg,var(--accent) 0%,var(--accent2) 100%);color:#fff;box-shadow:0 4px 18px var(--accent-glow);}
@@ -133,7 +139,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
         </div>
         <div class="hero-card">
           <div class="hero-title">Transsion Flagship 16</div>
-          <div class="hero-sub" id="module-version-sub">V1.01 · boot animation</div>
+          <div class="hero-sub" id="module-version-sub">V1.02 · boot animation + boot sound</div>
         </div>
         <div class="h8"></div>
         <div class="warn-card" id="old-mod-warn">Flagship 15 is still installed. This installer disables it. Remove it from Magisk/KSU so the two modules do not fight.</div>
@@ -147,9 +153,9 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
         <div class="section-label">Roadmap</div>
         <div class="glass-card roadmap">
           <ul>
-            <li class="on">Boot animation — shipping now</li>
+            <li class="on">Boot animation — verified</li>
+            <li class="on">Boot sound — shipping now</li>
             <li class="next">Next feature — you pick, then send a dump</li>
-            <li>Boot sound, charging anim, FOD, AI, Gaming… one at a time</li>
           </ul>
         </div>
         <div class="h8"></div>
@@ -158,13 +164,19 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
         <button class="action-btn btn-danger" onclick="confirmReboot()">Reboot Device</button>
         <div class="section-label">Boot log</div>
         <div class="glass-card"><div class="log-box" id="pfd-log">—</div></div>
+        <div class="section-label">Audio dump</div>
+        <div class="glass-card">
+          <div class="setting-row"><div class="row-text"><div class="row-title">Live boot-sound paths</div><div class="row-sub">Run on device, then paste the box if sound is silent</div></div></div>
+          <div class="file-row"><button class="action-btn btn-primary" onclick="dumpAudio()" style="padding:11px">Dump audio paths</button></div>
+          <div class="log-box" id="audio-dump">Tap Dump audio paths</div>
+        </div>
       </div>
 
       <div class="page" id="page-media">
         <div class="page-header">
           <div class="eyebrow">Media</div>
-          <h1>Boot animation</h1>
-          <div class="sub">Only this feature is wired. Reboot after Apply.</div>
+          <h1>Boot media</h1>
+          <div class="sub">Animation and sound. Reboot after Apply.</div>
         </div>
         <div class="glass-card">
           <div class="setting-row">
@@ -185,6 +197,27 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
               <input type="file" accept=".zip" onchange="handleBootanim(this)">
             </label>
             <div class="file-name" id="bootanim-file-name">No custom animation uploaded</div>
+          </div>
+        </div>
+        <div class="h8"></div>
+        <div class="glass-card">
+          <div class="setting-row">
+            <div class="row-text">
+              <div class="row-title">Boot sound</div>
+              <div class="row-sub">Injects audio.wav into the boot zip; also overlays /tr_product/media/audio</div>
+            </div>
+          </div>
+          <div class="segmented" id="bootsound-picker">
+            <div class="segmented-opt active" data-val="waltz" onclick="setBootSound('waltz')">Waltz</div>
+            <div class="segmented-opt" data-val="custom" onclick="setBootSound('custom')" id="bootsound-custom-opt" style="display:none">Custom</div>
+            <div class="segmented-opt" data-val="off" onclick="setBootSound('off')">Off</div>
+          </div>
+          <div class="file-row">
+            <label class="file-btn">
+              Upload custom ogg or wav
+              <input type="file" accept=".ogg,.wav,audio/ogg,audio/wav" onchange="handleBootsound(this)">
+            </label>
+            <div class="file-name" id="bootsound-file-name">Pack: Waltz</div>
           </div>
         </div>
         <div class="h8"></div>
@@ -209,7 +242,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
 <script type="module">
 const MOD='/data/adb/modules/transsion-flagship-16';
 const CONFIG_PATH=MOD+'/config.json';
-let cfg={bootanim_style:'hios16',bootanim_file:''};
+let cfg={bootanim_style:'hios16',bootanim_file:'',boot_sound:'waltz',boot_sound_file:''};
 let _exec=null;
 
 async function exec(cmd){
@@ -236,6 +269,14 @@ function setStyle(val){
     o.classList.toggle('active', o.dataset.val===val);
   });
 }
+function setBootSound(val){
+  if(val==='true') val='waltz';
+  if(val==='false') val='off';
+  cfg.boot_sound=val;
+  document.querySelectorAll('#bootsound-picker .segmented-opt').forEach(o=>{
+    o.classList.toggle('active', o.dataset.val===val);
+  });
+}
 function showConfirm(title,msg,opts={}){
   return new Promise(resolve=>{
     const bd=document.getElementById('modal-backdrop');
@@ -255,22 +296,7 @@ async function g(cmd){
   const r=await exec(cmd);
   return (r.stdout||'').trim();
 }
-async function saveAll(){
-  const json=JSON.stringify(cfg,null,2).replace(/'/g,"'\\''");
-  const r=await exec("echo '"+json+"' > \""+CONFIG_PATH+"\" && echo OK");
-  if((r.stdout||'').includes('OK')) toast('Saved — reboot to apply boot animation');
-  else toast('Save failed — is the module installed?');
-}
-async function confirmReboot(){
-  const ok=await showConfirm('Reboot Device','Restart now so the boot animation bind can apply.',{okLabel:'Reboot',danger:true});
-  if(ok) exec('reboot');
-}
-async function handleBootanim(input){
-  if(!input.files.length) return;
-  const file=input.files[0];
-  if(file.size>40*1024*1024){ toast('File too large (max 40MB)'); input.value=''; return; }
-  toast('Reading '+file.name+'…', 20000);
-  const bytes=new Uint8Array(await file.arrayBuffer());
+async function writeB64File(bytes, dests, tmp){
   const CHUNK=32766;
   let b64='';
   for(let i=0;i<bytes.length;i+=CHUNK){
@@ -279,12 +305,6 @@ async function handleBootanim(input){
     for(let j=0;j<slice.length;j++) bin+=String.fromCharCode(slice[j]);
     b64+=btoa(bin);
   }
-  const dests=[
-    MOD+'/tr_product/media/bootanimation_custom.zip',
-    MOD+'/system/product/media/bootanimation_custom.zip'
-  ];
-  toast('Writing custom zip…', 20000);
-  const tmp='/data/local/tmp/tf16_bootanim.b64';
   await exec('rm -f "'+tmp+'"');
   const W=8000;
   for(let i=0;i<b64.length;i+=W){
@@ -294,9 +314,41 @@ async function handleBootanim(input){
   for(const d of dests){
     await exec('mkdir -p "$(dirname "'+d+'")"');
     const wr=await exec('base64 -d "'+tmp+'" > "'+d+'" && echo OK');
-    if(!(wr.stdout||'').includes('OK')) { toast('Write failed for '+d); return; }
+    if(!(wr.stdout||'').includes('OK')) return false;
   }
   await exec('rm -f "'+tmp+'"');
+  return true;
+}
+async function saveAll(){
+  const json=JSON.stringify(cfg,null,2).replace(/'/g,"'\\''");
+  const r=await exec("echo '"+json+"' > \""+CONFIG_PATH+"\" && echo OK");
+  if((r.stdout||'').includes('OK')) toast('Saved — reboot to apply');
+  else toast('Save failed — is the module installed?');
+}
+async function confirmReboot(){
+  const ok=await showConfirm('Reboot Device','Restart now so boot animation and sound can apply.',{okLabel:'Reboot',danger:true});
+  if(ok) exec('reboot');
+}
+async function dumpAudio(){
+  toast('Dumping audio paths…', 12000);
+  const cmd='{ echo "=== /tr_product/media ==="; ls -la /tr_product/media 2>/dev/null; echo; echo "=== audio tree ==="; ls -laR /tr_product/media/audio 2>/dev/null; echo; echo "=== named files ==="; find /tr_product /product /system /system_ext /oem -maxdepth 6 \\( -iname "*poweron*" -o -iname "*bootsound*" -o -iname "*bootaudio*" -o -iname "audio.wav" -o -iname "audio.ogg" \\) 2>/dev/null; echo; echo "=== zip members ==="; unzip -l /tr_product/media/bootanimation.zip 2>/dev/null | grep -iE "audio|ogg|wav|boot"; echo; echo "=== props ==="; getprop | grep -iE "boot.?sound|poweron|bootsound"; } > "'+MOD+'/audio_dump.txt" 2>&1';
+  await exec(cmd);
+  const dump=await g('cat "'+MOD+'/audio_dump.txt" 2>/dev/null');
+  document.getElementById('audio-dump').textContent=dump||'(dump failed — is the module installed?)';
+  toast(dump?'Dump ready — copy from Home':'Dump failed');
+}
+async function handleBootanim(input){
+  if(!input.files.length) return;
+  const file=input.files[0];
+  if(file.size>40*1024*1024){ toast('File too large (max 40MB)'); input.value=''; return; }
+  toast('Writing custom zip…', 20000);
+  const bytes=new Uint8Array(await file.arrayBuffer());
+  const dests=[
+    MOD+'/tr_product/media/bootanimation_custom.zip',
+    MOD+'/system/product/media/bootanimation_custom.zip'
+  ];
+  const ok=await writeB64File(bytes, dests, '/data/local/tmp/tf16_bootanim.b64');
+  if(!ok){ toast('Write failed'); return; }
   cfg.bootanim_style='custom';
   cfg.bootanim_file=file.name;
   document.getElementById('bootanim-custom-opt').style.display='';
@@ -306,10 +358,36 @@ async function handleBootanim(input){
   toast('Custom zip saved — reboot to apply');
   input.value='';
 }
+async function handleBootsound(input){
+  if(!input.files.length) return;
+  const file=input.files[0];
+  if(file.size>8*1024*1024){ toast('File too large (max 8MB)'); input.value=''; return; }
+  const name=file.name.toLowerCase();
+  const isWav=name.endsWith('.wav');
+  const isOgg=name.endsWith('.ogg');
+  if(!isWav && !isOgg){ toast('Use a .ogg or .wav file'); input.value=''; return; }
+  toast('Writing custom sound…', 20000);
+  const bytes=new Uint8Array(await file.arrayBuffer());
+  const ext=isWav?'wav':'ogg';
+  const dests=[
+    MOD+'/tr_product/media/audio/bootsound/custom.'+ext,
+    MOD+'/system/product/media/audio/bootsound/custom.'+ext
+  ];
+  const ok=await writeB64File(bytes, dests, '/data/local/tmp/tf16_bootsound.b64');
+  if(!ok){ toast('Write failed'); return; }
+  cfg.boot_sound='custom';
+  cfg.boot_sound_file=file.name;
+  document.getElementById('bootsound-custom-opt').style.display='';
+  setBootSound('custom');
+  n('bootsound-file-name','Custom: '+file.name);
+  await saveAll();
+  toast('Custom sound saved — reboot to apply');
+  input.value='';
+}
 async function loadDevice(){
   const prop=await g('cat "'+MOD+'/module.prop" 2>/dev/null');
-  const ver=(prop.match(/^version=(.+)$/m)||[])[1]||'V1.01';
-  n('module-version-sub', ver+' · boot animation');
+  const ver=(prop.match(/^version=(.+)$/m)||[])[1]||'V1.02';
+  n('module-version-sub', ver+' · boot animation + boot sound');
   let type=await g('getprop ro.tran.os.type');
   let verOs=await g('getprop ro.transsion.os.version');
   const brand=(await g('getprop ro.product.brand')||'').toLowerCase();
@@ -338,14 +416,21 @@ async function loadDevice(){
   if(old==='yes') document.getElementById('old-mod-warn').style.display='block';
   const log=await g('cat "'+MOD+'/post_fs_data.log" 2>/dev/null');
   document.getElementById('pfd-log').textContent=log||'(no boot log yet — reboot once)';
+  const dump=await g('cat "'+MOD+'/audio_dump.txt" 2>/dev/null');
+  if(dump) document.getElementById('audio-dump').textContent=dump;
 }
 async function loadCfg(){
   const raw=await g('cat "'+CONFIG_PATH+'" 2>/dev/null');
   try{ if(raw) cfg={...cfg, ...JSON.parse(raw)}; }catch(e){}
   setStyle(cfg.bootanim_style||'hios16');
+  setBootSound(cfg.boot_sound||'waltz');
   if(cfg.bootanim_file){
     document.getElementById('bootanim-custom-opt').style.display='';
     n('bootanim-file-name','Custom: '+cfg.bootanim_file);
+  }
+  if(cfg.boot_sound_file){
+    document.getElementById('bootsound-custom-opt').style.display='';
+    n('bootsound-file-name','Custom: '+cfg.boot_sound_file);
   }
 }
 async function init(){
@@ -362,9 +447,12 @@ async function init(){
 init();
 window.switchTab=switchTab;
 window.setStyle=setStyle;
+window.setBootSound=setBootSound;
 window.saveAll=saveAll;
 window.confirmReboot=confirmReboot;
 window.handleBootanim=handleBootanim;
+window.handleBootsound=handleBootsound;
+window.dumpAudio=dumpAudio;
 </script>
 </body>
 </html>
