@@ -77,7 +77,7 @@ Use **one** module. Do not run Flagship 15 and Flagship 16 together.
 | **Transsion Flagship** (this README) | repo root | `TransFlagship_V4.xx.zip` | XOS / HiOS / iTel **15** |
 | **Transsion Flagship 16** | [`os16/`](os16/) | `TransFlagship16_V1.xx.zip` | Transsion **OS 16** (XOS / HiOS / iTel) |
 
-Flagship 16 has its own WebUI. Features are added **one at a time** after they are verified on a real OS 16 device. **V1.00 is boot animation only** (Default / HiOS 16 / Custom / Off, bind-mounted over `/tr_product/media/bootanimation.zip`). Installer disables Flagship 15 if it is still active.
+Flagship 16 has its own WebUI. Features are added **one at a time** after they are verified on a real OS 16 device. **V1.01 is boot animation only** (XOS / HiOS 16 / Custom / Off, bind-mounted over `/tr_product/media/bootanimation.zip`). Installer disables Flagship 15 if it is still active.
 
 See [`os16/CHANGELOG.md`](os16/CHANGELOG.md) for Flagship 16 versions.
 

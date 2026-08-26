@@ -133,7 +133,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
         </div>
         <div class="hero-card">
           <div class="hero-title">Transsion Flagship 16</div>
-          <div class="hero-sub" id="module-version-sub">V1.00 · boot animation</div>
+          <div class="hero-sub" id="module-version-sub">V1.01 · boot animation</div>
         </div>
         <div class="h8"></div>
         <div class="warn-card" id="old-mod-warn">Flagship 15 is still installed. This installer disables it. Remove it from Magisk/KSU so the two modules do not fight.</div>
@@ -174,7 +174,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
             </div>
           </div>
           <div class="segmented" id="bootanim-style-picker">
-            <div class="segmented-opt" data-val="default" onclick="setStyle('default')">Default</div>
+            <div class="segmented-opt" data-val="default" onclick="setStyle('default')">XOS</div>
             <div class="segmented-opt active" data-val="hios16" onclick="setStyle('hios16')">HiOS 16</div>
             <div class="segmented-opt" data-val="custom" onclick="setStyle('custom')" id="bootanim-custom-opt" style="display:none">Custom</div>
             <div class="segmented-opt" data-val="off" onclick="setStyle('off')">Off</div>
@@ -308,7 +308,7 @@ async function handleBootanim(input){
 }
 async function loadDevice(){
   const prop=await g('cat "'+MOD+'/module.prop" 2>/dev/null');
-  const ver=(prop.match(/^version=(.+)$/m)||[])[1]||'V1.00';
+  const ver=(prop.match(/^version=(.+)$/m)||[])[1]||'V1.01';
   n('module-version-sub', ver+' · boot animation');
   let type=await g('getprop ro.tran.os.type');
   let verOs=await g('getprop ro.transsion.os.version');
