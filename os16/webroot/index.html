@@ -143,7 +143,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
         </div>
         <div class="hero-card">
           <div class="hero-title">Transsion Flagship 16</div>
-          <div class="hero-sub" id="module-version-sub">V1.29 · OS 16</div>
+          <div class="hero-sub" id="module-version-sub">V1.30 · OS 16</div>
         </div>
         <div class="h8"></div>
         <div class="warn-card" id="old-mod-warn">Flagship 15 is still installed. This installer disables it. Remove it from Magisk/KSU so the two modules do not fight.</div>
@@ -164,7 +164,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
             <li class="on">AI Call Summary — Ella briefing</li>
             <li class="next">AI Gallery — all menus for show; some tools may crash when tapped</li>
             <li class="on">AI Video Enhancement — VEE flag on</li>
-            <li class="next">Gaming — eSports Touch + bypass charging; dump flags after reboot</li>
+            <li class="next">Gaming — OS 16 GT triggers in XArena; dump if still missing</li>
           </ul>
         </div>
         <div class="h8"></div>
@@ -247,9 +247,16 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
           <div class="setting-row">
             <div class="row-text">
               <div class="row-title">Gaming Suite</div>
-              <div class="row-sub">Flagship 15 names first — dump if menus do not appear.</div>
+              <div class="row-sub">OS 16 keys. Apply, reboot, then check XArena.</div>
             </div>
             <label class="toggle"><input type="checkbox" id="feat-game" checked onchange="setGame('game_master',this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+          </div>
+          <div class="setting-row">
+            <div class="row-text">
+              <div class="row-title">GT Triggers</div>
+              <div class="row-sub">XArena option to add GT triggers. No physical buttons on this phone.</div>
+            </div>
+            <label class="toggle"><input type="checkbox" id="feat-game-triggers" checked onchange="setGame('game_gt_triggers',this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
           </div>
           <div class="setting-row">
             <div class="row-text">
@@ -378,7 +385,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
 <script type="module">
 const MOD='/data/adb/modules/transsion-flagship-16';
 const CONFIG_PATH=MOD+'/config.json';
-let cfg={bootanim_style:'hios16',bootanim_file:'',rebootanim_style:'hios16',rebootanim_file:'',statusbar_style:'off',statusbarcustom_file:'',ai_master:true,ai_subtitles:true,ai_call_summary:true,ai_writing:true,ai_sound_rec:true,ai_notes:true,ai_gallery:true,ai_video:true,game_master:true,game_esports_touch:true,game_esports_level:3,game_bypass_charge:true};
+let cfg={bootanim_style:'hios16',bootanim_file:'',rebootanim_style:'hios16',rebootanim_file:'',statusbar_style:'off',statusbarcustom_file:'',ai_master:true,ai_subtitles:true,ai_call_summary:true,ai_writing:true,ai_sound_rec:true,ai_notes:true,ai_gallery:true,ai_video:true,game_master:true,game_esports_touch:true,game_esports_level:3,game_bypass_charge:true,game_gt_triggers:true};
 let _exec=null;
 
 async function exec(cmd){
@@ -437,7 +444,7 @@ function syncAiChildren(){
 }
 function syncGameChildren(){
   const on=cfg.game_master===true;
-  ['feat-game-touch','feat-game-bypass'].forEach(id=>{
+  ['feat-game-touch','feat-game-bypass','feat-game-triggers'].forEach(id=>{
     const el=document.getElementById(id);
     if(el) el.disabled=!on;
   });
@@ -469,12 +476,19 @@ const GALLERY_KEYS=[
   'ro.tr_gallery.compose.support'
 ];
 const GAME_KEYS=[
-  'ro.os_game_gt.support',
-  'ro.os_game_tp_esports10.support',
-  'ro.os_game_tp_esports20.support',
-  'ro.os_game_tp_esports30.support',
-  'ro.os_game_tp_esports_update11.support',
-  'ro.os_game_bypass_charging_support'
+  'ro.tr_game.e_sport_mode.support',
+  'ro.tr_game.game_mode.support',
+  'ro.tr_game.tp_esports10.feature.support',
+  'ro.tr_game.tp_esports20.feature.support',
+  'ro.tr_game.tp_esports30.feature.support',
+  'ro.tr_game.esports_update11.support',
+  'ro.tr_game.bypass_charging.support',
+  'ro.tr_game.shoulder_key.support',
+  'ro.tr_game.ai_picture_triggers.support',
+  'ro.tr_game.esportsvirtualctrl.support',
+  'ro.tr_game.screen_buttons.support',
+  'ro.tr_game.magic_button.support',
+  'ro.tr_smartbutton.shoulderbutton20.feature.support'
 ];
 function showConfirm(title,msg,opts={}){
   return new Promise(resolve=>{
@@ -536,12 +550,21 @@ async function writeAiSystemProp(){
   lines.push('ro.tr_video.vee.support='+ai01('ai_video'));
   const touch=gameOn('game_esports_touch');
   const lvl=esportsLevel();
-  lines.push('ro.os_game_gt.support='+(cfg.game_master===true?'1':'0'));
-  lines.push('ro.os_game_tp_esports10.support='+(touch?'1':'0'));
-  lines.push('ro.os_game_tp_esports20.support='+(touch&&lvl>=2?'1':'0'));
-  lines.push('ro.os_game_tp_esports30.support='+(touch&&lvl>=3?'1':'0'));
-  lines.push('ro.os_game_tp_esports_update11.support='+(touch?'1':'0'));
-  lines.push('ro.os_game_bypass_charging_support='+game01('game_bypass_charge'));
+  const trig=gameOn('game_gt_triggers');
+  const gemode=cfg.game_master===true?'1':'0';
+  lines.push('ro.tr_game.e_sport_mode.support='+gemode);
+  lines.push('ro.tr_game.game_mode.support='+gemode);
+  lines.push('ro.tr_game.tp_esports10.feature.support='+(touch?'1':'0'));
+  lines.push('ro.tr_game.tp_esports20.feature.support='+(touch&&lvl>=2?'1':'0'));
+  lines.push('ro.tr_game.tp_esports30.feature.support='+(touch&&lvl>=3?'1':'0'));
+  lines.push('ro.tr_game.esports_update11.support='+(touch?'1':'0'));
+  lines.push('ro.tr_game.bypass_charging.support='+game01('game_bypass_charge'));
+  lines.push('ro.tr_game.shoulder_key.support='+(trig?'1':'0'));
+  lines.push('ro.tr_game.ai_picture_triggers.support='+(trig?'1':'0'));
+  lines.push('ro.tr_game.esportsvirtualctrl.support='+(trig?'1':'0'));
+  lines.push('ro.tr_game.screen_buttons.support='+(trig?'1':'0'));
+  lines.push('ro.tr_game.magic_button.support='+(trig?'1':'0'));
+  lines.push('ro.tr_smartbutton.shoulderbutton20.feature.support='+(trig?'true':'false'));
   const body=lines.join('\n')+'\n';
   const esc=body.replace(/'/g,"'\\''");
   const r=await exec("printf '%s' '"+esc+"' > \""+MOD+"/system.prop\" && echo OK");
@@ -567,7 +590,8 @@ async function saveAll(){
     game_master:cfg.game_master!==false,
     game_esports_touch:cfg.game_esports_touch!==false,
     game_esports_level:esportsLevel(),
-    game_bypass_charge:cfg.game_bypass_charge!==false
+    game_bypass_charge:cfg.game_bypass_charge!==false,
+    game_gt_triggers:cfg.game_gt_triggers!==false
   };
   const json=JSON.stringify(slim,null,2).replace(/'/g,"'\\''");
   const r=await exec("echo '"+json+"' > \""+CONFIG_PATH+"\" && echo OK");
@@ -597,7 +621,7 @@ async function dumpAi(){
   }
   lines.push('');
   lines.push('=== other live AI-like keys (first 80) ===');
-  const live=await g("getprop | grep -iE 'ai_|aiphone|subtitle|soundrecorder|note_ai|aicore|aipower|ask_ai|tr_gallery|tr_video.vee|studio.lite|os_game|tr_game|esports|bypass_charg' | head -80");
+  const live=await g("getprop | grep -iE 'ai_|aiphone|subtitle|soundrecorder|note_ai|aicore|aipower|ask_ai|tr_gallery|tr_video.vee|studio.lite|tr_game|os_game|esports|bypass_charg|shoulder|smartbutton' | head -80");
   lines.push(live||'(none)');
   lines.push('');
   lines.push('=== gallery / aicore packages ===');
@@ -605,7 +629,7 @@ async function dumpAi(){
   lines.push(pkgs||'(none)');
   lines.push('');
   lines.push('=== stock build files (do these keys exist without the module?) ===');
-  const stock=await g("for f in /system/build.prop /system/system/build.prop /product/build.prop /system/product/build.prop /system/product/etc/build.prop /vendor/build.prop /odm/etc/build.prop /tr_product/build.prop /tr_product/etc/build.prop; do [ -f \"$f\" ] || continue; hits=$(grep -E 'aicorespeech_subtitle|aicorespeech_livecaption|tr_soundrecorder.summary|tr_note.ai_draw|os_ai_writing|aiphone.feature|aiphone_summany|tr_gallery|tr_video.vee|os_game_tp_esports|os_game_bypass|os_game_gt|tr_game' \"$f\" 2>/dev/null); [ -n \"$hits\" ] && echo \"$f\" && echo \"$hits\"; done");
+  const stock=await g("for f in /system/build.prop /system/system/build.prop /product/build.prop /system/product/build.prop /system/product/etc/build.prop /vendor/build.prop /odm/etc/build.prop /tr_product/build.prop /tr_product/etc/build.prop; do [ -f \"$f\" ] || continue; hits=$(grep -E 'aicorespeech_subtitle|aicorespeech_livecaption|tr_soundrecorder.summary|tr_note.ai_draw|os_ai_writing|aiphone.feature|aiphone_summany|tr_gallery|tr_video.vee|tr_game.|tr_smartbutton.shoulder' \"$f\" 2>/dev/null); [ -n \"$hits\" ] && echo \"$f\" && echo \"$hits\"; done");
   lines.push(stock||'(none of those keys in readable stock build files)');
   const text=lines.join('\n');
   document.getElementById('pfd-log').textContent=text;
@@ -709,7 +733,7 @@ async function handleStatusbar(input){
 }
 async function loadDevice(){
   const prop=await g('cat "'+MOD+'/module.prop" 2>/dev/null');
-  const ver=(prop.match(/^version=(.+)$/m)||[])[1]||'V1.29';
+  const ver=(prop.match(/^version=(.+)$/m)||[])[1]||'V1.30';
   n('module-version-sub', ver+' · OS 16');
   let type=await g('getprop ro.tran.os.type');
   let verOs=await g('getprop ro.transsion.os.version');
@@ -755,6 +779,7 @@ async function loadCfg(){
   if(cfg.game_esports_touch===undefined) cfg.game_esports_touch=true;
   if(cfg.game_esports_level===undefined) cfg.game_esports_level=3;
   if(cfg.game_bypass_charge===undefined) cfg.game_bypass_charge=true;
+  if(cfg.game_gt_triggers===undefined) cfg.game_gt_triggers=true;
   setStyle(cfg.bootanim_style||'hios16');
   if(!cfg.rebootanim_style) cfg.rebootanim_style=cfg.shutdownanim_style||'hios16';
   setRebootStyle(cfg.rebootanim_style||'hios16');
@@ -783,6 +808,7 @@ async function loadCfg(){
   setT('feat-game', cfg.game_master!==false);
   setT('feat-game-touch', cfg.game_esports_touch!==false);
   setT('feat-game-bypass', cfg.game_bypass_charge!==false);
+  setT('feat-game-triggers', cfg.game_gt_triggers!==false);
   setEsportsLevel(esportsLevel());
   syncAiChildren();
   syncGameChildren();

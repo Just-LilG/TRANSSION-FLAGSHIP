@@ -22,10 +22,19 @@ ro.tr_gallery.bokeh.support=1
 ro.tr_gallery.compose.support=1
 # Video Enhancement Engine — user confirmed this flag was working.
 ro.tr_video.vee.support=1
-# Gaming — Flagship 15 names. Dump if EMPTY; OS 16 may use different keys.
-ro.os_game_gt.support=1
-ro.os_game_tp_esports10.support=1
-ro.os_game_tp_esports20.support=1
-ro.os_game_tp_esports30.support=1
-ro.os_game_tp_esports_update11.support=1
-ro.os_game_bypass_charging_support=1
+# Gaming — OS 16 keys from GT 30 Pro dump (X6858). V1.29 Flagship 15 names
+# (ro.os_game_*) are EMPTY on this phone. Shoulder / smartbutton unhide
+# XArena GT trigger mapping. This G99 still has no physical trigger hardware.
+ro.tr_game.e_sport_mode.support=1
+ro.tr_game.game_mode.support=1
+ro.tr_game.tp_esports10.feature.support=1
+ro.tr_game.tp_esports20.feature.support=1
+ro.tr_game.tp_esports30.feature.support=1
+ro.tr_game.esports_update11.support=1
+ro.tr_game.bypass_charging.support=1
+ro.tr_game.shoulder_key.support=1
+ro.tr_game.ai_picture_triggers.support=1
+ro.tr_game.esportsvirtualctrl.support=1
+ro.tr_game.screen_buttons.support=1
+ro.tr_game.magic_button.support=1
+ro.tr_smartbutton.shoulderbutton20.feature.support=true

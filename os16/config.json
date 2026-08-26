@@ -16,5 +16,6 @@
   "game_master": true,
   "game_esports_touch": true,
   "game_esports_level": 3,
-  "game_bypass_charge": true
+  "game_bypass_charge": true,
+  "game_gt_triggers": true
 }
