@@ -1,5 +1,8 @@
 # Transsion Flagship 16
 
+## v1.11
+- **Charging animation.** Same XOS / HiOS 16 / Custom / Off picker as boot and reboot. Applies the lockscreen charge theme under `/tr_product/theme/charge` (bind that folder only — not `/tr_product` or `/theme`). XML `resourcePath`, `fileName`, and `fileMd5` are rewritten on boot so the OS accepts the chosen mp4. Off leaves stock. Plug the charger in on the lockscreen after Apply + reboot.
+
 ## v1.10
 - **Reboot animation.** Same XOS / HiOS 16 / Custom / Off picker as boot, applied to the shutdown splash that plays when you restart or power off. WebUI no longer shows internal file paths on Media or Sounds.
 

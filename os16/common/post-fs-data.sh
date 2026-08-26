@@ -168,6 +168,60 @@ busybox_bin() {
     return 1
 }
 
+file_md5() {
+    f="$1"
+    [ -f "$f" ] || return 1
+    sum=""
+    if command -v md5sum >/dev/null 2>&1; then
+        sum=$(md5sum "$f" 2>/dev/null | awk '{print $1}')
+    fi
+    if [ -z "$sum" ]; then
+        BB=$(busybox_bin)
+        [ -n "$BB" ] && sum=$($BB md5sum "$f" 2>/dev/null | awk '{print $1}')
+    fi
+    [ -n "$sum" ] && echo "$sum"
+}
+
+ensure_dir() {
+    dest="$1"
+    [ -d "$dest" ] && return 0
+    mkdir -p "$dest" 2>/dev/null
+    [ -n "$NSENTER" ] && $NSENTER mkdir -p "$dest" 2>/dev/null
+    [ -d "$dest" ]
+}
+
+patch_charge_xml() {
+    xml="$1"
+    respath="$2"
+    fname="$3"
+    md5="$4"
+    [ -f "$xml" ] || return 1
+    sed -i "s|<resourcePath>[^<]*</resourcePath>|<resourcePath>${respath}</resourcePath>|g" "$xml"
+    sed -i "s|<fileName>[^<]*</fileName>|<fileName>${fname}</fileName>|g" "$xml"
+    sed -i "s|<fileMd5>[^<]*</fileMd5>|<fileMd5>${md5}</fileMd5>|g" "$xml"
+}
+
+# Stage xml + pngs + the chosen mp4. Never bind-dir /tr_product or /tr_product/theme.
+stage_charge_tree() {
+    dest="$1"
+    respath="$2"
+    pack="$3"
+    src_mp4="$4"
+    fname="$5"
+    md5="$6"
+    [ -d "$pack" ] || return 1
+    [ -f "$src_mp4" ] || return 1
+    mkdir -p "$dest"
+    rm -f "$dest"/*.mp4 "$dest"/*.png "$dest"/*.xml
+    for f in "$pack"/*.png "$pack"/lockscreen_charge_config.xml; do
+        [ -f "$f" ] || continue
+        cp -f "$f" "$dest/"
+    done
+    cp -f "$src_mp4" "$dest/$fname"
+    chmod 644 "$dest"/* 2>/dev/null
+    patch_charge_xml "$dest/lockscreen_charge_config.xml" "$respath" "$fname" "$md5"
+}
+
 # Recursively copy live extras into stage so a bind-dir does not hide them.
 # Files already in stage (our overrides) win.
 merge_tree() {
@@ -425,10 +479,11 @@ fi
 BA_STYLE=$(cfg_get bootanim_style "hios16")
 RA_STYLE=$(cfg_get rebootanim_style "hios16")
 [ -z "$RA_STYLE" ] && RA_STYLE=$(cfg_get shutdownanim_style "hios16")
+CA_STYLE=$(cfg_get chargeanim_style "hios16")
 BS=$(cfg_get boot_sound "waltz")
 [ "$BS" = "true" ] && BS=waltz
 [ "$BS" = "false" ] && BS=off
-log_pfd "bootanim_style=$BA_STYLE rebootanim_style=$RA_STYLE boot_sound=$BS market=$(getprop ro.tran.sw.market 2>/dev/null)"
+log_pfd "bootanim_style=$BA_STYLE rebootanim_style=$RA_STYLE chargeanim_style=$CA_STYLE boot_sound=$BS market=$(getprop ro.tran.sw.market 2>/dev/null)"
 if [ "$BS" = "off" ]; then
     set_play_sound 0
 else
@@ -636,4 +691,123 @@ log_pfd "live /tr_product/media (stock audio tree, zip bound):"
 ls -la /tr_product/media >> "$PFD_LOG" 2>/dev/null
 ls -la /tr_product/media/audio >> "$PFD_LOG" 2>/dev/null
 ls -la /tr_product/media/audio/bootsound >> "$PFD_LOG" 2>/dev/null
+
+# Charging animation. Stock dump XML is /product/theme/charge/; live OS 16
+# uses /tr_product. Bind only the charge dir — never /tr_product or /theme.
+log_pfd "live /tr_product/theme:"
+ls -la /tr_product/theme >> "$PFD_LOG" 2>/dev/null
+ls -la /tr_product/theme/charge >> "$PFD_LOG" 2>/dev/null
+ls -la /product/theme/charge >> "$PFD_LOG" 2>/dev/null
+
+CHARGE_PACK=""
+for d in "$MODDIR/system/product/theme/charge" "$MODDIR/product/theme/charge"; do
+    if [ -f "$d/lockscreen_charge_config.xml" ]; then
+        CHARGE_PACK="$d"
+        break
+    fi
+done
+log_pfd "CHARGE_PACK=${CHARGE_PACK:-none} style=$CA_STYLE"
+
+if [ "$CA_STYLE" = "off" ]; then
+    log_pfd "chargeanim: off — leave stock charge theme"
+    rm -rf "$MODDIR/tr_product/theme/charge"
+    rm -rf /mnt/vendor/mountify/tr_product/theme/charge
+elif [ -z "$CHARGE_PACK" ]; then
+    log_pfd "chargeanim: no pack xml in module"
+else
+    SRC_MP4=""
+    FNAME=""
+    case "$CA_STYLE" in
+        default)
+            FNAME="xos_wire_charging_lockscreen.mp4"
+            SRC_MP4=$(first_existing "$CHARGE_PACK/$FNAME")
+            ;;
+        custom)
+            FNAME="custom.mp4"
+            SRC_MP4=$(first_existing \
+                "$MODDIR/system/product/theme/charge/custom.mp4" \
+                "$MODDIR/charge_custom.mp4" \
+                "$MODDIR/tr_product/theme/charge/custom.mp4" \
+                "$MODDIR/product/theme/charge/custom.mp4")
+            ;;
+        *)
+            FNAME="hios_wire_charging_lockscreen.mp4"
+            SRC_MP4=$(first_existing "$CHARGE_PACK/$FNAME")
+            ;;
+    esac
+    if [ -z "$SRC_MP4" ] || [ ! -f "$SRC_MP4" ]; then
+        log_pfd "chargeanim: no mp4 for style=$CA_STYLE"
+    else
+        cp -f "$SRC_MP4" "$MODDIR/.charge_pick.mp4"
+        SRC_MP4="$MODDIR/.charge_pick.mp4"
+        CA_MD5=$(file_md5 "$SRC_MP4")
+        log_pfd "chargeanim mp4=$FNAME md5=${CA_MD5:-none} from style=$CA_STYLE"
+        if [ -n "$CA_MD5" ]; then
+            CHARGE_TR="$MODDIR/.charge_tr"
+            CHARGE_PROD="$MODDIR/.charge_prod"
+            rm -rf "$CHARGE_TR" "$CHARGE_PROD"
+            stage_charge_tree "$CHARGE_TR" \
+                "/tr_product/theme/charge/" "$CHARGE_PACK" "$SRC_MP4" "$FNAME" "$CA_MD5"
+            stage_charge_tree "$CHARGE_PROD" \
+                "/product/theme/charge/" "$CHARGE_PACK" "$SRC_MP4" "$FNAME" "$CA_MD5"
+            mkdir -p "$MODDIR/tr_product/theme/charge"
+            cp -a "$CHARGE_TR"/. "$MODDIR/tr_product/theme/charge/"
+            if [ -d /mnt/vendor/mountify/tr_product ]; then
+                mkdir -p /mnt/vendor/mountify/tr_product/theme/charge
+                cp -a "$CHARGE_TR"/. /mnt/vendor/mountify/tr_product/theme/charge/
+                chmod 644 /mnt/vendor/mountify/tr_product/theme/charge/* 2>/dev/null
+                log_pfd "mountify theme/charge"
+            fi
+            log_pfd "charge xml resourcePath:"
+            grep resourcePath "$CHARGE_TR/lockscreen_charge_config.xml" >> "$PFD_LOG" 2>/dev/null
+            grep fileName "$CHARGE_TR/lockscreen_charge_config.xml" | head -3 >> "$PFD_LOG" 2>/dev/null
+            for dest in /tr_product/theme/charge /product/theme/charge /system/product/theme/charge; do
+                case "$dest" in
+                    /tr_product/*)
+                        [ -d /tr_product ] || continue
+                        src="$CHARGE_TR"
+                        ;;
+                    /product/*)
+                        [ -d /product ] || continue
+                        src="$CHARGE_PROD"
+                        ;;
+                    /system/product/*)
+                        [ -d /system/product ] || continue
+                        src="$CHARGE_PROD"
+                        ;;
+                    *) continue ;;
+                esac
+                if ! ensure_dir "$dest"; then
+                    log_pfd "charge dest missing: $dest"
+                    continue
+                fi
+                bind_over_dir "$src" "$dest"
+            done
+            for dest in $(find_named lockscreen_charge_config.xml) \
+                        $(find_named xos_wire_charging_lockscreen.mp4) \
+                        $(find_named hios_wire_charging_lockscreen.mp4); do
+                dir=$(dirname "$dest")
+                base=$(basename "$dest")
+                case "$dir" in
+                    /tr_product/*) src="$CHARGE_TR" ;;
+                    *) src="$CHARGE_PROD" ;;
+                esac
+                case "$base" in
+                    *.mp4) try_bind_file "$src/$FNAME" "$dest" ;;
+                    *) try_bind_file "$src/$base" "$dest" ;;
+                esac
+            done
+            log_pfd "chargeanim bind pass done"
+            ls -la /tr_product/theme/charge >> "$PFD_LOG" 2>/dev/null
+            if command -v resetprop >/dev/null 2>&1; then
+                resetprop -n ro.tran.charge_animation_support 1 2>/dev/null \
+                    || resetprop ro.tran.charge_animation_support 1 2>/dev/null
+                resetprop -n ro.tran.lockscreen_charge_anim 1 2>/dev/null \
+                    || resetprop ro.tran.lockscreen_charge_anim 1 2>/dev/null
+            fi
+        else
+            log_pfd "chargeanim: could not md5 $SRC_MP4"
+        fi
+    fi
+fi
 
