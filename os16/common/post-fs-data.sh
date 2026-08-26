@@ -181,12 +181,123 @@ set_play_sound() {
     if command -v resetprop >/dev/null 2>&1; then
         resetprop -n persist.sys.bootanim.play_sound "$val" 2>/dev/null \
             || resetprop persist.sys.bootanim.play_sound "$val" 2>/dev/null
+        resetprop -n persist.sys.media.bootanim.play_sound "$val" 2>/dev/null
     elif [ -x /data/adb/magisk/resetprop ]; then
         /data/adb/magisk/resetprop -n persist.sys.bootanim.play_sound "$val" 2>/dev/null
+        /data/adb/magisk/resetprop -n persist.sys.media.bootanim.play_sound "$val" 2>/dev/null
     elif [ -x /data/adb/ksu/bin/resetprop ]; then
         /data/adb/ksu/bin/resetprop -n persist.sys.bootanim.play_sound "$val" 2>/dev/null
+        /data/adb/ksu/bin/resetprop -n persist.sys.media.bootanim.play_sound "$val" 2>/dev/null
     fi
     log_pfd "persist.sys.bootanim.play_sound=$val live=$(getprop persist.sys.bootanim.play_sound 2>/dev/null)"
+}
+
+convert_ogg_to_wav() {
+    ogg="$1"
+    wav="$2"
+    [ -f "$ogg" ] || return 1
+    TERMUX=/data/data/com.termux/files/usr
+    for ff in \
+        "$TERMUX/bin/ffmpeg" \
+        /system/bin/ffmpeg /vendor/bin/ffmpeg /system_ext/bin/ffmpeg
+    do
+        [ -x "$ff" ] || continue
+        if [ "$ff" = "$TERMUX/bin/ffmpeg" ]; then
+            ok=$(LD_LIBRARY_PATH="$TERMUX/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}" \
+                PATH="$TERMUX/bin:$PATH" \
+                "$ff" -y -i "$ogg" -acodec pcm_s16le -ac 1 -ar 22050 "$wav" >/dev/null 2>&1 && echo yes)
+        else
+            ok=$("$ff" -y -i "$ogg" -acodec pcm_s16le -ac 1 -ar 22050 "$wav" >/dev/null 2>&1 && echo yes)
+        fi
+        if [ "$ok" = "yes" ]; then
+            log_pfd "converted ogg->wav with $ff"
+            return 0
+        fi
+        log_pfd "ffmpeg failed: $ff"
+    done
+    return 1
+}
+
+run_player() {
+    player="$1"
+    wav="$2"
+    shift 2
+    if command -v timeout >/dev/null 2>&1; then
+        if [ -n "$NSENTER" ]; then
+            $NSENTER timeout 8 "$player" "$wav" "$@" && return 0
+        fi
+        timeout 8 "$player" "$wav" "$@"
+        return $?
+    fi
+    if [ -n "$NSENTER" ]; then
+        $NSENTER "$player" "$wav" "$@" && return 0
+    fi
+    "$player" "$wav" "$@"
+}
+
+play_boot_wav() {
+    wav="$1"
+    [ -f "$wav" ] || { log_pfd "tinyplay skip (no wav)"; return 1; }
+    player=""
+    for p in /system/bin/tinyplay /vendor/bin/tinyplay /system_ext/bin/tinyplay \
+             /vendor/bin/hw/tinyplay /odm/bin/tinyplay \
+             /system/bin/aplay /vendor/bin/aplay; do
+        [ -x "$p" ] && { player="$p"; break; }
+    done
+    if [ -z "$player" ]; then
+        player=$(find /system /vendor /system_ext /odm -name tinyplay -type f 2>/dev/null | head -n 1)
+    fi
+    if [ -z "$player" ]; then
+        log_pfd "no tinyplay/aplay on device"
+        ls -l /system/bin/tinyplay /vendor/bin/tinyplay /dev/snd 2>>"$PFD_LOG"
+        find /system /vendor /system_ext /odm -name 'tinyplay' 2>/dev/null >>"$PFD_LOG"
+        return 1
+    fi
+    log_pfd "boot play: $player $wav"
+    # Do not block post-fs-data. PCM/HAL often appears after bootanim starts.
+    (
+        n=0
+        while [ "$n" -lt 15 ]; do
+            log_pfd "tinyplay attempt n=$n snd=$(ls /dev/snd 2>/dev/null | tr '\n' ' ')"
+            if ls /dev/snd/pcmC*p >/dev/null 2>&1 || [ "$n" -ge 2 ]; then
+                if run_player "$player" "$wav"; then
+                    log_pfd "tinyplay OK (default) n=$n"
+                    exit 0
+                fi
+                if run_player "$player" "$wav" -D 0 -d 0; then
+                    log_pfd "tinyplay OK -D 0 -d 0 n=$n"
+                    exit 0
+                fi
+                for pcm in /dev/snd/pcmC*p; do
+                    [ -e "$pcm" ] || continue
+                    base=$(basename "$pcm")
+                    card=$(echo "$base" | sed -n 's/^pcmC\([0-9]*\)D\([0-9]*\)p$/\1/p')
+                    dev=$(echo "$base" | sed -n 's/^pcmC\([0-9]*\)D\([0-9]*\)p$/\2/p')
+                    [ -n "$card" ] || continue
+                    if run_player "$player" "$wav" -D "$card" -d "$dev"; then
+                        log_pfd "tinyplay OK -D $card -d $dev n=$n"
+                        exit 0
+                    fi
+                done
+                log_pfd "tinyplay try fail n=$n"
+            fi
+            n=$((n + 1))
+            sleep 1
+        done
+        log_pfd "tinyplay gave up"
+        ls -l /dev/snd >>"$PFD_LOG" 2>/dev/null
+    ) >>"$PFD_LOG" 2>&1 &
+    log_pfd "boot play pid=$!"
+}
+
+log_bootanim_bin() {
+    log_pfd "bootanimation binaries:"
+    ls -l /system/bin/bootanimation /apex/com.android.bootanimation/bin/bootanimation 2>>"$PFD_LOG"
+    for b in /system/bin/bootanimation /apex/com.android.bootanimation/bin/bootanimation; do
+        [ -f "$b" ] || continue
+        log_pfd "strings audio in $b:"
+        strings "$b" 2>/dev/null | grep -iE 'audio\.wav|play_sound|TinyALSA|audioplay' | head -n 20 >>"$PFD_LOG"
+    done
 }
 
 # AOSP plays audio.wav from the *part folder* (part1/audio.wav), not zip root.
@@ -384,6 +495,7 @@ STAGED="$TRP_STAGE/bootanimation.zip"
 SRC_BOOTSOUND=""
 SRC_BOOTWAV=""
 if [ "$BS" = "custom" ]; then
+    BS_FILE=$(cfg_get boot_sound_file "")
     SRC_BOOTSOUND=$(first_existing \
         "$MODDIR/tr_product/media/audio/bootsound/custom.ogg" \
         "$MODDIR/product/media/audio/bootsound/custom.ogg" \
@@ -392,47 +504,57 @@ if [ "$BS" = "custom" ]; then
         "$MODDIR/tr_product/media/audio/bootsound/custom.wav" \
         "$MODDIR/product/media/audio/bootsound/custom.wav" \
         "$MODDIR/system/product/media/audio/bootsound/custom.wav")
+    if [ -z "$SRC_BOOTSOUND" ] && [ -n "$BS_FILE" ]; then
+        SRC_BOOTSOUND=$(first_existing \
+            "$MODDIR/tr_product/media/audio/bootsound/$BS_FILE" \
+            "$MODDIR/product/media/audio/bootsound/$BS_FILE" \
+            "$MODDIR/system/product/media/audio/bootsound/$BS_FILE")
+    fi
+    if [ -z "$SRC_BOOTWAV" ] && [ -n "$BS_FILE" ]; then
+        case "$BS_FILE" in
+            *.wav|*.WAV)
+                SRC_BOOTWAV=$(first_existing \
+                    "$MODDIR/tr_product/media/audio/bootsound/$BS_FILE" \
+                    "$MODDIR/product/media/audio/bootsound/$BS_FILE" \
+                    "$MODDIR/system/product/media/audio/bootsound/$BS_FILE")
+                ;;
+        esac
+    fi
+    # Prefer converting a freshly uploaded ogg over a stale custom.wav.
+    if [ -n "$SRC_BOOTSOUND" ]; then
+        mkdir -p "$MODDIR/tr_product/media/audio/bootsound"
+        if convert_ogg_to_wav "$SRC_BOOTSOUND" "$MODDIR/tr_product/media/audio/bootsound/custom.wav"; then
+            SRC_BOOTWAV="$MODDIR/tr_product/media/audio/bootsound/custom.wav"
+        elif [ -z "$SRC_BOOTWAV" ]; then
+            log_pfd "custom is ogg and no ffmpeg — zip/tinyplay need wav. Pick Waltz or upload .wav"
+        fi
+    fi
 elif [ "$BS" != "off" ]; then
-    SRC_BOOTSOUND=$(first_existing \
-        "$MODDIR/product/media/audio/bootsound/Waltz.ogg" \
-        "$MODDIR/system/product/media/audio/bootsound/Waltz.ogg" \
-        "$MODDIR/system/media/audio/ui/Waltz.ogg")
     SRC_BOOTWAV=$(first_existing \
+        "$MODDIR/product/media/audio/bootsound/Waltz_bootanim.wav" \
+        "$MODDIR/system/product/media/audio/bootsound/Waltz_bootanim.wav" \
         "$MODDIR/product/media/audio/bootsound/Waltz.wav" \
         "$MODDIR/system/product/media/audio/bootsound/Waltz.wav")
+    SRC_BOOTSOUND=$(first_existing \
+        "$MODDIR/product/media/audio/bootsound/Waltz.ogg" \
+        "$MODDIR/system/product/media/audio/bootsound/Waltz.ogg")
 fi
 log_pfd "bootsound ogg=${SRC_BOOTSOUND:-none} wav=${SRC_BOOTWAV:-none}"
+log_bootanim_bin
 
-if [ "$BS" != "off" ] && { [ -n "$SRC_BOOTSOUND" ] || [ -n "$SRC_BOOTWAV" ]; }; then
-    mkdir -p "$TRP_STAGE/audio/ui" "$TRP_STAGE/audio/bootsound"
-    merge_tree /tr_product/media/audio "$TRP_STAGE/audio"
-    log_pfd "staged audio after merge:"
-    ls -la "$TRP_STAGE/audio" >> "$PFD_LOG" 2>/dev/null
-    if [ -n "$SRC_BOOTSOUND" ]; then
-        cp -f "$SRC_BOOTSOUND" "$TRP_STAGE/audio/ui/PowerOn.ogg"
-        cp -f "$SRC_BOOTSOUND" "$TRP_STAGE/audio/bootsound/Waltz.ogg"
-    fi
-    if [ -n "$SRC_BOOTWAV" ]; then
-        cp -f "$SRC_BOOTWAV" "$TRP_STAGE/audio/ui/PowerOn.wav"
-        cp -f "$SRC_BOOTWAV" "$TRP_STAGE/audio/bootsound/Waltz.wav"
-    fi
-    if [ -f "$STAGED" ]; then
-        if [ -n "$SRC_BOOTWAV" ]; then
-            try_inject_audio "$STAGED" "$SRC_BOOTWAV"
-        else
-            strip_zip_audio "$STAGED"
-            log_pfd "bootsound: no wav — AOSP bootanim will not play zip audio (need .wav, not only .ogg)"
-        fi
-        log_pfd "staged zip audio members:"
-        ( unzip -l "$STAGED" 2>/dev/null || true ) | grep -i audio >> "$PFD_LOG"
-    else
-        log_pfd "bootsound: no staged zip to inject into"
-    fi
+# Stock XOS 16 audio/ has no PowerOn.ogg and no bootsound/. Binding that
+# whole tree (V1.02–V1.04) nested alarms/notifications and hid UI sounds.
+# Do not bind-dir /tr_product/media/audio. Only the boot zip + tinyplay.
+
+if [ "$BS" != "off" ] && [ -n "$SRC_BOOTWAV" ] && [ -f "$STAGED" ]; then
+    try_inject_audio "$STAGED" "$SRC_BOOTWAV"
+    log_pfd "staged zip audio members:"
+    ( unzip -l "$STAGED" 2>/dev/null || true ) | grep -i audio >> "$PFD_LOG"
 elif [ "$BS" = "off" ]; then
-    log_pfd "bootsound: off — stripping zip audio, leaving stock audio unbound"
+    log_pfd "bootsound: off"
     [ -f "$STAGED" ] && strip_zip_audio "$STAGED"
-else
-    log_pfd "bootsound: no ogg/wav to stage"
+elif [ -f "$STAGED" ]; then
+    log_pfd "bootsound: no wav to inject"
 fi
 
 if [ -f "$STAGED" ]; then
@@ -449,28 +571,13 @@ if [ -f "$STAGED" ]; then
     log_pfd "bootanim bind pass done"
 fi
 
-if [ "$BS" != "off" ] && { [ -n "$SRC_BOOTSOUND" ] || [ -n "$SRC_BOOTWAV" ]; }; then
-    AUDIO_STAGE="$TRP_STAGE/audio"
-    if [ -d /tr_product/media/audio ]; then
-        bind_over_dir "$AUDIO_STAGE" /tr_product/media/audio
-    fi
-    if [ -n "$SRC_BOOTSOUND" ]; then
-        for dest in \
-            /tr_product/media/audio/ui/PowerOn.ogg \
-            /tr_product/media/audio/bootsound/Waltz.ogg \
-            /product/media/audio/ui/PowerOn.ogg \
-            /system/product/media/audio/ui/PowerOn.ogg \
-            /system/media/audio/ui/PowerOn.ogg \
-            /system/media/bootsound.ogg \
-            /system/media/bootsound.mp3 \
-            /system/media/audio/bootaudio.mp3
-        do
-            try_bind_file "$SRC_BOOTSOUND" "$dest"
-        done
-    fi
-    if [ -n "$SRC_BOOTWAV" ]; then
-        try_bind_file "$SRC_BOOTWAV" /tr_product/media/audio/ui/PowerOn.wav
-        try_bind_file "$SRC_BOOTWAV" /tr_product/media/audio/bootsound/Waltz.wav
-    fi
-    log_pfd "bootsound bind pass done"
+if [ "$BS" != "off" ] && [ -n "$SRC_BOOTWAV" ]; then
+    echo "$SRC_BOOTWAV" > "$MODDIR/.boot_play.wav"
+    play_boot_wav "$SRC_BOOTWAV"
+else
+    rm -f "$MODDIR/.boot_play.wav"
 fi
+log_pfd "live audio after (should be stock tree, not module bind-dir):"
+ls -la /tr_product/media/audio >> "$PFD_LOG" 2>/dev/null
+ls -la /tr_product/media/audio/ui >> "$PFD_LOG" 2>/dev/null
+
