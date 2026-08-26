@@ -55,12 +55,14 @@ write_os16_ai_prop() {
   gmaster=$(json_bool "$cfg" game_master true)
   gtouch=$(ai_01 "$cfg" "$gmaster" game_esports_touch true)
   gbypass=$(ai_01 "$cfg" "$gmaster" game_bypass_charge true)
+  gtrig=$(ai_01 "$cfg" "$gmaster" game_gt_triggers true)
+  gtrig_tf=$(ai_tf "$cfg" "$gmaster" game_gt_triggers true)
   glvl=$(json_int "$cfg" game_esports_level 3)
   [ "$glvl" -ge 1 ] 2>/dev/null || glvl=3
   [ "$glvl" -le 3 ] 2>/dev/null || glvl=3
-  g10=0; g20=0; g30=0; g11=0; ggt=0
+  g10=0; g20=0; g30=0; g11=0; gemode=0
   if [ "$gmaster" = "true" ]; then
-    ggt=1
+    gemode=1
     if [ "$gtouch" = "1" ]; then
       g10=1
       g11=1
@@ -89,12 +91,19 @@ ro.tr_gallery.shadow.enhance.support=$gal
 ro.tr_gallery.bokeh.support=$gal
 ro.tr_gallery.compose.support=$gal
 ro.tr_video.vee.support=$vee
-ro.os_game_gt.support=$ggt
-ro.os_game_tp_esports10.support=$g10
-ro.os_game_tp_esports20.support=$g20
-ro.os_game_tp_esports30.support=$g30
-ro.os_game_tp_esports_update11.support=$g11
-ro.os_game_bypass_charging_support=$gbypass
+ro.tr_game.e_sport_mode.support=$gemode
+ro.tr_game.game_mode.support=$gemode
+ro.tr_game.tp_esports10.feature.support=$g10
+ro.tr_game.tp_esports20.feature.support=$g20
+ro.tr_game.tp_esports30.feature.support=$g30
+ro.tr_game.esports_update11.support=$g11
+ro.tr_game.bypass_charging.support=$gbypass
+ro.tr_game.shoulder_key.support=$gtrig
+ro.tr_game.ai_picture_triggers.support=$gtrig
+ro.tr_game.esportsvirtualctrl.support=$gtrig
+ro.tr_game.screen_buttons.support=$gtrig
+ro.tr_game.magic_button.support=$gtrig
+ro.tr_smartbutton.shoulderbutton20.feature.support=$gtrig_tf
 EOF
 }
 
@@ -102,7 +111,7 @@ print_modname() {
   ui_print " "
   ui_print "  ╔══════════════════════════════════════════╗"
   ui_print "  ║    TRANSSION FLAGSHIP 16                 ║"
-  ui_print "  ║    XOS · HiOS · iTel OS 16  ·  V1.29     ║"
+  ui_print "  ║    XOS · HiOS · iTel OS 16  ·  V1.30     ║"
   ui_print "  ╚══════════════════════════════════════════╝"
   ui_print " "
 }
@@ -284,7 +293,7 @@ set_permissions() {
   done
   ui_print " "
   ui_div
-  ui_print "  ✨  FLAGSHIP 16  ·  V1.29"
+  ui_print "  ✨  FLAGSHIP 16  ·  V1.30"
   ui_info "OS     : $OS_TYPE $OS_VER"
   ui_info "Feature: boot + reboot + overlay + OS 16 AI Suite"
   ui_div

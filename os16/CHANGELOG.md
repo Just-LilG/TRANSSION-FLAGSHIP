@@ -1,5 +1,8 @@
 # Transsion Flagship 16
 
+## v1.30
+- **XArena GT Triggers use OS 16 keys.** V1.29 wrote Flagship 15 names (`ro.os_game_*`) — those are EMPTY here. This build writes `ro.tr_game.shoulder_key.support`, `ro.tr_game.ai_picture_triggers.support`, virtual ctrl / screen buttons / magic button, and `ro.tr_smartbutton.shoulderbutton20`. eSports and bypass also switch to `ro.tr_game.*`. Apply + reboot, then look in XArena for **add GT triggers**. This phone still has no physical trigger hardware.
+
 ## v1.29
 - **AI Suite moved to Features.** Same place as Flagship 15: Home is device + dump, Media is animations, Features is AI + Gaming + status bar.
 - **Gaming (first try).** eSports Touch (levels 1–3) and Bypass Charging, using Flagship 15 key names. Open Game Space after Apply + reboot. Dump flags — EMPTY means OS 16 uses different names (same lesson as AI).
