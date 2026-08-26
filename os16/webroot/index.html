@@ -139,7 +139,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
         </div>
         <div class="hero-card">
           <div class="hero-title">Transsion Flagship 16</div>
-          <div class="hero-sub" id="module-version-sub">V1.08 · boot animation + boot sound</div>
+          <div class="hero-sub" id="module-version-sub">V1.09 · boot animation + boot sound</div>
         </div>
         <div class="h8"></div>
         <div class="warn-card" id="old-mod-warn">Flagship 15 is still installed. This installer disables it. Remove it from Magisk/KSU so the two modules do not fight.</div>
@@ -154,7 +154,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
         <div class="glass-card roadmap">
           <ul>
             <li class="on">Boot animation — verified</li>
-            <li class="on">Boot sound — zip audio.wav (needs device check)</li>
+            <li class="on">Boot sound — MediaPlayer bootaudio.ogg (needs device check)</li>
             <li class="next">Next feature — you pick, then send a dump</li>
           </ul>
         </div>
@@ -213,7 +213,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
           <div class="setting-row">
             <div class="row-text">
               <div class="row-title">Boot sound</div>
-              <div class="row-sub">Played from folder1/audio.wav (XOS) or part1/audio.wav (HiOS) in the bound zip. Custom must be .wav.</div>
+              <div class="row-sub">Played by bootanimation from bootaudio.ogg / Waltz.ogg /data/local/bootaudio.mp3. Custom ogg or mp3.</div>
             </div>
           </div>
           <div class="segmented" id="bootsound-picker">
@@ -223,8 +223,8 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
           </div>
           <div class="file-row">
             <label class="file-btn">
-              Upload custom wav
-              <input type="file" accept=".wav,.ogg,audio/wav,audio/ogg" onchange="handleBootsound(this)">
+              Upload custom ogg or mp3
+              <input type="file" accept=".ogg,.mp3,.wav,audio/ogg,audio/mpeg,audio/wav" onchange="handleBootsound(this)">
             </label>
             <div class="file-name" id="bootsound-file-name">Pack: Waltz</div>
           </div>
@@ -344,7 +344,7 @@ async function confirmReboot(){
 }
 async function dumpAudio(){
   toast('Dumping audio paths…', 12000);
-  const cmd='{ echo "=== /tr_product/media ==="; ls -la /tr_product/media 2>/dev/null; echo; echo "=== zip audio.wav ==="; unzip -l /tr_product/media/bootanimation.zip 2>/dev/null | grep -iE "audio|folder1|part1|desc"; echo; echo "=== service check audio ==="; service check audio 2>/dev/null; echo "anim=$(getprop init.svc.bootanim)"; echo "play_sound=$(getprop persist.sys.bootanim.play_sound)"; echo "pid=$(pidof bootanimation 2>/dev/null)"; echo "boot_completed=$(getprop sys.boot_completed)"; echo; echo "=== bootanimation strings ==="; strings /system/bin/bootanimation 2>/dev/null | grep -iE "audio.wav|play_sound|audioplay|Audio service" | head; echo; echo "=== post_fs_data (inject/restart) ==="; grep -iE "inject|audio|restart|wait |play_sound|ctl.restart|wav" "'+MOD+'/post_fs_data.log" 2>/dev/null; echo; echo "=== service.log ==="; cat "'+MOD+'/transflagship16_service.log" 2>/dev/null; } > "'+MOD+'/audio_dump.txt" 2>&1';
+  const cmd='{ echo "=== /tr_product/media ==="; ls -la /tr_product/media 2>/dev/null; echo; echo "=== Transsion initAudioPath candidates ==="; ls -l /product/media/audio/bootsound/Waltz.ogg /tr_product/media/audio/bootsound/bootaudio.ogg /data/local/bootaudio.mp3 2>/dev/null; echo; echo "=== bootsound dirs ==="; ls -la /tr_product/media/audio/bootsound /product/media/audio/bootsound /mnt/vendor/mountify/tr_product/media/audio/bootsound 2>/dev/null; echo; echo "=== props ==="; echo "play_sound=$(getprop persist.sys.bootanim.play_sound)"; echo "market=$(getprop ro.tran.sw.market)"; echo "anim=$(getprop init.svc.bootanim)"; service check audio 2>/dev/null; echo; echo "=== post_fs_data ==="; grep -iE "place|bootaudio|Waltz|mountify|play_sound|market|bind OK|copied" "'+MOD+'/post_fs_data.log" 2>/dev/null; echo; echo "=== service.log ==="; cat "'+MOD+'/transflagship16_service.log" 2>/dev/null; } > "'+MOD+'/audio_dump.txt" 2>&1';
   await exec(cmd);
   const dump=await g('cat "'+MOD+'/audio_dump.txt" 2>/dev/null');
   document.getElementById('audio-dump').textContent=dump||'(dump failed — is the module installed?)';
@@ -379,7 +379,7 @@ async function handleBootsound(input){
   const isWav=name.endsWith('.wav');
   const isOgg=name.endsWith('.ogg');
   const isMp3=name.endsWith('.mp3');
-  if(!isWav && !isOgg && !isMp3){ toast('Use .wav (ogg needs ffmpeg)'); input.value=''; return; }
+  if(!isWav && !isOgg && !isMp3){ toast('Use .ogg or .mp3'); input.value=''; return; }
   toast('Writing custom sound…', 20000);
   const bytes=new Uint8Array(await file.arrayBuffer());
   const ext=isWav?'wav':(isMp3?'mp3':'ogg');
@@ -405,7 +405,7 @@ async function handleBootsound(input){
 }
 async function loadDevice(){
   const prop=await g('cat "'+MOD+'/module.prop" 2>/dev/null');
-  const ver=(prop.match(/^version=(.+)$/m)||[])[1]||'V1.08';
+  const ver=(prop.match(/^version=(.+)$/m)||[])[1]||'V1.09';
   n('module-version-sub', ver+' · boot animation + boot sound');
   let type=await g('getprop ro.tran.os.type');
   let verOs=await g('getprop ro.transsion.os.version');
