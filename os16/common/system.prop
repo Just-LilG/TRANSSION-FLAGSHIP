@@ -1,1 +1,8 @@
-# Flagship 16 — AI props are written at boot from config (service.sh), not baked in here.
+# Flagship 16 — AI Suite off via Magisk system.prop (early load).
+# Not written from service.sh / late boot.
+ro.sys.tran.ai_subtitles_support=0
+ro.sys.tran.aiphone_summary_support=0
+ro.os_soundrecorder_speech_support=0
+ro.os_ai_notification_summary_sr_sa_0003_001_support=0
+ro.os_note_ai_bg_support=0
+ro.os_note_ai_draw_support=0
