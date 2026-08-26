@@ -15,7 +15,7 @@ print_modname() {
   ui_print " "
   ui_print "  ╔══════════════════════════════════════════╗"
   ui_print "  ║    TRANSSION FLAGSHIP 16                 ║"
-  ui_print "  ║    XOS · HiOS · iTel OS 16  ·  V1.16     ║"
+  ui_print "  ║    XOS · HiOS · iTel OS 16  ·  V1.17     ║"
   ui_print "  ╚══════════════════════════════════════════╝"
   ui_print " "
 }
@@ -169,15 +169,16 @@ on_install() {
     cp "$CFG" "$MODPATH/config.json"
     sed -i -e 's/"statusbar_style": *"ios"/"statusbar_style": "off"/' \
            -e 's/"statusbar_style": *"xos16"/"statusbar_style": "off"/' \
+           -e 's/"ai_master": true/"ai_master": false/' \
            "$MODPATH/config.json"
   else
-    ui_ok "Default config: HiOS 16 boot + reboot, AI on, status bar stock"
+    ui_ok "Default config: HiOS 16 boot + reboot, AI off, status bar stock"
   fi
 
   ui_ok "Boot animation"
   ui_ok "Reboot animation"
   ui_ok "Status bar: upload your own overlay, or leave stock"
-  ui_ok "AI Suite (on — turn off in WebUI if you do not want it)"
+  ui_ok "AI Suite OFF — stock AI should hide after reboot if the props work"
 }
 
 set_permissions() {
@@ -187,9 +188,9 @@ set_permissions() {
   done
   ui_print " "
   ui_div
-  ui_print "  ✨  FLAGSHIP 16  ·  V1.16"
+  ui_print "  ✨  FLAGSHIP 16  ·  V1.17"
   ui_info "OS     : $OS_TYPE $OS_VER"
-  ui_info "Feature: boot + reboot + custom overlay + AI suite"
+  ui_info "Feature: boot + reboot + overlay + AI suite (off)"
   ui_div
   ui_print "  Reboot, then open WebUI in Magisk/KSU."
   ui_print " "
