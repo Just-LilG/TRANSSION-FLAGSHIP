@@ -8,7 +8,7 @@ LOG="$MODDIR/transflagship_service.log"
 rm -f "$LOG"
 log_p() { echo "[$(date '+%H:%M:%S')] $1" >> "$LOG"; }
 
-log_p "=== TransFlagship V4.31 diagnostic header ==="
+log_p "=== TransFlagship V4.32 diagnostic header ==="
 log_p "Device model    : $(getprop ro.product.model 2>/dev/null)"
 log_p "Device marketname: $(getprop ro.product.marketname 2>/dev/null)"
 log_p "Brand           : $(getprop ro.product.brand 2>/dev/null)"
@@ -121,17 +121,34 @@ resetprop ro.aod_alwaysshow_support $(cfg_bool aod true)
 log_p "AOD = $(cfg_bool aod true)"
 
 GM=$(cfg_bool game_master true)
-resetprop ro.os_game_tp_esports10.support "$GM"
 if [ "$GM" = "1" ]; then
     resetprop ro.os_game_ray_tracing.support $(cfg_bool game_raytracing true)
     resetprop ro.os_game_frame_game_interpolation.support $(cfg_bool game_interpolation true)
     resetprop ro.os_game_graphic_hdr.support $(cfg_bool game_hdr true)
     resetprop ro.os_game_bypass_charging_support $(cfg_bool game_bypass_charge true)
+    TOUCH=$(cfg_bool game_esports_touch true)
+    LEVEL=$(cfg_int game_esports_level 3)
+    case "$LEVEL" in 1|2|3) ;; *) LEVEL=3 ;; esac
+    if [ "$TOUCH" = "1" ]; then
+        resetprop ro.os_game_tp_esports10.support 1
+        resetprop ro.os_game_tp_esports20.support $([ "$LEVEL" -ge 2 ] && echo 1 || echo 0)
+        resetprop ro.os_game_tp_esports30.support $([ "$LEVEL" -ge 3 ] && echo 1 || echo 0)
+        resetprop ro.os_game_tp_esports_update11.support 1
+    else
+        resetprop ro.os_game_tp_esports10.support 0
+        resetprop ro.os_game_tp_esports20.support 0
+        resetprop ro.os_game_tp_esports30.support 0
+        resetprop ro.os_game_tp_esports_update11.support 0
+    fi
 else
     resetprop ro.os_game_ray_tracing.support 0
     resetprop ro.os_game_frame_game_interpolation.support 0
     resetprop ro.os_game_graphic_hdr.support 0
     resetprop ro.os_game_bypass_charging_support 0
+    resetprop ro.os_game_tp_esports10.support 0
+    resetprop ro.os_game_tp_esports20.support 0
+    resetprop ro.os_game_tp_esports30.support 0
+    resetprop ro.os_game_tp_esports_update11.support 0
 fi
 log_p "Game mode = $GM"
 
@@ -204,4 +221,4 @@ log_p "Charging anim = $CA_ON"
 resetprop ro.tranos_hidenavigationbar_support $(cfg_bool nav_hide false)
 log_p "Nav hide = $(cfg_bool nav_hide false)"
 
-log_p "=== TransFlagship V4.31 service complete ==="
+log_p "=== TransFlagship V4.32 service complete ==="

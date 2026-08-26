@@ -1954,11 +1954,16 @@ async function applyRuntime(onPhase){
   }
 
   phase(3,TOTAL,'Gaming');
-  await rp('ro.os_game_tp_esports10.support', c.game_master?1:0);
   await rp('ro.os_game_ray_tracing.support', c.game_master&&c.game_raytracing?1:0);
   await rp('ro.os_game_frame_game_interpolation.support', c.game_master&&c.game_interpolation?1:0);
   await rp('ro.os_game_graphic_hdr.support', c.game_master&&c.game_hdr?1:0);
   await rp('ro.os_game_bypass_charging_support', c.game_master&&c.game_bypass_charge?1:0);
+  const touchOn=!!(c.game_master&&c.game_esports_touch);
+  const touchLvl=Math.min(3,Math.max(1,parseInt(c.game_esports_level,10)||3));
+  await rp('ro.os_game_tp_esports10.support', touchOn?1:0);
+  await rp('ro.os_game_tp_esports20.support', touchOn&&touchLvl>=2?1:0);
+  await rp('ro.os_game_tp_esports30.support', touchOn&&touchLvl>=3?1:0);
+  await rp('ro.os_game_tp_esports_update11.support', touchOn?1:0);
 
   phase(4,TOTAL,'Charging & nav bar');
   await rp('ro.tran.charge_animation_support', c.charge_anim?1:0);
@@ -2240,7 +2245,9 @@ const LIVE_STATUS_ITEMS=[
   {group:'Display',label:'Hide Nav Bar',prop:'ro.tranos_hidenavigationbar_support',cfgKey:'nav_hide',onVal:'1',offVal:'0'},
   {group:'Charging',label:'Charging Animation',prop:'ro.tran.charge_animation_support',cfgKey:'charge_anim',onVal:'1',offVal:'0'},
   {group:'Charging',label:'Lockscreen Charge Anim',prop:'ro.tran.lockscreen_charge_anim',cfgKey:'charge_anim',onVal:'1',offVal:'0'},
-  {group:'Gaming',label:'eSports Mode',prop:'ro.os_game_tp_esports10.support',cfgKey:'game_master',onVal:'1',offVal:'0'},
+  {group:'Gaming',label:'eSports Touch L1',prop:'ro.os_game_tp_esports10.support',cfgKey:'game_esports_touch',masterKey:'game_master',minLevel:1,onVal:'1',offVal:'0'},
+  {group:'Gaming',label:'eSports Touch L2',prop:'ro.os_game_tp_esports20.support',cfgKey:'game_esports_touch',masterKey:'game_master',minLevel:2,onVal:'1',offVal:'0'},
+  {group:'Gaming',label:'eSports Touch L3',prop:'ro.os_game_tp_esports30.support',cfgKey:'game_esports_touch',masterKey:'game_master',minLevel:3,onVal:'1',offVal:'0'},
   {group:'Gaming',label:'Ray Tracing',prop:'ro.os_game_ray_tracing.support',cfgKey:'game_raytracing',masterKey:'game_master',onVal:'1',offVal:'0'},
   {group:'Gaming',label:'Frame Interpolation',prop:'ro.os_game_frame_game_interpolation.support',cfgKey:'game_interpolation',masterKey:'game_master',onVal:'1',offVal:'0'},
   {group:'Gaming',label:'Graphic HDR',prop:'ro.os_game_graphic_hdr.support',cfgKey:'game_hdr',masterKey:'game_master',onVal:'1',offVal:'0'},
@@ -2445,7 +2452,12 @@ function liveExpected(item, cfgObj){
   if(item.cfgKey){
     const cfgOn=cfgObj[item.cfgKey]!==false;
     const masterOn=!item.masterKey || cfgObj[item.masterKey]!==false;
-    return (cfgOn && masterOn)?item.onVal:item.offVal;
+    let on=cfgOn && masterOn;
+    if(on && item.minLevel){
+      const lvl=parseInt(cfgObj[item.levelKey||'game_esports_level'],10)||0;
+      on=lvl>=item.minLevel;
+    }
+    return on?item.onVal:item.offVal;
   }
   return item.expect;
 }

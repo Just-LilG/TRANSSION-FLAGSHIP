@@ -1,5 +1,8 @@
 # Changelog
 
+## v4.32
+- **eSports Touch and the level slider now actually apply.** The toggle and 1–3 slider were saved to `config.json` only. Boot used `ro.os_game_tp_esports10.support` as a Gaming Suite master flag, and levels 2/3 (`esports20` / `esports30`) stayed always-on from `system.prop`. They now follow Gaming Suite + eSports Touch: L1 → `esports10`, L2 also `esports20`, L3 also `esports30` (and `esports_update11`).
+
 ## v4.31
 - **XOS 16 missing-key defaults now stay off at boot.** `post-fs-data.sh` / `service.sh` still used `charge_anim` default true, `fod_animation` default true, and `statusbar_style` default `xos16`. A config without those keys (or a partial file) turned charging animation, fingerprint animation, and the status-bar overlay back on. Boot now uses the same XOS 16 defaults as the installer and WebUI: all three off.
 
