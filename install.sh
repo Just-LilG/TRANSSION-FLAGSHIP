@@ -21,7 +21,7 @@ print_modname() {
   ui_print "  ╠══════════════════════════════════════════╣"
   ui_print "  ║                                          ║"
   ui_print "  ║   TRANSSION FLAGSHIP                     ║"
-  ui_print "  ║   ALL OS EDITION  ·  V4.27                 ║"
+  ui_print "  ║   ALL OS EDITION  ·  V4.28                 ║"
   ui_print "  ║   XOS · HiOS · iTel OS                   ║"
   ui_print "  ║                                          ║"
   ui_print "  ╚══════════════════════════════════════════╝"
@@ -90,19 +90,16 @@ detect_os() {
   fi
 
   if [ -z "$OS_VER" ]; then
-    local desc
+    # Only accept a branded OS version in the build description (XOS16, HiOS-15,
+    # iTelOS14, …). Matching a bare "16" used to treat Android 16 + XOS 15 as XOS 16.
+    local desc branded
     desc=$(getprop ro.build.description)
-    case "$desc" in
-      *16*) OS_VER="16" ;;
-      *15*) OS_VER="15" ;;
-      *14*) OS_VER="14" ;;
-      *13*) OS_VER="13" ;;
-      *12*) OS_VER="12" ;;
-      *10*) OS_VER="10" ;;
-      *9*)  OS_VER="9"  ;;
-      *8*)  OS_VER="8"  ;;
-      *)    OS_VER="?"  ;;
-    esac
+    branded=$(echo "$desc" | grep -oiE '(xos|hios|itelos|itel)[-_. ]*[0-9]+' | head -1)
+    if [ -n "$branded" ]; then
+      OS_VER=$(echo "$branded" | grep -oE '[0-9]+$')
+    else
+      OS_VER="?"
+    fi
   fi
 
   ui_info "OS       : $OS_TYPE $OS_VER"
@@ -422,7 +419,7 @@ set_permissions() {
   ui_print " "
   ui_div
   ui_print "  ✨  INSTALLATION COMPLETE"
-  ui_info "Module : Transsion Flagship V4.27"
+  ui_info "Module : Transsion Flagship V4.28"
   ui_info "Author : LIL G TECH LABS"
   ui_info "OS     : $OS_TYPE $OS_VER"
   ui_info "RAM    : ${RAM_GB}GB"

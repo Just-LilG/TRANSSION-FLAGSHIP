@@ -1731,18 +1731,24 @@ let _isXOS16=false;
 function versionLooksLike16(ver){
   return /^(xos[-_. ]*)?16([^0-9].*)?$/i.test((ver||'').trim());
 }
+function osVerFromBuildDescription(desc){
+  const m=String(desc||'').match(/(xos|hios|itelos|itel)[-_. ]*([0-9]+)/i);
+  return m?m[2]:'';
+}
 async function detectOS(){
   const r=await exec('grep -E "^detected_OS_(TYPE|VER)=" /data/adb/modules/transsion-flagship/install_diagnostic.txt 2>/dev/null').catch(()=>({stdout:''}));
   const out=(r&&r.stdout)||(typeof r==='string'?r:'');
-  let type=(out.match(/detected_OS_TYPE=(\S*)/)||[])[1]||'';
-  let ver=(out.match(/detected_OS_VER=(\S*)/)||[])[1]||'';
-  if(!type){
-    const live=await exec('getprop ro.tran.os.type 2>/dev/null');
-    type=((live&&live.stdout)||'').trim();
-  }
+  const diagType=(out.match(/detected_OS_TYPE=(\S*)/)||[])[1]||'';
+  const diagVer=(out.match(/detected_OS_VER=(\S*)/)||[])[1]||'';
+  // Prefer live props: install-time fallback used to treat any "16" in
+  // ro.build.description as XOS 16 (Android 16 + XOS 15 false positive).
+  const liveType=((await exec('getprop ro.tran.os.type 2>/dev/null').catch(()=>({stdout:''}))).stdout||'').trim();
+  const liveVer=((await exec('getprop ro.transsion.os.version 2>/dev/null').catch(()=>({stdout:''}))).stdout||'').trim();
+  let type=liveType||diagType;
+  let ver=liveVer||diagVer;
   if(!ver){
-    const live=await exec('getprop ro.transsion.os.version 2>/dev/null');
-    ver=((live&&live.stdout)||'').trim();
+    const desc=((await exec('getprop ro.build.description 2>/dev/null').catch(()=>({stdout:''}))).stdout||'').trim();
+    ver=osVerFromBuildDescription(desc);
   }
   _isXOS16=/^xos$/i.test((type||'').trim()) && versionLooksLike16(ver);
 }
