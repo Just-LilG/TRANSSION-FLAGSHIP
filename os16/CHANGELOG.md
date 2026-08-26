@@ -1,5 +1,9 @@
 # Transsion Flagship 16
 
+## v1.29
+- **AI Suite moved to Features.** Same place as Flagship 15: Home is device + dump, Media is animations, Features is AI + Gaming + status bar.
+- **Gaming (first try).** eSports Touch (levels 1–3) and Bypass Charging, using Flagship 15 key names. Open Game Space after Apply + reboot. Dump flags — EMPTY means OS 16 uses different names (same lesson as AI).
+
 ## v1.28
 - **AI Call Summary / Ella briefing on.** Turning the toggle on unhid Ella briefing on this phone. This build writes `aiphone` / `aiphone_summany` as `true` by default (upgrade from earlier builds turns the toggle on). Apply + reboot. GT generative Gallery is still not bundled.
 

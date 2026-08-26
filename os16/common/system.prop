@@ -22,3 +22,10 @@ ro.tr_gallery.bokeh.support=1
 ro.tr_gallery.compose.support=1
 # Video Enhancement Engine — user confirmed this flag was working.
 ro.tr_video.vee.support=1
+# Gaming — Flagship 15 names. Dump if EMPTY; OS 16 may use different keys.
+ro.os_game_gt.support=1
+ro.os_game_tp_esports10.support=1
+ro.os_game_tp_esports20.support=1
+ro.os_game_tp_esports30.support=1
+ro.os_game_tp_esports_update11.support=1
+ro.os_game_bypass_charging_support=1
