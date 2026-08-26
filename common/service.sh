@@ -8,7 +8,7 @@ LOG="$MODDIR/transflagship_service.log"
 rm -f "$LOG"
 log_p() { echo "[$(date '+%H:%M:%S')] $1" >> "$LOG"; }
 
-log_p "=== TransFlagship V4.25 diagnostic header ==="
+log_p "=== TransFlagship V4.26 diagnostic header ==="
 log_p "Device model    : $(getprop ro.product.model 2>/dev/null)"
 log_p "Device marketname: $(getprop ro.product.marketname 2>/dev/null)"
 log_p "Brand           : $(getprop ro.product.brand 2>/dev/null)"
@@ -133,6 +133,20 @@ else
 fi
 log_p "AI suite = $AM"
 
+SM=$(cfg_bool social_master true)
+if [ "$SM" = "1" ]; then
+    resetprop ro.os_social_turbo_record $(cfg_bool social_record true)
+    resetprop ro.os_social_turbo_translator $(cfg_bool social_translate true)
+    resetprop ro.os_social_turbo_makeup $(cfg_bool social_beauty true)
+    resetprop ro.os_social_turbo_beauty_default_off $([ "$(cfg_bool social_beauty true)" = "1" ] && echo 0 || echo 1)
+else
+    resetprop ro.os_social_turbo_record 0
+    resetprop ro.os_social_turbo_translator 0
+    resetprop ro.os_social_turbo_makeup 0
+    resetprop ro.os_social_turbo_beauty_default_off 1
+fi
+log_p "Social Turbo = $SM"
+
 BLUR_ON=$(cfg_bool launcher_blur true)
 if [ "$BLUR_ON" = "1" ]; then
     resetprop ro.transsion_launcher_gaussian_blur_support 2
@@ -170,4 +184,4 @@ log_p "Charging anim = $CA_ON"
 resetprop ro.tranos_hidenavigationbar_support $(cfg_bool nav_hide false)
 log_p "Nav hide = $(cfg_bool nav_hide false)"
 
-log_p "=== TransFlagship V4.25 service complete ==="
+log_p "=== TransFlagship V4.26 service complete ==="
