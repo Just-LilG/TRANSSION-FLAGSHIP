@@ -21,7 +21,7 @@ print_modname() {
   ui_print "  ╠══════════════════════════════════════════╣"
   ui_print "  ║                                          ║"
   ui_print "  ║   TRANSSION FLAGSHIP                     ║"
-  ui_print "  ║   ALL OS EDITION  ·  V4.35                 ║"
+  ui_print "  ║   ALL OS EDITION  ·  V4.36                 ║"
   ui_print "  ║   XOS · HiOS · iTel OS                   ║"
   ui_print "  ║                                          ║"
   ui_print "  ╚══════════════════════════════════════════╝"
@@ -209,6 +209,15 @@ on_install() {
   unzip -o "$ZIPFILE" 'CHANGELOG.md' -d "$MODPATH" >&2
 
   unzip -oj "$ZIPFILE" 'common/system.prop' -d "$MODPATH" >&2
+
+  # XOS 16 reads charge assets from /tr_product/theme/charge, not /product.
+  if [ -d "$MODPATH/system/product/theme/charge" ]; then
+    mkdir -p "$MODPATH/tr_product/theme/charge"
+    cp -a "$MODPATH/system/product/theme/charge/." "$MODPATH/tr_product/theme/charge/"
+    sed -i 's|/product/theme/charge/|/tr_product/theme/charge/|g' \
+      "$MODPATH/tr_product/theme/charge/lockscreen_charge_config.xml"
+    ui_ok "Charging animation staged for /tr_product/theme/charge"
+  fi
 
   CFG=/data/adb/modules/transsion-flagship/config.json
   if [ -f "$CFG" ]; then
@@ -419,7 +428,7 @@ set_permissions() {
   ui_print " "
   ui_div
   ui_print "  ✨  INSTALLATION COMPLETE"
-  ui_info "Module : Transsion Flagship V4.35"
+  ui_info "Module : Transsion Flagship V4.36"
   ui_info "Author : LIL G TECH LABS"
   ui_info "OS     : $OS_TYPE $OS_VER"
   ui_info "RAM    : ${RAM_GB}GB"

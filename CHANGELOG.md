@@ -1,5 +1,8 @@
 # Changelog
 
+## v4.36
+- **Boot sound and charging animation on XOS 16.** V4.35 bind-mounted the whole `/tr_product/media` folder to add Waltz, which hid the stock `audio/` tree (where this OS actually plays boot/charge sounds) and never put `audio.wav` in the bootanimation zip (AOSP plays WAV, not OGG). Charging animation still pointed at `/product/theme/charge/`, which does not exist here. Now: bind only the boot zip, merge stock audio then overlay Waltz, inject `audio.wav` into the zip, and stage the charge MP4/XML to `/tr_product/theme/charge/` with a rewritten resource path.
+
 ## v4.35
 - **The boot animation files are actually in the zip this time.** Releases V4.22–V4.34 were packed with `zip -x '*.zip'`, which stripped `bootanim_hios16.zip` / `bootanim_default.zip` (and the shutdown zips) from the flashable archive. Waltz was there; the animations folder on device was empty. On XOS 16 that looked like a bind-path bug; V4.34 then bind-mounted the *stock* `/tr_product/media` zip back over itself. This build includes those archives, ignores empty `product/theme/animations` leftovers, and only replaces the live zip when the selected style file is really present.
 
