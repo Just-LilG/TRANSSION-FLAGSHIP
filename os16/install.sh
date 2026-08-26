@@ -15,7 +15,7 @@ print_modname() {
   ui_print " "
   ui_print "  ╔══════════════════════════════════════════╗"
   ui_print "  ║    TRANSSION FLAGSHIP 16                 ║"
-  ui_print "  ║    XOS · HiOS · iTel OS 16  ·  V1.11     ║"
+  ui_print "  ║    XOS · HiOS · iTel OS 16  ·  V1.12     ║"
   ui_print "  ╚══════════════════════════════════════════╝"
   ui_print " "
 }
@@ -131,6 +131,14 @@ on_install() {
   if [ -f "$MODPATH/system/product/theme/charge/hios_wire_charging_lockscreen.mp4" ] \
       && [ -f "$MODPATH/system/product/theme/charge/xos_wire_charging_lockscreen.mp4" ]; then
     ui_ok "Charging animation files ready"
+    # Mountify overlays module tr_product/ onto /tr_product at boot. The live
+    # phone often has no /tr_product/theme/charge to bind over, so the files
+    # must exist in the module tree before that overlay is built.
+    mkdir -p "$MODPATH/tr_product/theme/charge"
+    cp -a "$MODPATH/system/product/theme/charge/." "$MODPATH/tr_product/theme/charge/"
+    sed -i 's|/product/theme/charge/|/tr_product/theme/charge/|g' \
+      "$MODPATH/tr_product/theme/charge/lockscreen_charge_config.xml"
+    ui_ok "Charging animation staged for overlay"
   else
     ui_warn "Charging animation files missing — flash may be incomplete"
   fi
@@ -156,7 +164,7 @@ set_permissions() {
   done
   ui_print " "
   ui_div
-  ui_print "  ✨  FLAGSHIP 16  ·  V1.11"
+  ui_print "  ✨  FLAGSHIP 16  ·  V1.12"
   ui_info "OS     : $OS_TYPE $OS_VER"
   ui_info "Feature: boot + reboot + charging animation"
   ui_div

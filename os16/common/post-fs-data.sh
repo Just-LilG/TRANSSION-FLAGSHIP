@@ -421,7 +421,10 @@ for dest in \
     /system/media/audio/ui/PowerOn.ogg \
     /product/media/audio/bootsound \
     /system/product/media/audio/bootsound \
-    /system/media/audio/bootsound
+    /system/media/audio/bootsound \
+    /tr_product/theme/charge \
+    /product/theme/charge \
+    /system/product/theme/charge
 do
     ns_umount "$dest"
 done
@@ -694,14 +697,86 @@ ls -la /tr_product/media/audio/bootsound >> "$PFD_LOG" 2>/dev/null
 
 # Charging animation. Stock dump XML is /product/theme/charge/; live OS 16
 # uses /tr_product. Bind only the charge dir — never /tr_product or /theme.
+# Mountify overlays $MODDIR/tr_product onto /tr_product at boot. V1.11 only
+# bind-dir'd a live dest that often does not exist (read-only overlay → mkdir
+# fails). Stage into the module tr_product tree (install + here) and also
+# copy into Mountify's lowerdir, then bind-file each name like bootanim.
 log_pfd "live /tr_product/theme:"
 ls -la /tr_product/theme >> "$PFD_LOG" 2>/dev/null
 ls -la /tr_product/theme/charge >> "$PFD_LOG" 2>/dev/null
 ls -la /product/theme/charge >> "$PFD_LOG" 2>/dev/null
+ls -la /system/product/theme/charge >> "$PFD_LOG" 2>/dev/null
+ls -la "$MODDIR/tr_product/theme/charge" >> "$PFD_LOG" 2>/dev/null
+ls -la /mnt/vendor/mountify/tr_product/theme/charge >> "$PFD_LOG" 2>/dev/null
+
+restore_charge_disabled() {
+    for d in "$MODDIR/system/product/theme/charge" "$MODDIR/product/theme/charge"; do
+        [ -d "$d" ] || continue
+        for f in "$d"/*.disabled; do
+            [ -f "$f" ] || continue
+            mv "$f" "${f%.disabled}"
+        done
+    done
+}
+
+place_charge_live() {
+    src="$1"
+    dest="$2"
+    [ -f "$src" ] || return 1
+    ensure_parent "$dest"
+    case "$dest" in
+        /tr_product/*)
+            rel=${dest#/tr_product/}
+            mkdir -p "$MODDIR/tr_product/$(dirname "$rel")"
+            cp -f "$src" "$MODDIR/tr_product/$rel"
+            chmod 644 "$MODDIR/tr_product/$rel" 2>/dev/null
+            if [ -d /mnt/vendor/mountify/tr_product ]; then
+                mkdir -p "/mnt/vendor/mountify/tr_product/$(dirname "$rel")"
+                cp -f "$src" "/mnt/vendor/mountify/tr_product/$rel"
+                chmod 644 "/mnt/vendor/mountify/tr_product/$rel" 2>/dev/null
+                log_pfd "mountify $rel"
+            fi
+            ;;
+        /product/*)
+            rel=${dest#/product/}
+            if [ -d /mnt/vendor/mountify/product ]; then
+                mkdir -p "/mnt/vendor/mountify/product/$(dirname "$rel")"
+                cp -f "$src" "/mnt/vendor/mountify/product/$rel"
+                chmod 644 "/mnt/vendor/mountify/product/$rel" 2>/dev/null
+                log_pfd "mountify product/$rel"
+            fi
+            if [ -d /mnt/vendor/mountify/system/product ]; then
+                mkdir -p "/mnt/vendor/mountify/system/product/$(dirname "$rel")"
+                cp -f "$src" "/mnt/vendor/mountify/system/product/$rel"
+            fi
+            ;;
+        /system/product/*)
+            rel=${dest#/system/product/}
+            if [ -d /mnt/vendor/mountify/system/product ]; then
+                mkdir -p "/mnt/vendor/mountify/system/product/$(dirname "$rel")"
+                cp -f "$src" "/mnt/vendor/mountify/system/product/$rel"
+            fi
+            ;;
+    esac
+    if [ ! -e "$dest" ]; then
+        touch "$dest" 2>/dev/null \
+            || { [ -n "$NSENTER" ] && $NSENTER touch "$dest" 2>/dev/null; }
+        [ -e "$dest" ] && log_pfd "created dest $dest"
+    fi
+    bind_over_file "$src" "$dest"
+}
+
+restore_charge_disabled
 
 CHARGE_PACK=""
-for d in "$MODDIR/system/product/theme/charge" "$MODDIR/product/theme/charge"; do
-    if [ -f "$d/lockscreen_charge_config.xml" ]; then
+for d in \
+    "$MODDIR/system/product/theme/charge" \
+    "$MODDIR/product/theme/charge" \
+    /mnt/vendor/mountify/system/product/theme/charge \
+    /mnt/vendor/mountify/product/theme/charge
+do
+    if [ -f "$d/lockscreen_charge_config.xml" ] \
+        && { [ -f "$d/hios_wire_charging_lockscreen.mp4" ] || [ -f "$d/xos_wire_charging_lockscreen.mp4" ]; }; then
         CHARGE_PACK="$d"
         break
     fi
@@ -712,6 +787,15 @@ if [ "$CA_STYLE" = "off" ]; then
     log_pfd "chargeanim: off — leave stock charge theme"
     rm -rf "$MODDIR/tr_product/theme/charge"
     rm -rf /mnt/vendor/mountify/tr_product/theme/charge
+    rm -rf /mnt/vendor/mountify/product/theme/charge
+    for d in "$MODDIR/system/product/theme/charge" "$MODDIR/product/theme/charge"; do
+        [ -d "$d" ] || continue
+        for f in "$d"/*; do
+            [ -f "$f" ] || continue
+            case "$f" in *.disabled) continue ;; esac
+            mv "$f" "${f}.disabled"
+        done
+    done
 elif [ -z "$CHARGE_PACK" ]; then
     log_pfd "chargeanim: no pack xml in module"
 else
@@ -725,8 +809,8 @@ else
         custom)
             FNAME="custom.mp4"
             SRC_MP4=$(first_existing \
-                "$MODDIR/system/product/theme/charge/custom.mp4" \
                 "$MODDIR/charge_custom.mp4" \
+                "$MODDIR/system/product/theme/charge/custom.mp4" \
                 "$MODDIR/tr_product/theme/charge/custom.mp4" \
                 "$MODDIR/product/theme/charge/custom.mp4")
             ;;
@@ -752,15 +836,32 @@ else
                 "/product/theme/charge/" "$CHARGE_PACK" "$SRC_MP4" "$FNAME" "$CA_MD5"
             mkdir -p "$MODDIR/tr_product/theme/charge"
             cp -a "$CHARGE_TR"/. "$MODDIR/tr_product/theme/charge/"
+            chmod 644 "$MODDIR/tr_product/theme/charge"/* 2>/dev/null
             if [ -d /mnt/vendor/mountify/tr_product ]; then
                 mkdir -p /mnt/vendor/mountify/tr_product/theme/charge
                 cp -a "$CHARGE_TR"/. /mnt/vendor/mountify/tr_product/theme/charge/
                 chmod 644 /mnt/vendor/mountify/tr_product/theme/charge/* 2>/dev/null
                 log_pfd "mountify theme/charge"
             fi
+            if [ -d /mnt/vendor/mountify/product ]; then
+                mkdir -p /mnt/vendor/mountify/product/theme/charge
+                cp -a "$CHARGE_PROD"/. /mnt/vendor/mountify/product/theme/charge/
+                chmod 644 /mnt/vendor/mountify/product/theme/charge/* 2>/dev/null
+                log_pfd "mountify product/theme/charge"
+            fi
             log_pfd "charge xml resourcePath:"
             grep resourcePath "$CHARGE_TR/lockscreen_charge_config.xml" >> "$PFD_LOG" 2>/dev/null
             grep fileName "$CHARGE_TR/lockscreen_charge_config.xml" | head -3 >> "$PFD_LOG" 2>/dev/null
+            for f in "$CHARGE_TR"/*; do
+                [ -f "$f" ] || continue
+                place_charge_live "$f" "/tr_product/theme/charge/$(basename "$f")"
+            done
+            for f in "$CHARGE_PROD"/*; do
+                [ -f "$f" ] || continue
+                base=$(basename "$f")
+                place_charge_live "$f" "/product/theme/charge/$base"
+                place_charge_live "$f" "/system/product/theme/charge/$base"
+            done
             for dest in /tr_product/theme/charge /product/theme/charge /system/product/theme/charge; do
                 case "$dest" in
                     /tr_product/*)
@@ -797,8 +898,9 @@ else
                     *) try_bind_file "$src/$base" "$dest" ;;
                 esac
             done
-            log_pfd "chargeanim bind pass done"
+            log_pfd "chargeanim apply pass done"
             ls -la /tr_product/theme/charge >> "$PFD_LOG" 2>/dev/null
+            ls -la /product/theme/charge >> "$PFD_LOG" 2>/dev/null
             if command -v resetprop >/dev/null 2>&1; then
                 resetprop -n ro.tran.charge_animation_support 1 2>/dev/null \
                     || resetprop ro.tran.charge_animation_support 1 2>/dev/null
