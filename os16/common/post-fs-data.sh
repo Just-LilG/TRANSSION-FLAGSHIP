@@ -270,9 +270,24 @@ fi
 log_pfd "live /tr_product/media:"
 ls -la /tr_product/media >> "$PFD_LOG" 2>/dev/null
 
-# Signal / WiFi overlay APKs. Magisk/Mountify overlays $MODDIR/system onto
-# /system. Default off: stock icons. Only one style is enabled at a time.
+# Status bar: only a user-uploaded overlay. Bundled iOS / XOS 16 APKs from
+# V1.14 are deleted so they cannot keep applying.
+rm -rf "$MODDIR/system/overlay/Icons_Signal_wifi" \
+       "$MODDIR/system/product/overlay/Icons_Signal_wifi" \
+       "$MODDIR/product/overlay/Icons_Signal_wifi" \
+       /mnt/vendor/mountify/system/overlay/Icons_Signal_wifi \
+       /mnt/vendor/mountify/system/product/overlay/Icons_Signal_wifi \
+       /mnt/vendor/mountify/product/overlay/Icons_Signal_wifi
+rm -f "$MODDIR/system/overlay/SystemUISignalOverlay.apk" \
+      "$MODDIR/system/overlay/SystemUISignalOverlay.apk.disabled" \
+      "$MODDIR/system/product/overlay/SystemUISignalOverlay.apk" \
+      "$MODDIR/system/product/overlay/SystemUISignalOverlay.apk.disabled" \
+      "$MODDIR/product/overlay/SystemUISignalOverlay.apk" \
+      "$MODDIR/product/overlay/SystemUISignalOverlay.apk.disabled"
+
 SB_STYLE=$(cfg_get statusbar_style "off")
+[ "$SB_STYLE" = "ios" ] && SB_STYLE=off
+[ "$SB_STYLE" = "xos16" ] && SB_STYLE=off
 log_pfd "statusbar_style=$SB_STYLE"
 
 sb_disable() {
@@ -284,22 +299,6 @@ sb_enable() {
     [ -f "${f}.disabled" ] && mv "${f}.disabled" "$f"
 }
 
-IOS_APKS="
-$MODDIR/system/overlay/Icons_Signal_wifi/Icons_Signal_wifi.apk
-$MODDIR/system/product/overlay/Icons_Signal_wifi/Icons_Signal_wifi.apk
-$MODDIR/product/overlay/Icons_Signal_wifi/Icons_Signal_wifi.apk
-/mnt/vendor/mountify/system/overlay/Icons_Signal_wifi/Icons_Signal_wifi.apk
-/mnt/vendor/mountify/system/product/overlay/Icons_Signal_wifi/Icons_Signal_wifi.apk
-/mnt/vendor/mountify/product/overlay/Icons_Signal_wifi/Icons_Signal_wifi.apk
-"
-XOS16_APKS="
-$MODDIR/system/overlay/SystemUISignalOverlay.apk
-$MODDIR/system/product/overlay/SystemUISignalOverlay.apk
-$MODDIR/product/overlay/SystemUISignalOverlay.apk
-/mnt/vendor/mountify/system/overlay/SystemUISignalOverlay.apk
-/mnt/vendor/mountify/system/product/overlay/SystemUISignalOverlay.apk
-/mnt/vendor/mountify/product/overlay/SystemUISignalOverlay.apk
-"
 CUSTOM_APKS="
 $MODDIR/system/overlay/Icons_Signal_wifi_custom.apk
 $MODDIR/system/product/overlay/Icons_Signal_wifi_custom.apk
@@ -309,40 +308,18 @@ $MODDIR/product/overlay/Icons_Signal_wifi_custom.apk
 /mnt/vendor/mountify/product/overlay/Icons_Signal_wifi_custom.apk
 "
 
-for f in $IOS_APKS $XOS16_APKS $CUSTOM_APKS; do
+for f in $CUSTOM_APKS; do
     sb_disable "$f"
 done
-case "$SB_STYLE" in
-    ios)
-        for f in $IOS_APKS; do sb_enable "$f"; done
-        ;;
-    xos16)
-        for f in $XOS16_APKS; do sb_enable "$f"; done
-        ;;
-    custom)
-        for f in $CUSTOM_APKS; do sb_enable "$f"; done
-        ;;
-esac
+if [ "$SB_STYLE" = "custom" ]; then
+    for f in $CUSTOM_APKS; do sb_enable "$f"; done
+fi
 
-log_pfd "overlay APKs after gate:"
-for f in $IOS_APKS $XOS16_APKS $CUSTOM_APKS; do
+have_custom=no
+for f in $CUSTOM_APKS; do
     if [ -f "$f" ]; then
-        log_pfd "  on  $f"
-    elif [ -f "${f}.disabled" ]; then
-        log_pfd "  off $f"
+        have_custom=yes
+        break
     fi
 done
-for p in \
-    /system/overlay/Icons_Signal_wifi/Icons_Signal_wifi.apk \
-    /system/product/overlay/Icons_Signal_wifi/Icons_Signal_wifi.apk \
-    /product/overlay/Icons_Signal_wifi/Icons_Signal_wifi.apk \
-    /system/overlay/SystemUISignalOverlay.apk \
-    /system/product/overlay/SystemUISignalOverlay.apk \
-    /product/overlay/SystemUISignalOverlay.apk
-do
-    if [ -f "$p" ]; then
-        log_pfd "live present $p"
-    else
-        log_pfd "live missing $p"
-    fi
-done
+log_pfd "custom overlay: $have_custom"
