@@ -68,13 +68,24 @@ A Magisk/KernelSU module for Transsion devices (Infinix, Tecno, itel) running XO
 - In-app update checker
 - Reset to defaults
 
-## XOS 16 (beta)
+## Two modules (OS 15 vs OS 16)
 
-XOS 16 support is new and marked **BETA** in the WebUI (amber badge on Home, XOS 16 devices only). Animation, blur, and dynamic-bar props for XOS 16 are unverified across the wider device pool — everything else in the module is stable. If you're on XOS 16 and notice glitches after enabling animation/blur features, disable them and report it.
+Use **one** module. Do not run Flagship 15 and Flagship 16 together.
 
-On XOS 16, three settings default to **off** on a fresh install (existing configs are never overwritten): Charging Animation, Fingerprint Animation, and the Signal/WiFi status bar overlay (now has a "None" option). You can re-enable any of them manually.
+| Module | Path in this repo | Flash zip | OS |
+|---|---|---|---|
+| **Transsion Flagship** (this README) | repo root | `TransFlagship_V4.xx.zip` | XOS / HiOS / iTel **15** |
+| **Transsion Flagship 16** | [`os16/`](os16/) | `TransFlagship16_V1.xx.zip` | Transsion **OS 16** (XOS / HiOS / iTel) |
 
-**Note:** this build does not bundle or auto-install a metamodule (e.g. Mountify). If you want one, install it separately before flashing.
+Flagship 16 has its own WebUI. Features are added **one at a time** after they are verified on a real OS 16 device. **V1.00 is boot animation only** (Default / HiOS 16 / Custom / Off, bind-mounted over `/tr_product/media/bootanimation.zip`). Installer disables Flagship 15 if it is still active.
+
+See [`os16/CHANGELOG.md`](os16/CHANGELOG.md) for Flagship 16 versions.
+
+## XOS 16 on Flagship 15 (legacy)
+
+The OS 15 module still contains XOS 16 workarounds, but most of those features do not apply correctly on Transsion OS 16. Prefer **Flagship 16** on OS 16 phones.
+
+**Note:** neither module bundles or auto-installs a metamodule (e.g. Mountify). If you want one, install it separately before flashing.
 
 ## Requirements
 
