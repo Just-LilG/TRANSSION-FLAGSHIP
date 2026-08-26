@@ -74,6 +74,53 @@ bind_over_dir() {
     return 1
 }
 
+# Unisoc/XOS bootanim (folder1/folder2 desc) plays a sibling file next to
+# bootanimation.zip — typically bootsound.mp3 — not AOSP part/audio.wav.
+# Overlay on /tr_product is ro, so bind cannot create dests. Mountify's
+# lowerdir /mnt/vendor/mountify/tr_product IS writable and shows up live.
+place_media_sibling() {
+    src="$1"
+    name="$2"
+    [ -f "$src" ] || return 1
+    [ -n "$name" ] || return 1
+    mkdir -p "$MODDIR/tr_product/media"
+    cp -f "$src" "$MODDIR/tr_product/media/$name"
+    chmod 644 "$MODDIR/tr_product/media/$name" 2>/dev/null
+    for mnt in \
+        /mnt/vendor/mountify/tr_product/media \
+        /mnt/vendor/mountify/system/tr_product/media
+    do
+        mkdir -p "$mnt" 2>/dev/null || continue
+        cp -f "$src" "$mnt/$name" 2>/dev/null
+        chmod 644 "$mnt/$name" 2>/dev/null
+        log_pfd "overlay sibling $mnt/$name"
+    done
+    try_bind_file "$src" "/tr_product/media/$name"
+    try_bind_file "$src" "/product/media/$name"
+    try_bind_file "$src" "/system/media/$name"
+}
+
+stage_unisoc_bootsound() {
+    ogg="$1"
+    wav="$2"
+    mp3="$3"
+    if [ -z "$mp3" ] || [ ! -f "$mp3" ]; then
+        if [ -f "$ogg" ]; then
+            mp3="$ogg"
+        elif [ -f "$wav" ]; then
+            mp3="$wav"
+        fi
+    fi
+    log_pfd "unisoc sibling ogg=${ogg:-none} mp3=${mp3:-none} wav=${wav:-none}"
+    [ -f "$mp3" ] && place_media_sibling "$mp3" bootsound.mp3
+    [ -f "$ogg" ] && place_media_sibling "$ogg" bootsound.ogg
+    [ -f "$ogg" ] && place_media_sibling "$ogg" audio.ogg
+    [ -f "$mp3" ] && place_media_sibling "$mp3" audio.mp3
+    [ -f "$wav" ] && place_media_sibling "$wav" bootsound.wav
+    log_pfd "live /tr_product/media after sibling stage:"
+    ls -la /tr_product/media >> "$PFD_LOG" 2>/dev/null
+}
+
 try_bind_file() {
     src="$1"
     dest="$2"
@@ -358,6 +405,11 @@ for dest in \
     /tr_product/media/audio/bootsound \
     /tr_product/media/audio/bootsound/Waltz.ogg \
     /tr_product/media/audio \
+    /tr_product/media/bootsound.ogg \
+    /tr_product/media/bootsound.mp3 \
+    /tr_product/media/audio.ogg \
+    /tr_product/media/audio.mp3 \
+    /tr_product/media/bootsound.wav \
     /product/media/bootanimation.zip \
     /system/product/media/bootanimation.zip \
     /system/media/bootanimation.zip \
@@ -494,6 +546,7 @@ STAGED="$TRP_STAGE/bootanimation.zip"
 
 SRC_BOOTSOUND=""
 SRC_BOOTWAV=""
+SRC_BOOTMP3=""
 if [ "$BS" = "custom" ]; then
     BS_FILE=$(cfg_get boot_sound_file "")
     SRC_BOOTSOUND=$(first_existing \
@@ -504,6 +557,10 @@ if [ "$BS" = "custom" ]; then
         "$MODDIR/tr_product/media/audio/bootsound/custom.wav" \
         "$MODDIR/product/media/audio/bootsound/custom.wav" \
         "$MODDIR/system/product/media/audio/bootsound/custom.wav")
+    SRC_BOOTMP3=$(first_existing \
+        "$MODDIR/tr_product/media/audio/bootsound/custom.mp3" \
+        "$MODDIR/product/media/audio/bootsound/custom.mp3" \
+        "$MODDIR/system/product/media/audio/bootsound/custom.mp3")
     if [ -z "$SRC_BOOTSOUND" ] && [ -n "$BS_FILE" ]; then
         SRC_BOOTSOUND=$(first_existing \
             "$MODDIR/tr_product/media/audio/bootsound/$BS_FILE" \
@@ -526,7 +583,7 @@ if [ "$BS" = "custom" ]; then
         if convert_ogg_to_wav "$SRC_BOOTSOUND" "$MODDIR/tr_product/media/audio/bootsound/custom.wav"; then
             SRC_BOOTWAV="$MODDIR/tr_product/media/audio/bootsound/custom.wav"
         elif [ -z "$SRC_BOOTWAV" ]; then
-            log_pfd "custom is ogg and no ffmpeg — zip/tinyplay need wav. Pick Waltz or upload .wav"
+            log_pfd "custom is ogg — will still stage as bootsound.ogg next to the zip"
         fi
     fi
 elif [ "$BS" != "off" ]; then
@@ -537,14 +594,20 @@ elif [ "$BS" != "off" ]; then
         "$MODDIR/system/product/media/audio/bootsound/Waltz.wav")
     SRC_BOOTSOUND=$(first_existing \
         "$MODDIR/product/media/audio/bootsound/Waltz.ogg" \
-        "$MODDIR/system/product/media/audio/bootsound/Waltz.ogg")
+        "$MODDIR/system/product/media/audio/bootsound/Waltz.ogg" \
+        "$MODDIR/tr_product/media/bootsound.ogg")
+    SRC_BOOTMP3=$(first_existing \
+        "$MODDIR/product/media/audio/bootsound/Waltz.mp3" \
+        "$MODDIR/system/product/media/audio/bootsound/Waltz.mp3" \
+        "$MODDIR/tr_product/media/bootsound.mp3")
 fi
-log_pfd "bootsound ogg=${SRC_BOOTSOUND:-none} wav=${SRC_BOOTWAV:-none}"
+log_pfd "bootsound ogg=${SRC_BOOTSOUND:-none} wav=${SRC_BOOTWAV:-none} mp3=${SRC_BOOTMP3:-none}"
 log_bootanim_bin
 
 # Stock XOS 16 audio/ has no PowerOn.ogg and no bootsound/. Binding that
 # whole tree (V1.02–V1.04) nested alarms/notifications and hid UI sounds.
-# Do not bind-dir /tr_product/media/audio. Only the boot zip + tinyplay.
+# Do not bind-dir /tr_product/media/audio.
+# XOS desc is Unisoc folder1/folder2 — play bootsound.mp3 next to the zip.
 
 if [ "$BS" != "off" ] && [ -n "$SRC_BOOTWAV" ] && [ -f "$STAGED" ]; then
     try_inject_audio "$STAGED" "$SRC_BOOTWAV"
@@ -553,8 +616,18 @@ if [ "$BS" != "off" ] && [ -n "$SRC_BOOTWAV" ] && [ -f "$STAGED" ]; then
 elif [ "$BS" = "off" ]; then
     log_pfd "bootsound: off"
     [ -f "$STAGED" ] && strip_zip_audio "$STAGED"
+    rm -f "$MODDIR/tr_product/media/bootsound.ogg" \
+          "$MODDIR/tr_product/media/bootsound.mp3" \
+          "$MODDIR/tr_product/media/audio.ogg" \
+          "$MODDIR/tr_product/media/audio.mp3" \
+          "$MODDIR/tr_product/media/bootsound.wav"
+    rm -f /mnt/vendor/mountify/tr_product/media/bootsound.ogg \
+          /mnt/vendor/mountify/tr_product/media/bootsound.mp3 \
+          /mnt/vendor/mountify/tr_product/media/audio.ogg \
+          /mnt/vendor/mountify/tr_product/media/audio.mp3 \
+          /mnt/vendor/mountify/tr_product/media/bootsound.wav
 elif [ -f "$STAGED" ]; then
-    log_pfd "bootsound: no wav to inject"
+    log_pfd "bootsound: no wav to inject (sibling ogg/mp3 may still play)"
 fi
 
 if [ -f "$STAGED" ]; then
@@ -569,6 +642,10 @@ if [ -f "$STAGED" ]; then
         bind_over_file "$STAGED" "$dest"
     done
     log_pfd "bootanim bind pass done"
+fi
+
+if [ "$BS" != "off" ]; then
+    stage_unisoc_bootsound "$SRC_BOOTSOUND" "$SRC_BOOTWAV" "$SRC_BOOTMP3"
 fi
 
 if [ "$BS" != "off" ] && [ -n "$SRC_BOOTWAV" ]; then

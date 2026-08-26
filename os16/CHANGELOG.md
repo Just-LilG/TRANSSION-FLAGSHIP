@@ -1,5 +1,8 @@
 # Transsion Flagship 16
 
+## v1.07
+- **Boot sound via Unisoc sibling file.** XOS 16 `desc.txt` is `folder1`/`folder2` (Unisoc), which plays `bootsound.mp3` **next to** `bootanimation.zip`, not AOSP `part/audio.wav`. Tinyplay is often missing. V1.07 copies Waltz to `/tr_product/media/bootsound.mp3` (and `.ogg`) through Mountify's overlay lowerdir — without bind-dir of `audio/`. Custom ogg works on this path. Set Sounds to **Waltz**, flash, reboot.
+
 ## v1.06
 - **Installer no longer OOM-killed on KernelSU.** KernelSU unpacks the zip first, then the Magisk installer was deleting that tree and unzipping the two bootanim zips again (`Killed` in the install log). V1.06 keeps the extracted files and only refreshes scripts / webroot / boot-sound wavs.
 

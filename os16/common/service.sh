@@ -5,7 +5,7 @@ LOG="$MODDIR/transflagship16_service.log"
 rm -f "$LOG"
 log_p() { echo "[$(date '+%H:%M:%S')] $1" >> "$LOG"; }
 
-log_p "=== TransFlagship 16 V1.06 ==="
+log_p "=== TransFlagship 16 V1.07 ==="
 log_p "Device : $(getprop ro.product.model 2>/dev/null)"
 log_p "Brand  : $(getprop ro.product.brand 2>/dev/null)"
 log_p "Android: $(getprop ro.build.version.release 2>/dev/null)"
@@ -28,6 +28,7 @@ else
     resetprop persist.sys.media.bootanim.play_sound 1 2>/dev/null
 fi
 log_p "boot_sound=$BS play_sound=$(getprop persist.sys.bootanim.play_sound 2>/dev/null)"
+log_p "sibling: $(ls -l /tr_product/media/bootsound.mp3 /tr_product/media/bootsound.ogg /tr_product/media/audio.ogg 2>/dev/null)"
 log_p "bootanim svc=$(getprop init.svc.bootanim 2>/dev/null) boot_completed=$(getprop sys.boot_completed 2>/dev/null)"
 ls -l /system/bin/tinyplay /vendor/bin/tinyplay /system/bin/aplay /dev/snd >> "$LOG" 2>/dev/null
 
