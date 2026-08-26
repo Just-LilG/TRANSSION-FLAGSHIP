@@ -1,5 +1,8 @@
 # Changelog
 
+## v4.28
+- **Stopped Android 16 from being treated as XOS 16.** When `ro.transsion.os.version` was empty, install (and then the WebUI, via that diagnostic) scanned `ro.build.description` for a bare `16`. Android 16 + XOS 15 builds contain that digit in the Android version, so they got XOS 16 defaults (charging anim / FOD / status bar overlay off). Fallback now only accepts a branded OS version (`XOS16`, `HiOS-15`, `iTelOS14`, …) and the WebUI prefers the live OS-version prop over a stale install diagnostic.
+
 ## v4.27
 - **Bypass Charging now defaults on at boot, matching the WebUI.** `service.sh` used `cfg_bool game_bypass_charge false`, so a missing key (or first boot before config was written) turned the feature off even though `config.json`, install defaults, and the in-app toggle all default to on. The boot default now matches those.
 
