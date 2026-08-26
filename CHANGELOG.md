@@ -1,5 +1,8 @@
 # Changelog
 
+## v4.24
+- **Stopped XOS 16 from force-enabling Experimental animation/renderer tuning.** The XOS 16 install path wrote `ro.tr_perf.*`, `ro.tr_animation.platform_level`, `ro.tran_display_unionrender.support`, and `ro.tr_dynamicbar.support` into `system.prop` on every flash, so the Experimental toggle could not actually turn them off. Those props now apply only when the toggle is on (via `service.sh` / Apply & Save), matching HiOS/iTel and the in-app warning. Also stopped overriding Dynamic Blur with a hardcoded level 3 — that switch already controls launcher blur at runtime.
+
 ## v4.23
 - **Removed the duplicate "Off" option on the Signal & WiFi icon picker.** None and Off were both wired to the same `off` value, so choosing "no overlay" highlighted two buttons at once. The picker is now None / iOS / XOS 16 / Custom (Custom still appears only after you upload an overlay).
 

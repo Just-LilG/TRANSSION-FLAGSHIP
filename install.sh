@@ -21,7 +21,7 @@ print_modname() {
   ui_print "  ╠══════════════════════════════════════════╣"
   ui_print "  ║                                          ║"
   ui_print "  ║   TRANSSION FLAGSHIP                     ║"
-  ui_print "  ║   ALL OS EDITION  ·  V4.23                 ║"
+  ui_print "  ║   ALL OS EDITION  ·  V4.24                 ║"
   ui_print "  ║   XOS · HiOS · iTel OS                   ║"
   ui_print "  ║                                          ║"
   ui_print "  ╚══════════════════════════════════════════╝"
@@ -332,18 +332,6 @@ ro.tran.secure_folder_v2_support=1
 ro.tran.ai_portrait_v3_support=1
 ro.tran.ai_night_v3_support=1
 ro.os_camera_hyper_ai_support=1
-ro.tr_perf.launch_start_exit.model=3
-ro.tr_animation.platform_level=3
-ro.tr_perf.power_keyguard_animation.model=3
-ro.tr_perf.recent_animation.model=3
-ro.tr_perf.unlock_mode.model=3
-ro.tran_display_unionrender.support=1
-ro.surface_flinger.supports_background_blur=1
-ro.os.recent.blur=1
-ro.transsion_launcher_gaussian_blur_support=3
-tr_launcher.gaussianblur.support=3
-ro.transsion_async_animation_support=1
-ro.tr_dynamicbar.support=1
 XOSPROP
           ui_ok "XOS 16 props injected"
           VCONFIG_DIR="$MODPATH/system/tr_product/etc/vconfig/com.transsion.launcher3"
@@ -434,7 +422,7 @@ set_permissions() {
   ui_print " "
   ui_div
   ui_print "  ✨  INSTALLATION COMPLETE"
-  ui_info "Module : Transsion Flagship V4.23"
+  ui_info "Module : Transsion Flagship V4.24"
   ui_info "Author : LIL G TECH LABS"
   ui_info "OS     : $OS_TYPE $OS_VER"
   ui_info "RAM    : ${RAM_GB}GB"
