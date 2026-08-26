@@ -1,4 +1,6 @@
 {
   "bootanim_style": "hios16",
-  "bootanim_file": ""
+  "bootanim_file": "",
+  "boot_sound": "waltz",
+  "boot_sound_file": ""
 }
