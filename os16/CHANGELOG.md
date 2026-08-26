@@ -1,5 +1,8 @@
 # Transsion Flagship 16
 
+## v1.23
+- **AI Gallery + video enhancement.** The Settings toggles were not the GT Gallery/video set. This build writes OS 16 Gallery keys (AI Studio lite, AI Art, eraser, expand, HD, group/shadow enhance, bokeh, compose) and `ro.tr_video.vee.support`. Stock often leaves those at `0` even on GT firmware — we force them on. Apply + reboot, then check Gallery (AI Studio / enhance) and video playback. Dump AI flags after reboot. These still need the Gallery/video engines on the phone; a missing model can show a menu that does nothing.
+
 ## v1.22
 - **AI Suite restored.** The V1.21 hide test worked: those five OS 16 keys removed some Settings AI options. This build turns them back on (stock `=1`). Apply in WebUI rewrites Magisk `system.prop` from the toggles — reboot, no `resetprop` on boot. Master on by default; upgrade from V1.21 turns it back on. AI Writing replaces Notification Summary (`ro.os_ai_writing.support`). Call summary stays stock-off (`aiphone` / `aiphone_summany`). Dump + Copy log still on Home.
 
