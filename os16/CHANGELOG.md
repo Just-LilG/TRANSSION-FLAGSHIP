@@ -1,5 +1,8 @@
 # Transsion Flagship 16
 
+## v1.13
+- **Dropped failed features to shrink the zip.** Charging animation (V1.11–V1.12) and boot sound (V1.02–V1.09) never applied on device. Their packs, WebUI, and apply code are removed. Flash cleans leftover overlay copies from those builds. **Kept:** boot animation and reboot animation (verified).
+
 ## v1.12
 - **Charging animation overlay.** V1.11 bind-mounted a live charge folder that often does not exist on OS 16 (read-only overlay, mkdir fails). Files are now staged into the module overlay tree at install — the same way boot animation reaches `/tr_product` — then applied again at boot with per-file bind. Home has a charge dump if it is still missing.
 

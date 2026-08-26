@@ -15,7 +15,7 @@ print_modname() {
   ui_print " "
   ui_print "  ╔══════════════════════════════════════════╗"
   ui_print "  ║    TRANSSION FLAGSHIP 16                 ║"
-  ui_print "  ║    XOS · HiOS · iTel OS 16  ·  V1.12     ║"
+  ui_print "  ║    XOS · HiOS · iTel OS 16  ·  V1.13     ║"
   ui_print "  ╚══════════════════════════════════════════╝"
   ui_print " "
 }
@@ -110,13 +110,11 @@ on_install() {
   fi
   if [ "$KEEP_EXTRACT" = true ] || [ "$have_zips" = true ]; then
     ui_ok "Boot animation zips already extracted"
-    ui_info "Refreshing scripts, webroot, boot sound, and charging files"
+    ui_info "Refreshing scripts and webroot"
     unzip -o "$ZIPFILE" 'webroot/*' -d "$MODPATH" >&2
     unzip -o "$ZIPFILE" 'config.json' -d "$MODPATH" >&2
     unzip -o "$ZIPFILE" 'CHANGELOG.md' -d "$MODPATH" >&2
     unzip -oj "$ZIPFILE" 'common/system.prop' -d "$MODPATH" >&2
-    unzip -o "$ZIPFILE" 'system/product/media/audio/bootsound/*' -d "$MODPATH" >&2
-    unzip -o "$ZIPFILE" 'system/product/theme/charge/*' -d "$MODPATH" >&2
     unzip -o "$ZIPFILE" 'tr_product/*' -d "$MODPATH" >&2
   else
     ui_info "Extracting module files from zip"
@@ -128,33 +126,31 @@ on_install() {
     unzip -oj "$ZIPFILE" 'common/system.prop' -d "$MODPATH" >&2
   fi
 
-  if [ -f "$MODPATH/system/product/theme/charge/hios_wire_charging_lockscreen.mp4" ] \
-      && [ -f "$MODPATH/system/product/theme/charge/xos_wire_charging_lockscreen.mp4" ]; then
-    ui_ok "Charging animation files ready"
-    # Mountify overlays module tr_product/ onto /tr_product at boot. The live
-    # phone often has no /tr_product/theme/charge to bind over, so the files
-    # must exist in the module tree before that overlay is built.
-    mkdir -p "$MODPATH/tr_product/theme/charge"
-    cp -a "$MODPATH/system/product/theme/charge/." "$MODPATH/tr_product/theme/charge/"
-    sed -i 's|/product/theme/charge/|/tr_product/theme/charge/|g' \
-      "$MODPATH/tr_product/theme/charge/lockscreen_charge_config.xml"
-    ui_ok "Charging animation staged for overlay"
-  else
-    ui_warn "Charging animation files missing — flash may be incomplete"
-  fi
+  # Drop failed boot-sound / charging packs left by V1.02–V1.12.
+  rm -rf "$MODPATH/system/product/theme/charge" \
+         "$MODPATH/tr_product/theme/charge" \
+         "$MODPATH/product/theme/charge" \
+         "$MODPATH/system/product/media/audio" \
+         "$MODPATH/tr_product/media/audio" \
+         "$MODPATH/product/media/audio" \
+         "$MODPATH/.charge_tr" "$MODPATH/.charge_prod"
+  rm -f "$MODPATH/.charge_pick.mp4" "$MODPATH/charge_custom.mp4"
+  rm -rf /mnt/vendor/mountify/tr_product/theme/charge \
+         /mnt/vendor/mountify/product/theme/charge \
+         /mnt/vendor/mountify/tr_product/media/audio/bootsound
+  rm -f /data/local/bootaudio.mp3 /data/local/shutaudio.mp3
+  ui_ok "Removed unused charging and boot-sound files"
 
   CFG=/data/adb/modules/transsion-flagship-16/config.json
   if [ -f "$CFG" ]; then
     ui_ok "Existing Flagship 16 config preserved"
     cp "$CFG" "$MODPATH/config.json"
   else
-    ui_ok "Default config: HiOS 16 boot, reboot, and charging animation"
+    ui_ok "Default config: HiOS 16 boot + reboot animation"
   fi
 
-  ui_ok "Feature 1: boot animation"
-  ui_ok "Feature 2: reboot animation"
-  ui_ok "Feature 3: charging animation"
-  ui_ok "Boot sound (still being verified)"
+  ui_ok "Boot animation"
+  ui_ok "Reboot animation"
 }
 
 set_permissions() {
@@ -164,9 +160,9 @@ set_permissions() {
   done
   ui_print " "
   ui_div
-  ui_print "  ✨  FLAGSHIP 16  ·  V1.12"
+  ui_print "  ✨  FLAGSHIP 16  ·  V1.13"
   ui_info "OS     : $OS_TYPE $OS_VER"
-  ui_info "Feature: boot + reboot + charging animation"
+  ui_info "Feature: boot + reboot animation"
   ui_div
   ui_print "  Reboot, then open WebUI in Magisk/KSU."
   ui_print " "
