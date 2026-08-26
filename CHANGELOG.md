@@ -1,5 +1,8 @@
 # Changelog
 
+## v4.34
+- **Boot animation and boot sound on XOS 16 actually apply.** V4.33 bind-mounted the wrong places: Mountify rewrites `system/product` to `product`, so the style zips were never found (`bootanim: no module zip to bind`), and the live file on this OS is `/tr_product/media/bootanimation.zip` — not `/product/media`. `post-fs-data.sh` now stages from `$MODDIR/product/theme/animations`, bind-mounts `/tr_product/media` (so missing boot-sound files can be added), injects `audio.ogg` into the zip, and still binds any leftover `bootanimation.zip` it can find. Off still leaves stock unbound.
+
 ## v4.33
 - **Boot animation and boot sound work on XOS 16 again.** Android 16's bootanimation process prefers `/product/media/bootanimation.zip` (then apex/oem/system), and it starts before KernelSU OverlayFS / Magisk Magic Mount apply the module tree — so the copies under `system/media` that worked on XOS 15 were ignored. `post-fs-data.sh` now bind-mounts the selected boot animation, shutdown animation, and Waltz boot sound over every live path that already exists (`/product/media`, `/system/media`, PowerOn.ogg, the Transsion `bootsound` folder). Off still leaves stock unbound.
 

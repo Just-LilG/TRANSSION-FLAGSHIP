@@ -40,9 +40,18 @@ fi
 log_pfd "config.json exists: $([ -f "$CFG" ] && echo yes || echo no)"
 
 # OverlayFS / Magic Mount of /product happens too late for bootanim (and on
-# KernelSU may not happen at all without a metamodule). Android 16 also prefers
-# /product/media/bootanimation.zip over /system/media/, so the module tree
-# never wins on XOS 16. Bind-mount the prepared files over every live path.
+# KernelSU may not happen at all without a metamodule). XOS 16 on this
+# device stores the zip at /tr_product/media/bootanimation.zip — not
+# /product or /system. Bind in init's mount namespace so bootanim sees it.
+if [ -x /system/bin/nsenter ]; then
+    NSENTER="/system/bin/nsenter -t 1 -m --"
+elif command -v nsenter >/dev/null 2>&1; then
+    NSENTER="nsenter -t 1 -m --"
+else
+    NSENTER=""
+fi
+log_pfd "nsenter: ${NSENTER:-none}"
+
 bind_over_file() {
     src="$1"
     dest="$2"
@@ -50,9 +59,17 @@ bind_over_file() {
     [ -e "$dest" ] || { log_pfd "bind skip (no dest): $dest"; return 1; }
     chcon --reference="$dest" "$src" 2>/dev/null
     chmod 644 "$src" 2>/dev/null
+    if [ -n "$NSENTER" ]; then
+        $NSENTER umount -l "$dest" 2>/dev/null
+        if $NSENTER mount --bind "$src" "$dest"; then
+            log_pfd "bind OK (init) $dest"
+            return 0
+        fi
+        log_pfd "bind init-ns FAIL $dest, trying local"
+    fi
     umount -l "$dest" 2>/dev/null
     if mount --bind "$src" "$dest"; then
-        log_pfd "bind OK $dest"
+        log_pfd "bind OK (local) $dest"
         return 0
     fi
     log_pfd "bind FAIL $src -> $dest"
@@ -64,9 +81,16 @@ bind_over_dir() {
     [ -d "$src" ] || return 1
     [ -d "$dest" ] || { log_pfd "bind-dir skip (no dest): $dest"; return 1; }
     chcon --reference="$dest" "$src" 2>/dev/null
+    if [ -n "$NSENTER" ]; then
+        $NSENTER umount -l "$dest" 2>/dev/null
+        if $NSENTER mount --bind "$src" "$dest"; then
+            log_pfd "bind-dir OK (init) $dest"
+            return 0
+        fi
+    fi
     umount -l "$dest" 2>/dev/null
     if mount --bind "$src" "$dest"; then
-        log_pfd "bind-dir OK $dest"
+        log_pfd "bind-dir OK (local) $dest"
         return 0
     fi
     log_pfd "bind-dir FAIL $src -> $dest"
@@ -77,6 +101,67 @@ first_existing() {
         [ -f "$p" ] && { echo "$p"; return 0; }
     done
     return 1
+}
+find_named() {
+    name="$1"
+    for root in /tr_product /product /system /system_ext /vendor /odm /oem /custom /apex; do
+        [ -d "$root" ] || continue
+        find "$root" -maxdepth 6 -name "$name" 2>/dev/null
+    done
+}
+ns_umount() {
+    dest="$1"
+    [ -n "$NSENTER" ] && $NSENTER umount -l "$dest" 2>/dev/null
+    umount -l "$dest" 2>/dev/null
+}
+busybox_bin() {
+    for cand in /data/adb/ksu/bin/busybox /data/adb/magisk/busybox /data/adb/ap/bin/busybox; do
+        [ -x "$cand" ] && { echo "$cand"; return 0; }
+    done
+    return 1
+}
+# Bind cannot create missing dest files. OverlayFS *can* add them if the
+# module tree has tr_product/. Also inject audio into the zip for players
+# that read audio.ogg / bootsound.ogg from bootanimation.zip itself.
+try_inject_audio() {
+    zipfile="$1"
+    ogg="$2"
+    [ -f "$zipfile" ] && [ -f "$ogg" ] || return 1
+    tmpd="$MODDIR/.boot_inject"
+    rm -rf "$tmpd"
+    mkdir -p "$tmpd"
+    cp "$ogg" "$tmpd/audio.ogg"
+    cp "$ogg" "$tmpd/bootsound.ogg"
+    BB=$(busybox_bin)
+    if [ -z "$BB" ]; then
+        log_pfd "zip inject skipped (no busybox): $zipfile"
+        rm -rf "$tmpd"
+        return 1
+    fi
+    if ( cd "$tmpd" && "$BB" zip -j -u "$zipfile" audio.ogg bootsound.ogg ); then
+        log_pfd "injected audio.ogg into $zipfile"
+        rm -rf "$tmpd"
+        return 0
+    fi
+    log_pfd "zip inject FAIL $zipfile"
+    rm -rf "$tmpd"
+    return 1
+}
+try_bind_file() {
+    src="$1"
+    dest="$2"
+    [ -f "$src" ] || return 1
+    if [ ! -e "$dest" ]; then
+        parent=$(dirname "$dest")
+        if [ -d "$parent" ]; then
+            if touch "$dest" 2>/dev/null; then
+                log_pfd "created dest $dest"
+            elif [ -n "$NSENTER" ] && $NSENTER touch "$dest" 2>/dev/null; then
+                log_pfd "created dest (init) $dest"
+            fi
+        fi
+    fi
+    bind_over_file "$src" "$dest"
 }
 
 BS_ON=$(cfg_bool boot_sound true)
@@ -94,11 +179,19 @@ do
 done
 # Live dests we may have bind-mounted last boot — drop them before re-applying
 for dest in \
+    /tr_product/media/bootanimation.zip \
+    /tr_product/media/bootanimation-dark.zip \
+    /tr_product/media/shutdownanimation.zip \
+    /tr_product/media/audio/ui/PowerOn.ogg \
+    /tr_product/media/audio/bootsound \
+    /tr_product/media/audio/bootsound/Waltz.ogg \
     /product/media/bootanimation.zip \
     /system/product/media/bootanimation.zip \
     /system/media/bootanimation.zip \
     /oem/media/bootanimation.zip \
     /apex/com.android.bootanimation/etc/bootanimation.zip \
+    /product/media/bootanimation-dark.zip \
+    /system/product/media/bootanimation-dark.zip \
     /product/media/shutdownanimation.zip \
     /system/product/media/shutdownanimation.zip \
     /system/media/shutdownanimation.zip \
@@ -110,8 +203,12 @@ for dest in \
     /system/product/media/audio/bootsound \
     /system/media/audio/bootsound
 do
-    umount -l "$dest" 2>/dev/null
+    ns_umount "$dest"
 done
+ns_umount /tr_product/media
+ns_umount /product/media
+ns_umount /system/product/media
+ns_umount /system/media
 
 CA_ON=$(cfg_bool charge_anim "$CA_DEF")
 for f in "$MODDIR/system/product/theme/charge/hios_wire_charging_lockscreen.mp4" \
@@ -150,145 +247,291 @@ for name in refresh_rate_config.json project_refresh_rate_config.json; do
     fi
 done
 
-ANIM_DIR="$MODDIR/system/product/theme/animations"
-MEDIA_DIRS="$MODDIR/system/media $MODDIR/system/product/media"
-[ -d "$MODDIR/product" ] && MEDIA_DIRS="$MEDIA_DIRS $MODDIR/product/media"
+# Magisk/Mountify rewrite system/product -> product, so the style zips are
+# often at $MODDIR/product/theme/animations — not system/product/theme/...
+ANIM_DIR=""
+for d in \
+    "$MODDIR/product/theme/animations" \
+    "$MODDIR/system/product/theme/animations" \
+    "$MODDIR/tr_product/theme/animations" \
+    "$MODDIR/system/tr_product/theme/animations"
+do
+    if [ -d "$d" ]; then
+        ANIM_DIR="$d"
+        break
+    fi
+done
+if [ -z "$ANIM_DIR" ]; then
+    hit=$(find "$MODDIR" -name 'bootanim_*.zip' 2>/dev/null | head -n 1)
+    [ -n "$hit" ] && ANIM_DIR=$(dirname "$hit")
+fi
+log_pfd "ANIM_DIR=$ANIM_DIR"
+[ -n "$ANIM_DIR" ] && ls -la "$ANIM_DIR" >> "$PFD_LOG" 2>/dev/null
+log_pfd "live /tr_product/media:"
+ls -la /tr_product/media >> "$PFD_LOG" 2>/dev/null
+log_pfd "live /product/media:"
+ls -la /product/media >> "$PFD_LOG" 2>/dev/null
+
+MEDIA_DIRS="$MODDIR/tr_product/media $MODDIR/system/tr_product/media $MODDIR/product/media $MODDIR/system/product/media $MODDIR/system/media"
+
+pick_style_zip() {
+    kind="$1"
+    style="$2"
+    hit=""
+    case "$style" in
+        off)
+            return 1
+            ;;
+        custom)
+            if [ "$kind" = "bootanim" ]; then
+                hit=$(first_existing \
+                    "$MODDIR/product/media/bootanimation_custom.zip" \
+                    "$MODDIR/system/product/media/bootanimation_custom.zip" \
+                    "$MODDIR/system/media/bootanimation_custom.zip" \
+                    "$MODDIR/tr_product/media/bootanimation_custom.zip")
+            else
+                hit=$(first_existing \
+                    "$MODDIR/product/media/shutdownanimation_custom.zip" \
+                    "$MODDIR/system/product/media/shutdownanimation_custom.zip" \
+                    "$MODDIR/system/media/shutdownanimation_custom.zip" \
+                    "$MODDIR/tr_product/media/shutdownanimation_custom.zip")
+            fi
+            ;;
+        *)
+            hit=$(first_existing \
+                "$ANIM_DIR/${kind}_$style.zip" \
+                "$MODDIR/product/theme/animations/${kind}_$style.zip" \
+                "$MODDIR/system/product/theme/animations/${kind}_$style.zip")
+            [ -n "$hit" ] || hit=$(find "$MODDIR" -name "${kind}_${style}.zip" 2>/dev/null | head -n 1)
+            ;;
+    esac
+    [ -n "$hit" ] && echo "$hit"
+}
+
+stage_named() {
+    src="$1"
+    name="$2"
+    [ -f "$src" ] || return 1
+    for dir in $MEDIA_DIRS; do
+        mkdir -p "$dir"
+        dest="$dir/$name"
+        [ "$src" = "$dest" ] && continue
+        cp -f "$src" "$dest"
+        chmod 644 "$dest" 2>/dev/null
+    done
+    return 0
+}
+
+# Copy live extras into a stage dir so bind-dir does not hide them.
+mirror_live_media() {
+    live="$1"
+    stage="$2"
+    [ -d "$live" ] || return 1
+    mkdir -p "$stage"
+    for f in "$live"/*; do
+        [ -e "$f" ] || continue
+        base=$(basename "$f")
+        [ -e "$stage/$base" ] && continue
+        cp -a "$f" "$stage/$base" 2>/dev/null
+        log_pfd "mirrored live $live/$base"
+    done
+}
 
 BA_STYLE=$(cfg_get bootanim_style "default")
-for dir in $MEDIA_DIRS; do
-    mkdir -p "$dir"
-    DEST="$dir/bootanimation.zip"
-    case "$BA_STYLE" in
-        off)
-            rm -f "$DEST"
-            ;;
-        custom)
-            for f in "$dir"/bootanimation_custom.*; do
-                [ -e "$f" ] || continue
-                rm -f "$DEST"
-                cp "$f" "$DEST"
-                break
-            done
-            ;;
-        default|hios16)
-            [ -f "$ANIM_DIR/bootanim_$BA_STYLE.zip" ] && cp "$ANIM_DIR/bootanim_$BA_STYLE.zip" "$DEST"
-            ;;
-    esac
-done
-
 SA_STYLE=$(cfg_get shutdownanim_style "default")
+
+# Always start from a clean stage so we never re-inject audio into last boot's zip
 for dir in $MEDIA_DIRS; do
     mkdir -p "$dir"
-    DEST="$dir/shutdownanimation.zip"
-    case "$SA_STYLE" in
-        off)
-            rm -f "$DEST"
-            ;;
-        custom)
-            for f in "$dir"/shutdownanimation_custom.*; do
-                [ -e "$f" ] || continue
-                rm -f "$DEST"
-                cp "$f" "$DEST"
-                break
-            done
-            ;;
-        default|hios16)
-            [ -f "$ANIM_DIR/shutdownanim_$SA_STYLE.zip" ] && cp "$ANIM_DIR/shutdownanim_$SA_STYLE.zip" "$DEST"
-            ;;
-    esac
+    rm -f "$dir/bootanimation.zip" "$dir/bootanimation-dark.zip" "$dir/shutdownanimation.zip"
+    rm -f "$dir/audio.ogg" "$dir/bootsound.ogg"
 done
 
-# Apply before OverlayFS: XOS 16 / Android 16 reads /product/media first, and
-# bootanim starts before KernelSU OverlayFS (and often before Magisk Magic Mount).
+SRC_BOOTANIM=""
 if [ "$BA_STYLE" != "off" ]; then
-    SRC_BOOTANIM=$(first_existing \
-        "$MODDIR/product/media/bootanimation.zip" \
-        "$MODDIR/system/product/media/bootanimation.zip" \
-        "$MODDIR/system/media/bootanimation.zip")
-    if [ -n "$SRC_BOOTANIM" ]; then
-        log_pfd "bootanim src=$SRC_BOOTANIM style=$BA_STYLE"
-        for dest in \
-            /product/media/bootanimation.zip \
-            /system/product/media/bootanimation.zip \
-            /system/media/bootanimation.zip \
-            /oem/media/bootanimation.zip \
-            /apex/com.android.bootanimation/etc/bootanimation.zip
-        do
-            bind_over_file "$SRC_BOOTANIM" "$dest"
+    SRC_BOOTANIM=$(pick_style_zip bootanim "$BA_STYLE")
+    if [ -z "$SRC_BOOTANIM" ] && [ "$BA_STYLE" = "custom" ]; then
+        for dir in $MEDIA_DIRS "$MODDIR/product/media" "$MODDIR/system/product/media"; do
+            for f in "$dir"/bootanimation_custom.*; do
+                [ -f "$f" ] || continue
+                SRC_BOOTANIM="$f"
+                break
+            done
+            [ -n "$SRC_BOOTANIM" ] && break
         done
+    fi
+    if [ -n "$SRC_BOOTANIM" ]; then
+        mkdir -p "$MODDIR/tr_product/media"
+        cp -f "$SRC_BOOTANIM" "$MODDIR/tr_product/media/bootanimation.zip"
+        chmod 644 "$MODDIR/tr_product/media/bootanimation.zip" 2>/dev/null
+        log_pfd "bootanim staged from $SRC_BOOTANIM style=$BA_STYLE"
     else
-        log_pfd "bootanim: no module zip to bind (style=$BA_STYLE)"
+        log_pfd "bootanim: no module zip to stage (style=$BA_STYLE)"
     fi
 else
-    log_pfd "bootanim: off — left stock paths unbound"
+    log_pfd "bootanim: off — will not replace live zip"
 fi
 
+SRC_SHUTDOWN=""
 if [ "$SA_STYLE" != "off" ]; then
-    SRC_SHUTDOWN=$(first_existing \
-        "$MODDIR/product/media/shutdownanimation.zip" \
-        "$MODDIR/system/product/media/shutdownanimation.zip" \
-        "$MODDIR/system/media/shutdownanimation.zip")
-    if [ -n "$SRC_SHUTDOWN" ]; then
-        log_pfd "shutdownanim src=$SRC_SHUTDOWN style=$SA_STYLE"
-        for dest in \
-            /product/media/shutdownanimation.zip \
-            /system/product/media/shutdownanimation.zip \
-            /system/media/shutdownanimation.zip \
-            /oem/media/shutdownanimation.zip
-        do
-            bind_over_file "$SRC_SHUTDOWN" "$dest"
+    SRC_SHUTDOWN=$(pick_style_zip shutdownanim "$SA_STYLE")
+    if [ -z "$SRC_SHUTDOWN" ] && [ "$SA_STYLE" = "custom" ]; then
+        for dir in $MEDIA_DIRS; do
+            for f in "$dir"/shutdownanimation_custom.*; do
+                [ -f "$f" ] || continue
+                SRC_SHUTDOWN="$f"
+                break
+            done
+            [ -n "$SRC_SHUTDOWN" ] && break
         done
+    fi
+    if [ -n "$SRC_SHUTDOWN" ]; then
+        stage_named "$SRC_SHUTDOWN" "shutdownanimation.zip"
+        log_pfd "shutdownanim staged from $SRC_SHUTDOWN style=$SA_STYLE"
     fi
 fi
 
-if [ "$BS_ON" = "1" ]; then
-    SRC_BOOTSOUND=$(first_existing \
-        "$MODDIR/product/media/audio/bootsound/Waltz.ogg" \
-        "$MODDIR/system/product/media/audio/bootsound/Waltz.ogg" \
-        "$MODDIR/system/media/audio/bootsound/Waltz.ogg" \
-        "$MODDIR/system/media/audio/ui/Waltz.ogg")
-    if [ -n "$SRC_BOOTSOUND" ]; then
-        log_pfd "bootsound src=$SRC_BOOTSOUND"
-        SRC_BOOTSOUND_DIR=""
-        for d in \
-            "$MODDIR/product/media/audio/bootsound" \
-            "$MODDIR/system/product/media/audio/bootsound" \
-            "$MODDIR/system/media/audio/bootsound"
-        do
-            [ -d "$d" ] && [ -f "$d/Waltz.ogg" ] && SRC_BOOTSOUND_DIR="$d" && break
-        done
-        # AOSP / some XOS 16 builds play PowerOn.ogg from ui/, not the bootsound folder
-        for dest in \
-            /product/media/audio/ui/PowerOn.ogg \
-            /system/product/media/audio/ui/PowerOn.ogg \
-            /system/media/audio/ui/PowerOn.ogg \
-            /system/media/bootsound.ogg \
-            /system/media/bootsound.mp3 \
-            /system/media/audio/bootaudio.mp3
-        do
-            bind_over_file "$SRC_BOOTSOUND" "$dest"
-        done
-        # Transsion XOS 15 played whatever is in media/audio/bootsound/. Bind the
-        # whole folder so Waltz.ogg is visible even when OverlayFS hasn't mounted.
-        for dir in \
-            /product/media/audio/bootsound \
-            /system/product/media/audio/bootsound \
-            /system/media/audio/bootsound
-        do
-            if [ -n "$SRC_BOOTSOUND_DIR" ] && bind_over_dir "$SRC_BOOTSOUND_DIR" "$dir"; then
-                :
-            elif [ -d "$dir" ]; then
-                for f in "$dir"/*; do
-                    [ -f "$f" ] || continue
-                    bind_over_file "$SRC_BOOTSOUND" "$f"
-                done
-            fi
-        done
-    else
-        log_pfd "bootsound: Waltz.ogg missing — nothing to bind"
+SRC_BOOTSOUND=$(first_existing \
+    "$MODDIR/product/media/audio/bootsound/Waltz.ogg" \
+    "$MODDIR/system/product/media/audio/bootsound/Waltz.ogg" \
+    "$MODDIR/system/media/audio/bootsound/Waltz.ogg" \
+    "$MODDIR/system/media/audio/ui/Waltz.ogg")
+
+TRP_STAGE="$MODDIR/tr_product/media"
+mkdir -p "$TRP_STAGE"
+
+if [ "$BS_ON" = "1" ] && [ -n "$SRC_BOOTSOUND" ]; then
+    log_pfd "bootsound src=$SRC_BOOTSOUND"
+    mkdir -p "$TRP_STAGE/audio/ui" "$TRP_STAGE/audio/bootsound"
+    mkdir -p "$MODDIR/product/media/audio/ui" "$MODDIR/product/media/audio/bootsound"
+    mkdir -p "$MODDIR/system/product/media/audio/ui"
+    mkdir -p "$MODDIR/system/tr_product/media/audio/ui" "$MODDIR/system/tr_product/media/audio/bootsound"
+    cp -f "$SRC_BOOTSOUND" "$TRP_STAGE/audio/ui/PowerOn.ogg"
+    cp -f "$SRC_BOOTSOUND" "$TRP_STAGE/audio/bootsound/Waltz.ogg"
+    cp -f "$SRC_BOOTSOUND" "$TRP_STAGE/audio.ogg"
+    cp -f "$SRC_BOOTSOUND" "$TRP_STAGE/bootsound.ogg"
+    cp -f "$SRC_BOOTSOUND" "$MODDIR/system/tr_product/media/audio/ui/PowerOn.ogg"
+    cp -f "$SRC_BOOTSOUND" "$MODDIR/system/tr_product/media/audio/bootsound/Waltz.ogg"
+    cp -f "$SRC_BOOTSOUND" "$MODDIR/product/media/audio/ui/PowerOn.ogg"
+    if [ "$BA_STYLE" != "off" ] && [ -f "$TRP_STAGE/bootanimation.zip" ]; then
+        try_inject_audio "$TRP_STAGE/bootanimation.zip" "$SRC_BOOTSOUND"
     fi
+elif [ "$BS_ON" = "1" ]; then
+    log_pfd "bootsound: Waltz.ogg missing — nothing to stage"
 else
     log_pfd "bootsound: off — left stock paths unbound"
+fi
+
+if [ -f "$TRP_STAGE/bootanimation.zip" ]; then
+    cp -f "$TRP_STAGE/bootanimation.zip" "$TRP_STAGE/bootanimation-dark.zip"
+    stage_named "$TRP_STAGE/bootanimation.zip" "bootanimation.zip"
+    stage_named "$TRP_STAGE/bootanimation.zip" "bootanimation-dark.zip"
+fi
+
+# Prefer bind-dir of /tr_product/media so we can ADD files (sound) that do not
+# exist on the live partition. Mirror leftover live files first so we do not hide them.
+TRP_DIR_BOUND=0
+if [ -d /tr_product/media ]; then
+    if [ "$BA_STYLE" != "off" ] || [ "$BS_ON" = "1" ]; then
+        mirror_live_media /tr_product/media "$TRP_STAGE"
+        if bind_over_dir "$TRP_STAGE" /tr_product/media; then
+            TRP_DIR_BOUND=1
+        fi
+    fi
+fi
+
+STAGED_BOOT=$(first_existing \
+    "$MODDIR/tr_product/media/bootanimation.zip" \
+    "$MODDIR/product/media/bootanimation.zip" \
+    "$MODDIR/system/product/media/bootanimation.zip" \
+    "$MODDIR/system/media/bootanimation.zip")
+STAGED_SHUT=$(first_existing \
+    "$MODDIR/tr_product/media/shutdownanimation.zip" \
+    "$MODDIR/product/media/shutdownanimation.zip" \
+    "$MODDIR/system/product/media/shutdownanimation.zip" \
+    "$MODDIR/system/media/shutdownanimation.zip")
+
+if [ "$BA_STYLE" != "off" ] && [ -n "$STAGED_BOOT" ]; then
+    log_pfd "bootanim src=$STAGED_BOOT style=$BA_STYLE"
+    if [ "$TRP_DIR_BOUND" != "1" ]; then
+        try_bind_file "$STAGED_BOOT" /tr_product/media/bootanimation.zip
+        try_bind_file "$STAGED_BOOT" /tr_product/media/bootanimation-dark.zip
+    fi
+    try_bind_file "$STAGED_BOOT" /product/media/bootanimation.zip
+    try_bind_file "$STAGED_BOOT" /system/product/media/bootanimation.zip
+    try_bind_file "$STAGED_BOOT" /system/media/bootanimation.zip
+    try_bind_file "$STAGED_BOOT" /oem/media/bootanimation.zip
+    try_bind_file "$STAGED_BOOT" /apex/com.android.bootanimation/etc/bootanimation.zip
+    for dest in $(find_named bootanimation.zip) $(find_named bootanimation-dark.zip); do
+        if [ "$TRP_DIR_BOUND" = "1" ]; then
+            case "$dest" in
+                /tr_product/*) continue ;;
+            esac
+        fi
+        try_bind_file "$STAGED_BOOT" "$dest"
+    done
+elif [ "$BA_STYLE" != "off" ]; then
+    log_pfd "bootanim: no module zip to bind (style=$BA_STYLE)"
+fi
+
+if [ "$SA_STYLE" != "off" ] && [ -n "$STAGED_SHUT" ]; then
+    log_pfd "shutdownanim src=$STAGED_SHUT style=$SA_STYLE"
+    if [ "$TRP_DIR_BOUND" != "1" ]; then
+        try_bind_file "$STAGED_SHUT" /tr_product/media/shutdownanimation.zip
+    fi
+    try_bind_file "$STAGED_SHUT" /product/media/shutdownanimation.zip
+    try_bind_file "$STAGED_SHUT" /system/product/media/shutdownanimation.zip
+    try_bind_file "$STAGED_SHUT" /system/media/shutdownanimation.zip
+    try_bind_file "$STAGED_SHUT" /oem/media/shutdownanimation.zip
+    for dest in $(find_named shutdownanimation.zip); do
+        if [ "$TRP_DIR_BOUND" = "1" ]; then
+            case "$dest" in
+                /tr_product/*) continue ;;
+            esac
+        fi
+        try_bind_file "$STAGED_SHUT" "$dest"
+    done
+fi
+
+if [ "$BS_ON" = "1" ] && [ -n "$SRC_BOOTSOUND" ]; then
+    SRC_BOOTSOUND_DIR=""
+    for d in \
+        "$MODDIR/tr_product/media/audio/bootsound" \
+        "$MODDIR/product/media/audio/bootsound" \
+        "$MODDIR/system/product/media/audio/bootsound" \
+        "$MODDIR/system/media/audio/bootsound"
+    do
+        [ -d "$d" ] && [ -f "$d/Waltz.ogg" ] && SRC_BOOTSOUND_DIR="$d" && break
+    done
+    for dest in \
+        /tr_product/media/audio/ui/PowerOn.ogg \
+        /tr_product/media/audio/bootsound/Waltz.ogg \
+        /tr_product/media/audio.ogg \
+        /tr_product/media/bootsound.ogg \
+        /product/media/audio/ui/PowerOn.ogg \
+        /system/product/media/audio/ui/PowerOn.ogg \
+        /system/media/audio/ui/PowerOn.ogg \
+        /system/media/bootsound.ogg \
+        /system/media/bootsound.mp3 \
+        /system/media/audio/bootaudio.mp3
+    do
+        try_bind_file "$SRC_BOOTSOUND" "$dest"
+    done
+    for dir in \
+        /tr_product/media/audio/bootsound \
+        /product/media/audio/bootsound \
+        /system/product/media/audio/bootsound \
+        /system/media/audio/bootsound
+    do
+        if [ -n "$SRC_BOOTSOUND_DIR" ] && bind_over_dir "$SRC_BOOTSOUND_DIR" "$dir"; then
+            :
+        elif [ -d "$dir" ]; then
+            for f in "$dir"/*; do
+                [ -f "$f" ] || continue
+                try_bind_file "$SRC_BOOTSOUND" "$f"
+            done
+        fi
+    done
 fi
 
 EF_ON=$(cfg_bool emoji_font true)
