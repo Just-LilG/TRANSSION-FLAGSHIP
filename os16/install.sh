@@ -15,7 +15,7 @@ print_modname() {
   ui_print " "
   ui_print "  ╔══════════════════════════════════════════╗"
   ui_print "  ║    TRANSSION FLAGSHIP 16                 ║"
-  ui_print "  ║    XOS · HiOS · iTel OS 16  ·  V1.05     ║"
+  ui_print "  ║    XOS · HiOS · iTel OS 16  ·  V1.06     ║"
   ui_print "  ╚══════════════════════════════════════════╝"
   ui_print " "
 }
@@ -101,11 +101,29 @@ on_install() {
   ui_div
   ui_step "Injecting files..."
   ui_div
-  unzip -o "$ZIPFILE" 'system/*' -d "$MODPATH" >&2
-  unzip -o "$ZIPFILE" 'webroot/*' -d "$MODPATH" >&2
-  unzip -o "$ZIPFILE" 'config.json' -d "$MODPATH" >&2
-  unzip -o "$ZIPFILE" 'CHANGELOG.md' -d "$MODPATH" >&2
-  unzip -oj "$ZIPFILE" 'common/system.prop' -d "$MODPATH" >&2
+  # KernelSU already unpacked the zip. Re-unzipping system/* (two 6–13MB
+  # bootanim archives) is what got the V1.05 flash "Killed" (OOM).
+  have_zips=false
+  if [ -f "$MODPATH/system/product/theme/animations/bootanim_hios16.zip" ] \
+      && [ -f "$MODPATH/system/product/theme/animations/bootanim_default.zip" ]; then
+    have_zips=true
+  fi
+  if [ "$KEEP_EXTRACT" = true ] || [ "$have_zips" = true ]; then
+    ui_ok "Boot animation zips already extracted"
+    ui_info "Refreshing scripts, webroot, and boot sound files"
+    unzip -o "$ZIPFILE" 'webroot/*' -d "$MODPATH" >&2
+    unzip -o "$ZIPFILE" 'config.json' -d "$MODPATH" >&2
+    unzip -o "$ZIPFILE" 'CHANGELOG.md' -d "$MODPATH" >&2
+    unzip -oj "$ZIPFILE" 'common/system.prop' -d "$MODPATH" >&2
+    unzip -o "$ZIPFILE" 'system/product/media/audio/bootsound/*' -d "$MODPATH" >&2
+  else
+    ui_info "Extracting module files from zip"
+    unzip -o "$ZIPFILE" 'system/*' -d "$MODPATH" >&2
+    unzip -o "$ZIPFILE" 'webroot/*' -d "$MODPATH" >&2
+    unzip -o "$ZIPFILE" 'config.json' -d "$MODPATH" >&2
+    unzip -o "$ZIPFILE" 'CHANGELOG.md' -d "$MODPATH" >&2
+    unzip -oj "$ZIPFILE" 'common/system.prop' -d "$MODPATH" >&2
+  fi
 
   CFG=/data/adb/modules/transsion-flagship-16/config.json
   if [ -f "$CFG" ]; then
@@ -126,7 +144,7 @@ set_permissions() {
   done
   ui_print " "
   ui_div
-  ui_print "  ✨  FLAGSHIP 16  ·  V1.05"
+  ui_print "  ✨  FLAGSHIP 16  ·  V1.06"
   ui_info "OS     : $OS_TYPE $OS_VER"
   ui_info "Feature: boot animation + boot sound"
   ui_div

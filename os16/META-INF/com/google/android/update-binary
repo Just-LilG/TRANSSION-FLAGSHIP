@@ -32,6 +32,8 @@ imageless_magisk() {
 OUTFD=$2
 ZIPFILE=$3
 
+ui_print "- Flagship 16 V1.06 installer"
+
 mount /data 2>/dev/null
 
 # Load utility functions
@@ -58,8 +60,14 @@ $BOOTMODE && boot_actions || recovery_actions
 # Preparation
 ##########################################################################################
 
-# Extract common files
-unzip -oj "$ZIPFILE" module.prop install.sh uninstall.sh 'common/*' -d $TMPDIR >&2
+# Extract only the tiny Magisk-template files. Busybox unzip + glob 'common/*'
+# on a 20MB zip can dump the bootanim zips into /dev/tmp (tmpfs) and OOM.
+ui_print "- Preparing Flagship 16 installer"
+for f in module.prop install.sh uninstall.sh \
+         common/post-fs-data.sh common/service.sh common/system.prop
+do
+  unzip -oj "$ZIPFILE" "$f" -d $TMPDIR >&2 || abort "! Missing $f in zip"
+done
 
 [ ! -f $TMPDIR/install.sh ] && abort "! Unable to extract zip file!"
 # Load install script
@@ -89,9 +97,20 @@ ui_print "******************************"
 # Install
 ##########################################################################################
 
-# Create mod paths
-rm -rf $MODPATH 2>/dev/null
+# Create mod paths.
+# KernelSU Manager extracts the zip into MODPATH *before* this script runs
+# ("Extracting module files"). Magisk does not. Deleting that tree and
+# unzipping bootanim_*.zip again is what printed "Killed" on V1.05.
 mkdir -p $MODPATH
+if [ -f "$MODPATH/system/product/theme/animations/bootanim_hios16.zip" ] \
+    && [ -f "$MODPATH/system/product/theme/animations/bootanim_default.zip" ]; then
+  ui_print "- Keeping KernelSU-extracted files (skip wipe)"
+  KEEP_EXTRACT=true
+else
+  rm -rf $MODPATH 2>/dev/null
+  mkdir -p $MODPATH
+  KEEP_EXTRACT=false
+fi
 
 on_install
 
