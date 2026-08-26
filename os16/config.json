@@ -2,9 +2,5 @@
   "bootanim_style": "hios16",
   "bootanim_file": "",
   "rebootanim_style": "hios16",
-  "rebootanim_file": "",
-  "chargeanim_style": "hios16",
-  "chargeanim_file": "",
-  "boot_sound": "waltz",
-  "boot_sound_file": ""
+  "rebootanim_file": ""
 }
