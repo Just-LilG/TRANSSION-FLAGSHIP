@@ -1,5 +1,8 @@
 # Transsion Flagship 16
 
+## v1.03
+- Boot sound lives on the **Sounds** tab (same as Flagship 15). Media is boot animation only.
+
 ## v1.02
 - **Boot sound.** Waltz / Custom / Off. Injects `audio.wav` into the staged bootanimation zip (AOSP plays WAV from the zip), merges stock `/tr_product/media/audio` then overlays Waltz, and bind-mounts that audio tree — not the whole `/tr_product/media` folder. Home has a **Dump audio paths** button if sound is silent.
 
