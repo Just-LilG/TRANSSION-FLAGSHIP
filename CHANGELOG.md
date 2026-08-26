@@ -1,5 +1,8 @@
 # Changelog
 
+## v4.25
+- **AI Suite master toggle now actually gates AI props.** Turning off AI Suite only flipped the in-app switch — boot (`service.sh`) and Apply & Save still enabled subtitles, call summary, and sound-recorder speech from the individual toggles. Those props now follow the master switch, matching how Gaming Suite already works.
+
 ## v4.24
 - **Stopped XOS 16 from force-enabling Experimental animation/renderer tuning.** The XOS 16 install path wrote `ro.tr_perf.*`, `ro.tr_animation.platform_level`, `ro.tran_display_unionrender.support`, and `ro.tr_dynamicbar.support` into `system.prop` on every flash, so the Experimental toggle could not actually turn them off. Those props now apply only when the toggle is on (via `service.sh` / Apply & Save), matching HiOS/iTel and the in-app warning. Also stopped overriding Dynamic Blur with a hardcoded level 3 — that switch already controls launcher blur at runtime.
 
