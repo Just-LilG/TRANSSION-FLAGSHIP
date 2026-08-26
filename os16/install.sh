@@ -32,6 +32,15 @@ ai_tf() {
   [ "$v" = "false" ] && echo false || echo true
 }
 
+json_int() {
+  f="$1"; k="$2"; d="$3"
+  v=$(json_bool "$f" "$k" "$d")
+  case "$v" in
+    ''|*[!0-9]*) echo "$d" ;;
+    *) echo "$v" ;;
+  esac
+}
+
 write_os16_ai_prop() {
   cfg="$1"
   dest="$2"
@@ -43,9 +52,25 @@ write_os16_ai_prop() {
   call=$(ai_tf "$cfg" "$master" ai_call_summary true)
   gal=$(ai_01 "$cfg" "$master" ai_gallery true)
   vee=$(ai_01 "$cfg" "$master" ai_video true)
+  gmaster=$(json_bool "$cfg" game_master true)
+  gtouch=$(ai_01 "$cfg" "$gmaster" game_esports_touch true)
+  gbypass=$(ai_01 "$cfg" "$gmaster" game_bypass_charge true)
+  glvl=$(json_int "$cfg" game_esports_level 3)
+  [ "$glvl" -ge 1 ] 2>/dev/null || glvl=3
+  [ "$glvl" -le 3 ] 2>/dev/null || glvl=3
+  g10=0; g20=0; g30=0; g11=0; ggt=0
+  if [ "$gmaster" = "true" ]; then
+    ggt=1
+    if [ "$gtouch" = "1" ]; then
+      g10=1
+      g11=1
+      [ "$glvl" -ge 2 ] && g20=1
+      [ "$glvl" -ge 3 ] && g30=1
+    fi
+  fi
   cat > "$dest" <<EOF
-# Flagship 16 — OS 16 AI keys. Magisk loads this file at boot.
-# Apply in WebUI rewrites this file from the AI Suite toggles. Reboot to take effect.
+# Flagship 16 — OS 16 keys. Magisk loads this file at boot.
+# Apply in WebUI rewrites this file from the Features toggles. Reboot to take effect.
 # Not written from service.sh.
 ro.tr_aiservice.aicorespeech_subtitle.feature.support=$sub
 ro.tr_aiservice.aicorespeech_livecaption.feature.support=$sub
@@ -64,6 +89,12 @@ ro.tr_gallery.shadow.enhance.support=$gal
 ro.tr_gallery.bokeh.support=$gal
 ro.tr_gallery.compose.support=$gal
 ro.tr_video.vee.support=$vee
+ro.os_game_gt.support=$ggt
+ro.os_game_tp_esports10.support=$g10
+ro.os_game_tp_esports20.support=$g20
+ro.os_game_tp_esports30.support=$g30
+ro.os_game_tp_esports_update11.support=$g11
+ro.os_game_bypass_charging_support=$gbypass
 EOF
 }
 
@@ -71,7 +102,7 @@ print_modname() {
   ui_print " "
   ui_print "  ╔══════════════════════════════════════════╗"
   ui_print "  ║    TRANSSION FLAGSHIP 16                 ║"
-  ui_print "  ║    XOS · HiOS · iTel OS 16  ·  V1.28     ║"
+  ui_print "  ║    XOS · HiOS · iTel OS 16  ·  V1.29     ║"
   ui_print "  ╚══════════════════════════════════════════╝"
   ui_print " "
 }
@@ -232,15 +263,15 @@ on_install() {
            -e 's/"ai_call_summary": false/"ai_call_summary": true/' \
            "$MODPATH/config.json"
   else
-    ui_ok "Default config: HiOS 16 boot + reboot, AI on, status bar stock"
+    ui_ok "Default config: HiOS 16 boot + reboot, AI + gaming on, status bar stock"
   fi
   write_os16_ai_prop "$MODPATH/config.json" "$MODPATH/system.prop"
-  ui_ok "OS 16 AI keys written from config (reboot to apply)"
+  ui_ok "OS 16 keys written from config (reboot to apply)"
 
   ui_ok "Boot animation"
   ui_ok "Reboot animation"
   ui_ok "Status bar: upload your own overlay, or leave stock"
-  ui_ok "OS 16 AI Suite — Apply in WebUI, then reboot"
+  ui_ok "OS 16 AI Suite + Gaming — Features tab, Apply, then reboot"
 }
 
 set_permissions() {
@@ -253,7 +284,7 @@ set_permissions() {
   done
   ui_print " "
   ui_div
-  ui_print "  ✨  FLAGSHIP 16  ·  V1.28"
+  ui_print "  ✨  FLAGSHIP 16  ·  V1.29"
   ui_info "OS     : $OS_TYPE $OS_VER"
   ui_info "Feature: boot + reboot + overlay + OS 16 AI Suite"
   ui_div

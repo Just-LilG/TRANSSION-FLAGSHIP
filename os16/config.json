@@ -12,5 +12,9 @@
   "ai_sound_rec": true,
   "ai_notes": true,
   "ai_gallery": true,
-  "ai_video": true
+  "ai_video": true,
+  "game_master": true,
+  "game_esports_touch": true,
+  "game_esports_level": 3,
+  "game_bypass_charge": true
 }
