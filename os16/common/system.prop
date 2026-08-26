@@ -8,10 +8,12 @@ ro.tr_note.ai_draw.support=1
 ro.os_ai_writing.support=1
 ro.tr_aiassistant.aiphone.feature.support=false
 ro.tr_aiassistant.aiphone_summany.feature.support=false
+# AICore-backed Gallery tools (already 1 on this phone's aicore_* keys).
+ro.tr_gallery.eraser.v2.support=1
+ro.tr_gallery.ext.image.support=1
+# Generative Studio/Art/HD — V1.23 crashed AI Gallery Edit. Stay off.
 ro.tr_gallery.ai_art.support=0
 ro.tr_gallery.ai.studio.lite.support=0
-ro.tr_gallery.eraser.v2.support=0
-ro.tr_gallery.ext.image.support=0
 ro.tr_gallery.hd.support=0
 ro.tr_gallery.group.enhance.support=0
 ro.tr_gallery.shadow.enhance.support=0

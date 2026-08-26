@@ -11,6 +11,6 @@
   "ai_writing": true,
   "ai_sound_rec": true,
   "ai_notes": true,
-  "ai_gallery": false,
+  "ai_gallery": true,
   "ai_video": false
 }

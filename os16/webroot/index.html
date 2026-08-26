@@ -142,7 +142,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
         </div>
         <div class="hero-card">
           <div class="hero-title">Transsion Flagship 16</div>
-          <div class="hero-sub" id="module-version-sub">V1.24 · OS 16 AI Suite</div>
+          <div class="hero-sub" id="module-version-sub">V1.25 · OS 16 AI Suite</div>
         </div>
         <div class="h8"></div>
         <div class="warn-card" id="old-mod-warn">Flagship 15 is still installed. This installer disables it. Remove it from Magisk/KSU so the two modules do not fight.</div>
@@ -160,7 +160,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
             <li class="on">Reboot animation — verified</li>
             <li>Status bar overlay — upload your own APK</li>
             <li class="on">AI Suite — verified OS 16 keys; Apply + reboot</li>
-            <li>AI Gallery / video — menus only; editor crashes on this phone</li>
+            <li class="next">AI Gallery — eraser/expand only; Art/Studio crash on this phone</li>
           </ul>
         </div>
         <div class="section-label">Status bar</div>
@@ -230,14 +230,14 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
           <div class="setting-row">
             <div class="row-text">
               <div class="row-title">AI Gallery</div>
-              <div class="row-sub">Needs the GT editor. Crashes on this phone — leave off.</div>
+              <div class="row-sub">Eraser and expand only. Art/Studio stay off — they crash.</div>
             </div>
-            <label class="toggle"><input type="checkbox" id="feat-ai-gallery" onchange="setAi('ai_gallery',this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+            <label class="toggle"><input type="checkbox" id="feat-ai-gallery" checked onchange="setAi('ai_gallery',this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
           </div>
           <div class="setting-row">
             <div class="row-text">
               <div class="row-title">AI Video Enhancement</div>
-              <div class="row-sub">VEE flag only. Leave off unless you are testing.</div>
+              <div class="row-sub">VEE flag. Leave off — not working on this phone.</div>
             </div>
             <label class="toggle"><input type="checkbox" id="feat-ai-video" onchange="setAi('ai_video',this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
           </div>
@@ -325,7 +325,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
 <script type="module">
 const MOD='/data/adb/modules/transsion-flagship-16';
 const CONFIG_PATH=MOD+'/config.json';
-let cfg={bootanim_style:'hios16',bootanim_file:'',rebootanim_style:'hios16',rebootanim_file:'',statusbar_style:'off',statusbarcustom_file:'',ai_master:true,ai_subtitles:true,ai_call_summary:false,ai_writing:true,ai_sound_rec:true,ai_notes:true,ai_gallery:false,ai_video:false};
+let cfg={bootanim_style:'hios16',bootanim_file:'',rebootanim_style:'hios16',rebootanim_file:'',statusbar_style:'off',statusbarcustom_file:'',ai_master:true,ai_subtitles:true,ai_call_summary:false,ai_writing:true,ai_sound_rec:true,ai_notes:true,ai_gallery:true,ai_video:false};
 let _exec=null;
 
 async function exec(cmd){
@@ -382,11 +382,13 @@ function describeAiFlag(v){
   if(v==='1' || v==='true') return '='+v+' — Magisk set on';
   return '='+v;
 }
-const GALLERY_KEYS=[
+const GALLERY_AICORE_KEYS=[
+  'ro.tr_gallery.eraser.v2.support',
+  'ro.tr_gallery.ext.image.support'
+];
+const GALLERY_CRASH_KEYS=[
   'ro.tr_gallery.ai_art.support',
   'ro.tr_gallery.ai.studio.lite.support',
-  'ro.tr_gallery.eraser.v2.support',
-  'ro.tr_gallery.ext.image.support',
   'ro.tr_gallery.hd.support',
   'ro.tr_gallery.group.enhance.support',
   'ro.tr_gallery.shadow.enhance.support',
@@ -449,7 +451,8 @@ async function writeAiSystemProp(){
     'ro.tr_aiassistant.aiphone_summany.feature.support='+aiTf('ai_call_summary')
   ];
   const gal=ai01('ai_gallery');
-  GALLERY_KEYS.forEach(k=>lines.push(k+'='+gal));
+  GALLERY_AICORE_KEYS.forEach(k=>lines.push(k+'='+gal));
+  GALLERY_CRASH_KEYS.forEach(k=>lines.push(k+'=0'));
   lines.push('ro.tr_video.vee.support='+ai01('ai_video'));
   const body=lines.join('\n')+'\n';
   const esc=body.replace(/'/g,"'\\''");
@@ -471,7 +474,7 @@ async function saveAll(){
     ai_writing:cfg.ai_writing!==false,
     ai_sound_rec:cfg.ai_sound_rec!==false,
     ai_notes:cfg.ai_notes!==false,
-    ai_gallery:cfg.ai_gallery===true,
+    ai_gallery:cfg.ai_gallery!==false,
     ai_video:cfg.ai_video===true
   };
   const json=JSON.stringify(slim,null,2).replace(/'/g,"'\\''");
@@ -491,7 +494,8 @@ async function dumpAi(){
     'ro.os_ai_writing.support',
     'ro.tr_aiassistant.aiphone.feature.support',
     'ro.tr_aiassistant.aiphone_summany.feature.support',
-    ...GALLERY_KEYS,
+    ...GALLERY_AICORE_KEYS,
+    ...GALLERY_CRASH_KEYS,
     'ro.tr_video.vee.support'
   ];
   const lines=['=== keys this module writes ==='];
@@ -503,6 +507,10 @@ async function dumpAi(){
   lines.push('=== other live AI-like keys (first 80) ===');
   const live=await g("getprop | grep -iE 'ai_|aiphone|subtitle|soundrecorder|note_ai|aicore|aipower|ask_ai|tr_gallery|tr_video.vee|studio.lite' | head -80");
   lines.push(live||'(none)');
+  lines.push('');
+  lines.push('=== gallery / aicore packages ===');
+  const pkgs=await g("pm list packages | grep -iE 'gallery|aicore|aiedit|photoedit|imagesdk|nexusflow' | head -40");
+  lines.push(pkgs||'(none)');
   lines.push('');
   lines.push('=== stock build files (do these keys exist without the module?) ===');
   const stock=await g("for f in /system/build.prop /system/system/build.prop /product/build.prop /system/product/build.prop /system/product/etc/build.prop /vendor/build.prop /odm/etc/build.prop /tr_product/build.prop /tr_product/etc/build.prop; do [ -f \"$f\" ] || continue; hits=$(grep -E 'aicorespeech_subtitle|aicorespeech_livecaption|tr_soundrecorder.summary|tr_note.ai_draw|os_ai_writing|aiphone.feature|aiphone_summany|tr_gallery|tr_video.vee' \"$f\" 2>/dev/null); [ -n \"$hits\" ] && echo \"$f\" && echo \"$hits\"; done");
@@ -609,7 +617,7 @@ async function handleStatusbar(input){
 }
 async function loadDevice(){
   const prop=await g('cat "'+MOD+'/module.prop" 2>/dev/null');
-  const ver=(prop.match(/^version=(.+)$/m)||[])[1]||'V1.24';
+  const ver=(prop.match(/^version=(.+)$/m)||[])[1]||'V1.25';
   n('module-version-sub', ver+' · OS 16 AI Suite');
   let type=await g('getprop ro.tran.os.type');
   let verOs=await g('getprop ro.transsion.os.version');
@@ -649,7 +657,7 @@ async function loadCfg(){
   try{ if(raw) cfg={...cfg, ...JSON.parse(raw)}; }catch(e){}
   if(cfg.ai_writing===undefined) cfg.ai_writing=cfg.ai_notif_summary!==false;
   if(cfg.ai_call_summary===undefined) cfg.ai_call_summary=false;
-  if(cfg.ai_gallery===undefined) cfg.ai_gallery=false;
+  if(cfg.ai_gallery===undefined) cfg.ai_gallery=true;
   if(cfg.ai_video===undefined) cfg.ai_video=false;
   setStyle(cfg.bootanim_style||'hios16');
   if(!cfg.rebootanim_style) cfg.rebootanim_style=cfg.shutdownanim_style||'hios16';
@@ -674,7 +682,7 @@ async function loadCfg(){
   setT('feat-ai-write', cfg.ai_writing!==false);
   setT('feat-ai-rec', cfg.ai_sound_rec!==false);
   setT('feat-ai-note', cfg.ai_notes!==false);
-  setT('feat-ai-gallery', cfg.ai_gallery===true);
+  setT('feat-ai-gallery', cfg.ai_gallery!==false);
   setT('feat-ai-video', cfg.ai_video===true);
   syncAiChildren();
 }
