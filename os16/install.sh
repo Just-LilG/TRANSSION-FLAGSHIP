@@ -15,7 +15,7 @@ print_modname() {
   ui_print " "
   ui_print "  ╔══════════════════════════════════════════╗"
   ui_print "  ║    TRANSSION FLAGSHIP 16                 ║"
-  ui_print "  ║    XOS · HiOS · iTel OS 16  ·  V1.15     ║"
+  ui_print "  ║    XOS · HiOS · iTel OS 16  ·  V1.16     ║"
   ui_print "  ╚══════════════════════════════════════════╝"
   ui_print " "
 }
@@ -171,12 +171,13 @@ on_install() {
            -e 's/"statusbar_style": *"xos16"/"statusbar_style": "off"/' \
            "$MODPATH/config.json"
   else
-    ui_ok "Default config: HiOS 16 boot + reboot, status bar stock"
+    ui_ok "Default config: HiOS 16 boot + reboot, AI on, status bar stock"
   fi
 
   ui_ok "Boot animation"
   ui_ok "Reboot animation"
   ui_ok "Status bar: upload your own overlay, or leave stock"
+  ui_ok "AI Suite (on — turn off in WebUI if you do not want it)"
 }
 
 set_permissions() {
@@ -186,9 +187,9 @@ set_permissions() {
   done
   ui_print " "
   ui_div
-  ui_print "  ✨  FLAGSHIP 16  ·  V1.15"
+  ui_print "  ✨  FLAGSHIP 16  ·  V1.16"
   ui_info "OS     : $OS_TYPE $OS_VER"
-  ui_info "Feature: boot + reboot animation + custom status-bar overlay"
+  ui_info "Feature: boot + reboot + custom overlay + AI suite"
   ui_div
   ui_print "  Reboot, then open WebUI in Magisk/KSU."
   ui_print " "
