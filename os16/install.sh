@@ -42,7 +42,7 @@ write_os16_ai_prop() {
   writing=$(ai_01 "$cfg" "$master" ai_writing true)
   call=$(ai_tf "$cfg" "$master" ai_call_summary false)
   gal=$(ai_01 "$cfg" "$master" ai_gallery true)
-  vee=$(ai_01 "$cfg" "$master" ai_video false)
+  vee=$(ai_01 "$cfg" "$master" ai_video true)
   cat > "$dest" <<EOF
 # Flagship 16 — OS 16 AI keys. Magisk loads this file at boot.
 # Apply in WebUI rewrites this file from the AI Suite toggles. Reboot to take effect.
@@ -71,7 +71,7 @@ print_modname() {
   ui_print " "
   ui_print "  ╔══════════════════════════════════════════╗"
   ui_print "  ║    TRANSSION FLAGSHIP 16                 ║"
-  ui_print "  ║    XOS · HiOS · iTel OS 16  ·  V1.26     ║"
+  ui_print "  ║    XOS · HiOS · iTel OS 16  ·  V1.27     ║"
   ui_print "  ╚══════════════════════════════════════════╝"
   ui_print " "
 }
@@ -223,13 +223,13 @@ on_install() {
   if [ -f "$CFG" ]; then
     ui_ok "Existing Flagship 16 config preserved"
     cp "$CFG" "$MODPATH/config.json"
-    # Undo V1.24 gallery-off and V1.25 eraser-only. Keep video off.
-    # Gallery keys are all written from ai_gallery (menus for show).
+    # Undo V1.24 gallery/video-off and V1.25 eraser-only.
+    # Gallery + VEE keys are written from the matching toggles.
     sed -i -e 's/"statusbar_style": *"ios"/"statusbar_style": "off"/' \
            -e 's/"statusbar_style": *"xos16"/"statusbar_style": "off"/' \
            -e 's/"ai_notif_summary"/"ai_writing"/' \
            -e 's/"ai_gallery": false/"ai_gallery": true/' \
-           -e 's/"ai_video": true/"ai_video": false/' \
+           -e 's/"ai_video": false/"ai_video": true/' \
            "$MODPATH/config.json"
   else
     ui_ok "Default config: HiOS 16 boot + reboot, AI on, status bar stock"
@@ -253,7 +253,7 @@ set_permissions() {
   done
   ui_print " "
   ui_div
-  ui_print "  ✨  FLAGSHIP 16  ·  V1.26"
+  ui_print "  ✨  FLAGSHIP 16  ·  V1.27"
   ui_info "OS     : $OS_TYPE $OS_VER"
   ui_info "Feature: boot + reboot + overlay + OS 16 AI Suite"
   ui_div

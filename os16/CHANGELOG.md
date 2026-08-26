@@ -1,5 +1,8 @@
 # Transsion Flagship 16
 
+## v1.27
+- **AI Video Enhancement back on.** V1.24–V1.26 left `ro.tr_video.vee.support` at `0`. This build writes it to `1` again (toggle on by default; upgrade from those builds turns it back on). Apply + reboot, then check video playback. Gallery menus stay as in V1.26.
+
 ## v1.26
 - **All AI Gallery menus for show.** V1.25 only unhid Eraser/Expand. This build writes every Gallery key to `1` again: Art, Studio lite, eraser, expand, HD, group/shadow enhance, bokeh, compose. Video VEE stays off. Tapping Art/Studio/HD can still crash AI Gallery Edit — this phone has the menus, not the GT editor/models. Apply + reboot, then check Gallery.
 
