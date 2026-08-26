@@ -1,5 +1,8 @@
 # Transsion Flagship 16
 
+## v1.21
+- **OS 16 AI keys off.** Device dump showed Flagship 15 names at 0 with stock AI still visible. This phone uses `ro.tr_*` keys. Magisk `system.prop` now sets off: speech subtitles, live caption, sound-recorder summary, notes draw, and AI writing. Dump AI flags + Copy log after reboot. If those Settings options hide, the keys are real.
+
 ## v1.20
 - **Copy log on Home.** Dump AI flags (and the boot log) can be copied with one tap. Dump also tries to copy automatically.
 
