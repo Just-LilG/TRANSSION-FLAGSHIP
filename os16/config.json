@@ -5,7 +5,7 @@
   "rebootanim_file": "",
   "statusbar_style": "off",
   "statusbarcustom_file": "",
-  "ai_master": true,
+  "ai_master": false,
   "ai_subtitles": true,
   "ai_call_summary": true,
   "ai_notif_summary": true,

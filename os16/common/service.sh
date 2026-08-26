@@ -14,7 +14,7 @@ cfg_get() {
 }
 cfg_bool() { [ "$(cfg_get "$1" "$2")" = "true" ] && echo 1 || echo 0; }
 
-log_p "=== TransFlagship 16 V1.16 ==="
+log_p "=== TransFlagship 16 V1.17 ==="
 log_p "Device : $(getprop ro.product.model 2>/dev/null)"
 log_p "Brand  : $(getprop ro.product.brand 2>/dev/null)"
 log_p "Android: $(getprop ro.build.version.release 2>/dev/null)"
@@ -26,7 +26,7 @@ if [ -f "$MODDIR/install_diagnostic.txt" ]; then
 fi
 log_p "config: $([ -f "$CFG" ] && cat "$CFG" || echo missing)"
 
-AM=$(cfg_bool ai_master true)
+AM=$(cfg_bool ai_master false)
 if [ "$AM" = "1" ]; then
     resetprop ro.sys.tran.ai_subtitles_support $(cfg_bool ai_subtitles true)
     resetprop ro.sys.tran.aiphone_summary_support $(cfg_bool ai_call_summary true)

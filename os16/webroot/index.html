@@ -139,7 +139,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
         </div>
         <div class="hero-card">
           <div class="hero-title">Transsion Flagship 16</div>
-          <div class="hero-sub" id="module-version-sub">V1.16 · boot, reboot, overlay, AI</div>
+          <div class="hero-sub" id="module-version-sub">V1.17 · AI off (test hide)</div>
         </div>
         <div class="h8"></div>
         <div class="warn-card" id="old-mod-warn">Flagship 15 is still installed. This installer disables it. Remove it from Magisk/KSU so the two modules do not fight.</div>
@@ -156,7 +156,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
             <li class="on">Boot animation — verified</li>
             <li class="on">Reboot animation — verified</li>
             <li>Status bar overlay — upload your own APK</li>
-            <li class="next">AI Suite — Apply, reboot, then check Settings</li>
+            <li class="next">AI Suite — off this flash; stock AI should hide if the props work</li>
           </ul>
         </div>
         <div class="section-label">Status bar</div>
@@ -184,9 +184,9 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
           <div class="setting-row">
             <div class="row-text">
               <div class="row-title">AI Suite</div>
-              <div class="row-sub">Master switch for the options below</div>
+              <div class="row-sub">Off this build so stock AI can hide if the flags work</div>
             </div>
-            <label class="toggle"><input type="checkbox" id="feat-ai" checked onchange="setAi('ai_master',this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+            <label class="toggle"><input type="checkbox" id="feat-ai" onchange="setAi('ai_master',this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
           </div>
           <div class="setting-row">
             <div class="row-text">
@@ -303,7 +303,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
 <script type="module">
 const MOD='/data/adb/modules/transsion-flagship-16';
 const CONFIG_PATH=MOD+'/config.json';
-let cfg={bootanim_style:'hios16',bootanim_file:'',rebootanim_style:'hios16',rebootanim_file:'',statusbar_style:'off',statusbarcustom_file:'',ai_master:true,ai_subtitles:true,ai_call_summary:true,ai_notif_summary:true,ai_sound_rec:true,ai_notes:true};
+let cfg={bootanim_style:'hios16',bootanim_file:'',rebootanim_style:'hios16',rebootanim_file:'',statusbar_style:'off',statusbarcustom_file:'',ai_master:false,ai_subtitles:true,ai_call_summary:true,ai_notif_summary:true,ai_sound_rec:true,ai_notes:true};
 let _exec=null;
 
 async function exec(cmd){
@@ -344,7 +344,7 @@ function setStatusbarStyle(val){
 }
 function setAi(key,el){ cfg[key]=el.checked; }
 function setT(id,v){ const el=document.getElementById(id); if(el) el.checked=!!v; }
-function aiOn(key){ return cfg.ai_master!==false && cfg[key]!==false; }
+function aiOn(key){ return cfg.ai_master===true && cfg[key]!==false; }
 function showConfirm(title,msg,opts={}){
   return new Promise(resolve=>{
     const bd=document.getElementById('modal-backdrop');
@@ -395,7 +395,7 @@ async function saveAll(){
     rebootanim_file:cfg.rebootanim_file||'',
     statusbar_style:cfg.statusbar_style||'off',
     statusbarcustom_file:cfg.statusbarcustom_file||'',
-    ai_master:cfg.ai_master!==false,
+    ai_master:cfg.ai_master===true,
     ai_subtitles:cfg.ai_subtitles!==false,
     ai_call_summary:cfg.ai_call_summary!==false,
     ai_notif_summary:cfg.ai_notif_summary!==false,
@@ -482,8 +482,8 @@ async function handleStatusbar(input){
 }
 async function loadDevice(){
   const prop=await g('cat "'+MOD+'/module.prop" 2>/dev/null');
-  const ver=(prop.match(/^version=(.+)$/m)||[])[1]||'V1.16';
-  n('module-version-sub', ver+' · boot, reboot, overlay, AI');
+  const ver=(prop.match(/^version=(.+)$/m)||[])[1]||'V1.17';
+  n('module-version-sub', ver+' · AI off (test hide)');
   let type=await g('getprop ro.tran.os.type');
   let verOs=await g('getprop ro.transsion.os.version');
   const brand=(await g('getprop ro.product.brand')||'').toLowerCase();
@@ -537,7 +537,7 @@ async function loadCfg(){
     document.getElementById('statusbar-custom-opt').style.display='';
     n('statusbar-file-name','Custom overlay uploaded');
   }
-  setT('feat-ai', cfg.ai_master!==false);
+  setT('feat-ai', cfg.ai_master===true);
   setT('feat-ai-sub', cfg.ai_subtitles!==false);
   setT('feat-ai-call', cfg.ai_call_summary!==false);
   setT('feat-ai-notif', cfg.ai_notif_summary!==false);
