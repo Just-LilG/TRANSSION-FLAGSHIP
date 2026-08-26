@@ -14,6 +14,29 @@ cfg_get() {
 }
 cfg_bool() { [ "$(cfg_get "$1" "$2")" = "true" ] && echo 1 || echo 0; }
 
+# Same rule as install.sh is_xos16: XOS + version 16.x. Used so a missing
+# config key does not turn charging anim / FOD / status-bar overlay on for XOS 16.
+is_xos16() {
+    local type ver
+    type=$(getprop ro.tran.os.type 2>/dev/null)
+    ver=$(getprop ro.transsion.os.version 2>/dev/null)
+    if [ -f "$MODDIR/install_diagnostic.txt" ]; then
+        [ -z "$type" ] && type=$(grep '^detected_OS_TYPE=' "$MODDIR/install_diagnostic.txt" | cut -d= -f2- | tr -d '\r')
+        [ -z "$ver" ] && ver=$(grep '^detected_OS_VER=' "$MODDIR/install_diagnostic.txt" | cut -d= -f2- | tr -d '\r')
+    fi
+    [ "$type" = "XOS" ] || return 1
+    echo "$ver" | grep -qiE '^(xos[-_. ]*)?16([^0-9].*)?$'
+}
+if is_xos16; then
+    CA_DEF=false
+    FOD_DEF=false
+    SB_DEF=off
+else
+    CA_DEF=true
+    FOD_DEF=true
+    SB_DEF=xos16
+fi
+
 log_pfd "config.json exists: $([ -f "$CFG" ] && echo yes || echo no)"
 
 BS_ON=$(cfg_bool boot_sound true)
@@ -25,7 +48,7 @@ for f in "$MODDIR/system/product/media/audio/bootsound/Waltz.ogg"; do
     fi
 done
 
-CA_ON=$(cfg_bool charge_anim true)
+CA_ON=$(cfg_bool charge_anim "$CA_DEF")
 for f in "$MODDIR/system/product/theme/charge/hios_wire_charging_lockscreen.mp4" \
          "$MODDIR/system/product/theme/charge/lockscreen_charge_config.xml"; do
     if [ "$CA_ON" = "0" ]; then
@@ -211,7 +234,7 @@ for dir in "$MODDIR/system/product/media/audio/ui" "$MODDIR/system/media/audio/u
     done
 done
 
-SB_STYLE=$(cfg_get statusbar_style "xos16")
+SB_STYLE=$(cfg_get statusbar_style "$SB_DEF")
 IOS_APK_A="$MODDIR/system/overlay/Icons_Signal_wifi/Icons_Signal_wifi.apk"
 IOS_APK_B="$MODDIR/system/product/overlay/Icons_Signal_wifi/Icons_Signal_wifi.apk"
 XOS16_APK_A="$MODDIR/system/overlay/SystemUISignalOverlay.apk"
@@ -254,7 +277,7 @@ case "$SB_STYLE" in
         ;;
 esac
 
-FOD_ON=$(cfg_bool fod_animation true)
+FOD_ON=$(cfg_bool fod_animation "$FOD_DEF")
 FOD_RES_A="$MODDIR/system/product/overlay/FodResOverlay/FodResOverlay.apk"
 FOD_RES_B="$MODDIR/system/overlay/FodResOverlay/FodResOverlay.apk"
 FOD_SET_A="$MODDIR/system/product/overlay/FodSetOverlay/FodSetOverlay.apk"

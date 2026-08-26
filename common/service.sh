@@ -8,7 +8,7 @@ LOG="$MODDIR/transflagship_service.log"
 rm -f "$LOG"
 log_p() { echo "[$(date '+%H:%M:%S')] $1" >> "$LOG"; }
 
-log_p "=== TransFlagship V4.30 diagnostic header ==="
+log_p "=== TransFlagship V4.31 diagnostic header ==="
 log_p "Device model    : $(getprop ro.product.model 2>/dev/null)"
 log_p "Device marketname: $(getprop ro.product.marketname 2>/dev/null)"
 log_p "Brand           : $(getprop ro.product.brand 2>/dev/null)"
@@ -79,6 +79,20 @@ cfg_get() {
 }
 cfg_bool() { [ "$(cfg_get "$1" "$2")" = "true" ] && echo 1 || echo 0; }
 cfg_int()  { cfg_get "$1" "$2"; }
+
+is_xos16() {
+    local type ver
+    type=$(getprop ro.tran.os.type 2>/dev/null)
+    ver=$(getprop ro.transsion.os.version 2>/dev/null)
+    if [ -f "$MODDIR/install_diagnostic.txt" ]; then
+        [ -z "$type" ] && type=$(grep '^detected_OS_TYPE=' "$MODDIR/install_diagnostic.txt" | cut -d= -f2- | tr -d '\r')
+        [ -z "$ver" ] && ver=$(grep '^detected_OS_VER=' "$MODDIR/install_diagnostic.txt" | cut -d= -f2- | tr -d '\r')
+    fi
+    [ "$type" = "XOS" ] || return 1
+    echo "$ver" | grep -qiE '^(xos[-_. ]*)?16([^0-9].*)?$'
+}
+CA_DEF=true
+is_xos16 && CA_DEF=false
 
 settings_put global window_animation_scale 1.0
 settings_put global transition_animation_scale 1.0
@@ -181,7 +195,7 @@ log_p "Experimental performance tuning = $PERF_TUNING_ON"
 
 log_p "Boot sound / anim / emoji font handled in post-fs-data.sh"
 
-CA_ON=$(cfg_bool charge_anim true)
+CA_ON=$(cfg_bool charge_anim "$CA_DEF")
 resetprop ro.tran.charge_animation_support "$CA_ON"
 resetprop ro.tran.lockscreen_charge_anim "$CA_ON"
 am force-stop com.transsion.aichargeprovider 2>/dev/null
@@ -190,4 +204,4 @@ log_p "Charging anim = $CA_ON"
 resetprop ro.tranos_hidenavigationbar_support $(cfg_bool nav_hide false)
 log_p "Nav hide = $(cfg_bool nav_hide false)"
 
-log_p "=== TransFlagship V4.30 service complete ==="
+log_p "=== TransFlagship V4.31 service complete ==="

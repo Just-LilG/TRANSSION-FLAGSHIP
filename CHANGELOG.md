@@ -1,5 +1,8 @@
 # Changelog
 
+## v4.31
+- **XOS 16 missing-key defaults now stay off at boot.** `post-fs-data.sh` / `service.sh` still used `charge_anim` default true, `fod_animation` default true, and `statusbar_style` default `xos16`. A config without those keys (or a partial file) turned charging animation, fingerprint animation, and the status-bar overlay back on. Boot now uses the same XOS 16 defaults as the installer and WebUI: all three off.
+
 ## v4.30
 - **Live Status now follows master toggles and the recents prop we actually ship.** Gaming and AI sub-items (and Social Turbo) were compared against their own switches even when the suite master was off, so they showed MISMATCH after a correct Apply. Recent Apps still expected `ro.transsion_recent_animation_support=3`, which was removed because it ghosted recents — it now checks `ro.transsion.recent_animation.model=3` instead.
 
