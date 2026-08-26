@@ -139,7 +139,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
         </div>
         <div class="hero-card">
           <div class="hero-title">Transsion Flagship 16</div>
-          <div class="hero-sub" id="module-version-sub">V1.11 · charging animation</div>
+          <div class="hero-sub" id="module-version-sub">V1.12 · charging animation</div>
         </div>
         <div class="h8"></div>
         <div class="warn-card" id="old-mod-warn">Flagship 15 is still installed. This installer disables it. Remove it from Magisk/KSU so the two modules do not fight.</div>
@@ -170,6 +170,12 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
           <div class="setting-row"><div class="row-text"><div class="row-title">Diagnostics</div><div class="row-sub">If boot sound is silent, tap dump and send the box</div></div></div>
           <div class="file-row"><button class="action-btn btn-primary" onclick="dumpAudio()" style="padding:11px">Dump audio paths</button></div>
           <div class="log-box" id="audio-dump">Tap Dump audio paths</div>
+        </div>
+        <div class="section-label">Charge dump</div>
+        <div class="glass-card">
+          <div class="setting-row"><div class="row-text"><div class="row-title">Diagnostics</div><div class="row-sub">If charging animation does not play, tap dump and send the box</div></div></div>
+          <div class="file-row"><button class="action-btn btn-primary" onclick="dumpCharge()" style="padding:11px">Dump charge paths</button></div>
+          <div class="log-box" id="charge-dump">Tap Dump charge paths</div>
         </div>
       </div>
 
@@ -407,6 +413,14 @@ async function dumpAudio(){
   document.getElementById('audio-dump').textContent=dump||'(dump failed — is the module installed?)';
   toast(dump?'Dump ready — copy from Home':'Dump failed');
 }
+async function dumpCharge(){
+  toast('Dumping charge paths…', 12000);
+  const cmd='{ echo "=== live theme ==="; ls -la /tr_product/theme /tr_product/theme/charge /product/theme/charge /system/product/theme/charge 2>/dev/null; echo; echo "=== module trees ==="; ls -la "'+MOD+'/tr_product/theme/charge" "'+MOD+'/system/product/theme/charge" "'+MOD+'/product/theme/charge" "'+MOD+'/.charge_tr" 2>/dev/null; echo; echo "=== mountify ==="; ls -la /mnt/vendor/mountify/tr_product/theme/charge /mnt/vendor/mountify/product/theme/charge 2>/dev/null; echo; echo "=== xml ==="; grep -E "resourcePath|fileName|fileMd5" /tr_product/theme/charge/lockscreen_charge_config.xml /product/theme/charge/lockscreen_charge_config.xml "'+MOD+'/tr_product/theme/charge/lockscreen_charge_config.xml" 2>/dev/null; echo; echo "=== props ==="; echo "charge_animation_support=$(getprop ro.tran.charge_animation_support)"; echo "lockscreen_charge_anim=$(getprop ro.tran.lockscreen_charge_anim)"; echo "pm=$(pm path com.transsion.aichargeprovider 2>/dev/null)"; echo; echo "=== config ==="; cat "'+MOD+'/config.json" 2>/dev/null; echo; echo "=== post_fs_data charge ==="; grep -iE "charge|theme/charge|CHARGE_|mountify theme|place_charge|bind-dir|created dest" "'+MOD+'/post_fs_data.log" 2>/dev/null; echo; echo "=== service.log ==="; cat "'+MOD+'/transflagship16_service.log" 2>/dev/null; } > "'+MOD+'/charge_dump.txt" 2>&1';
+  await exec(cmd);
+  const dump=await g('cat "'+MOD+'/charge_dump.txt" 2>/dev/null');
+  document.getElementById('charge-dump').textContent=dump||'(dump failed — is the module installed?)';
+  toast(dump?'Dump ready — copy from Home':'Dump failed');
+}
 async function handleBootanim(input){
   if(!input.files.length) return;
   const file=input.files[0];
@@ -506,7 +520,7 @@ async function handleBootsound(input){
 }
 async function loadDevice(){
   const prop=await g('cat "'+MOD+'/module.prop" 2>/dev/null');
-  const ver=(prop.match(/^version=(.+)$/m)||[])[1]||'V1.11';
+  const ver=(prop.match(/^version=(.+)$/m)||[])[1]||'V1.12';
   n('module-version-sub', ver+' · charging animation');
   let type=await g('getprop ro.tran.os.type');
   let verOs=await g('getprop ro.transsion.os.version');
@@ -538,6 +552,8 @@ async function loadDevice(){
   document.getElementById('pfd-log').textContent=log||'(no boot log yet — reboot once)';
   const dump=await g('cat "'+MOD+'/audio_dump.txt" 2>/dev/null');
   if(dump) document.getElementById('audio-dump').textContent=dump;
+  const cdump=await g('cat "'+MOD+'/charge_dump.txt" 2>/dev/null');
+  if(cdump) document.getElementById('charge-dump').textContent=cdump;
 }
 async function loadCfg(){
   const raw=await g('cat "'+CONFIG_PATH+'" 2>/dev/null');
@@ -588,6 +604,7 @@ window.handleRebootanim=handleRebootanim;
 window.handleChargeanim=handleChargeanim;
 window.handleBootsound=handleBootsound;
 window.dumpAudio=dumpAudio;
+window.dumpCharge=dumpCharge;
 </script>
 </body>
 </html>
