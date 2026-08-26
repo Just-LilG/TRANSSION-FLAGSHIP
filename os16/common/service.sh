@@ -5,7 +5,7 @@ LOG="$MODDIR/transflagship16_service.log"
 rm -f "$LOG"
 log_p() { echo "[$(date '+%H:%M:%S')] $1" >> "$LOG"; }
 
-log_p "=== TransFlagship 16 V1.07 ==="
+log_p "=== TransFlagship 16 V1.08 ==="
 log_p "Device : $(getprop ro.product.model 2>/dev/null)"
 log_p "Brand  : $(getprop ro.product.brand 2>/dev/null)"
 log_p "Android: $(getprop ro.build.version.release 2>/dev/null)"
@@ -28,32 +28,51 @@ else
     resetprop persist.sys.media.bootanim.play_sound 1 2>/dev/null
 fi
 log_p "boot_sound=$BS play_sound=$(getprop persist.sys.bootanim.play_sound 2>/dev/null)"
-log_p "sibling: $(ls -l /tr_product/media/bootsound.mp3 /tr_product/media/bootsound.ogg /tr_product/media/audio.ogg 2>/dev/null)"
-log_p "bootanim svc=$(getprop init.svc.bootanim 2>/dev/null) boot_completed=$(getprop sys.boot_completed 2>/dev/null)"
-ls -l /system/bin/tinyplay /vendor/bin/tinyplay /system/bin/aplay /dev/snd >> "$LOG" 2>/dev/null
+log_p "audio=$(service check audio 2>/dev/null) anim=$(getprop init.svc.bootanim 2>/dev/null) pid=$(pidof bootanimation 2>/dev/null) completed=$(getprop sys.boot_completed 2>/dev/null)"
+log_p "zip audio members:"
+( unzip -l /tr_product/media/bootanimation.zip 2>/dev/null || true ) | grep -iE 'audio|folder1|part1|desc' >> "$LOG"
+log_p "restarted=$([ -f "$MODDIR/.bootanim_restarted" ] && cat "$MODDIR/.bootanim_restarted" || echo no)"
 
-# Second chance only while bootanim is still up. Do not chime after lockscreen.
-WAV=""
-[ -f "$MODDIR/.boot_play.wav" ] && WAV=$(cat "$MODDIR/.boot_play.wav")
-if [ "$BS" != "off" ] && [ -n "$WAV" ] && [ -f "$WAV" ]; then
-    if [ "$(getprop init.svc.bootanim 2>/dev/null)" = "running" ] \
-        || [ "$(getprop sys.boot_completed 2>/dev/null)" != "1" ]; then
-        player=""
-        for p in /system/bin/tinyplay /vendor/bin/tinyplay /system_ext/bin/tinyplay \
-                 /system/bin/aplay /vendor/bin/aplay; do
-            [ -x "$p" ] && { player="$p"; break; }
-        done
-        if [ -n "$player" ]; then
-            log_p "service tinyplay: $player $WAV"
-            "$player" "$WAV" >> "$LOG" 2>&1 || "$player" "$WAV" -D 0 -d 0 >> "$LOG" 2>&1
-            log_p "service tinyplay done rc=$?"
-        else
-            log_p "service tinyplay: no player"
+# Second chance: AOSP audioplay.cpp skips zip audio.wav forever if audioserver
+# was not up when bootanim first started. Wait briefly while animation may
+# still be up (late_start can race either side of bootanim).
+if [ "$BS" != "off" ]; then
+    n=0
+    while [ "$n" -lt 15 ]; do
+        if [ -f "$MODDIR/.bootanim_restarted" ]; then
+            log_p "service skip restart (already: $(cat "$MODDIR/.bootanim_restarted" 2>/dev/null))"
+            break
         fi
-    else
-        log_p "skip service tinyplay (boot already completed)"
-    fi
+        chk=$(service check audio 2>/dev/null)
+        anim=$(getprop init.svc.bootanim 2>/dev/null)
+        case "$chk" in
+            *found*) audio_ok=1 ;;
+            *) audio_ok=0 ;;
+        esac
+        running=0
+        [ "$anim" = "running" ] && running=1
+        pidof bootanimation >/dev/null 2>&1 && running=1
+        log_p "service wait audio='$chk' anim=$anim running=$running n=$n"
+        if [ "$audio_ok" = 1 ] && [ "$running" = 1 ]; then
+            if mkdir "$MODDIR/.bootanim_restart.lock" 2>/dev/null; then
+                echo "service audio+bootanim" > "$MODDIR/.bootanim_restarted"
+                log_p "service second-chance ctl.restart bootanim"
+                setprop ctl.restart bootanim
+                sleep 1
+                log_p "after restart anim=$(getprop init.svc.bootanim 2>/dev/null) pid=$(pidof bootanimation 2>/dev/null)"
+            else
+                log_p "service skip restart (already claimed: $(cat "$MODDIR/.bootanim_restarted" 2>/dev/null))"
+            fi
+            break
+        fi
+        if [ "$(getprop sys.boot_completed 2>/dev/null)" = "1" ] && [ "$running" = 0 ]; then
+            log_p "service skip restart (boot already completed, anim gone)"
+            break
+        fi
+        n=$((n + 1))
+        sleep 1
+    done
 else
-    log_p "service tinyplay: no wav marker"
+    log_p "service skip restart (boot sound off)"
 fi
 log_p "=== service complete (boot anim applied in post-fs-data) ==="
