@@ -139,7 +139,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
         </div>
         <div class="hero-card">
           <div class="hero-title">Transsion Flagship 16</div>
-          <div class="hero-sub" id="module-version-sub">V1.03 · boot animation + boot sound</div>
+          <div class="hero-sub" id="module-version-sub">V1.04 · boot animation + boot sound</div>
         </div>
         <div class="h8"></div>
         <div class="warn-card" id="old-mod-warn">Flagship 15 is still installed. This installer disables it. Remove it from Magisk/KSU so the two modules do not fight.</div>
@@ -213,7 +213,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
           <div class="setting-row">
             <div class="row-text">
               <div class="row-title">Boot sound</div>
-              <div class="row-sub">Injects audio.wav into the boot zip; also overlays /tr_product/media/audio</div>
+              <div class="row-sub">WAV inside the boot animation part folder. Custom works best as .wav</div>
             </div>
           </div>
           <div class="segmented" id="bootsound-picker">
@@ -223,7 +223,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
           </div>
           <div class="file-row">
             <label class="file-btn">
-              Upload custom ogg or wav
+              Upload custom wav (ogg overlay only)
               <input type="file" accept=".ogg,.wav,audio/ogg,audio/wav" onchange="handleBootsound(this)">
             </label>
             <div class="file-name" id="bootsound-file-name">Pack: Waltz</div>
@@ -399,7 +399,7 @@ async function handleBootsound(input){
 }
 async function loadDevice(){
   const prop=await g('cat "'+MOD+'/module.prop" 2>/dev/null');
-  const ver=(prop.match(/^version=(.+)$/m)||[])[1]||'V1.03';
+  const ver=(prop.match(/^version=(.+)$/m)||[])[1]||'V1.04';
   n('module-version-sub', ver+' · boot animation + boot sound');
   let type=await g('getprop ro.tran.os.type');
   let verOs=await g('getprop ro.transsion.os.version');

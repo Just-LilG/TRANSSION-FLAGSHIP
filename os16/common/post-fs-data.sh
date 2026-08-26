@@ -131,45 +131,110 @@ merge_tree() {
     done
 }
 
-# AOSP bootanim plays audio.wav from inside the zip. Transsion may also look for audio.ogg.
-try_inject_audio() {
-    zipfile="$1"
-    ogg="$2"
-    wav="$3"
-    [ -f "$zipfile" ] || return 1
-    tmpd="$MODDIR/.boot_inject"
-    rm -rf "$tmpd"
-    mkdir -p "$tmpd"
-    names=""
-    if [ -f "$wav" ]; then
-        cp "$wav" "$tmpd/audio.wav"
-        names="$names audio.wav"
-    fi
-    if [ -f "$ogg" ]; then
-        cp "$ogg" "$tmpd/audio.ogg"
-        cp "$ogg" "$tmpd/bootsound.ogg"
-        names="$names audio.ogg bootsound.ogg"
-    fi
-    [ -n "$names" ] || { rm -rf "$tmpd"; return 1; }
+zip_bin() {
     BB=$(busybox_bin)
-    ZIPBIN=""
     if [ -n "$BB" ]; then
-        ZIPBIN="$BB zip"
-    elif command -v zip >/dev/null 2>&1; then
-        ZIPBIN="zip"
-    fi
-    if [ -z "$ZIPBIN" ]; then
-        log_pfd "zip inject skipped (no busybox/zip): $zipfile"
-        rm -rf "$tmpd"
-        return 1
-    fi
-    # shellcheck disable=SC2086
-    if ( cd "$tmpd" && $ZIPBIN -j -u "$zipfile" $names ); then
-        log_pfd "injected $names into $zipfile"
-        rm -rf "$tmpd"
+        echo "$BB zip"
         return 0
     fi
-    log_pfd "zip inject FAIL $zipfile"
+    if command -v zip >/dev/null 2>&1; then
+        echo zip
+        return 0
+    fi
+    return 1
+}
+
+unzip_p() {
+    zipfile="$1"
+    member="$2"
+    if command -v unzip >/dev/null 2>&1; then
+        unzip -p "$zipfile" "$member" 2>/dev/null && return 0
+    fi
+    BB=$(busybox_bin)
+    [ -n "$BB" ] && $BB unzip -p "$zipfile" "$member" 2>/dev/null
+}
+
+bootanim_part() {
+    zipfile="$1"
+    desc=$(unzip_p "$zipfile" desc.txt | tr -d '\r')
+    part=$(printf '%s\n' "$desc" | awk 'NR>1 && ($1=="p"||$1=="c") && ($2+0)>0 {print $4; exit}')
+    [ -z "$part" ] && part=$(printf '%s\n' "$desc" | awk 'NR>1 && ($1=="p"||$1=="c") {print $4; exit}')
+    [ -n "$part" ] && echo "$part"
+}
+
+strip_zip_audio() {
+    zipfile="$1"
+    [ -f "$zipfile" ] || return 1
+    part=$(bootanim_part "$zipfile")
+    [ -n "$part" ] || return 1
+    ZIPBIN=$(zip_bin)
+    [ -n "$ZIPBIN" ] || return 1
+    if $ZIPBIN -d "$zipfile" "$part/audio.wav" >/dev/null 2>&1; then
+        log_pfd "stripped $part/audio.wav from $zipfile"
+        return 0
+    fi
+    return 1
+}
+
+set_play_sound() {
+    val="$1"
+    if command -v resetprop >/dev/null 2>&1; then
+        resetprop -n persist.sys.bootanim.play_sound "$val" 2>/dev/null \
+            || resetprop persist.sys.bootanim.play_sound "$val" 2>/dev/null
+    elif [ -x /data/adb/magisk/resetprop ]; then
+        /data/adb/magisk/resetprop -n persist.sys.bootanim.play_sound "$val" 2>/dev/null
+    elif [ -x /data/adb/ksu/bin/resetprop ]; then
+        /data/adb/ksu/bin/resetprop -n persist.sys.bootanim.play_sound "$val" 2>/dev/null
+    fi
+    log_pfd "persist.sys.bootanim.play_sound=$val live=$(getprop persist.sys.bootanim.play_sound 2>/dev/null)"
+}
+
+# AOSP plays audio.wav from the *part folder* (part1/audio.wav), not zip root.
+# zip -j put the file at the root, which bootanimation ignores.
+try_inject_audio() {
+    zipfile="$1"
+    wav="$2"
+    [ -f "$zipfile" ] || return 1
+    [ -f "$wav" ] || { log_pfd "inject skip (no wav)"; return 1; }
+    part=$(bootanim_part "$zipfile")
+    [ -n "$part" ] || part="part1"
+    log_pfd "inject into $part/audio.wav"
+    tmpd="$MODDIR/.boot_inject"
+    rm -rf "$tmpd"
+    mkdir -p "$tmpd/$part"
+    cp "$wav" "$tmpd/$part/audio.wav"
+    ZIPBIN=$(zip_bin)
+    if [ -n "$ZIPBIN" ]; then
+        if ( cd "$tmpd" && $ZIPBIN -0 -u "$zipfile" "$part/audio.wav" ); then
+            log_pfd "injected $part/audio.wav (store) into $zipfile"
+            rm -rf "$tmpd"
+            return 0
+        fi
+        log_pfd "zip -0 -u FAIL, rebuilding zip"
+        work="$MODDIR/.boot_rebuild"
+        rm -rf "$work"
+        mkdir -p "$work"
+        if command -v unzip >/dev/null 2>&1; then
+            unzip -o "$zipfile" -d "$work" >/dev/null 2>&1
+        else
+            BB=$(busybox_bin)
+            [ -n "$BB" ] && $BB unzip -o "$zipfile" -d "$work" >/dev/null 2>&1
+        fi
+        mkdir -p "$work/$part"
+        cp "$wav" "$work/$part/audio.wav"
+        out="$MODDIR/.boot_repacked.zip"
+        rm -f "$out"
+        if ( cd "$work" && $ZIPBIN -0 -r "$out" . ); then
+            mv "$out" "$zipfile"
+            log_pfd "rebuilt zip with $part/audio.wav"
+            rm -rf "$tmpd" "$work"
+            return 0
+        fi
+        log_pfd "zip rebuild FAIL"
+        rm -rf "$tmpd" "$work"
+        return 1
+    fi
+    log_pfd "zip inject skipped (no zip binary)"
     rm -rf "$tmpd"
     return 1
 }
@@ -252,6 +317,11 @@ BS=$(cfg_get boot_sound "waltz")
 [ "$BS" = "true" ] && BS=waltz
 [ "$BS" = "false" ] && BS=off
 log_pfd "bootanim_style=$BA_STYLE boot_sound=$BS"
+if [ "$BS" = "off" ]; then
+    set_play_sound 0
+else
+    set_play_sound 1
+fi
 
 pick_boot_zip() {
     style="$1"
@@ -347,12 +417,20 @@ if [ "$BS" != "off" ] && { [ -n "$SRC_BOOTSOUND" ] || [ -n "$SRC_BOOTWAV" ]; }; 
         cp -f "$SRC_BOOTWAV" "$TRP_STAGE/audio/bootsound/Waltz.wav"
     fi
     if [ -f "$STAGED" ]; then
-        try_inject_audio "$STAGED" "$SRC_BOOTSOUND" "$SRC_BOOTWAV"
+        if [ -n "$SRC_BOOTWAV" ]; then
+            try_inject_audio "$STAGED" "$SRC_BOOTWAV"
+        else
+            strip_zip_audio "$STAGED"
+            log_pfd "bootsound: no wav — AOSP bootanim will not play zip audio (need .wav, not only .ogg)"
+        fi
+        log_pfd "staged zip audio members:"
+        ( unzip -l "$STAGED" 2>/dev/null || true ) | grep -i audio >> "$PFD_LOG"
     else
         log_pfd "bootsound: no staged zip to inject into"
     fi
 elif [ "$BS" = "off" ]; then
-    log_pfd "bootsound: off — stock audio left unbound"
+    log_pfd "bootsound: off — stripping zip audio, leaving stock audio unbound"
+    [ -f "$STAGED" ] && strip_zip_audio "$STAGED"
 else
     log_pfd "bootsound: no ogg/wav to stage"
 fi

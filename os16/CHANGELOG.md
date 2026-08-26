@@ -1,5 +1,8 @@
 # Transsion Flagship 16
 
+## v1.04
+- **Boot sound actually in the animation.** V1.02 put `audio.wav` at the zip root (`zip -j`). Android 16 bootanim only plays `part1/audio.wav` / `folder1/audio.wav` (the first finite part) and only if `persist.sys.bootanim.play_sound` is not 0. Waltz is now stored in those part folders; custom should be a **.wav**.
+
 ## v1.03
 - Boot sound lives on the **Sounds** tab (same as Flagship 15). Media is boot animation only.
 
