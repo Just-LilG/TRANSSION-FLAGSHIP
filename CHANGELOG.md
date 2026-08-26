@@ -1,5 +1,8 @@
 # Changelog
 
+## v4.35
+- **The boot animation files are actually in the zip this time.** Releases V4.22–V4.34 were packed with `zip -x '*.zip'`, which stripped `bootanim_hios16.zip` / `bootanim_default.zip` (and the shutdown zips) from the flashable archive. Waltz was there; the animations folder on device was empty. On XOS 16 that looked like a bind-path bug; V4.34 then bind-mounted the *stock* `/tr_product/media` zip back over itself. This build includes those archives, ignores empty `product/theme/animations` leftovers, and only replaces the live zip when the selected style file is really present.
+
 ## v4.34
 - **Boot animation and boot sound on XOS 16 actually apply.** V4.33 bind-mounted the wrong places: Mountify rewrites `system/product` to `product`, so the style zips were never found (`bootanim: no module zip to bind`), and the live file on this OS is `/tr_product/media/bootanimation.zip` — not `/product/media`. `post-fs-data.sh` now stages from `$MODDIR/product/theme/animations`, bind-mounts `/tr_product/media` (so missing boot-sound files can be added), injects `audio.ogg` into the zip, and still binds any leftover `bootanimation.zip` it can find. Off still leaves stock unbound.
 

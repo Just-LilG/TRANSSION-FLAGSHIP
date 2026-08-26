@@ -249,24 +249,33 @@ done
 
 # Magisk/Mountify rewrite system/product -> product, so the style zips are
 # often at $MODDIR/product/theme/animations — not system/product/theme/...
+# Skip empty dirs (Mountify leftover) so we do not hide zips still under system/product.
 ANIM_DIR=""
 for d in \
     "$MODDIR/product/theme/animations" \
     "$MODDIR/system/product/theme/animations" \
     "$MODDIR/tr_product/theme/animations" \
-    "$MODDIR/system/tr_product/theme/animations"
+    "$MODDIR/system/tr_product/theme/animations" \
+    /mnt/vendor/mountify/product/theme/animations \
+    /mnt/vendor/mountify/system/product/theme/animations
 do
-    if [ -d "$d" ]; then
+    found=""
+    for f in "$d"/bootanim_*.zip; do
+        [ -f "$f" ] && found="$f" && break
+    done
+    if [ -n "$found" ]; then
         ANIM_DIR="$d"
         break
     fi
 done
 if [ -z "$ANIM_DIR" ]; then
-    hit=$(find "$MODDIR" -name 'bootanim_*.zip' 2>/dev/null | head -n 1)
+    hit=$(find "$MODDIR" /mnt/vendor/mountify -name 'bootanim_*.zip' 2>/dev/null | head -n 1)
     [ -n "$hit" ] && ANIM_DIR=$(dirname "$hit")
 fi
 log_pfd "ANIM_DIR=$ANIM_DIR"
 [ -n "$ANIM_DIR" ] && ls -la "$ANIM_DIR" >> "$PFD_LOG" 2>/dev/null
+log_pfd "module bootanim_*.zip:"
+find "$MODDIR" /mnt/vendor/mountify -name 'bootanim_*.zip' 2>/dev/null >> "$PFD_LOG"
 log_pfd "live /tr_product/media:"
 ls -la /tr_product/media >> "$PFD_LOG" 2>/dev/null
 log_pfd "live /product/media:"
@@ -301,7 +310,9 @@ pick_style_zip() {
             hit=$(first_existing \
                 "$ANIM_DIR/${kind}_$style.zip" \
                 "$MODDIR/product/theme/animations/${kind}_$style.zip" \
-                "$MODDIR/system/product/theme/animations/${kind}_$style.zip")
+                "$MODDIR/system/product/theme/animations/${kind}_$style.zip" \
+                "/mnt/vendor/mountify/product/theme/animations/${kind}_$style.zip" \
+                "/mnt/vendor/mountify/system/product/theme/animations/${kind}_$style.zip")
             [ -n "$hit" ] || hit=$(find "$MODDIR" -name "${kind}_${style}.zip" 2>/dev/null | head -n 1)
             ;;
     esac
@@ -422,7 +433,7 @@ else
     log_pfd "bootsound: off — left stock paths unbound"
 fi
 
-if [ -f "$TRP_STAGE/bootanimation.zip" ]; then
+if [ -n "$SRC_BOOTANIM" ] && [ -f "$TRP_STAGE/bootanimation.zip" ]; then
     cp -f "$TRP_STAGE/bootanimation.zip" "$TRP_STAGE/bootanimation-dark.zip"
     stage_named "$TRP_STAGE/bootanimation.zip" "bootanimation.zip"
     stage_named "$TRP_STAGE/bootanimation.zip" "bootanimation-dark.zip"
@@ -451,7 +462,7 @@ STAGED_SHUT=$(first_existing \
     "$MODDIR/system/product/media/shutdownanimation.zip" \
     "$MODDIR/system/media/shutdownanimation.zip")
 
-if [ "$BA_STYLE" != "off" ] && [ -n "$STAGED_BOOT" ]; then
+if [ "$BA_STYLE" != "off" ] && [ -n "$SRC_BOOTANIM" ] && [ -n "$STAGED_BOOT" ]; then
     log_pfd "bootanim src=$STAGED_BOOT style=$BA_STYLE"
     if [ "$TRP_DIR_BOUND" != "1" ]; then
         try_bind_file "$STAGED_BOOT" /tr_product/media/bootanimation.zip
@@ -474,7 +485,7 @@ elif [ "$BA_STYLE" != "off" ]; then
     log_pfd "bootanim: no module zip to bind (style=$BA_STYLE)"
 fi
 
-if [ "$SA_STYLE" != "off" ] && [ -n "$STAGED_SHUT" ]; then
+if [ "$SA_STYLE" != "off" ] && [ -n "$SRC_SHUTDOWN" ] && [ -n "$STAGED_SHUT" ]; then
     log_pfd "shutdownanim src=$STAGED_SHUT style=$SA_STYLE"
     if [ "$TRP_DIR_BOUND" != "1" ]; then
         try_bind_file "$STAGED_SHUT" /tr_product/media/shutdownanimation.zip
