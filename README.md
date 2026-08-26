@@ -1,35 +1,99 @@
-# ⚡ Advanced System Control & WebUI Module
+# Transsion Flagship — All OS Edition
 
-![Magisk](https://img.shields.io/badge/Magisk-Module-00AF9C?style=for-the-badge&logo=magisk)
-![Version](https://img.shields.io/badge/Version-v1.0.0-blue?style=for-the-badge)
-![Status](https://img.shields.io/badge/Status-Stable-success?style=for-the-badge)
+A Magisk/KernelSU module for Transsion devices (Infinix, Tecno, itel) running XOS, HiOS, or iTel OS, with a WebUI for customizing sounds, boot/charging animations, status bar style, AI/gaming features, and display/performance tuning — without editing system files by hand.
 
-## 📖 Overview
-This is a comprehensive system modification module designed to inject custom assets, override default system properties, and provide a seamless web-based control interface. Built for performance and customizability, this module targets system-level optimization, allowing for advanced thermal control, display metric adjustments, and UI refinements without modifying the physical system partition.
+## What it does
 
-## ✨ Core Features
+### Sounds
+- Boot sound (with custom upload support)
+- Wired charging sound
+- Wireless charging sound
+- Individual system sound customization — keypress, connection, and feedback sounds (25+ sounds, each with its own upload or bundled alternate)
 
-*   **Local Web Dashboard (`/webroot`):** Hosts a lightweight local HTML/JS interface accessible directly from your device. Use it to toggle module features, monitor bridge events, and configure system variables on the fly.
-*   **Performance & Prop Injection (`system.prop`):** Safely overrides standard system properties to optimize memory management and unlock high-framerate rendering (e.g., forcing 120 FPS / 144 FPS profiles in supported apps).
-*   **Typography & Asset Override (`/system`):** Systemlessly replaces default UI assets, including custom `NotoColorEmoji.ttf` implementations for a cleaner, unified aesthetic across the OS.
-*   **Automated Boot Scripts (`/common`):** Utilizes `post-fs-data.sh` and `service.sh` execution loops to ensure all modifications are applied cleanly during the boot sequence before the UI initializes.
+### Media
+- Custom FOD (in-display fingerprint) animation styles
+- Boot animation style (with custom upload support)
+- Shutdown animation style (with custom upload support)
+- Charging animation (with custom upload support)
+- Custom emoji font
 
-## 📱 Compatibility
+### Visual Effects
+- Dynamic blur — dock, folders, recents & app drawer
 
-*   **Root Solutions:** Magisk (v24.0+), KernelSU, and APatch.
-*   **Architecture:** ARM64 devices.
-*   **OS/ROMs:** Fully tested and compatible with AOSP-based custom ROMs (e.g., Project Infinity, AxionOS, Lunaris AOSP) as well as heavily modified stock frameworks.
+### AI Suite
+- AI subtitles
+- AI call summary
+- AI notification summary
+- AI sound recorder
+- AI notes
 
-## ⚙️ Installation Instructions
+### Gaming Suite
+- eSports touch sensitivity
+- Frame interpolation
+- Ray tracing
+- Game HDR
+- Bypass charging (play while charging without battery-health throttling)
 
-1. Download the latest `.zip` release.
-2. Open your root manager (Magisk / KernelSU / APatch).
-3. Navigate to the **Modules** tab.
-4. Select **Install from storage** and choose the downloaded `.zip` file.
-5. Wait for the flashing process to complete and verify the installer log outputs.
-6. **Reboot** your device to apply all system changes.
+### Social Turbo v3
+- Call recording
+- AI translation
+- Beauty & makeup filters
 
-### Termux Installation / Update (Advanced)
-If you prefer managing your modules via command-line, you can execute the flash directly via a root shell in Termux:
-```bash
-su -c magisk --install-module /sdcard/Download/YourModuleName.zip
+### Display
+- DC dimming
+- Color enhancement
+- HDR display
+- Reading mode
+- Force 120Hz refresh rate
+
+### Status Bar
+- Signal & WiFi icon style — iOS, XOS 16, None, or your own custom overlay
+
+### Navigation & System
+- Hide navigation bar
+- AOD (Always-On Display)
+
+### Experimental
+- Animation & renderer tuning — higher-tier animation model, union renderer, dynamic bar (XOS 16)
+
+### Platform Support
+- XOS (15 & 16, with version-specific optimizations)
+- HiOS
+- iTel OS
+
+### In-App Tools
+- **Module Conflict Check** — scans other installed modules for files at the same system paths this one uses, both at install time and on demand from the WebUI, with safe Disable/Remove actions per conflicting module
+- Live status panel
+- Service log & troubleshooting viewer
+- In-app update checker
+- Reset to defaults
+
+## XOS 16 (beta)
+
+XOS 16 support is new and marked **BETA** in the WebUI (amber badge on Home, XOS 16 devices only). Animation, blur, and dynamic-bar props for XOS 16 are unverified across the wider device pool — everything else in the module is stable. If you're on XOS 16 and notice glitches after enabling animation/blur features, disable them and report it.
+
+On XOS 16, three settings default to **off** on a fresh install (existing configs are never overwritten): Charging Animation, Fingerprint Animation, and the Signal/WiFi status bar overlay (now has a "None" option). You can re-enable any of them manually.
+
+**Note:** this build does not bundle or auto-install a metamodule (e.g. Mountify). If you want one, install it separately before flashing.
+
+## Requirements
+
+- Root via Magisk (20400+) or KernelSU, with WebUI support
+- A Transsion-brand device (Infinix / Tecno / itel) running XOS, HiOS, or iTel OS
+
+## Installation
+
+1. Flash the zip via Magisk Manager or KernelSU Manager
+2. Reboot
+3. Open the module's WebUI (from your root manager app) to customize
+
+## Notes
+
+- Every customization is applied at boot (`post-fs-data.sh`) or via **Apply & Save** in the WebUI (`service.sh` / runtime props). Some settings — mainly ones baked into `system.prop` — only take effect after a reboot, not a live Apply.
+- Two toggles under Features are marked **Experimental**: they're sourced from third-party reference modules, not independently verified on every device, and can require a reboot to fully revert. Read their in-app warnings before enabling.
+- Uploading a new custom sound automatically backs up whatever was there before — an "Undo" option appears on the Sounds tab for a short window after any upload.
+- See `CHANGELOG.md` for the full version history, including known issues and what's fixed in each release.
+
+## Uninstalling
+
+Standard Magisk/KernelSU module removal. `uninstall.sh` cleans up module-created files; nothing outside the module's own directory is touched.
