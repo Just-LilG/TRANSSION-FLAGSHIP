@@ -77,7 +77,7 @@ Use **one** module. Do not run Flagship 15 and Flagship 16 together.
 | **Transsion Flagship** (this README) | repo root | `TransFlagship_V4.xx.zip` | XOS / HiOS / iTel **15** |
 | **Transsion Flagship 16** | [`os16/`](os16/) | `TransFlagship16_V1.xx.zip` | Transsion **OS 16** (XOS / HiOS / iTel) |
 
-Flagship 16 has its own WebUI. Features are added **one at a time** after they are verified on a real OS 16 device. **V1.18** puts AI Suite flags in Magisk `system.prop` (off) instead of writing them late in boot. Boot/reboot animation and custom status-bar overlay upload are unchanged. Installer disables Flagship 15 if it is still active.
+Flagship 16 has its own WebUI. Features are added **one at a time** after they are verified on a real OS 16 device. **V1.19** adds an AI flag dump (the Flagship 15 AI keys did not hide stock options). Boot/reboot animation and custom status-bar overlay upload are unchanged. Installer disables Flagship 15 if it is still active.
 
 See [`os16/CHANGELOG.md`](os16/CHANGELOG.md) for Flagship 16 versions.
 

@@ -1,5 +1,8 @@
 # Transsion Flagship 16
 
+## v1.19
+- **Dump AI flags.** Setting those Flagship 15 keys to 0 did not hide stock AI — they may not exist on OS 16 at all. Home has **Dump AI flags**: EMPTY means the key is not on the phone (or Magisk did not apply it); `=0` with AI still visible means the ROM ignores that key. The dump also lists other live AI-like keys and whether the six names appear in stock build files. Paste that log.
+
 ## v1.18
 - **AI flags in Magisk `system.prop`, not late boot.** V1.17 set them to off from `service.sh` after boot had already started; stock AI stayed. This build writes the six AI flags as **0** in the module property file Magisk loads early, and does not `resetprop` them from the boot script or from Apply. After reboot, stock AI should hide if the ROM reads these flags.
 
