@@ -28,13 +28,15 @@ ro.transsion_disable_launcher_unlock_support=0
 ro.transsion_enable_lite_launcher_unlock_support=0
 ro.transsion_remote_anim_support=0
 ro.transsion_async_animation_support=1
+
+ro.surface_flinger.supports_background_blur=1
+ro.os.recent.blur=1
+
 ro.transsion_unlock_mode_support=3
 ro.transsion_launch_start_exit_support=3
 ro.transsion_power_keyguard_animation_support=3
 ro.transsion.power_keyguard_animation.model=3
-ro.transsion_recent_animation_support=3
 ro.transsion.recent_animation.model=3
-ro.transsion_launcher_gaussian_blur_support=2
 ro.transsion.launcher_boost_scene_support=1
 ro.transsion.enable_uxscroll_hint=1
 ro.transsion.rescue_boost_support=1
@@ -80,7 +82,6 @@ ro.os_ask_ai.support=1
 ro.os.ai_reasure_box.support=1
 ro.os.dialer_ai_auto_answer=1
 ro.os.dialer_ai_summary=1
-ro.os_dynamicbar_ai_translation_support=1
 ro.os_ai_notification_summary_sr_sa_0003_001_support=1
 ro.os_note_ai_bg_support=1
 ro.os_note_ai_draw_support=1

@@ -8,6 +8,37 @@ LOG="$MODDIR/transflagship_service.log"
 rm -f "$LOG"
 log_p() { echo "[$(date '+%H:%M:%S')] $1" >> "$LOG"; }
 
+log_p "=== TransFlagship V4.22 diagnostic header ==="
+log_p "Device model    : $(getprop ro.product.model 2>/dev/null)"
+log_p "Device marketname: $(getprop ro.product.marketname 2>/dev/null)"
+log_p "Brand           : $(getprop ro.product.brand 2>/dev/null)"
+log_p "Android release : $(getprop ro.build.version.release 2>/dev/null)"
+log_p "Android SDK     : $(getprop ro.build.version.sdk 2>/dev/null)"
+log_p "Build desc      : $(getprop ro.build.description 2>/dev/null)"
+log_p "ro.tran.os.type : $(getprop ro.tran.os.type 2>/dev/null)"
+log_p "ro.transsion.os.version: $(getprop ro.transsion.os.version 2>/dev/null)"
+log_p "SELinux         : $(getenforce 2>/dev/null)"
+log_p "Module dir      : $MODDIR"
+log_p "Module dir exists: $([ -d "$MODDIR" ] && echo yes || echo no)"
+log_p "system.prop present: $([ -f "$MODDIR/system.prop" ] && echo yes || echo no)"
+if [ -f "$MODDIR/system.prop" ]; then
+    log_p "system.prop line count: $(wc -l < "$MODDIR/system.prop")"
+fi
+log_p "config.json present: $([ -f "$CFG" ] && echo yes || echo no)"
+log_p "--- Install-time detection (from install.sh, captured once at flash) ---"
+if [ -f "$MODDIR/install_diagnostic.txt" ]; then
+    while IFS= read -r line; do log_p "$line"; done < "$MODDIR/install_diagnostic.txt"
+else
+    log_p "install_diagnostic.txt missing — module may predate this diagnostic or install.sh failed before writing it"
+fi
+log_p "--- Spot-check live props (should be 1/true if module is active) ---"
+log_p "ro.transsion_unlock_mode_support = $(getprop ro.transsion_unlock_mode_support 2>/dev/null)"
+log_p "ro.transsion_launch_start_exit_support = $(getprop ro.transsion_launch_start_exit_support 2>/dev/null)"
+log_p "ro.aod_alwaysshow_support = $(getprop ro.aod_alwaysshow_support 2>/dev/null)"
+log_p "ro.os_game_tp_esports20.support = $(getprop ro.os_game_tp_esports20.support 2>/dev/null)"
+log_p "=== end diagnostic header ==="
+log_p ""
+
 : > "$ACTIVE"
 if [ "$(getenforce 2>/dev/null)" = "Enforcing" ]; then
     if ! cmd settings get global airplane_mode_on >/dev/null 2>&1; then
@@ -61,6 +92,17 @@ resetprop ro.tran.display_hdr_support $(cfg_bool display_hdr true)
 resetprop ro.tran.display_dc_dimming_support $(cfg_bool display_dc true)
 log_p "Display settings written"
 
+FORCE_120HZ=$(cfg_bool force_120hz false)
+if [ "$FORCE_120HZ" = "1" ]; then
+    settings_put system tran_refresh_mode 120
+    settings_put system tran_need_recovery_refresh_mode 120
+    settings_put system tran_need_recovery_refresh_rate 120
+    settings_put system last_tran_refresh_mode_in_refresh_setting 120
+    settings_put system peak_refresh_rate 120.0
+    settings_put system min_refresh_rate 120.0
+fi
+log_p "Force 120Hz = $FORCE_120HZ"
+
 resetprop ro.aod_alwaysshow_support $(cfg_bool aod true)
 log_p "AOD = $(cfg_bool aod true)"
 
@@ -84,12 +126,41 @@ resetprop ro.sys.tran.aiphone_summary_support $(cfg_bool ai_call_summary true)
 resetprop ro.os_soundrecorder_speech_support $(cfg_bool ai_sound_rec true)
 log_p "AI props applied"
 
+BLUR_ON=$(cfg_bool launcher_blur true)
+if [ "$BLUR_ON" = "1" ]; then
+    resetprop ro.transsion_launcher_gaussian_blur_support 2
+    resetprop tr_launcher.gaussianblur.support 2
+    resetprop ro.tran.effectengine.dynamicblur.support 1
+else
+    resetprop ro.transsion_launcher_gaussian_blur_support 0
+    resetprop tr_launcher.gaussianblur.support 0
+    resetprop ro.tran.effectengine.dynamicblur.support 0
+fi
+settings_put system transsion_launcher_gaussian_blur_enable "$BLUR_ON"
+am force-stop com.transsion.launcher3 2>/dev/null
+log_p "Launcher blur (incl. dock) = $BLUR_ON (launcher restarted to apply)"
+
+PERF_TUNING_ON=$(cfg_bool perf_tuning false)
+if [ "$PERF_TUNING_ON" = "1" ]; then
+    resetprop ro.tr_animation.platform_level 3
+    resetprop ro.tr_perf.launch_start_exit.model 3
+    resetprop ro.tr_perf.power_keyguard_animation.model 3
+    resetprop ro.tr_perf.recent_animation.model 3
+    resetprop ro.tr_perf.unlock_mode.model 3
+    resetprop ro.tran_display_unionrender.support 1
+    resetprop ro.tr_dynamicbar.support 1
+fi
+log_p "Experimental performance tuning = $PERF_TUNING_ON"
+
 log_p "Boot sound / anim / emoji font handled in post-fs-data.sh"
 
-resetprop ro.tran.charge_animation_support $(cfg_bool charge_anim true)
-log_p "Charging anim = $(cfg_bool charge_anim true)"
+CA_ON=$(cfg_bool charge_anim true)
+resetprop ro.tran.charge_animation_support "$CA_ON"
+resetprop ro.tran.lockscreen_charge_anim "$CA_ON"
+am force-stop com.transsion.aichargeprovider 2>/dev/null
+log_p "Charging anim = $CA_ON"
 
 resetprop ro.tranos_hidenavigationbar_support $(cfg_bool nav_hide false)
 log_p "Nav hide = $(cfg_bool nav_hide false)"
 
-log_p "=== TransFlagship V3.16 service complete ==="
+log_p "=== TransFlagship V4.22 service complete ==="

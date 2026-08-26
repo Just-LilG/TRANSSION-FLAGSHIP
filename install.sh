@@ -6,13 +6,11 @@ LATESTARTSERVICE=true
 
 REPLACE=""
 
-
 ui_ok()   { ui_print "  ✅ $1"; }
 ui_info() { ui_print "  ⚡ $1"; }
 ui_warn() { ui_print "  ⚠️  $1"; }
 ui_step() { ui_print "  ▶ $1"; }
 ui_div()  { ui_print "  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"; }
-
 
 print_modname() {
   ui_print " "
@@ -23,7 +21,7 @@ print_modname() {
   ui_print "  ╠══════════════════════════════════════════╣"
   ui_print "  ║                                          ║"
   ui_print "  ║   TRANSSION FLAGSHIP                     ║"
-  ui_print "  ║   ALL OS EDITION  ·  V3.16                ║"
+  ui_print "  ║   ALL OS EDITION  ·  V4.22                 ║"
   ui_print "  ║   XOS · HiOS · iTel OS                   ║"
   ui_print "  ║                                          ║"
   ui_print "  ╚══════════════════════════════════════════╝"
@@ -47,7 +45,6 @@ print_modname() {
   ui_div
   ui_print " "
 }
-
 
 check_device() {
   ui_step "Validating device..."
@@ -74,7 +71,6 @@ check_device() {
       ;;
   esac
 }
-
 
 detect_os() {
   OS_TYPE=$(getprop ro.tran.os.type 2>/dev/null)
@@ -110,8 +106,18 @@ detect_os() {
   fi
 
   ui_info "OS       : $OS_TYPE $OS_VER"
-}
 
+  {
+    echo "install_time_utc=$(date -u '+%Y-%m-%d %H:%M:%S' 2>/dev/null)"
+    echo "raw_ro.tran.os.type=$(getprop ro.tran.os.type 2>/dev/null)"
+    echo "raw_ro.transsion.os.version=$(getprop ro.transsion.os.version 2>/dev/null)"
+    echo "raw_ro.product.brand=$(getprop ro.product.brand 2>/dev/null)"
+    echo "raw_ro.build.description=$(getprop ro.build.description 2>/dev/null)"
+    echo "detected_OS_TYPE=$OS_TYPE"
+    echo "detected_OS_VER=$OS_VER"
+    echo "used_fallback_detection=$([ -z "$(getprop ro.tran.os.type 2>/dev/null)" ] && echo yes || echo no)"
+  } > "$MODPATH/install_diagnostic.txt" 2>/dev/null
+}
 
 detect_ram() {
   RAM_KB=$(grep MemTotal /proc/meminfo | awk '{print $2}')
@@ -119,6 +125,64 @@ detect_ram() {
   ui_info "RAM      : ${RAM_GB}GB"
 }
 
+is_xos16() {
+  [ "$OS_TYPE" = "XOS" ] || return 1
+  echo "$OS_VER" | grep -qiE '^(xos[-_. ]*)?16([^0-9].*)?$'
+}
+
+append_os_props() {
+  local dest="$MODPATH/system.prop"
+  if [ -n "$TMPDIR" ] && [ -f "$TMPDIR/system.prop" ]; then
+    dest="$TMPDIR/system.prop"
+  fi
+  cat >> "$dest"
+}
+
+check_module_conflicts() {
+  local self_id="transsion-flagship"
+  local conflict_paths="system/media/audio/ui system/product/media/audio/ui system/product/media/audio/bootsound system/overlay/FodResOverlay system/overlay/FodSetOverlay system/product/overlay/FodResOverlay system/product/overlay/FodSetOverlay system/overlay/Icons_Signal_wifi system/product/overlay/Icons_Signal_wifi system/product/apm/config system/product/theme/charge system/product/theme/animations system/product/theme/sounds"
+  local conflict_props="ro.surface_flinger.supports_background_blur ro.os.recent.blur ro.transsion_recent_animation_support ro.transsion.recent_animation.model ro.transsion_launcher_gaussian_blur_support tr_launcher.gaussianblur.support ro.tran.effectengine.dynamicblur.support ro.surface_flinger.max_frame_buffer_acquired_buffers"
+  local found=""
+  local d m p k
+  for d in /data/adb/modules/*/; do
+    [ -d "$d" ] || continue
+    m=$(basename "$d")
+    [ "$m" = "$self_id" ] && continue
+    [ -f "${d}disable" ] && continue
+    for p in $conflict_paths; do
+      if [ -e "${d}${p}" ]; then
+        found="${found}${m}|${p}
+"
+      fi
+    done
+    if [ -f "${d}system.prop" ]; then
+      for k in $conflict_props; do
+        if grep -q "^${k}=" "${d}system.prop" 2>/dev/null; then
+          found="${found}${m}|prop:${k}
+"
+        fi
+      done
+    fi
+  done
+
+  mkdir -p /data/adb/transsion-flagship-staging
+  printf '%s' "$found" > /data/adb/transsion-flagship-staging/install_conflicts.txt
+
+  if [ -z "$found" ]; then
+    ui_ok "No conflicting modules detected"
+    return
+  fi
+
+  local mods
+  mods=$(printf '%s' "$found" | cut -d'|' -f1 | sort -u)
+  ui_warn "Possible conflicts with other installed modules:"
+  local mod
+  for mod in $mods; do
+    ui_warn "  - $mod"
+  done
+  ui_info "Open the TransFlagship WebUI after reboot to review and remove"
+  ui_info "conflicting modules if needed — nothing has been touched."
+}
 
 on_install() {
   ui_print " "
@@ -132,12 +196,20 @@ on_install() {
 
   ui_print " "
   ui_div
+  ui_step "Checking for Module Conflicts..."
+  ui_div
+
+  check_module_conflicts
+
+  ui_print " "
+  ui_div
   ui_step "Injecting System Files..."
   ui_div
 
   unzip -o "$ZIPFILE" 'system/*' -d "$MODPATH" >&2
   unzip -o "$ZIPFILE" 'webroot/*' -d "$MODPATH" >&2
   unzip -o "$ZIPFILE" 'config.json' -d "$MODPATH" >&2
+  unzip -o "$ZIPFILE" 'CHANGELOG.md' -d "$MODPATH" >&2
 
   unzip -oj "$ZIPFILE" 'common/system.prop' -d "$MODPATH" >&2
 
@@ -157,9 +229,11 @@ on_install() {
 {
   "boot_sound": true,
   "boot_sound_name": "Waltz",
-  "boot_anim": true,
-  "shutdown_anim": true,
+  "bootanim_style": "default",
+  "shutdownanim_style": "default",
   "charge_anim": true,
+  "chargesound_style": "default",
+  "wirelesschargesound_style": "default",
   "emoji_font": true,
   "ai_master": true,
   "ai_subtitles": true,
@@ -183,10 +257,24 @@ on_install() {
   "display_hdr": true,
   "display_reading": false,
   "nav_hide": false,
-  "aod": true
+  "aod": true,
+  "launcher_blur": true,
+  "perf_tuning": false,
+  "force_120hz": false,
+  "statusbar_style": "xos16",
+  "fod_animation": true
 }
 DEFAULTCFG
-    ui_ok "Default config written"
+    if is_xos16; then
+      sed -i \
+        -e 's/"charge_anim": true/"charge_anim": false/' \
+        -e 's/"fod_animation": true/"fod_animation": false/' \
+        -e 's/"statusbar_style": "xos16"/"statusbar_style": "off"/' \
+        "$MODPATH/config.json"
+      ui_ok "XOS 16 defaults: charging anim, fingerprint anim, and status bar overlay off"
+    else
+      ui_ok "Default config written"
+    fi
   fi
 
   if [ "$OS_TYPE" != "XOS" ]; then
@@ -218,10 +306,9 @@ DEFAULTCFG
 
   case "$OS_TYPE" in
     XOS)
-      case "$OS_VER" in
-        16*)
+      if is_xos16; then
           ui_step "Applying XOS 16 Extended Props..."
-          cat >> "$MODPATH/system.prop" << 'XOSPROP'
+          append_os_props << 'XOSPROP'
 
 ro.os_ai_nova_support=1
 ro.os_ai_nova_v2_support=1
@@ -245,12 +332,32 @@ ro.tran.secure_folder_v2_support=1
 ro.tran.ai_portrait_v3_support=1
 ro.tran.ai_night_v3_support=1
 ro.os_camera_hyper_ai_support=1
+ro.tr_perf.launch_start_exit.model=3
+ro.tr_animation.platform_level=3
+ro.tr_perf.power_keyguard_animation.model=3
+ro.tr_perf.recent_animation.model=3
+ro.tr_perf.unlock_mode.model=3
+ro.tran_display_unionrender.support=1
+ro.surface_flinger.supports_background_blur=1
+ro.os.recent.blur=1
+ro.transsion_launcher_gaussian_blur_support=3
+tr_launcher.gaussianblur.support=3
+ro.transsion_async_animation_support=1
+ro.tr_dynamicbar.support=1
 XOSPROP
           ui_ok "XOS 16 props injected"
-          ;;
-        15*)
-          ui_step "Applying XOS 15 Extended Props..."
-          cat >> "$MODPATH/system.prop" << 'XOSPROP'
+          VCONFIG_DIR="$MODPATH/system/tr_product/etc/vconfig/com.transsion.launcher3"
+          mkdir -p "$VCONFIG_DIR"
+          cat > "$VCONFIG_DIR/build.prop" << 'VCONFIGPROP'
+ro.tr_perf.launch_start_exit.model=3
+ro.os.tran_hide_status_bar_for_land_recent=1
+VCONFIGPROP
+          ui_ok "XOS 16 launcher vconfig applied (app open/close animation)"
+      else
+        case "$OS_VER" in
+          15*)
+            ui_step "Applying XOS 15 Extended Props..."
+            append_os_props << 'XOSPROP'
 
 ro.os_ai_nova_support=1
 ro.os_ai_copilot_support=1
@@ -260,17 +367,18 @@ ro.os_xos15_blur_support=1
 ro.tran.ai_portrait_v2_support=1
 ro.tran.ai_night_v2_support=1
 XOSPROP
-          ui_ok "XOS 15 props injected"
-          ;;
-        *)
-          ui_ok "XOS $OS_VER base props active"
-          ;;
-      esac
+            ui_ok "XOS 15 props injected"
+            ;;
+          *)
+            ui_ok "XOS $OS_VER base props active"
+            ;;
+        esac
+      fi
       ;;
 
     HiOS)
       ui_step "Applying HiOS Extended Props..."
-      cat >> "$MODPATH/system.prop" << 'HIOSPROP'
+      append_os_props << 'HIOSPROP'
 
 ro.tran_hios_launcher_support=1
 ro.tran_hios_dynamic_bar_support=1
@@ -287,7 +395,7 @@ HIOSPROP
 
     iTelOS)
       ui_step "Applying iTel OS Extended Props..."
-      cat >> "$MODPATH/system.prop" << 'ITELPROP'
+      append_os_props << 'ITELPROP'
 
 ro.tran_itel_launcher_support=1
 ro.tran_itel_smart_key_support=1
@@ -303,7 +411,6 @@ ITELPROP
   ui_ok "WebUI available in Magisk/KSU Manager"
 }
 
-
 set_permissions() {
   set_perm_recursive "$MODPATH" 0 0 0755 0644
 
@@ -318,8 +425,8 @@ set_permissions() {
   done
 
   for sh in \
-    "$MODPATH/common/post-fs-data.sh" \
-    "$MODPATH/common/service.sh" \
+    "$MODPATH/post-fs-data.sh" \
+    "$MODPATH/service.sh" \
     "$MODPATH/uninstall.sh"; do
     [ -f "$sh" ] && set_perm "$sh" 0 0 0755
   done
@@ -327,7 +434,7 @@ set_permissions() {
   ui_print " "
   ui_div
   ui_print "  ✨  INSTALLATION COMPLETE"
-  ui_info "Module : Transsion Flagship V3.16"
+  ui_info "Module : Transsion Flagship V4.22"
   ui_info "Author : LIL G TECH LABS"
   ui_info "OS     : $OS_TYPE $OS_VER"
   ui_info "RAM    : ${RAM_GB}GB"

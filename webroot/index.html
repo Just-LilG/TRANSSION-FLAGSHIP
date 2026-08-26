@@ -21,7 +21,7 @@
   --text:#f1f5f9;
   --text2:rgba(241,245,249,0.55);
   --text3:rgba(241,245,249,0.28);
-  --tab-h:64px;
+  --tab-h:86px;
 }
 
 html,body{
@@ -91,6 +91,14 @@ html,body{
   font-size:28px;font-weight:700;letter-spacing:-0.02em;color:var(--text);
 }
 .page-header .sub{font-size:13px;color:var(--text2);margin-top:3px;}
+.beta-badge{
+  display:inline-flex;align-items:center;gap:5px;
+  margin-top:10px;padding:5px 10px;border-radius:999px;
+  background:rgba(245,158,11,0.12);border:1px solid rgba(245,158,11,0.3);
+  font-size:11px;font-weight:700;letter-spacing:.02em;color:#f59e0b;
+  text-transform:uppercase;
+}
+.beta-badge .hint-icon{color:#f59e0b;opacity:.85;text-transform:none;font-weight:500;}
 
 /* ── Section Label ──────────────────────────────────────────────────────────── */
 .section-label{
@@ -133,6 +141,14 @@ html,body{
   top:0;left:56px;right:16px;height:1px;
   background:var(--glass-b);
 }
+.hint-icon{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:20px;height:20px;margin-left:2px;
+  color:#777;font-weight:400;font-size:14px;
+  cursor:pointer;-webkit-tap-highlight-color:transparent;
+  vertical-align:middle;
+}
+.hint-icon:active{color:var(--accent);}
 
 /* ── Row Icon ───────────────────────────────────────────────────────────────── */
 .row-icon{
@@ -172,6 +188,15 @@ html,body{
 }
 .toggle input:checked~.toggle-thumb{transform:translateX(20px);}
 .toggle:active .toggle-thumb{width:27px;}
+
+/* ── Segmented picker (for mutually-exclusive style choices) ──────────────────── */
+.segmented{display:flex;gap:4px;background:rgba(255,255,255,0.06);border-radius:12px;padding:4px;margin:0 16px 14px;}
+.segmented-opt{
+  flex:1;text-align:center;padding:9px 4px;border-radius:9px;
+  font-size:12.5px;font-weight:600;color:#9aa;cursor:pointer;
+  transition:background 0.2s,color 0.2s;user-select:none;
+}
+.segmented-opt.active{background:var(--accent);color:#fff;}
 
 /* ── Slider ─────────────────────────────────────────────────────────────────── */
 .slider-row{padding:8px 16px 14px;}
@@ -291,9 +316,58 @@ input[type=range]:active::-webkit-slider-thumb{
 }
 .hero-sub{font-size:13px;color:var(--text2);margin-top:3px;}
 
+/* ── Splash screen ──────────────────────────────────────────────────────────── */
+.splash{
+  position:fixed;inset:0;z-index:999;
+  display:flex;align-items:center;justify-content:center;
+  background:var(--bg);
+  transition:opacity 0.5s ease, visibility 0.5s ease;
+}
+.splash.hide{opacity:0;visibility:hidden;pointer-events:none;}
+.splash-glow{
+  position:absolute;top:50%;left:50%;width:340px;height:340px;
+  transform:translate(-50%,-50%);
+  background:radial-gradient(circle,var(--accent-glow) 0%,transparent 70%);
+  filter:blur(20px);
+  animation:splashPulse 2.4s ease-in-out infinite;
+}
+@keyframes splashPulse{0%,100%{opacity:0.5;transform:translate(-50%,-50%) scale(1)}50%{opacity:0.9;transform:translate(-50%,-50%) scale(1.15)}}
+.splash-content{position:relative;text-align:center;animation:splashIn 0.6s cubic-bezier(0.22,1,0.36,1) both;}
+@keyframes splashIn{from{opacity:0;transform:translateY(10px) scale(0.96)}to{opacity:1;transform:translateY(0) scale(1)}}
+.splash-logo{
+  display:flex;align-items:center;justify-content:center;margin-bottom:18px;
+  animation:splashLogoSpin 3s ease-in-out infinite;
+}
+@keyframes splashLogoSpin{0%,100%{transform:rotate(-4deg) scale(1)}50%{transform:rotate(4deg) scale(1.06)}}
+.splash-title{font-size:30px;font-weight:800;letter-spacing:-0.5px;color:var(--text);}
+.splash-title span{background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;color:transparent;}
+.splash-tagline{font-size:13px;color:var(--text2);margin-top:6px;letter-spacing:0.5px;}
+.splash-bar{width:120px;height:3px;border-radius:2px;background:var(--glass);margin:26px auto 12px;overflow:hidden;}
+.splash-bar-fill{
+  width:40%;height:100%;border-radius:2px;
+  background:linear-gradient(90deg,var(--accent),var(--accent2));
+  animation:splashBarSlide 1.1s ease-in-out infinite;
+}
+@keyframes splashBarSlide{0%{transform:translateX(-100%)}100%{transform:translateX(350%)}}
+.splash-status{font-size:11px;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;}
+
+.splash-conflict-content{width:100%;max-width:340px;padding:0 20px;}
+.splash-conflict-icon{display:flex;justify-content:center;margin-bottom:14px;}
+.splash-conflict-title{font-size:18px;font-weight:700;color:var(--text);text-align:center;margin-bottom:8px;}
+.splash-conflict-sub{font-size:12.5px;color:var(--text2);text-align:center;line-height:1.5;margin-bottom:18px;}
+.splash-conflict-list{max-height:180px;overflow-y:auto;margin-bottom:18px;}
+.splash-conflict-item{
+  background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.25);
+  border-radius:12px;padding:10px 12px;margin-bottom:8px;text-align:left;
+}
+.splash-conflict-item-name{font-size:13px;font-weight:600;color:#f87171;}
+.splash-conflict-item-paths{font-size:10.5px;color:#999;font-family:monospace;margin-top:3px;}
+.splash-conflict-actions{display:flex;gap:10px;}
+
 /* ── Page visibility ────────────────────────────────────────────────────────── */
 .page{display:none;}
-.page.active{display:block;}
+.page.active{display:block;animation:pageIn 0.28s cubic-bezier(0.22,1,0.36,1) both;}
+@keyframes pageIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 
 /* ── Entrance animation ─────────────────────────────────────────────────────── */
 .glass-card,.hero-card{animation:cardIn 0.35s cubic-bezier(0.22,1,0.36,1) both;}
@@ -303,39 +377,48 @@ input[type=range]:active::-webkit-slider-thumb{
 .glass-card:nth-child(5){animation-delay:0.16s}
 @keyframes cardIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
 
-/* ── Bottom Tab Bar ─────────────────────────────────────────────────────────── */
+/* ── Bottom Tab Bar (floating) ──────────────────────────────────────────────── */
+.tab-bar-wrap{
+  position:absolute;left:0;right:0;bottom:0;
+  z-index:50;
+  padding:0 24px calc(env(safe-area-inset-bottom,0px) + 16px);
+  display:flex;justify-content:center;
+  pointer-events:none;
+}
+.tab-bar-wrap .tab-bar{pointer-events:auto;}
 .tab-bar{
-  height:var(--tab-h);
-  background:rgba(8,8,18,0.92);
-  border-top:1px solid var(--glass-b);
-  display:flex;align-items:center;
-  flex-shrink:0;
+  display:flex;align-items:center;gap:2px;
+  background:rgba(14,14,24,0.85);
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:20px;
+  padding:6px;
+  box-shadow:0 10px 30px rgba(0,0,0,0.5), 0 2px 8px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.06);
 }
 @supports(backdrop-filter:blur(1px)){
-  .tab-bar{background:rgba(6,6,16,0.7);backdrop-filter:blur(40px) saturate(200%);-webkit-backdrop-filter:blur(40px) saturate(200%);}
+  .tab-bar{background:rgba(12,12,22,0.7);backdrop-filter:blur(28px) saturate(200%);-webkit-backdrop-filter:blur(28px) saturate(200%);}
 }
-.tab-items{display:flex;width:100%;padding:0 4px;}
+.tab-items{display:flex;gap:2px;}
 .tab-item{
-  flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;
-  padding:8px 4px;cursor:pointer;
+  display:flex;align-items:center;gap:6px;
+  padding:10px 12px;border-radius:14px;cursor:pointer;
   -webkit-tap-highlight-color:transparent;
-  position:relative;
+  transition:background 0.25s ease,padding 0.25s ease;
 }
-.tab-icon{
-  width:26px;height:26px;display:flex;align-items:center;justify-content:center;
-  transition:transform 0.25s cubic-bezier(0.34,1.56,0.64,1);
-}
-.tab-icon svg{width:22px;height:22px;fill:none;stroke:var(--text3);stroke-width:1.8;
+.tab-item:active{transform:scale(0.96);}
+.tab-icon{width:19px;height:19px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.tab-icon svg{width:19px;height:19px;fill:none;stroke:var(--text3);stroke-width:2;
   stroke-linecap:round;stroke-linejoin:round;transition:stroke 0.2s;}
-.tab-label{font-size:10px;font-weight:500;color:var(--text3);transition:color 0.2s;}
-.tab-pill{
-  position:absolute;top:5px;width:40px;height:32px;border-radius:10px;
-  background:rgba(167,139,250,0.13);opacity:0;transition:opacity 0.2s;
+.tab-label{
+  font-size:12.5px;font-weight:600;color:#fff;white-space:nowrap;
+  max-width:0;overflow:hidden;opacity:0;
+  transition:max-width 0.28s ease,opacity 0.2s ease;
 }
-.tab-item.active .tab-pill{opacity:1;}
-.tab-item.active .tab-icon{transform:scale(1.12);}
-.tab-item.active .tab-icon svg{stroke:var(--accent);}
-.tab-item.active .tab-label{color:var(--accent);}
+.tab-item.active{background:var(--accent);}
+.tab-item.active .tab-icon svg{stroke:#fff;}
+.tab-item.active .tab-label{max-width:80px;opacity:1;}
+
+/* legacy tab-pill no longer used by the nav bar, kept only in case anything else references it */
+.tab-pill{display:none;}
 
 /* ── Toast ──────────────────────────────────────────────────────────────────── */
 .toast{
@@ -375,8 +458,68 @@ input[type=range]:active::-webkit-slider-thumb{
 .modal-btn-confirm{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;}
 .modal-btn-danger{background:linear-gradient(135deg,#f87171,#dc2626);color:#fff;}
 
+.whatsnew-box{
+  background:rgba(22,22,42,0.98);border:1px solid var(--glass-b);
+  border-radius:20px;padding:22px 20px;max-width:380px;width:100%;
+  max-height:75vh;display:flex;flex-direction:column;
+  transform:translateY(10px) scale(0.97);transition:transform 0.25s cubic-bezier(0.34,1.56,0.64,1);
+  box-shadow:0 20px 50px rgba(0,0,0,0.5);
+}
+.modal-backdrop.show .whatsnew-box{transform:translateY(0) scale(1);}
+.whatsnew-title{font-size:17px;font-weight:700;color:var(--text);margin-bottom:2px;}
+.whatsnew-version{font-size:12px;color:var(--accent);font-weight:600;margin-bottom:14px;}
+.whatsnew-content{overflow-y:auto;flex:1;font-size:13px;color:#ccc;line-height:1.6;margin-bottom:16px;}
+.whatsnew-content strong{color:#fff;}
+.whatsnew-content ul{margin:0;padding-left:18px;}
+.whatsnew-content li{margin-bottom:8px;}
+
+.header-icon-btn{
+  position:absolute;top:0;right:0;
+  width:38px;height:38px;border-radius:12px;
+  background:var(--glass);border:1px solid var(--glass-b);
+  display:flex;align-items:center;justify-content:center;
+  color:var(--text2);cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+  transition:transform 0.15s ease, background 0.15s ease;
+}
+.header-icon-btn:active{transform:scale(0.92);background:rgba(255,255,255,0.1);}
+
+.info-panel-backdrop{
+  position:fixed;inset:0;z-index:500;
+  background:rgba(0,0,0,0.55);
+  opacity:0;visibility:hidden;
+  transition:opacity 0.3s ease, visibility 0.3s ease;
+}
+.info-panel-backdrop.show{opacity:1;visibility:visible;}
+.info-panel{
+  position:absolute;top:0;right:0;bottom:0;
+  width:88%;max-width:380px;
+  background:rgba(14,14,26,0.98);
+  border-left:1px solid var(--glass-b);
+  display:flex;flex-direction:column;
+  transform:translateX(100%);
+  transition:transform 0.32s cubic-bezier(0.22,1,0.36,1);
+  box-shadow:-10px 0 40px rgba(0,0,0,0.4);
+}
+.info-panel-backdrop.show .info-panel{transform:translateX(0);}
+.info-panel-handle{display:none;}
+.info-panel-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:20px 16px 14px;flex-shrink:0;
+  border-bottom:1px solid var(--glass-b);
+}
+.info-panel-title{font-size:16px;font-weight:700;color:var(--text);}
+.info-panel-close{
+  width:32px;height:32px;border-radius:10px;
+  background:var(--glass);border:none;color:var(--text2);
+  display:flex;align-items:center;justify-content:center;cursor:pointer;
+}
+.info-panel-scroll{flex:1;overflow-y:auto;padding:16px;}
+
 /* ── Spacers ────────────────────────────────────────────────────────────────── */
-.h8{height:8px;}.h12{height:12px;}
+.h8{height:8px;}.h12{height:12px;}@keyframes btn-apply-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+.btn-apply-spinner { animation: btn-apply-spin 0.8s linear infinite; }
+.btn-apply-save[disabled] { opacity: 0.75; pointer-events: none; }
 </style>
 
 </head>
@@ -384,6 +527,31 @@ input[type=range]:active::-webkit-slider-thumb{
 <div class="ambient"></div>
 
 <div class="app">
+<div class="splash" id="splash">
+  <div class="splash-glow"></div>
+  <div class="splash-content" id="splash-loading-content">
+    <div class="splash-logo">
+      <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="url(#splashGrad)" stroke-width="2"><defs><linearGradient id="splashGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#a78bfa"/><stop offset="100%" stop-color="#818cf8"/></linearGradient></defs><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+    </div>
+    <div class="splash-title">Trans<span>Flagship</span></div>
+    <div class="splash-tagline">Flagship Unlocked</div>
+    <div class="splash-bar"><div class="splash-bar-fill"></div></div>
+    <div class="splash-status" id="splash-status">Loading</div>
+  </div>
+  <div class="splash-content splash-conflict-content" id="splash-conflict-content" style="display:none">
+    <div class="splash-conflict-icon">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+    </div>
+    <div class="splash-conflict-title">Possible Conflicts Found</div>
+    <div class="splash-conflict-sub">These modules share system paths with TransFlagship — whichever mounts last usually wins for those files.</div>
+    <div class="splash-conflict-list" id="splash-conflict-list"></div>
+    <div class="splash-conflict-actions">
+      <button class="action-btn btn-ghost" style="flex:1" onclick="skipSplashConflicts()">Skip</button>
+      <button class="action-btn btn-primary" style="flex:1" onclick="continueFromSplash()">Continue</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-backdrop" id="modal-backdrop">
   <div class="modal-box">
     <div class="modal-title" id="modal-title">Confirm</div>
@@ -395,22 +563,116 @@ input[type=range]:active::-webkit-slider-thumb{
   </div>
 </div>
 
-  <!-- ── PAGES ───────────────────────────────────────────────────────────── -->
+<div class="modal-backdrop" id="whatsnew-backdrop">
+  <div class="whatsnew-box">
+    <div class="whatsnew-title">What's New</div>
+    <div class="whatsnew-version" id="whatsnew-version"></div>
+    <div class="whatsnew-content" id="whatsnew-content"></div>
+    <button class="modal-btn modal-btn-confirm" style="width:100%" onclick="closeWhatsNew()">Got it</button>
+  </div>
+</div>
+
+<div class="info-panel-backdrop" id="info-panel-backdrop" onclick="closeInfoPanel(event)">
+  <div class="info-panel" id="info-panel" onclick="event.stopPropagation()">
+    <div class="info-panel-handle"></div>
+    <div class="info-panel-header">
+      <div class="info-panel-title">Info &amp; Diagnostics</div>
+      <button class="info-panel-close" onclick="closeInfoPanel()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="info-panel-scroll">
+
+      <div class="section-label">Sound Customization</div>
+      <div class="glass-card">
+        <div id="sound-summary-list" style="padding:12px">
+          <div style="font-size:12.5px;color:#666;padding:4px 0">Loading…</div>
+        </div>
+        <div style="padding:0 12px 12px;">
+          <button class="action-btn btn-ghost" style="width:100%" onclick="goToSoundsTab()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+            Open Sounds Tab
+          </button>
+        </div>
+      </div>
+
+      <div class="section-label">Module Conflict Check</div>
+      <div class="glass-card">
+        <div id="conflict-check-list" style="padding:10px 12px 4px">
+          <div style="font-size:12.5px;color:#666;padding:8px 0">Tap Check to scan...</div>
+        </div>
+        <div style="padding:0 12px 12px;">
+          <button class="action-btn btn-ghost" style="width:100%" onclick="checkModuleConflicts()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="10"/></svg>
+            Check for Conflicts
+          </button>
+        </div>
+      </div>
+
+      <div class="section-label">Live Status</div>
+      <div class="glass-card">
+        <div id="live-status-list" style="padding:10px 12px 4px">
+          <div style="font-size:12.5px;color:#666;padding:8px 0">Tap Refresh to load...</div>
+        </div>
+        <div style="padding:0 12px 12px;">
+          <button class="action-btn btn-ghost" style="width:100%" onclick="loadLiveStatus()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 4v6h6"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg>
+            Refresh Live Status
+          </button>
+        </div>
+      </div>
+
+      <div class="section-label">Service Log &amp; Troubleshooting</div>
+      <div class="glass-card">
+        <div class="log-box" id="log-box">Tap refresh to load log...</div>
+        <div style="padding:0 12px 12px;">
+          <button class="action-btn" style="background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;width:100%;margin-bottom:8px" onclick="copyDiagnostic()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            Copy for Support
+          </button>
+        </div>
+        <div class="btn-row" style="padding:0 12px 12px;">
+          <button class="action-btn btn-ghost" onclick="loadLog()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 4v6h6"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg>
+            Refresh
+          </button>
+          <button class="action-btn btn-ghost" onclick="clearLog()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+            Clear
+          </button>
+        </div>
+      </div>
+
+      <div class="h8"></div>
+    </div>
+  </div>
+</div>
+
   <div class="pages" id="pages">
     <div class="scroll-inner">
 
-      <!-- HOME -->
       <div class="page active" id="page-home">
-        <div class="page-header">
+        <div class="page-header" style="position:relative">
+          <button class="header-icon-btn" onclick="openInfoPanel()" aria-label="Info & Diagnostics">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+          </button>
           <div class="eyebrow">LIL G TECH LABS</div>
           <h1>Transsion Flagship</h1>
-          <div class="sub">All OS Edition · V3.1</div>
+          <div class="sub" id="module-version-sub">All OS Edition</div>
+          <div class="beta-badge" id="xos16-beta-badge" style="display:none">
+            BETA — XOS 16 <span class="hint-icon" onclick="showHint(event,'You\'re on XOS 16. Animation, blur, and dynamic bar props for XOS 16 are new and haven\\'t been widely tested yet — everything else in the module is stable. If you notice glitches after enabling animation/blur features, disable them and let us know in the channel.')">ⓘ</span>
+          </div>
         </div>
 
         <div class="hero-card">
           <div class="hero-title">Flagship Unlocked</div>
           <div class="hero-sub" id="hero-sub">Loading device info...</div>
           <div class="status-badge"><div class="status-dot"></div>Module Active</div>
+          <div id="update-check-result" style="margin-top:12px;font-size:12px;display:none"></div>
+          <button class="action-btn btn-ghost" style="width:100%;margin-top:12px;font-size:12px;padding:9px" onclick="checkForUpdates()" id="update-check-btn">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="display:inline;vertical-align:middle;margin-right:5px"><path d="M1 4v6h6"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg>
+            Check for Updates
+          </button>
         </div>
 
         <div class="section-label">Device</div>
@@ -421,43 +683,11 @@ input[type=range]:active::-webkit-slider-thumb{
           <div class="info-cell"><div class="lbl">Android</div><div class="val" id="info-android">—</div></div>
         </div>
 
-        <div class="section-label">Quick Toggles</div>
-        <div class="glass-card">
-          <div class="setting-row">
-            <div class="row-icon" style="background:linear-gradient(135deg,#34d399,#059669)">
-              <svg viewBox="0 0 24 24" stroke="#fff" stroke-width="2"><rect x="2" y="6" width="20" height="14" rx="3"/><path d="M18 6V4a2 2 0 00-2-2H8a2 2 0 00-2 2v2"/><circle cx="12" cy="13" r="2"/></svg>
-            </div>
-            <div class="row-text"><div class="row-title">Gaming Suite</div><div class="row-sub">eSports + frame boost</div></div>
-            <label class="toggle"><input type="checkbox" id="q-game" checked onchange="quickSave()"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
-          </div>
-          <div class="setting-row">
-            <div class="row-icon" style="background:linear-gradient(135deg,#60a5fa,#3b82f6)">
-              <svg viewBox="0 0 24 24" stroke="#fff" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v2m0 16v2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M2 12h2m16 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
-            </div>
-            <div class="row-text"><div class="row-title">AI Suite</div><div class="row-sub">Nova, Copilot, subtitles</div></div>
-            <label class="toggle"><input type="checkbox" id="q-ai" checked onchange="quickSave()"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
-          </div>
-        </div>
-
-        <div class="section-label">Service Log</div>
-        <div class="glass-card">
-          <div class="log-box" id="log-box">Tap refresh to load log...</div>
-          <div class="btn-row" style="padding:0 12px 12px;">
-            <button class="action-btn btn-ghost" onclick="loadLog()">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 4v6h6"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg>
-              Refresh
-            </button>
-            <button class="action-btn btn-ghost" onclick="clearLog()">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>
-              Clear
-            </button>
-          </div>
-        </div>
-
         <div class="h8"></div>
-        <button class="action-btn btn-primary" onclick="saveAll()">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-          Apply &amp; Save
+        <button class="action-btn btn-primary btn-apply-save" onclick="saveAll('full')">
+          <svg class="btn-apply-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+          <svg class="btn-apply-spinner" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="display:none"><circle cx="12" cy="12" r="9" stroke-opacity="0.25"/><path d="M21 12a9 9 0 0 0-9-9"/></svg>
+          <span class="btn-apply-label">Apply &amp; Save</span>
         </button>
         <div class="h8"></div>
         <button class="action-btn btn-danger" onclick="confirmReboot()">
@@ -472,57 +702,12 @@ input[type=range]:active::-webkit-slider-thumb{
         <div class="h8"></div>
       </div>
 
-      <!-- ANIMATIONS -->
-      <div class="page" id="page-anim">
-        <div class="page-header"><div class="eyebrow">Visual</div><h1>Animations</h1><div class="sub">Launcher, unlock &amp; blur</div></div>
-
-        <div class="section-label">Status</div>
-        <div class="glass-card">
-          <div class="setting-row">
-            <div class="row-icon" style="background:linear-gradient(135deg,#a78bfa,#818cf8)">
-              <svg viewBox="0 0 24 24" stroke="#fff" stroke-width="2"><path d="M12 3l1.9 5.8H20l-4.9 3.6 1.9 5.8L12 15l-5 3.4 1.9-5.8L4 9.8h6.1z"/></svg>
-            </div>
-            <div class="row-text"><div class="row-title">Unlock Animation</div><div class="row-sub">Active — level 3</div></div>
-          </div>
-          <div class="setting-row">
-            <div class="row-icon" style="background:linear-gradient(135deg,#10b981,#059669)">
-              <svg viewBox="0 0 24 24" stroke="#fff" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
-            </div>
-            <div class="row-text"><div class="row-title">Recent Apps Animation</div><div class="row-sub">Active — level 3</div></div>
-          </div>
-          <div class="setting-row">
-            <div class="row-icon" style="background:linear-gradient(135deg,#6366f1,#4f46e5)">
-              <svg viewBox="0 0 24 24" stroke="#fff" stroke-width="2"><path d="M5 3l14 9-14 9V3z"/></svg>
-            </div>
-            <div class="row-text"><div class="row-title">Launch / Exit Animation</div><div class="row-sub">Active — level 3</div></div>
-          </div>
-          <div class="setting-row">
-            <div class="row-icon" style="background:linear-gradient(135deg,#34d399,#10b981)">
-              <svg viewBox="0 0 24 24" stroke="#fff" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
-            </div>
-            <div class="row-text"><div class="row-title">Gaussian Blur</div><div class="row-sub">Active — level 2</div></div>
-          </div>
+      <div class="page" id="page-sounds">
+        <div class="page-header"><div class="eyebrow">Customise</div><h1>Sounds</h1><div class="sub">System sounds &amp; boot animation</div></div>
+        <div id="undo-upload-banner" style="display:none;margin:0 16px 12px;padding:10px 12px;background:rgba(167,139,250,0.1);border:1px solid rgba(167,139,250,0.25);border-radius:12px;align-items:center;justify-content:space-between;gap:10px">
+          <div style="font-size:12px;color:#ddd;flex:1;min-width:0" id="undo-upload-label">Uploaded a file</div>
+          <button class="action-btn btn-ghost" style="width:auto;padding:6px 12px;font-size:11.5px;flex-shrink:0" onclick="undoLastUpload()">Undo</button>
         </div>
-        <div class="glass-card" style="margin-top:12px;padding:14px 16px">
-          <div style="font-size:13px;color:#9aa;line-height:1.5">
-            These are set to the smoothest configuration tested for this device
-            and aren't user-adjustable, since incorrect values can break app
-            open/close animation.
-          </div>
-        </div>
-
-        <div class="section-label">Launcher</div>
-        <div class="glass-card" style="padding:14px 16px">
-          <div style="font-size:13px;color:#9aa;line-height:1.5">
-            Dream animations, folder-close interrupt, and multitask arc are
-            enabled by default.
-          </div>
-        </div>
-      </div>
-
-      <!-- MEDIA -->
-      <div class="page" id="page-media">
-        <div class="page-header"><div class="eyebrow">Customise</div><h1>Media</h1><div class="sub">Boot, shutdown &amp; charging</div></div>
 
         <div class="section-label">Boot Sound</div>
         <div class="glass-card">
@@ -530,7 +715,6 @@ input[type=range]:active::-webkit-slider-thumb{
             <div class="row-icon" style="background:linear-gradient(135deg,#fbbf24,#d97706)">
               <svg viewBox="0 0 24 24" stroke="#fff" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 010 14.14M15.54 8.46a5 5 0 010 7.07"/></svg>
             </div>
-
             <div class="row-text"><div class="row-title">Boot Sound</div><div class="row-sub">Play on device startup</div></div>
             <label class="toggle"><input type="checkbox" id="media-bootsound" checked onchange="save()"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
           </div>
@@ -544,22 +728,508 @@ input[type=range]:active::-webkit-slider-thumb{
           </div>
         </div>
 
-        <div class="section-label">Boot Animation</div>
+        <div class="section-label">Charging Sound</div>
         <div class="glass-card">
           <div class="setting-row">
-            <div class="row-icon" style="background:linear-gradient(135deg,#a78bfa,#7c3aed)">
-              <svg viewBox="0 0 24 24" stroke="#fff" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+            <div class="row-icon" style="background:linear-gradient(135deg,#fbbf24,#f59e0b)">
+              <svg viewBox="0 0 24 24" stroke="#fff" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
             </div>
-            <div class="row-text"><div class="row-title">Boot Animation</div><div class="row-sub">Startup splash screen</div></div>
-            <label class="toggle"><input type="checkbox" id="media-bootanim" checked onchange="save()"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+            <div class="row-text"><div class="row-title">Wired Charging Sound</div><div class="row-sub">Played when you plug in charging</div></div>
+          </div>
+          <div class="segmented" id="chargesound-style-picker">
+            <div class="segmented-opt active" data-val="default" onclick="setSoundStyle('chargesound','default')">Default</div>
+            <div class="segmented-opt" data-val="huawei" onclick="setSoundStyle('chargesound','huawei')">Huawei</div>
+            <div class="segmented-opt" data-val="ios" onclick="setSoundStyle('chargesound','ios')">iOS</div>
+            <div class="segmented-opt" data-val="s25" onclick="setSoundStyle('chargesound','s25')">S25</div>
+            <div class="segmented-opt" data-val="custom" onclick="setSoundStyle('chargesound','custom')" id="chargesound-custom-opt" style="display:none">Custom</div>
+            <div class="segmented-opt" data-val="off" onclick="setSoundStyle('chargesound','off')">Off</div>
           </div>
           <div class="file-row">
             <label class="file-btn">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline;vertical-align:middle;margin-right:6px"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-              Upload Boot Animation (.zip)
+              Upload Your Own (.ogg)
+              <input type="file" accept=".ogg,.mp3,.wav,.m4a,audio/*" onchange="handleFile(this,'chargesound','media-chargesound-name')">
+            </label>
+            <div class="file-name" id="media-chargesound-name">No custom sound uploaded</div>
+          </div>
+          <div class="setting-row" style="border-top:1px solid var(--glass-b)">
+            <div class="row-icon" style="background:linear-gradient(135deg,#a78bfa,#818cf8)">
+              <svg viewBox="0 0 24 24" stroke="#fff" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+            </div>
+            <div class="row-text"><div class="row-title">Wireless Charging Sound</div><div class="row-sub">Played when wireless charging starts</div></div>
+          </div>
+          <div class="segmented" id="wirelesschargesound-style-picker">
+            <div class="segmented-opt active" data-val="default" onclick="setSoundStyle('wirelesschargesound','default')">Default</div>
+            <div class="segmented-opt" data-val="huawei" onclick="setSoundStyle('wirelesschargesound','huawei')">Huawei</div>
+            <div class="segmented-opt" data-val="ios" onclick="setSoundStyle('wirelesschargesound','ios')">iOS</div>
+            <div class="segmented-opt" data-val="s25" onclick="setSoundStyle('wirelesschargesound','s25')">S25</div>
+            <div class="segmented-opt" data-val="custom" onclick="setSoundStyle('wirelesschargesound','custom')" id="wirelesschargesound-custom-opt" style="display:none">Custom</div>
+            <div class="segmented-opt" data-val="off" onclick="setSoundStyle('wirelesschargesound','off')">Off</div>
+          </div>
+          <div class="file-row">
+            <label class="file-btn">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline;vertical-align:middle;margin-right:6px"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              Upload Your Own (.ogg)
+              <input type="file" accept=".ogg,.mp3,.wav,.m4a,audio/*" onchange="handleFile(this,'wirelesschargesound','media-wirelesschargesound-name')">
+            </label>
+            <div class="file-name" id="media-wirelesschargesound-name">No custom sound uploaded</div>
+          </div>
+          <div style="padding:0 16px 12px;font-size:11.5px;color:#8a8a9a;line-height:1.4">
+            "Off" restores your device's real stock sound.
+          </div>
+        </div>
+
+        <div class="section-label">Keypress Sounds</div>
+        <div class="glass-card">
+          <div class="setting-row">
+            <div class="row-text" style="margin-left:0"><div class="row-title" style="font-size:13.5px">Delete</div></div>
+          </div>
+          <div class="segmented" id="sound_KeypressDelete-style-picker" style="margin-top:-6px">
+            <div class="segmented-opt" data-val="pack" onclick="setSoundStyle('sound_KeypressDelete','pack')">Pack</div>
+            <div class="segmented-opt" data-val="custom" onclick="setSoundStyle('sound_KeypressDelete','custom')" id="sound_KeypressDelete-custom-opt" style="display:none">Custom</div>
+            <div class="segmented-opt active" data-val="off" onclick="setSoundStyle('sound_KeypressDelete','off')">Stock</div>
+          </div>
+          <div class="file-row" style="padding-top:0">
+            <label class="file-btn" style="font-size:11.5px;padding:7px 10px">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline;vertical-align:middle;margin-right:4px"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              Upload
+              <input type="file" accept=".ogg,.mp3,.wav,.m4a,audio/*" onchange="handleFile(this,'sound_KeypressDelete','media-sound_KeypressDelete-name')">
+            </label>
+            <div class="file-name" id="media-sound_KeypressDelete-name" style="font-size:10.5px">No custom sound</div>
+          </div>
+          <div class="setting-row" style="border-top:1px solid var(--glass-b)">
+            <div class="row-text" style="margin-left:0"><div class="row-title" style="font-size:13.5px">Invalid</div></div>
+          </div>
+          <div class="segmented" id="sound_KeypressInvalid-style-picker" style="margin-top:-6px">
+            <div class="segmented-opt" data-val="pack" onclick="setSoundStyle('sound_KeypressInvalid','pack')">Pack</div>
+            <div class="segmented-opt" data-val="custom" onclick="setSoundStyle('sound_KeypressInvalid','custom')" id="sound_KeypressInvalid-custom-opt" style="display:none">Custom</div>
+            <div class="segmented-opt active" data-val="off" onclick="setSoundStyle('sound_KeypressInvalid','off')">Stock</div>
+          </div>
+          <div class="file-row" style="padding-top:0">
+            <label class="file-btn" style="font-size:11.5px;padding:7px 10px">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline;vertical-align:middle;margin-right:4px"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              Upload
+              <input type="file" accept=".ogg,.mp3,.wav,.m4a,audio/*" onchange="handleFile(this,'sound_KeypressInvalid','media-sound_KeypressInvalid-name')">
+            </label>
+            <div class="file-name" id="media-sound_KeypressInvalid-name" style="font-size:10.5px">No custom sound</div>
+          </div>
+          <div class="setting-row" style="border-top:1px solid var(--glass-b)">
+            <div class="row-text" style="margin-left:0"><div class="row-title" style="font-size:13.5px">Return</div></div>
+          </div>
+          <div class="segmented" id="sound_KeypressReturn-style-picker" style="margin-top:-6px">
+            <div class="segmented-opt" data-val="pack" onclick="setSoundStyle('sound_KeypressReturn','pack')">Pack</div>
+            <div class="segmented-opt" data-val="custom" onclick="setSoundStyle('sound_KeypressReturn','custom')" id="sound_KeypressReturn-custom-opt" style="display:none">Custom</div>
+            <div class="segmented-opt active" data-val="off" onclick="setSoundStyle('sound_KeypressReturn','off')">Stock</div>
+          </div>
+          <div class="file-row" style="padding-top:0">
+            <label class="file-btn" style="font-size:11.5px;padding:7px 10px">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline;vertical-align:middle;margin-right:4px"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              Upload
+              <input type="file" accept=".ogg,.mp3,.wav,.m4a,audio/*" onchange="handleFile(this,'sound_KeypressReturn','media-sound_KeypressReturn-name')">
+            </label>
+            <div class="file-name" id="media-sound_KeypressReturn-name" style="font-size:10.5px">No custom sound</div>
+          </div>
+          <div class="setting-row" style="border-top:1px solid var(--glass-b)">
+            <div class="row-text" style="margin-left:0"><div class="row-title" style="font-size:13.5px">Spacebar</div></div>
+          </div>
+          <div class="segmented" id="sound_KeypressSpacebar-style-picker" style="margin-top:-6px">
+            <div class="segmented-opt" data-val="pack" onclick="setSoundStyle('sound_KeypressSpacebar','pack')">Pack</div>
+            <div class="segmented-opt" data-val="custom" onclick="setSoundStyle('sound_KeypressSpacebar','custom')" id="sound_KeypressSpacebar-custom-opt" style="display:none">Custom</div>
+            <div class="segmented-opt active" data-val="off" onclick="setSoundStyle('sound_KeypressSpacebar','off')">Stock</div>
+          </div>
+          <div class="file-row" style="padding-top:0">
+            <label class="file-btn" style="font-size:11.5px;padding:7px 10px">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline;vertical-align:middle;margin-right:4px"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              Upload
+              <input type="file" accept=".ogg,.mp3,.wav,.m4a,audio/*" onchange="handleFile(this,'sound_KeypressSpacebar','media-sound_KeypressSpacebar-name')">
+            </label>
+            <div class="file-name" id="media-sound_KeypressSpacebar-name" style="font-size:10.5px">No custom sound</div>
+          </div>
+          <div class="setting-row" style="border-top:1px solid var(--glass-b)">
+            <div class="row-text" style="margin-left:0"><div class="row-title" style="font-size:13.5px">Standard</div></div>
+          </div>
+          <div class="segmented" id="sound_KeypressStandard-style-picker" style="margin-top:-6px">
+            <div class="segmented-opt" data-val="pack" onclick="setSoundStyle('sound_KeypressStandard','pack')">Pack</div>
+            <div class="segmented-opt" data-val="custom" onclick="setSoundStyle('sound_KeypressStandard','custom')" id="sound_KeypressStandard-custom-opt" style="display:none">Custom</div>
+            <div class="segmented-opt active" data-val="off" onclick="setSoundStyle('sound_KeypressStandard','off')">Stock</div>
+          </div>
+          <div class="file-row" style="padding-top:0">
+            <label class="file-btn" style="font-size:11.5px;padding:7px 10px">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline;vertical-align:middle;margin-right:4px"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              Upload
+              <input type="file" accept=".ogg,.mp3,.wav,.m4a,audio/*" onchange="handleFile(this,'sound_KeypressStandard','media-sound_KeypressStandard-name')">
+            </label>
+            <div class="file-name" id="media-sound_KeypressStandard-name" style="font-size:10.5px">No custom sound</div>
+          </div>
+          <div class="setting-row" style="border-top:1px solid var(--glass-b)">
+            <div class="row-text" style="margin-left:0"><div class="row-title" style="font-size:13.5px">Delete (Alt)</div></div>
+          </div>
+          <div class="segmented" id="sound_delete-style-picker" style="margin-top:-6px">
+            <div class="segmented-opt" data-val="pack" onclick="setSoundStyle('sound_delete','pack')">Pack</div>
+            <div class="segmented-opt" data-val="custom" onclick="setSoundStyle('sound_delete','custom')" id="sound_delete-custom-opt" style="display:none">Custom</div>
+            <div class="segmented-opt active" data-val="off" onclick="setSoundStyle('sound_delete','off')">Stock</div>
+          </div>
+          <div class="file-row" style="padding-top:0">
+            <label class="file-btn" style="font-size:11.5px;padding:7px 10px">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline;vertical-align:middle;margin-right:4px"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              Upload
+              <input type="file" accept=".ogg,.mp3,.wav,.m4a,audio/*" onchange="handleFile(this,'sound_delete','media-sound_delete-name')">
+            </label>
+            <div class="file-name" id="media-sound_delete-name" style="font-size:10.5px">No custom sound</div>
+          </div>
+        </div>
+
+        <div class="section-label">Connection Sounds</div>
+        <div class="glass-card">
+          <div class="setting-row">
+            <div class="row-text" style="margin-left:0"><div class="row-title" style="font-size:13.5px">Dock</div></div>
+          </div>
+          <div class="segmented" id="sound_Dock-style-picker" style="margin-top:-6px">
+            <div class="segmented-opt" data-val="pack" onclick="setSoundStyle('sound_Dock','pack')">Pack</div>
+            <div class="segmented-opt" data-val="custom" onclick="setSoundStyle('sound_Dock','custom')" id="sound_Dock-custom-opt" style="display:none">Custom</div>
+            <div class="segmented-opt active" data-val="off" onclick="setSoundStyle('sound_Dock','off')">Stock</div>
+          </div>
+          <div class="file-row" style="padding-top:0">
+            <label class="file-btn" style="font-size:11.5px;padding:7px 10px">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline;vertical-align:middle;margin-right:4px"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              Upload
+              <input type="file" accept=".ogg,.mp3,.wav,.m4a,audio/*" onchange="handleFile(this,'sound_Dock','media-sound_Dock-name')">
+            </label>
+            <div class="file-name" id="media-sound_Dock-name" style="font-size:10.5px">No custom sound</div>
+          </div>
+          <div class="setting-row" style="border-top:1px solid var(--glass-b)">
+            <div class="row-text" style="margin-left:0"><div class="row-title" style="font-size:13.5px">Undock</div></div>
+          </div>
+          <div class="segmented" id="sound_Undock-style-picker" style="margin-top:-6px">
+            <div class="segmented-opt" data-val="pack" onclick="setSoundStyle('sound_Undock','pack')">Pack</div>
+            <div class="segmented-opt" data-val="custom" onclick="setSoundStyle('sound_Undock','custom')" id="sound_Undock-custom-opt" style="display:none">Custom</div>
+            <div class="segmented-opt active" data-val="off" onclick="setSoundStyle('sound_Undock','off')">Stock</div>
+          </div>
+          <div class="file-row" style="padding-top:0">
+            <label class="file-btn" style="font-size:11.5px;padding:7px 10px">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline;vertical-align:middle;margin-right:4px"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              Upload
+              <input type="file" accept=".ogg,.mp3,.wav,.m4a,audio/*" onchange="handleFile(this,'sound_Undock','media-sound_Undock-name')">
+            </label>
+            <div class="file-name" id="media-sound_Undock-name" style="font-size:10.5px">No custom sound</div>
+          </div>
+          <div class="setting-row" style="border-top:1px solid var(--glass-b)">
+            <div class="row-text" style="margin-left:0"><div class="row-title" style="font-size:13.5px">Disconnect</div></div>
+          </div>
+          <div class="segmented" id="sound_Disconnect-style-picker" style="margin-top:-6px">
+            <div class="segmented-opt" data-val="pack" onclick="setSoundStyle('sound_Disconnect','pack')">Pack</div>
+            <div class="segmented-opt" data-val="custom" onclick="setSoundStyle('sound_Disconnect','custom')" id="sound_Disconnect-custom-opt" style="display:none">Custom</div>
+            <div class="segmented-opt active" data-val="off" onclick="setSoundStyle('sound_Disconnect','off')">Stock</div>
+          </div>
+          <div class="file-row" style="padding-top:0">
+            <label class="file-btn" style="font-size:11.5px;padding:7px 10px">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline;vertical-align:middle;margin-right:4px"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              Upload
+              <input type="file" accept=".ogg,.mp3,.wav,.m4a,audio/*" onchange="handleFile(this,'sound_Disconnect','media-sound_Disconnect-name')">
+            </label>
+            <div class="file-name" id="media-sound_Disconnect-name" style="font-size:10.5px">No custom sound</div>
+          </div>
+          <div class="setting-row" style="border-top:1px solid var(--glass-b)">
+            <div class="row-text" style="margin-left:0"><div class="row-title" style="font-size:13.5px">Trusted Device</div></div>
+          </div>
+          <div class="segmented" id="sound_Trusted-style-picker" style="margin-top:-6px">
+            <div class="segmented-opt" data-val="pack" onclick="setSoundStyle('sound_Trusted','pack')">Pack</div>
+            <div class="segmented-opt" data-val="custom" onclick="setSoundStyle('sound_Trusted','custom')" id="sound_Trusted-custom-opt" style="display:none">Custom</div>
+            <div class="segmented-opt active" data-val="off" onclick="setSoundStyle('sound_Trusted','off')">Stock</div>
+          </div>
+          <div class="file-row" style="padding-top:0">
+            <label class="file-btn" style="font-size:11.5px;padding:7px 10px">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline;vertical-align:middle;margin-right:4px"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              Upload
+              <input type="file" accept=".ogg,.mp3,.wav,.m4a,audio/*" onchange="handleFile(this,'sound_Trusted','media-sound_Trusted-name')">
+            </label>
+            <div class="file-name" id="media-sound_Trusted-name" style="font-size:10.5px">No custom sound</div>
+          </div>
+        </div>
+
+        <div class="section-label">Feedback Sounds</div>
+        <div class="glass-card">
+          <div class="setting-row">
+            <div class="row-text" style="margin-left:0"><div class="row-title" style="font-size:13.5px">Screenshot</div></div>
+          </div>
+          <div class="segmented" id="sound_Screenshots-style-picker" style="margin-top:-6px">
+            <div class="segmented-opt" data-val="pack" onclick="setSoundStyle('sound_Screenshots','pack')">Pack</div>
+            <div class="segmented-opt" data-val="custom" onclick="setSoundStyle('sound_Screenshots','custom')" id="sound_Screenshots-custom-opt" style="display:none">Custom</div>
+            <div class="segmented-opt active" data-val="off" onclick="setSoundStyle('sound_Screenshots','off')">Stock</div>
+          </div>
+          <div class="file-row" style="padding-top:0">
+            <label class="file-btn" style="font-size:11.5px;padding:7px 10px">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline;vertical-align:middle;margin-right:4px"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              Upload
+              <input type="file" accept=".ogg,.mp3,.wav,.m4a,audio/*" onchange="handleFile(this,'sound_Screenshots','media-sound_Screenshots-name')">
+            </label>
+            <div class="file-name" id="media-sound_Screenshots-name" style="font-size:10.5px">No custom sound</div>
+          </div>
+          <div class="setting-row" style="border-top:1px solid var(--glass-b)">
+            <div class="row-text" style="margin-left:0"><div class="row-title" style="font-size:13.5px">Fail / Error</div></div>
+          </div>
+          <div class="segmented" id="sound_Fail-style-picker" style="margin-top:-6px">
+            <div class="segmented-opt" data-val="pack" onclick="setSoundStyle('sound_Fail','pack')">Pack</div>
+            <div class="segmented-opt" data-val="custom" onclick="setSoundStyle('sound_Fail','custom')" id="sound_Fail-custom-opt" style="display:none">Custom</div>
+            <div class="segmented-opt active" data-val="off" onclick="setSoundStyle('sound_Fail','off')">Stock</div>
+          </div>
+          <div class="file-row" style="padding-top:0">
+            <label class="file-btn" style="font-size:11.5px;padding:7px 10px">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline;vertical-align:middle;margin-right:4px"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              Upload
+              <input type="file" accept=".ogg,.mp3,.wav,.m4a,audio/*" onchange="handleFile(this,'sound_Fail','media-sound_Fail-name')">
+            </label>
+            <div class="file-name" id="media-sound_Fail-name" style="font-size:10.5px">No custom sound</div>
+          </div>
+          <div class="setting-row" style="border-top:1px solid var(--glass-b)">
+            <div class="row-text" style="margin-left:0"><div class="row-title" style="font-size:13.5px">Success</div></div>
+          </div>
+          <div class="segmented" id="sound_Success-style-picker" style="margin-top:-6px">
+            <div class="segmented-opt" data-val="pack" onclick="setSoundStyle('sound_Success','pack')">Pack</div>
+            <div class="segmented-opt" data-val="custom" onclick="setSoundStyle('sound_Success','custom')" id="sound_Success-custom-opt" style="display:none">Custom</div>
+            <div class="segmented-opt active" data-val="off" onclick="setSoundStyle('sound_Success','off')">Stock</div>
+          </div>
+          <div class="file-row" style="padding-top:0">
+            <label class="file-btn" style="font-size:11.5px;padding:7px 10px">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline;vertical-align:middle;margin-right:4px"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              Upload
+              <input type="file" accept=".ogg,.mp3,.wav,.m4a,audio/*" onchange="handleFile(this,'sound_Success','media-sound_Success-name')">
+            </label>
+            <div class="file-name" id="media-sound_Success-name" style="font-size:10.5px">No custom sound</div>
+          </div>
+          <div class="setting-row" style="border-top:1px solid var(--glass-b)">
+            <div class="row-text" style="margin-left:0"><div class="row-title" style="font-size:13.5px">Message Sent</div></div>
+          </div>
+          <div class="segmented" id="sound_Sent_Success-style-picker" style="margin-top:-6px">
+            <div class="segmented-opt" data-val="pack" onclick="setSoundStyle('sound_Sent_Success','pack')">Pack</div>
+            <div class="segmented-opt" data-val="custom" onclick="setSoundStyle('sound_Sent_Success','custom')" id="sound_Sent_Success-custom-opt" style="display:none">Custom</div>
+            <div class="segmented-opt active" data-val="off" onclick="setSoundStyle('sound_Sent_Success','off')">Stock</div>
+          </div>
+          <div class="file-row" style="padding-top:0">
+            <label class="file-btn" style="font-size:11.5px;padding:7px 10px">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline;vertical-align:middle;margin-right:4px"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              Upload
+              <input type="file" accept=".ogg,.mp3,.wav,.m4a,audio/*" onchange="handleFile(this,'sound_Sent_Success','media-sound_Sent_Success-name')">
+            </label>
+            <div class="file-name" id="media-sound_Sent_Success-name" style="font-size:10.5px">No custom sound</div>
+          </div>
+          <div class="setting-row" style="border-top:1px solid var(--glass-b)">
+            <div class="row-text" style="margin-left:0"><div class="row-title" style="font-size:13.5px">Message Sent (Alt)</div></div>
+          </div>
+          <div class="segmented" id="sound_sent_message_success-style-picker" style="margin-top:-6px">
+            <div class="segmented-opt" data-val="pack" onclick="setSoundStyle('sound_sent_message_success','pack')">Pack</div>
+            <div class="segmented-opt" data-val="custom" onclick="setSoundStyle('sound_sent_message_success','custom')" id="sound_sent_message_success-custom-opt" style="display:none">Custom</div>
+            <div class="segmented-opt active" data-val="off" onclick="setSoundStyle('sound_sent_message_success','off')">Stock</div>
+          </div>
+          <div class="file-row" style="padding-top:0">
+            <label class="file-btn" style="font-size:11.5px;padding:7px 10px">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline;vertical-align:middle;margin-right:4px"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              Upload
+              <input type="file" accept=".ogg,.mp3,.wav,.m4a,audio/*" onchange="handleFile(this,'sound_sent_message_success','media-sound_sent_message_success-name')">
+            </label>
+            <div class="file-name" id="media-sound_sent_message_success-name" style="font-size:10.5px">No custom sound</div>
+          </div>
+          <div class="setting-row" style="border-top:1px solid var(--glass-b)">
+            <div class="row-text" style="margin-left:0"><div class="row-title" style="font-size:13.5px">Beep (Single)</div></div>
+          </div>
+          <div class="segmented" id="sound_beep_once-style-picker" style="margin-top:-6px">
+            <div class="segmented-opt" data-val="pack" onclick="setSoundStyle('sound_beep_once','pack')">Pack</div>
+            <div class="segmented-opt" data-val="custom" onclick="setSoundStyle('sound_beep_once','custom')" id="sound_beep_once-custom-opt" style="display:none">Custom</div>
+            <div class="segmented-opt active" data-val="off" onclick="setSoundStyle('sound_beep_once','off')">Stock</div>
+          </div>
+          <div class="file-row" style="padding-top:0">
+            <label class="file-btn" style="font-size:11.5px;padding:7px 10px">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline;vertical-align:middle;margin-right:4px"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              Upload
+              <input type="file" accept=".ogg,.mp3,.wav,.m4a,audio/*" onchange="handleFile(this,'sound_beep_once','media-sound_beep_once-name')">
+            </label>
+            <div class="file-name" id="media-sound_beep_once-name" style="font-size:10.5px">No custom sound</div>
+          </div>
+          <div class="setting-row" style="border-top:1px solid var(--glass-b)">
+            <div class="row-text" style="margin-left:0"><div class="row-title" style="font-size:13.5px">Beep (Double)</div></div>
+          </div>
+          <div class="segmented" id="sound_beep_twice-style-picker" style="margin-top:-6px">
+            <div class="segmented-opt" data-val="pack" onclick="setSoundStyle('sound_beep_twice','pack')">Pack</div>
+            <div class="segmented-opt" data-val="custom" onclick="setSoundStyle('sound_beep_twice','custom')" id="sound_beep_twice-custom-opt" style="display:none">Custom</div>
+            <div class="segmented-opt active" data-val="off" onclick="setSoundStyle('sound_beep_twice','off')">Stock</div>
+          </div>
+          <div class="file-row" style="padding-top:0">
+            <label class="file-btn" style="font-size:11.5px;padding:7px 10px">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline;vertical-align:middle;margin-right:4px"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              Upload
+              <input type="file" accept=".ogg,.mp3,.wav,.m4a,audio/*" onchange="handleFile(this,'sound_beep_twice','media-sound_beep_twice-name')">
+            </label>
+            <div class="file-name" id="media-sound_beep_twice-name" style="font-size:10.5px">No custom sound</div>
+          </div>
+          <div class="setting-row" style="border-top:1px solid var(--glass-b)">
+            <div class="row-text" style="margin-left:0"><div class="row-title" style="font-size:13.5px">UI Tick</div></div>
+          </div>
+          <div class="segmented" id="sound_Effect_Tick-style-picker" style="margin-top:-6px">
+            <div class="segmented-opt" data-val="pack" onclick="setSoundStyle('sound_Effect_Tick','pack')">Pack</div>
+            <div class="segmented-opt" data-val="custom" onclick="setSoundStyle('sound_Effect_Tick','custom')" id="sound_Effect_Tick-custom-opt" style="display:none">Custom</div>
+            <div class="segmented-opt active" data-val="off" onclick="setSoundStyle('sound_Effect_Tick','off')">Stock</div>
+          </div>
+          <div class="file-row" style="padding-top:0">
+            <label class="file-btn" style="font-size:11.5px;padding:7px 10px">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline;vertical-align:middle;margin-right:4px"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              Upload
+              <input type="file" accept=".ogg,.mp3,.wav,.m4a,audio/*" onchange="handleFile(this,'sound_Effect_Tick','media-sound_Effect_Tick-name')">
+            </label>
+            <div class="file-name" id="media-sound_Effect_Tick-name" style="font-size:10.5px">No custom sound</div>
+          </div>
+          <div class="setting-row" style="border-top:1px solid var(--glass-b)">
+            <div class="row-text" style="margin-left:0"><div class="row-title" style="font-size:13.5px">Gear / Settings</div></div>
+          </div>
+          <div class="segmented" id="sound_Gear-style-picker" style="margin-top:-6px">
+            <div class="segmented-opt" data-val="pack" onclick="setSoundStyle('sound_Gear','pack')">Pack</div>
+            <div class="segmented-opt" data-val="custom" onclick="setSoundStyle('sound_Gear','custom')" id="sound_Gear-custom-opt" style="display:none">Custom</div>
+            <div class="segmented-opt active" data-val="off" onclick="setSoundStyle('sound_Gear','off')">Stock</div>
+          </div>
+          <div class="file-row" style="padding-top:0">
+            <label class="file-btn" style="font-size:11.5px;padding:7px 10px">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline;vertical-align:middle;margin-right:4px"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              Upload
+              <input type="file" accept=".ogg,.mp3,.wav,.m4a,audio/*" onchange="handleFile(this,'sound_Gear','media-sound_Gear-name')">
+            </label>
+            <div class="file-name" id="media-sound_Gear-name" style="font-size:10.5px">No custom sound</div>
+          </div>
+          <div class="setting-row" style="border-top:1px solid var(--glass-b)">
+            <div class="row-text" style="margin-left:0"><div class="row-title" style="font-size:13.5px">Notification</div></div>
+          </div>
+          <div class="segmented" id="sound_Cobalt-style-picker" style="margin-top:-6px">
+            <div class="segmented-opt" data-val="pack" onclick="setSoundStyle('sound_Cobalt','pack')">Pack</div>
+            <div class="segmented-opt" data-val="custom" onclick="setSoundStyle('sound_Cobalt','custom')" id="sound_Cobalt-custom-opt" style="display:none">Custom</div>
+            <div class="segmented-opt active" data-val="off" onclick="setSoundStyle('sound_Cobalt','off')">Stock</div>
+          </div>
+          <div class="file-row" style="padding-top:0">
+            <label class="file-btn" style="font-size:11.5px;padding:7px 10px">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline;vertical-align:middle;margin-right:4px"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              Upload
+              <input type="file" accept=".ogg,.mp3,.wav,.m4a,audio/*" onchange="handleFile(this,'sound_Cobalt','media-sound_Cobalt-name')">
+            </label>
+            <div class="file-name" id="media-sound_Cobalt-name" style="font-size:10.5px">No custom sound</div>
+          </div>
+          <div class="setting-row" style="border-top:1px solid var(--glass-b)">
+            <div class="row-text" style="margin-left:0"><div class="row-title" style="font-size:13.5px">In-Call Notification</div></div>
+          </div>
+          <div class="segmented" id="sound_InCallNotification-style-picker" style="margin-top:-6px">
+            <div class="segmented-opt" data-val="pack" onclick="setSoundStyle('sound_InCallNotification','pack')">Pack</div>
+            <div class="segmented-opt" data-val="custom" onclick="setSoundStyle('sound_InCallNotification','custom')" id="sound_InCallNotification-custom-opt" style="display:none">Custom</div>
+            <div class="segmented-opt active" data-val="off" onclick="setSoundStyle('sound_InCallNotification','off')">Stock</div>
+          </div>
+          <div class="file-row" style="padding-top:0">
+            <label class="file-btn" style="font-size:11.5px;padding:7px 10px">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline;vertical-align:middle;margin-right:4px"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              Upload
+              <input type="file" accept=".ogg,.mp3,.wav,.m4a,audio/*" onchange="handleFile(this,'sound_InCallNotification','media-sound_InCallNotification-name')">
+            </label>
+            <div class="file-name" id="media-sound_InCallNotification-name" style="font-size:10.5px">No custom sound</div>
+          </div>
+          <div class="setting-row" style="border-top:1px solid var(--glass-b)">
+            <div class="row-text" style="margin-left:0"><div class="row-title" style="font-size:13.5px">Timer Tick</div></div>
+          </div>
+          <div class="segmented" id="sound_Calculagraph-style-picker" style="margin-top:-6px">
+            <div class="segmented-opt" data-val="pack" onclick="setSoundStyle('sound_Calculagraph','pack')">Pack</div>
+            <div class="segmented-opt" data-val="custom" onclick="setSoundStyle('sound_Calculagraph','custom')" id="sound_Calculagraph-custom-opt" style="display:none">Custom</div>
+            <div class="segmented-opt active" data-val="off" onclick="setSoundStyle('sound_Calculagraph','off')">Stock</div>
+          </div>
+          <div class="file-row" style="padding-top:0">
+            <label class="file-btn" style="font-size:11.5px;padding:7px 10px">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline;vertical-align:middle;margin-right:4px"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              Upload
+              <input type="file" accept=".ogg,.mp3,.wav,.m4a,audio/*" onchange="handleFile(this,'sound_Calculagraph','media-sound_Calculagraph-name')">
+            </label>
+            <div class="file-name" id="media-sound_Calculagraph-name" style="font-size:10.5px">No custom sound</div>
+          </div>
+          <div class="setting-row" style="border-top:1px solid var(--glass-b)">
+            <div class="row-text" style="margin-left:0"><div class="row-title" style="font-size:13.5px">Clock Tick</div></div>
+          </div>
+          <div class="segmented" id="sound_Second_Hand-style-picker" style="margin-top:-6px">
+            <div class="segmented-opt" data-val="pack" onclick="setSoundStyle('sound_Second_Hand','pack')">Pack</div>
+            <div class="segmented-opt" data-val="custom" onclick="setSoundStyle('sound_Second_Hand','custom')" id="sound_Second_Hand-custom-opt" style="display:none">Custom</div>
+            <div class="segmented-opt active" data-val="off" onclick="setSoundStyle('sound_Second_Hand','off')">Stock</div>
+          </div>
+          <div class="file-row" style="padding-top:0">
+            <label class="file-btn" style="font-size:11.5px;padding:7px 10px">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline;vertical-align:middle;margin-right:4px"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              Upload
+              <input type="file" accept=".ogg,.mp3,.wav,.m4a,audio/*" onchange="handleFile(this,'sound_Second_Hand','media-sound_Second_Hand-name')">
+            </label>
+            <div class="file-name" id="media-sound_Second_Hand-name" style="font-size:10.5px">No custom sound</div>
+          </div>
+          <div class="setting-row" style="border-top:1px solid var(--glass-b)">
+            <div class="row-text" style="margin-left:0"><div class="row-title" style="font-size:13.5px">Unlock</div></div>
+          </div>
+          <div class="segmented" id="sound_Unlock-style-picker" style="margin-top:-6px">
+            <div class="segmented-opt" data-val="pack" onclick="setSoundStyle('sound_Unlock','pack')">Pack</div>
+            <div class="segmented-opt" data-val="custom" onclick="setSoundStyle('sound_Unlock','custom')" id="sound_Unlock-custom-opt" style="display:none">Custom</div>
+            <div class="segmented-opt active" data-val="off" onclick="setSoundStyle('sound_Unlock','off')">Stock</div>
+          </div>
+          <div class="file-row" style="padding-top:0">
+            <label class="file-btn" style="font-size:11.5px;padding:7px 10px">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline;vertical-align:middle;margin-right:4px"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              Upload
+              <input type="file" accept=".ogg,.mp3,.wav,.m4a,audio/*" onchange="handleFile(this,'sound_Unlock','media-sound_Unlock-name')">
+            </label>
+            <div class="file-name" id="media-sound_Unlock-name" style="font-size:10.5px">No custom sound</div>
+          </div>
+          <div class="setting-row" style="border-top:1px solid var(--glass-b)">
+            <div class="row-text" style="margin-left:0"><div class="row-title" style="font-size:13.5px">Lock</div></div>
+          </div>
+          <div class="segmented" id="sound_Lock-style-picker" style="margin-top:-6px">
+            <div class="segmented-opt" data-val="custom" onclick="setSoundStyle('sound_Lock','custom')" id="sound_Lock-custom-opt" style="display:none">Custom</div>
+            <div class="segmented-opt active" data-val="off" onclick="setSoundStyle('sound_Lock','off')">Stock</div>
+          </div>
+          <div class="file-row" style="padding-top:0">
+            <label class="file-btn" style="font-size:11.5px;padding:7px 10px">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline;vertical-align:middle;margin-right:4px"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              Upload
+              <input type="file" accept=".ogg,.mp3,.wav,.m4a,audio/*" onchange="handleFile(this,'sound_Lock','media-sound_Lock-name')">
+            </label>
+            <div class="file-name" id="media-sound_Lock-name" style="font-size:10.5px">No custom sound</div>
+          </div>
+        </div>
+        <div class="section-label">Fingerprint Animation</div>
+        <div class="glass-card">
+          <div class="setting-row">
+            <div class="row-icon" style="background:linear-gradient(135deg,#60a5fa,#2563eb)">
+              <svg viewBox="0 0 24 24" stroke="#fff" stroke-width="2"><path d="M12 11c0 3.517-1.009 6.799-2.753 9.571M17.923 17.923a10.007 10.007 0 001.44-4.923M12 3a9 9 0 019 9M6.5 5.5a9 9 0 013.5-1.5M3 11c0-2.2.72-4.229 1.937-5.87"/><circle cx="12" cy="11" r="4"/></svg>
+            </div>
+            <div class="row-text"><div class="row-title">Custom FOD Animation</div><div class="row-sub">Adds extra in-display fingerprint unlock styles</div></div>
+            <label class="toggle"><input type="checkbox" id="feat-fod" checked onchange="save()"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+          </div>
+        </div>
+        <div class="glass-card" style="margin-top:12px;padding:14px 16px">
+          <div style="font-size:12px;color:#777;line-height:1.5">
+            Once enabled, pick your preferred fingerprint animation style from your device's own Settings app — this just unlocks the extra options, it doesn't add its own picker here.
+          </div>
+        </div>
+      </div>
+
+      <div class="page" id="page-media">
+        <div class="page-header"><div class="eyebrow">Customise</div><h1>Media</h1><div class="sub">Boot, shutdown &amp; charging</div></div>
+
+        <div class="section-label">Boot Animation</div>
+        <div class="glass-card">
+          <div class="setting-row">
+            <div class="row-icon" style="background:linear-gradient(135deg,#a78bfa,#7c3aed)">
+              <svg viewBox="0 0 24 24" stroke="#fff" stroke-width="2"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+            </div>
+            <div class="row-text"><div class="row-title">Boot Animation Style</div><div class="row-sub">Startup splash screen</div></div>
+          </div>
+          <div class="segmented" id="bootanim-style-picker">
+            <div class="segmented-opt active" data-val="default" onclick="setSoundStyle('bootanim','default')">Default</div>
+            <div class="segmented-opt" data-val="hios16" onclick="setSoundStyle('bootanim','hios16')">HiOS 16</div>
+            <div class="segmented-opt" data-val="custom" onclick="setSoundStyle('bootanim','custom')" id="bootanim-custom-opt" style="display:none">Custom</div>
+            <div class="segmented-opt" data-val="off" onclick="setSoundStyle('bootanim','off')">Off</div>
+          </div>
+          <div class="file-row">
+            <label class="file-btn">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline;vertical-align:middle;margin-right:6px"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              Upload Your Own (.zip)
               <input type="file" accept=".zip" onchange="handleFile(this,'bootanim','media-bootanim-name')">
             </label>
-            <div class="file-name" id="media-bootanim-name">Current: bootanimation.zip</div>
+            <div class="file-name" id="media-bootanim-name">No custom animation uploaded</div>
           </div>
         </div>
 
@@ -567,20 +1237,26 @@ input[type=range]:active::-webkit-slider-thumb{
         <div class="glass-card">
           <div class="setting-row">
             <div class="row-icon" style="background:linear-gradient(135deg,#f87171,#dc2626)">
-              <svg viewBox="0 0 24 24" stroke="#fff" stroke-width="2"><path d="M18.36 6.64a9 9 0 11-12.73 0"/><line x1="12" y1="2" x2="12" y2="12"/></svg>
+              <svg viewBox="0 0 24 24" stroke="#fff" stroke-width="2"><path d="M18.36 6.64a9 9 0 11-12.73 0M12 2v10"/></svg>
             </div>
-            <div class="row-text"><div class="row-title">Shutdown Animation</div><div class="row-sub">Power off splash screen</div></div>
-            <label class="toggle"><input type="checkbox" id="media-shutdownanim" checked onchange="save()"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+            <div class="row-text"><div class="row-title">Shutdown Animation Style</div><div class="row-sub">Power off splash screen</div></div>
+          </div>
+          <div class="segmented" id="shutdownanim-style-picker">
+            <div class="segmented-opt active" data-val="default" onclick="setSoundStyle('shutdownanim','default')">Default</div>
+            <div class="segmented-opt" data-val="hios16" onclick="setSoundStyle('shutdownanim','hios16')">HiOS 16</div>
+            <div class="segmented-opt" data-val="custom" onclick="setSoundStyle('shutdownanim','custom')" id="shutdownanim-custom-opt" style="display:none">Custom</div>
+            <div class="segmented-opt" data-val="off" onclick="setSoundStyle('shutdownanim','off')">Off</div>
           </div>
           <div class="file-row">
             <label class="file-btn">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline;vertical-align:middle;margin-right:6px"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-              Upload Shutdown Animation (.zip)
+              Upload Your Own (.zip)
               <input type="file" accept=".zip" onchange="handleFile(this,'shutdownanim','media-shutdownanim-name')">
             </label>
-            <div class="file-name" id="media-shutdownanim-name">Current: shutdownanimation.zip</div>
+            <div class="file-name" id="media-shutdownanim-name">No custom animation uploaded</div>
           </div>
         </div>
+
 
         <div class="section-label">Charging Animation</div>
         <div class="glass-card">
@@ -620,16 +1296,27 @@ input[type=range]:active::-webkit-slider-thumb{
           </div>
         </div>
         <div class="h8"></div>
-        <button class="action-btn btn-primary" onclick="saveAll()">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-          Apply &amp; Save
+        <button class="action-btn btn-primary btn-apply-save" onclick="saveAll('files-only')">
+          <svg class="btn-apply-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+          <svg class="btn-apply-spinner" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="display:none"><circle cx="12" cy="12" r="9" stroke-opacity="0.25"/><path d="M21 12a9 9 0 0 0-9-9"/></svg>
+          <span class="btn-apply-label">Apply &amp; Save</span>
         </button>
         <div class="h8"></div>
       </div>
 
-      <!-- FEATURES -->
       <div class="page" id="page-feat">
         <div class="page-header"><div class="eyebrow">System</div><h1>Features</h1><div class="sub">AI, gaming &amp; display</div></div>
+
+        <div class="section-label">Visual Effects</div>
+        <div class="glass-card">
+          <div class="setting-row">
+            <div class="row-icon" style="background:linear-gradient(135deg,#34d399,#10b981)">
+              <svg viewBox="0 0 24 24" stroke="#fff" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+            </div>
+            <div class="row-text"><div class="row-title">Dynamic Blur <span class="hint-icon" onclick="showHint(event,'Some effects rely on a flag read early in boot — reboot if disabling doesn\'t change anything right away.')">ⓘ</span></div><div class="row-sub">Dock, folders, recents &amp; app drawer blur engine</div></div>
+            <label class="toggle"><input type="checkbox" id="feat-launcher-blur" checked onchange="save()"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+          </div>
+        </div>
 
         <div class="section-label">AI Suite</div>
         <div class="glass-card">
@@ -638,7 +1325,7 @@ input[type=range]:active::-webkit-slider-thumb{
               <svg viewBox="0 0 24 24" stroke="#fff" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v2m0 16v2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M2 12h2m16 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
             </div>
             <div class="row-text"><div class="row-title">AI Suite</div><div class="row-sub">Master toggle</div></div>
-            <label class="toggle"><input type="checkbox" id="feat-ai" checked onchange="syncQuick('q-ai',this.checked);save()"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+            <label class="toggle"><input type="checkbox" id="feat-ai" checked onchange="save()"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
           </div>
           <div class="setting-row">
             <div class="row-icon" style="background:linear-gradient(135deg,#818cf8,#6366f1)">
@@ -684,7 +1371,7 @@ input[type=range]:active::-webkit-slider-thumb{
               <svg viewBox="0 0 24 24" stroke="#fff" stroke-width="2"><rect x="2" y="6" width="20" height="14" rx="3"/><path d="M18 6V4a2 2 0 00-2-2H8a2 2 0 00-2 2v2"/><circle cx="12" cy="13" r="2"/></svg>
             </div>
             <div class="row-text"><div class="row-title">Gaming Suite</div><div class="row-sub">Master toggle</div></div>
-            <label class="toggle"><input type="checkbox" id="feat-game" checked onchange="syncQuick('q-game',this.checked);save()"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+            <label class="toggle"><input type="checkbox" id="feat-game" checked onchange="save()"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
           </div>
           <div class="setting-row">
             <div class="row-icon" style="background:linear-gradient(135deg,#f59e0b,#d97706)">
@@ -789,6 +1476,62 @@ input[type=range]:active::-webkit-slider-thumb{
             <div class="row-text"><div class="row-title">Reading Mode</div><div class="row-sub">Eye comfort filter</div></div>
             <label class="toggle"><input type="checkbox" id="feat-reading" onchange="save()"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
           </div>
+          <div class="setting-row">
+            <div class="row-icon" style="background:linear-gradient(135deg,#22d3ee,#0891b2)">
+              <svg viewBox="0 0 24 24" stroke="#fff" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            </div>
+            <div class="row-text"><div class="row-title">Force 120Hz <span class="hint-icon" onclick="showHint(event,'Raises the refresh rate ceiling and bypasses the per-app policy capping some apps to 90Hz. Some devices may still adapt below 120Hz. Requires a reboot to fully apply or revert.')">ⓘ</span></div><div class="row-sub">Sets refresh rate ceiling for every app</div></div>
+            <label class="toggle"><input type="checkbox" id="feat-force120hz" onchange="save();checkPerfComboWarning()"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+          </div>
+        </div>
+
+        <div class="section-label">Status Bar</div>
+        <div class="glass-card">
+          <div class="setting-row">
+            <div class="row-icon" style="background:linear-gradient(135deg,#34d399,#10b981)">
+              <svg viewBox="0 0 24 24" stroke="#fff" stroke-width="2"><path d="M2 20h.01M7 20v-4M12 20v-8M17 20v-12M22 20v-16"/></svg>
+            </div>
+            <div class="row-text"><div class="row-title">Signal &amp; WiFi Icon Style <span class="hint-icon" onclick="showHint(event,'XOS 16 style also changes the network-type badge to always show 5G, regardless of your actual connection. On XOS 16 devices this defaults to None since the stock icons already match.')">ⓘ</span></div><div class="row-sub">Only one style is active at a time</div></div>
+          </div>
+          <div class="segmented" id="statusbar-style-picker">
+            <div class="segmented-opt" data-val="off" onclick="setStatusbarStyle('off')">None</div>
+            <div class="segmented-opt" data-val="ios" onclick="setStatusbarStyle('ios')">iOS</div>
+            <div class="segmented-opt active" data-val="xos16" onclick="setStatusbarStyle('xos16')">XOS 16</div>
+            <div class="segmented-opt" data-val="custom" onclick="setStatusbarStyle('custom')" id="segmented-custom-opt" style="display:none">Custom</div>
+            <div class="segmented-opt" data-val="off" onclick="setStatusbarStyle('off')">Off</div>
+          </div>
+        </div>
+
+        <div class="section-label">Custom Overlay</div>
+        <div class="glass-card">
+          <div class="setting-row">
+            <div class="row-icon" style="background:linear-gradient(135deg,#a78bfa,#7c3aed)">
+              <svg viewBox="0 0 24 24" stroke="#fff" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            </div>
+            <div class="row-text"><div class="row-title">Import Your Own <span class="hint-icon" onclick="showHint(event,'Uploading a custom overlay automatically switches the style picker above to use it instead of the built-in styles. Must be a valid signed RRO overlay APK targeting SystemUI — an invalid file may not apply, but won\'t break anything else.')">ⓘ</span></div><div class="row-sub">Upload a custom signal/wifi overlay .apk</div></div>
+          </div>
+          <div class="file-row">
+            <label class="file-btn">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline;vertical-align:middle;margin-right:6px"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              Upload Overlay (.apk)
+              <input type="file" accept=".apk,application/vnd.android.package-archive" onchange="handleFile(this,'statusbarcustom','media-statusbarcustom-name')">
+            </label>
+            <div class="file-name" id="media-statusbarcustom-name">No custom overlay uploaded</div>
+          </div>
+        </div>
+
+        <div class="section-label">Experimental: Performance Tuning</div>
+        <div class="glass-card">
+          <div id="perftuning-combo-warning" style="display:none;padding:10px 12px;background:rgba(248,113,113,0.1);border-bottom:1px solid rgba(248,113,113,0.3);font-size:12px;color:#f87171;line-height:1.5">
+            ⚠ Known issue: enabling this together with Force 120Hz has caused doubled/ghosted recents rendering on at least one device. No individual prop fix found yet — if you see this, try disabling one of the two and rebooting.
+          </div>
+          <div class="setting-row">
+            <div class="row-icon" style="background:linear-gradient(135deg,#f59e0b,#d97706)">
+              <svg viewBox="0 0 24 24" stroke="#fff" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+            </div>
+            <div class="row-text"><div class="row-title">Animation &amp; Renderer Tuning <span class="hint-icon" onclick="showHint(event,'From a third-party module confirmed working on XOS 16, not independently verified by us. Untested on HiOS/iTelOS. Turning this off requires a reboot to fully revert — we don\'t yet know the safe default values for these specific props. Disable and reboot if you notice animation glitches or instability.')">ⓘ</span></div><div class="row-sub">⚠ Experimental — higher-tier animation model, union renderer, dynamic bar</div></div>
+            <label class="toggle"><input type="checkbox" id="feat-perftuning" onchange="save();checkPerfComboWarning()"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+          </div>
         </div>
 
         <div class="section-label">Privacy</div>
@@ -809,42 +1552,39 @@ input[type=range]:active::-webkit-slider-thumb{
           </div>
         </div>
         <div class="h8"></div>
-        <button class="action-btn btn-primary" onclick="saveAll()">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-          Apply &amp; Save
+        <button class="action-btn btn-primary btn-apply-save" onclick="saveAll('full')">
+          <svg class="btn-apply-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+          <svg class="btn-apply-spinner" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="display:none"><circle cx="12" cy="12" r="9" stroke-opacity="0.25"/><path d="M21 12a9 9 0 0 0-9-9"/></svg>
+          <span class="btn-apply-label">Apply &amp; Save</span>
         </button>
         <div class="h8"></div>
       </div>
 
-    </div><!-- /scroll-inner -->
-  </div><!-- /pages -->
+    </div>
+  </div>
 
-  <!-- ── TAB BAR ───────────────────────────────────────────────────────────── -->
+  <div class="tab-bar-wrap">
   <nav class="tab-bar">
     <div class="tab-items">
       <div class="tab-item active" onclick="switchTab('home',this)">
-        <div class="tab-pill"></div>
         <div class="tab-icon">
           <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
         </div>
         <div class="tab-label">Home</div>
       </div>
-      <div class="tab-item" onclick="switchTab('anim',this)">
-        <div class="tab-pill"></div>
+      <div class="tab-item" id="tab-btn-sounds" onclick="switchTab('sounds',this)">
         <div class="tab-icon">
-          <svg viewBox="0 0 24 24"><path d="M5 3l14 9-14 9V3z"/></svg>
+          <svg viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
         </div>
-        <div class="tab-label">Animations</div>
+        <div class="tab-label">Sounds</div>
       </div>
       <div class="tab-item" onclick="switchTab('media',this)">
-        <div class="tab-pill"></div>
         <div class="tab-icon">
           <svg viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
         </div>
         <div class="tab-label">Media</div>
       </div>
       <div class="tab-item" onclick="switchTab('feat',this)">
-        <div class="tab-pill"></div>
         <div class="tab-icon">
           <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
         </div>
@@ -852,7 +1592,8 @@ input[type=range]:active::-webkit-slider-thumb{
       </div>
     </div>
   </nav>
-</div><!-- /app -->
+  </div>
+</div>
 
 <div class="toast" id="toast"></div>
 
@@ -861,7 +1602,6 @@ const CONFIG_PATH='/data/adb/modules/transsion-flagship/config.json';
 const LOG_PATH='/data/adb/modules/transsion-flagship/transflagship_service.log';
 let cfg={};
 
-// ── exec bridge — uses KSU callback API via bridge.js ES module ──────────────
 let _exec = null;
 let _fullScreen = null;
 
@@ -875,14 +1615,23 @@ async function exec(cmd){
   }
 }
 
-// ── Toast ──────────────────────────────────────────────────────────────────────
+function showHint(e,msg){
+  if(e&&e.stopPropagation) e.stopPropagation();
+  toast(msg,4600);
+}
+
 function toast(msg,dur=2400){
   const el=document.getElementById('toast');
   el.textContent=msg;el.classList.add('show');
   clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('show'),dur);
 }
 
-// ── Themed confirm modal (replaces native confirm() so it matches the app) ────
+function progressToast(msg){
+  const el=document.getElementById('toast');
+  el.textContent=msg;el.classList.add('show');
+  clearTimeout(el._t); // no auto-dismiss while progress is ongoing
+}
+
 function showConfirm(title,msg,opts={}){
   return new Promise(resolve=>{
     const bd=document.getElementById('modal-backdrop');
@@ -903,7 +1652,48 @@ function showConfirm(title,msg,opts={}){
   });
 }
 
-// ── Tab nav ───────────────────────────────────────────────────────────────────
+function renderSoundSummary(){
+  const box=document.getElementById('sound-summary-list');
+  if(!box) return;
+  let customCount=0, packCount=0, offCount=0;
+  for(const key of SOUND_KEYS_ALL){
+    const style=cfg[key+'_style']||'off';
+    if(style==='custom') customCount++;
+    else if(style==='pack') packCount++;
+    else offCount++;
+  }
+  const total=SOUND_KEYS_ALL.length;
+  const changed=customCount+packCount;
+  let html=`<div style="display:flex;align-items:baseline;gap:6px;margin-bottom:8px">
+    <div style="font-size:22px;font-weight:700;color:${changed>0?'var(--accent)':'#888'}">${changed}</div>
+    <div style="font-size:12.5px;color:#9aa">of ${total} sounds customized</div>
+  </div>`;
+  if(changed>0){
+    html+=`<div style="display:flex;gap:14px;font-size:11.5px;color:#9aa">
+      ${customCount>0?`<span>${customCount} Custom</span>`:''}
+      ${packCount>0?`<span>${packCount} Pack</span>`:''}
+      <span>${offCount} Stock</span>
+    </div>`;
+  } else {
+    html+=`<div style="font-size:11.5px;color:#666">Everything's on stock sounds right now.</div>`;
+  }
+  box.innerHTML=html;
+}
+
+function checkPerfComboWarning(){
+  const banner=document.getElementById('perftuning-combo-warning');
+  if(!banner) return;
+  const force120=document.getElementById('feat-force120hz');
+  const perfTuning=document.getElementById('feat-perftuning');
+  const bothOn=force120&&perfTuning&&force120.checked&&perfTuning.checked;
+  banner.style.display=bothOn?'block':'none';
+}
+
+function goToSoundsTab(){
+  const btn=document.getElementById('tab-btn-sounds');
+  if(btn) switchTab('sounds',btn);
+}
+
 function switchTab(id,el){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.tab-item').forEach(t=>t.classList.remove('active'));
@@ -912,51 +1702,112 @@ function switchTab(id,el){
   document.getElementById('pages').scrollTop=0;
 }
 
-function syncQuick(id,val){const el=document.getElementById(id);if(el)el.checked=val;}
 
-// ── Load config ────────────────────────────────────────────────────────────────
+async function persistCfg(){
+  const json=JSON.stringify(cfg,null,2);
+  const esc=json.replace(/'/g,"'\\''");
+  await exec("echo '"+esc+"' > \""+CONFIG_PATH+"\"");
+}
+
+function setStatusbarStyle(val){
+  cfg.statusbar_style=val;
+  document.querySelectorAll('#statusbar-style-picker .segmented-opt').forEach(el=>{
+    el.classList.toggle('active',el.dataset.val===val);
+  });
+  save();
+  persistCfg();
+}
+
+function setSoundStyle(type,val){
+  cfg[type+'_style']=val;
+  document.querySelectorAll('#'+type+'-style-picker .segmented-opt').forEach(el=>{
+    el.classList.toggle('active',el.dataset.val===val);
+  });
+  save();
+  persistCfg();
+  renderSoundSummary();
+}
+
+let _isXOS16=false;
+function versionLooksLike16(ver){
+  return /^(xos[-_. ]*)?16([^0-9].*)?$/i.test((ver||'').trim());
+}
+async function detectOS(){
+  const r=await exec('grep -E "^detected_OS_(TYPE|VER)=" /data/adb/modules/transsion-flagship/install_diagnostic.txt 2>/dev/null').catch(()=>({stdout:''}));
+  const out=(r&&r.stdout)||(typeof r==='string'?r:'');
+  let type=(out.match(/detected_OS_TYPE=(\S*)/)||[])[1]||'';
+  let ver=(out.match(/detected_OS_VER=(\S*)/)||[])[1]||'';
+  if(!type){
+    const live=await exec('getprop ro.tran.os.type 2>/dev/null');
+    type=((live&&live.stdout)||'').trim();
+  }
+  if(!ver){
+    const live=await exec('getprop ro.transsion.os.version 2>/dev/null');
+    ver=((live&&live.stdout)||'').trim();
+  }
+  _isXOS16=/^xos$/i.test((type||'').trim()) && versionLooksLike16(ver);
+}
+
 async function loadConfig(){
+  await detectOS();
+  const badge=document.getElementById('xos16-beta-badge');
+  if(badge) badge.style.display=_isXOS16?'inline-flex':'none';
   const r=await exec('cat "'+CONFIG_PATH+'" 2>/dev/null');
   try{cfg=JSON.parse(r.stdout||'{}');}catch(e){cfg={};}
   applyConfig();
 }
 
-// ── Reset to defaults — recovers from bad/stale config carried over from
-// an earlier broken version (e.g. animation levels stuck at their floor) ──────
-const DEFAULT_CONFIG={
-  boot_sound:true,boot_sound_name:"Waltz",boot_anim:true,
-  shutdown_anim:true,charge_anim:true,emoji_font:true,ai_master:true,ai_subtitles:true,
+const SOUND_KEYS_ALL=['sound_Calculagraph','sound_Cobalt','sound_Disconnect','sound_Dock','sound_Effect_Tick','sound_Fail','sound_Gear','sound_InCallNotification','sound_KeypressDelete','sound_KeypressInvalid','sound_KeypressReturn','sound_KeypressSpacebar','sound_KeypressStandard','sound_Lock','sound_Screenshots','sound_Second_Hand','sound_Sent_Success','sound_Success','sound_Trusted','sound_Undock','sound_Unlock','sound_beep_once','sound_beep_twice','sound_delete','sound_sent_message_success'];
+const SOUND_DEFAULTS={};
+for(const k of SOUND_KEYS_ALL){ SOUND_DEFAULTS[k+'_style']='off'; SOUND_DEFAULTS[k+'_file']=''; }
+function getDefaultConfig(){return{
+  boot_sound:true,boot_sound_name:"Waltz",bootanim_style:'default',shutdownanim_style:'default',
+  charge_anim:!_isXOS16,emoji_font:true,chargesound_style:'default',wirelesschargesound_style:'default',
+  fod_animation:!_isXOS16,ai_master:true,ai_subtitles:true,
   ai_call_summary:true,ai_notif_summary:true,ai_sound_rec:true,ai_notes:true,game_master:true,
   game_esports_touch:true,game_esports_level:3,game_interpolation:true,game_raytracing:true,
   game_hdr:true,game_bypass_charge:true,social_master:true,social_record:true,
   social_translate:true,social_beauty:true,display_dc:true,display_color:true,display_hdr:true,
-  display_reading:false,nav_hide:false,aod:true
-};
+  display_reading:false,nav_hide:false,aod:true,statusbar_style:(_isXOS16?'off':'xos16'),launcher_blur:true,perf_tuning:false,force_120hz:false,
+  ...SOUND_DEFAULTS
+};}
 async function confirmResetDefaults(){
   if(_uploadInProgress){toast('Please wait for the upload to finish first',3000);return;}
-  const ok=await showConfirm('Reset to Defaults','This discards your current toggle choices and restores the default settings.',{okLabel:'Reset',danger:true});
+  const ok=await showConfirm('Reset to Defaults','This discards every setting on Home, Media, Sounds, and Features — including all your individual sound choices and uploaded custom files — and restores the stock defaults. This cannot be undone.',{okLabel:'Reset Everything',danger:true});
   if(!ok) return;
-  cfg=JSON.parse(JSON.stringify(DEFAULT_CONFIG));
+  cfg=JSON.parse(JSON.stringify(getDefaultConfig()));
+  renderSoundSummary();
   const json=JSON.stringify(cfg,null,2);
   const esc=json.replace(/'/g,"'\\''");
   await exec("echo '"+esc+"' > \""+CONFIG_PATH+"\"");
   applyConfig();
   await applyRuntime();
   await exec('am force-stop com.android.systemui').catch(()=>{});
+  await exec('am force-stop com.transsion.launcher3').catch(()=>{});
   toast('Reset to defaults — reboot recommended');
 }
 
 function applyConfig(){
   const get=(k,d)=>cfg[k]!==undefined?cfg[k]:d;
-  setT('q-game',get('game_master',true));
-  setT('q-ai',get('ai_master',true));
-  setT('media-bootsound',get('boot_sound',true));setT('media-bootanim',get('boot_anim',true));
-  setT('media-shutdownanim',get('shutdown_anim',true));setT('media-chargeanim',get('charge_anim',true));
+  setT('media-bootsound',get('boot_sound',true));
+  setT('media-chargeanim',get('charge_anim',!_isXOS16));
   setT('media-emoji',get('emoji_font',true));
+  setT('feat-fod',get('fod_animation',!_isXOS16));
   if(cfg.bootsound_file)n('media-bootsound-name','Custom: '+cfg.bootsound_file);
-  if(cfg.bootanim_file)n('media-bootanim-name','Custom: '+cfg.bootanim_file);
-  if(cfg.shutdownanim_file)n('media-shutdownanim-name','Custom: '+cfg.shutdownanim_file);
   if(cfg.chargeanim_file)n('media-chargeanim-name','Custom: '+cfg.chargeanim_file);
+  const SOUND_KEYS=['sound_Calculagraph','sound_Cobalt','sound_Disconnect','sound_Dock','sound_Effect_Tick','sound_Fail','sound_Gear','sound_InCallNotification','sound_KeypressDelete','sound_KeypressInvalid','sound_KeypressReturn','sound_KeypressSpacebar','sound_KeypressStandard','sound_Lock','sound_Screenshots','sound_Second_Hand','sound_Sent_Success','sound_Success','sound_Trusted','sound_Undock','sound_Unlock','sound_beep_once','sound_beep_twice','sound_delete','sound_sent_message_success'];
+  for(const t of ['chargesound','wirelesschargesound','bootanim','shutdownanim',...SOUND_KEYS]){
+    const isIndividualSound=t.startsWith('sound_');
+    const styleVal=get(t+'_style',isIndividualSound?'off':'default');
+    document.querySelectorAll('#'+t+'-style-picker .segmented-opt').forEach(el=>{
+      el.classList.toggle('active',el.dataset.val===styleVal);
+    });
+    if(cfg[t+'_file']){
+      n('media-'+t+'-name','Custom: '+cfg[t+'_file']);
+      const customOpt=document.getElementById(t+'-custom-opt');
+      if(customOpt) customOpt.style.display='';
+    }
+  }
   if(cfg.emoji_file)n('media-emoji-name','Custom: '+cfg.emoji_file);
   setT('feat-ai',get('ai_master',true));setT('feat-ai-sub',get('ai_subtitles',true));
   setT('feat-ai-call',get('ai_call_summary',true));setT('feat-ai-notif',get('ai_notif_summary',true));
@@ -970,6 +1821,19 @@ function applyConfig(){
   setT('feat-hdr',get('display_hdr',true));setT('feat-reading',get('display_reading',false));
   setT('feat-navhide',get('nav_hide',false));
   setT('feat-aod',get('aod',true));
+  setT('feat-perftuning',get('perf_tuning',false));
+  setT('feat-force120hz',get('force_120hz',false));
+  checkPerfComboWarning();
+  setT('feat-launcher-blur',get('launcher_blur',true));
+  const sbStyle=get('statusbar_style',_isXOS16?'off':'xos16');
+  document.querySelectorAll('#statusbar-style-picker .segmented-opt').forEach(el=>{
+    el.classList.toggle('active',el.dataset.val===sbStyle);
+  });
+  if(cfg.statusbarcustom_file){
+    n('media-statusbarcustom-name','Custom: '+cfg.statusbarcustom_file);
+    const customOpt=document.getElementById('segmented-custom-opt');
+    if(customOpt) customOpt.style.display='';
+  }
   setS('feat-game-touch-level','feat-game-touch-val',get('game_esports_level',3));
 }
 
@@ -977,17 +1841,27 @@ function setT(id,v){const e=document.getElementById(id);if(e)e.checked=!!v;}
 function setS(id,lid,v){const e=document.getElementById(id);if(e){e.value=v;document.getElementById(lid).textContent=v;}}
 function n(id,t){const e=document.getElementById(id);if(e)e.textContent=t;}
 
-// ── Collect ────────────────────────────────────────────────────────────────────
 function collectConfig(){
   const g=id=>document.getElementById(id);
   const t=id=>g(id)?g(id).checked:false;
   const s=id=>g(id)?parseInt(g(id).value):1;
+  const SOUND_KEYS=['sound_Calculagraph','sound_Cobalt','sound_Disconnect','sound_Dock','sound_Effect_Tick','sound_Fail','sound_Gear','sound_InCallNotification','sound_KeypressDelete','sound_KeypressInvalid','sound_KeypressReturn','sound_KeypressSpacebar','sound_KeypressStandard','sound_Lock','sound_Screenshots','sound_Second_Hand','sound_Sent_Success','sound_Success','sound_Trusted','sound_Undock','sound_Unlock','sound_beep_once','sound_beep_twice','sound_delete','sound_sent_message_success'];
+  const soundConfig={};
+  for(const k of SOUND_KEYS){
+    soundConfig[k+'_style']=cfg[k+'_style']||'off';
+    soundConfig[k+'_file']=cfg[k+'_file']||'';
+  }
   return{
-    boot_sound:t('media-bootsound'),boot_anim:t('media-bootanim'),
-    shutdown_anim:t('media-shutdownanim'),charge_anim:t('media-chargeanim'),emoji_font:t('media-emoji'),
+    boot_sound:t('media-bootsound'),charge_anim:t('media-chargeanim'),emoji_font:t('media-emoji'),
+    fod_animation:t('feat-fod'),
     bootsound_file:cfg.bootsound_file||'',boot_sound_name:cfg.boot_sound_name||'Waltz',
-    bootanim_file:cfg.bootanim_file||'',shutdownanim_file:cfg.shutdownanim_file||'',
+    bootanim_style:cfg.bootanim_style||'default',bootanim_file:cfg.bootanim_file||'',
+    shutdownanim_style:cfg.shutdownanim_style||'default',shutdownanim_file:cfg.shutdownanim_file||'',
     chargeanim_file:cfg.chargeanim_file||'',emoji_file:cfg.emoji_file||'',
+    chargesound_style:cfg.chargesound_style||'default',chargesound_file:cfg.chargesound_file||'',
+    wirelesschargesound_style:cfg.wirelesschargesound_style||'default',wirelesschargesound_file:cfg.wirelesschargesound_file||'',
+    statusbar_style:cfg.statusbar_style||(_isXOS16?'off':'xos16'),statusbarcustom_file:cfg.statusbarcustom_file||'',
+    ...soundConfig,
     ai_master:t('feat-ai'),ai_subtitles:t('feat-ai-sub'),ai_call_summary:t('feat-ai-call'),
     ai_notif_summary:t('feat-ai-notif'),ai_sound_rec:t('feat-ai-rec'),ai_notes:t('feat-ai-note'),
     game_master:t('feat-game'),game_esports_touch:t('feat-game-touch'),game_esports_level:s('feat-game-touch-level'),
@@ -997,80 +1871,165 @@ function collectConfig(){
     social_translate:t('feat-social-trans'),social_beauty:t('feat-social-beauty'),
     display_dc:t('feat-dc'),display_color:t('feat-color'),display_hdr:t('feat-hdr'),
     display_reading:t('feat-reading'),
-    nav_hide:t('feat-navhide'),aod:t('feat-aod'),
+    nav_hide:t('feat-navhide'),aod:t('feat-aod'),perf_tuning:t('feat-perftuning'),force_120hz:t('feat-force120hz'),launcher_blur:t('feat-launcher-blur'),
   };
 }
 
 function save(){cfg=collectConfig();}
 
-async function saveAll(){
-  if(_uploadInProgress){toast('Please wait for the upload to finish first',3000);return;}
-  save();
-  const json=JSON.stringify(cfg,null,2);
-  const esc=json.replace(/'/g,"'\\''");
-  await exec("echo '"+esc+"' > \""+CONFIG_PATH+"\"");
-  await applyRuntime();
-  // SystemUI/launcher cache ro.* props at process start — restart them so
-  // AOD, animation, and nav-bar changes show up without a full device reboot.
-  // Deeper hooks (game engine, camera AI, etc.) still need a real reboot.
-  await exec('am force-stop com.android.systemui').catch(()=>{});
-  toast('Saved — SystemUI restarting. Some features need a full reboot.');
+function setApplyBusy(busy){
+  document.querySelectorAll('.btn-apply-save').forEach(btn=>{
+    btn.disabled = busy;
+    btn.querySelector('.btn-apply-icon').style.display = busy ? 'none' : '';
+    btn.querySelector('.btn-apply-spinner').style.display = busy ? '' : 'none';
+    btn.querySelector('.btn-apply-label').textContent = busy ? 'Applying…' : 'Apply & Save';
+  });
 }
 
-// ── settings_put helper — uses content update fallback for X6886 ──────────────
+async function saveAll(scope='full'){
+  if(_uploadInProgress){toast('Please wait for the upload to finish first',3000);return;}
+  setApplyBusy(true);
+  try{
+    save();
+    progressToast('Applying… Saving config');
+    const json=JSON.stringify(cfg,null,2);
+    const esc=json.replace(/'/g,"'\\''");
+    await exec("echo '"+esc+"' > \""+CONFIG_PATH+"\"");
+
+    if(scope==='full'){
+      await applyRuntime((i,total,label)=>{
+        progressToast(`Applying… (${i}/${total}) ${label}`);
+      });
+    }
+
+    progressToast('Applying… Restarting SystemUI');
+    await exec('am force-stop com.android.systemui').catch(()=>{});
+    progressToast('Applying… Restarting Launcher');
+    await exec('am force-stop com.transsion.launcher3').catch(()=>{});
+    progressToast('Applying… Restarting charge animation');
+    await exec('am force-stop com.transsion.aichargeprovider').catch(()=>{});
+    toast('Saved — SystemUI & Launcher restarting. Some features need a full reboot.');
+  }catch(e){
+    toast('Apply failed — check that the module is installed correctly.',3600);
+  }finally{
+    setApplyBusy(false);
+  }
+}
+
 async function sp(ns, key, val) {
-  // Try content update first (works on CMD_DISPATCHER_UNRELIABLE devices)
   await exec(`content update --uri content://settings/${ns} --bind value:s:${val} --where "name='${key}'"`)
     .catch(()=>{});
-  // Also try settings put (works on normal devices)
   await exec(`settings put ${ns} ${key} ${val}`).catch(()=>{});
 }
 
-async function applyRuntime(){
+async function applyRuntime(onPhase){
   const c=cfg;
   const rp = async(k,v) => { try{ await exec(`resetprop ${k} ${v}`); }catch(e){} };
+  const phase = (i,total,label)=>{ if(onPhase) onPhase(i,total,label); };
+  const TOTAL=8;
 
-  // NOTE: unlock/recent/launch/blur animation props are static in
-  // common/system.prop (proven values from confirmed-working builds) and
-  // are intentionally not touched here anymore — live resetprop toggling
-  // was unreliable and a bad saved value could break app open/close animation.
+  phase(1,TOTAL,'Animations');
   await sp('global','window_animation_scale','1.0');
   await sp('global','transition_animation_scale','1.0');
   await sp('global','animator_duration_scale','1.0');
 
-  // Display — content update first for X6886
+  phase(2,TOTAL,'Display');
   await sp('system','tran_dc_dimming_enable', c.display_dc?1:0);
   await sp('system','tran_display_color_enhance', c.display_color?1:0);
   await sp('system','tran_reading_mode_enable', c.display_reading?1:0);
   await rp('ro.tran.display_hdr_support', c.display_hdr?1:0);
   await rp('ro.tran.display_dc_dimming_support', c.display_dc?1:0);
+  if(c.force_120hz){
+    await sp('system','tran_refresh_mode','120');
+    await sp('system','tran_need_recovery_refresh_mode','120');
+    await sp('system','tran_need_recovery_refresh_rate','120');
+    await sp('system','last_tran_refresh_mode_in_refresh_setting','120');
+    await sp('system','peak_refresh_rate','120.0');
+    await sp('system','min_refresh_rate','120.0');
+  }
 
-  // Gaming — sub-features gated by game_master so turning off Game Mode
-  // actually turns everything under it off too
+  phase(3,TOTAL,'Gaming');
   await rp('ro.os_game_tp_esports10.support', c.game_master?1:0);
   await rp('ro.os_game_ray_tracing.support', c.game_master&&c.game_raytracing?1:0);
   await rp('ro.os_game_frame_game_interpolation.support', c.game_master&&c.game_interpolation?1:0);
   await rp('ro.os_game_graphic_hdr.support', c.game_master&&c.game_hdr?1:0);
   await rp('ro.os_game_bypass_charging_support', c.game_master&&c.game_bypass_charge?1:0);
 
-  // Charging anim
+  phase(4,TOTAL,'Charging & nav bar');
   await rp('ro.tran.charge_animation_support', c.charge_anim?1:0);
   await rp('ro.tran.lockscreen_charge_anim', c.charge_anim?1:0);
 
-  // Nav bar
   await rp('ro.tranos_hidenavigationbar_support', c.nav_hide?1:0);
 
-  // AI
+  phase(5,TOTAL,'AI features');
   await rp('ro.sys.tran.ai_subtitles_support', c.ai_subtitles?1:0);
   await rp('ro.sys.tran.aiphone_summary_support', c.ai_call_summary?1:0);
   await rp('ro.os_soundrecorder_speech_support', c.ai_sound_rec?1:0);
 
-  // AOD
+  phase(6,TOTAL,'AOD');
   await rp('ro.aod_alwaysshow_support', c.aod?1:0);
+
+  phase(7,TOTAL,'Launcher blur');
+  const blurLevel=c.launcher_blur?2:0;
+  const blurBit=c.launcher_blur?1:0;
+  await rp('ro.transsion_launcher_gaussian_blur_support', blurLevel);
+  await rp('tr_launcher.gaussianblur.support', blurLevel);
+  await rp('ro.tran.effectengine.dynamicblur.support', blurBit);
+  await sp('system','transsion_launcher_gaussian_blur_enable', blurBit);
+
+  phase(8,TOTAL,'Performance tuning (experimental)');
+  if(c.perf_tuning){
+    await rp('ro.tr_animation.platform_level', 3);
+    await rp('ro.tr_perf.launch_start_exit.model', 3);
+    await rp('ro.tr_perf.power_keyguard_animation.model', 3);
+    await rp('ro.tr_perf.recent_animation.model', 3);
+    await rp('ro.tr_perf.unlock_mode.model', 3);
+    await rp('ro.tran_display_unionrender.support', 1);
+    await rp('ro.tr_dynamicbar.support', 1);
+  }
 }
 
-// ── File Upload ────────────────────────────────────────────────────────────────
 let _uploadInProgress=false;
+let _lastUpload=null;
+let _splashConflictModules=[];
+function showUndoUploadBanner(name){
+  const banner=document.getElementById('undo-upload-banner');
+  const label=document.getElementById('undo-upload-label');
+  if(!banner||!label) return;
+  label.textContent='Uploaded '+name;
+  banner.style.display='flex';
+  clearTimeout(banner._hideTimer);
+  banner._hideTimer=setTimeout(()=>{banner.style.display='none';},30000);
+}
+
+async function undoLastUpload(){
+  if(!_lastUpload){toast('Nothing to undo');return;}
+  const {type,destList,nameId}=_lastUpload;
+  let restoredAny=false;
+  for(const d of destList){
+    const r=await exec('[ -f "'+d+'.prevupload" ] && { cp "'+d+'.prevupload" "'+d+'"; rm -f "'+d+'.prevupload"; echo RESTORED; } || echo NONE').catch(()=>({stdout:'NONE'}));
+    if((r.stdout||'').includes('RESTORED')) restoredAny=true;
+    else await exec('rm -f "'+d+'"').catch(()=>{});
+  }
+  if(restoredAny){
+    toast('Reverted to the previous file — reboot to apply');
+  } else {
+    cfg[type+'_style']='off';
+    const nameEl=document.getElementById(nameId);
+    if(nameEl) nameEl.textContent='No custom sound';
+    document.querySelectorAll('#'+type+'-style-picker .segmented-opt').forEach(el=>{
+      el.classList.toggle('active',el.dataset.val==='off');
+    });
+    const json=JSON.stringify(cfg,null,2);
+    const esc=json.replace(/'/g,"'\\''");
+    await exec("echo '"+esc+"' > \""+CONFIG_PATH+"\"");
+    toast('Removed the upload — reverted to Stock. Reboot to apply.');
+  }
+  const banner=document.getElementById('undo-upload-banner');
+  if(banner){banner.style.display='none';clearTimeout(banner._hideTimer);}
+  _lastUpload=null;
+}
+
 async function handleFile(input,type,nameId){
   if(!input.files.length)return;
   if(_uploadInProgress){
@@ -1080,39 +2039,34 @@ async function handleFile(input,type,nameId){
   }
   _uploadInProgress=true;
   stopLogPolling(); // background polling still hits exec() every 2s otherwise —
-  // that's a second source of bridge concurrency during a long upload that
-  // the earlier "don't let the user trigger overlapping actions" fix didn't
-  // cover, since this timer isn't triggered by anything the user taps.
-  // Disable every upload button/toggle while this one is running — the
-  // shared bridge/exec() pipeline isn't safe for overlapping calls: a
-  // second upload started mid-flight was racing the first on the same temp
-  // file path, which could corrupt or hang the in-progress read/write and
-  // looked exactly like "the UI freezes when I tap something."
   document.querySelectorAll('input[type="file"], input[type="checkbox"]').forEach(el=>el.disabled=true);
   const file=input.files[0];const name=file.name;
   const base='/data/adb/modules/transsion-flagship';
-  // NOTE: bootsound targets one fixed path. bootanim/shutdownanim/emoji all
-  // exist in BOTH /system/... and /system/product/... in this build — we
-  // don't know which one this specific device actually reads, so we write
-  // to both directly rather than write-then-copy (which failed silently
-  // before, since exec() can't report a command's real exit code).
+  const ext=(name.match(/\.[a-zA-Z0-9]+$/)||['.ogg'])[0].toLowerCase();
   const multiDestMap={
-    bootanim:[base+'/system/media/bootanimation.zip',base+'/system/product/media/bootanimation.zip'],
-    shutdownanim:[base+'/system/media/shutdownanimation.zip',base+'/system/product/media/shutdownanimation.zip'],
+    bootanim:[base+'/system/media/bootanimation_custom.zip',base+'/system/product/media/bootanimation_custom.zip'],
+    shutdownanim:[base+'/system/media/shutdownanimation_custom.zip',base+'/system/product/media/shutdownanimation_custom.zip'],
     emoji:[base+'/system/fonts/NotoColorEmoji.ttf',base+'/system/product/fonts/NotoColorEmoji.ttf'],
+    statusbarcustom:[base+'/system/overlay/Icons_Signal_wifi_custom.apk',base+'/system/product/overlay/Icons_Signal_wifi_custom.apk'],
+    chargesound:[base+'/system/product/media/audio/ui/ChargingStarted_custom'+ext,base+'/system/media/audio/ui/ChargingStarted_custom'+ext],
+    wirelesschargesound:[base+'/system/product/media/audio/ui/WirelessChargingStarted_custom'+ext,base+'/system/media/audio/ui/WirelessChargingStarted_custom'+ext],
   };
   const destMap={
     bootsound:base+'/system/product/media/audio/bootsound/Waltz.ogg',
     chargeanim:base+'/system/product/theme/charge/'+name,
   };
   const isMulti=!!multiDestMap[type];
-  const destList=isMulti?multiDestMap[type]:(destMap[type]?[destMap[type]]:null);
+  let destList=isMulti?multiDestMap[type]:(destMap[type]?[destMap[type]]:null);
+  if(!destList && type.startsWith('sound_')){
+    const soundName=type.substring(6); // strip 'sound_' prefix
+    destList=[
+      base+'/system/product/media/audio/ui/'+soundName+'_custom'+ext,
+      base+'/system/media/audio/ui/'+soundName+'_custom'+ext,
+    ];
+  }
   if(!destList){_uploadInProgress=false;document.querySelectorAll('input[type="file"], input[type="checkbox"]').forEach(el=>el.disabled=false);return;}
   const dest=destList[0];
 
-  // Hard size guard — files above this are unlikely to cross the JS bridge
-  // reliably, and would otherwise hang the UI thread for a long time before
-  // possibly failing anyway. Better to fail fast with a clear reason.
   const MAX_MB=40;
   if(file.size>MAX_MB*1024*1024){
     toast('File too large ('+(file.size/1048576).toFixed(1)+'MB) — max '+MAX_MB+'MB supported',5000);
@@ -1121,13 +2075,13 @@ async function handleFile(input,type,nameId){
     return;
   }
 
-  toast('Uploading '+name+' ('+(file.size/1048576).toFixed(1)+'MB)...',60000);
+  const sizeMB=(file.size/1048576).toFixed(1);
+  toast('Reading '+name+' ('+sizeMB+'MB)...',60000);
   try{
     const buf=await file.arrayBuffer();
     const bytes=new Uint8Array(buf);
+    toast('Encoding '+name+'...',60000);
     const CHUNK=32766; // must be a multiple of 3 — base64 encodes 3 bytes ->
-    // 4 chars with no padding, so only a multiple-of-3 chunk size lets us
-    // btoa() each piece independently and join with no corruption.
     let b64;
     if(typeof Worker!=='undefined'){
       try{
@@ -1157,10 +2111,6 @@ async function handleFile(input,type,nameId){
       }catch(werr){b64=null;} // fall through to main-thread path below
     }
     if(b64===undefined||b64===null){
-      // Fallback for WebViews without Worker support: same chunked approach
-      // but on the main thread, with yields to at least stay somewhat
-      // responsive. Not as safe as the worker path on very large files, but
-      // better than nothing if Worker genuinely isn't available here.
       const parts=[];
       for(let i=0,c=0;i<bytes.length;i+=CHUNK,c++){
         const slice=bytes.subarray(i,i+CHUNK);
@@ -1172,54 +2122,50 @@ async function handleFile(input,type,nameId){
       b64=parts.join('');
     }
 
-    // Hard timeout wrapper — if any exec() call hangs (bridge issue, huge
-    // payload, whatever) the upload fails cleanly instead of leaving the
-    // "Uploading..." toast on screen forever.
     const withTimeout=(p,ms,label)=>Promise.race([
       p,
       new Promise((_,rej)=>setTimeout(()=>rej(new Error(label+' timed out after '+(ms/1000)+'s')),ms))
     ]);
 
     const tmp='/data/local/tmp/transflagship_upload_'+Date.now()+'.b64';
-    // Write the base64 payload to a temp file ONCE, then base64-decode it
-    // into every destination — avoids re-sending a multi-MB string through
-    // the JS bridge more than once when a file needs to land in two places.
+    toast('Sending '+name+' to device...',60000);
     await withTimeout(exec('cat > "'+tmp+'" << \'TFUPLOADEOF\'\n'+b64+'\nTFUPLOADEOF'),45000,'Bridge write');
+    toast('Writing '+name+' to system...',60000);
+    const binTmp=tmp+'.bin';
+    const decodeR=await withTimeout(exec('base64 -d "'+tmp+'" > "'+binTmp+'" && echo OK || echo FAIL'),30000,'Decode');
+    if(!(decodeR.stdout||'').includes('OK')) throw new Error('base64 decode failed');
+    if(type==='chargesound'||type==='wirelesschargesound'){
+      const baseName=type==='chargesound'?'ChargingStarted_custom':'WirelessChargingStarted_custom';
+      const otherExts=['.ogg','.mp3','.wav','.m4a'].filter(e=>e!==ext);
+      for(const dir of ['/system/product/media/audio/ui','/system/media/audio/ui']){
+        for(const oe of otherExts){
+          await exec('rm -f "'+base+dir+'/'+baseName+oe+'" "'+base+dir+'/'+baseName+oe+'.disabled"').catch(()=>{});
+        }
+      }
+    }
     for(const d of destList){
       const dir=d.substring(0,d.lastIndexOf('/'));
       await exec('mkdir -p "'+dir+'"');
-      const r=await withTimeout(exec('base64 -d "'+tmp+'" > "'+d+'" && echo OK || echo FAIL'),20000,'Decode to '+d);
+      await exec('[ -f "'+d+'" ] && cp "'+d+'" "'+d+'.prevupload" 2>/dev/null; true').catch(()=>{});
+      const r=await withTimeout(exec('cp "'+binTmp+'" "'+d+'" && echo OK || echo FAIL'),15000,'Copy to '+d);
       if(!(r.stdout||'').includes('OK')) throw new Error('device write failed for '+d);
-      // Verify the written file's size actually matches the upload — exec()
-      // always resolves "successfully" even when the underlying shell command
-      // fails, so an empty/truncated write would otherwise look identical to
-      // a real success. This is the only reliable way to catch that.
       const szr=await exec('stat -c%s "'+d+'" 2>/dev/null || wc -c < "'+d+'"');
       const writtenSize=parseInt((szr.stdout||'0').trim(),10);
       if(!writtenSize || Math.abs(writtenSize-bytes.length)>4){
         throw new Error('written size ('+writtenSize+') for '+d+' does not match upload ('+bytes.length+') — write failed silently');
       }
-      // Remove any stale .disabled sibling from a previous "off" toggle,
-      // otherwise post-fs-data.sh's rename logic gets confused about which
-      // file is the real one.
+      await exec('chmod 644 "'+d+'"').catch(()=>{});
       await exec('rm -f "'+d+'.disabled"').catch(()=>{});
     }
-    await exec('rm -f "'+tmp+'"');
+    await exec('rm -f "'+tmp+'" "'+binTmp+'"');
     cfg[type+'_file']=name;
     document.getElementById(nameId).textContent='Custom: '+name;
-    // Persist to config.json on disk immediately — cfg[...] alone only
-    // updates the in-memory object. Without this write, the filename record
-    // is lost the moment the app is closed/reloaded unless the user
-    // separately taps "Apply & Save", which nothing here prompts them to do.
     const persistFilename=async()=>{
       const json=JSON.stringify(cfg,null,2);
       const esc=json.replace(/'/g,"'\\''");
       await exec("echo '"+esc+"' > \""+CONFIG_PATH+"\"");
     };
     if(type==='chargeanim'){
-      // lockscreen_charge_config.xml pins an exact MD5 for the charging
-      // video — if it doesn't match, the animation may be silently rejected
-      // regardless of filename/location. Recompute and patch it in place.
       const cfgXml=base+'/system/product/theme/charge/lockscreen_charge_config.xml';
       const md5r=await exec('md5sum "'+dest+'" 2>/dev/null | cut -d" " -f1');
       const md5=(md5r.stdout||'').trim();
@@ -1234,10 +2180,30 @@ async function handleFile(input,type,nameId){
       } else {
         throw new Error('could not compute MD5 of uploaded file');
       }
+    } else if(type==='statusbarcustom'){
+      cfg.statusbar_style='custom';
+      const customOpt=document.getElementById('segmented-custom-opt');
+      if(customOpt) customOpt.style.display='';
+      document.querySelectorAll('#statusbar-style-picker .segmented-opt').forEach(el=>{
+        el.classList.toggle('active',el.dataset.val==='custom');
+      });
+      await persistFilename();
+      toast(name+' saved and set as active style — reboot to apply');
+    } else if(type==='chargesound'||type==='wirelesschargesound'||type==='bootanim'||type==='shutdownanim'||type.startsWith('sound_')){
+      cfg[type+'_style']='custom';
+      const customOpt=document.getElementById(type+'-custom-opt');
+      if(customOpt) customOpt.style.display='';
+      document.querySelectorAll('#'+type+'-style-picker .segmented-opt').forEach(el=>{
+        el.classList.toggle('active',el.dataset.val==='custom');
+      });
+      await persistFilename();
+      toast(name+' saved and set as active — reboot to apply');
     } else {
       await persistFilename();
       toast(name+' saved to '+destList.length+' location(s) — reboot to apply');
     }
+    _lastUpload={type,name,destList,nameId,prevLabel:document.getElementById(nameId)?document.getElementById(nameId).dataset.prevLabel:null};
+    showUndoUploadBanner(name);
   }catch(e){toast('Upload failed: '+e.message,5000);}
   finally{
     _uploadInProgress=false;
@@ -1247,7 +2213,262 @@ async function handleFile(input,type,nameId){
   }
 }
 
-// ── Log ───────────────────────────────────────────────────────────────────────
+const LIVE_STATUS_ITEMS=[
+  {group:'Animations',label:'Unlock (static)',prop:'ro.transsion_unlock_mode_support',expect:'3'},
+  {group:'Animations',label:'Launch/Exit (static)',prop:'ro.transsion_launch_start_exit_support',expect:'3'},
+  {group:'Animations',label:'Recent Apps (static)',prop:'ro.transsion_recent_animation_support',expect:'3'},
+  {group:'Launcher',label:'Launcher Blur',prop:'ro.transsion_launcher_gaussian_blur_support',cfgKey:'launcher_blur',onVal:'2',offVal:'0'},
+  {group:'Launcher',label:'Launcher Blur (alt)',prop:'tr_launcher.gaussianblur.support',cfgKey:'launcher_blur',onVal:'2',offVal:'0'},
+  {group:'Launcher',label:'Blur Engine',prop:'ro.tran.effectengine.dynamicblur.support',cfgKey:'launcher_blur',onVal:'1',offVal:'0'},
+  {group:'Launcher',label:'SurfaceFlinger Blur (static)',prop:'ro.surface_flinger.supports_background_blur',expect:'1'},
+  {group:'Launcher',label:'Recent Blur (static)',prop:'ro.os.recent.blur',expect:'1'},
+  {group:'Display',label:'AOD',prop:'ro.aod_alwaysshow_support',cfgKey:'aod',onVal:'1',offVal:'0'},
+  {group:'Display',label:'HDR',prop:'ro.tran.display_hdr_support',cfgKey:'display_hdr',onVal:'1',offVal:'0'},
+  {group:'Display',label:'DC Dimming',prop:'ro.tran.display_dc_dimming_support',cfgKey:'display_dc',onVal:'1',offVal:'0'},
+  {group:'Display',label:'Hide Nav Bar',prop:'ro.tranos_hidenavigationbar_support',cfgKey:'nav_hide',onVal:'1',offVal:'0'},
+  {group:'Charging',label:'Charging Animation',prop:'ro.tran.charge_animation_support',cfgKey:'charge_anim',onVal:'1',offVal:'0'},
+  {group:'Charging',label:'Lockscreen Charge Anim',prop:'ro.tran.lockscreen_charge_anim',cfgKey:'charge_anim',onVal:'1',offVal:'0'},
+  {group:'Gaming',label:'eSports Mode',prop:'ro.os_game_tp_esports10.support',cfgKey:'game_master',onVal:'1',offVal:'0'},
+  {group:'Gaming',label:'Ray Tracing',prop:'ro.os_game_ray_tracing.support',cfgKey:'game_raytracing',onVal:'1',offVal:'0'},
+  {group:'Gaming',label:'Frame Interpolation',prop:'ro.os_game_frame_game_interpolation.support',cfgKey:'game_interpolation',onVal:'1',offVal:'0'},
+  {group:'Gaming',label:'Graphic HDR',prop:'ro.os_game_graphic_hdr.support',cfgKey:'game_hdr',onVal:'1',offVal:'0'},
+  {group:'Gaming',label:'Bypass Charging',prop:'ro.os_game_bypass_charging_support',cfgKey:'game_bypass_charge',onVal:'1',offVal:'0'},
+  {group:'AI',label:'AI Subtitles',prop:'ro.sys.tran.ai_subtitles_support',cfgKey:'ai_subtitles',onVal:'1',offVal:'0'},
+  {group:'AI',label:'Call Summary',prop:'ro.sys.tran.aiphone_summary_support',cfgKey:'ai_call_summary',onVal:'1',offVal:'0'},
+  {group:'AI',label:'Sound Recorder Speech',prop:'ro.os_soundrecorder_speech_support',cfgKey:'ai_sound_rec',onVal:'1',offVal:'0'},
+];
+
+const CONFLICT_PROPS=[
+  'ro.surface_flinger.supports_background_blur',
+  'ro.os.recent.blur',
+  'ro.transsion_recent_animation_support',
+  'ro.transsion.recent_animation.model',
+  'ro.transsion_launcher_gaussian_blur_support',
+  'tr_launcher.gaussianblur.support',
+  'ro.tran.effectengine.dynamicblur.support',
+  'ro.surface_flinger.max_frame_buffer_acquired_buffers'
+];
+
+const CONFLICT_PATHS=[
+  'system/media/audio/ui',
+  'system/product/media/audio/ui',
+  'system/product/media/audio/bootsound',
+  'system/overlay/FodResOverlay',
+  'system/overlay/FodSetOverlay',
+  'system/product/overlay/FodResOverlay',
+  'system/product/overlay/FodSetOverlay',
+  'system/overlay/Icons_Signal_wifi',
+  'system/product/overlay/Icons_Signal_wifi',
+  'system/product/apm/config',
+  'system/product/theme/charge',
+  'system/product/theme/animations',
+  'system/product/theme/sounds'
+];
+
+let _whatsNewCurrentVersion=null;
+
+async function checkForUpdates(){
+  const btn=document.getElementById('update-check-btn');
+  const result=document.getElementById('update-check-result');
+  const origLabel=btn.innerHTML;
+  btn.disabled=true;
+  btn.innerHTML='Checking…';
+  result.style.display='none';
+
+  try{
+    const propR=await exec('grep "^versionCode=" /data/adb/modules/transsion-flagship/module.prop').catch(()=>({stdout:''}));
+    const localCodeMatch=(propR.stdout||'').match(/versionCode=(\d+)/);
+    const localCode=localCodeMatch?parseInt(localCodeMatch[1],10):null;
+
+    const resp=await fetch('https://raw.githubusercontent.com/Just-LilG/TRANSSION-FLAGSHIP/main/update.json',{cache:'no-store'});
+    if(!resp.ok) throw new Error('HTTP '+resp.status);
+    const data=await resp.json();
+    const remoteCode=data.versionCode;
+    const remoteVersion=data.version;
+
+    result.style.display='block';
+    if(localCode===null){
+      result.innerHTML='<span style="color:#9aa">Couldn\'t read the installed version to compare.</span>';
+    } else if(remoteCode>localCode){
+      result.innerHTML='<span style="color:#34d399">Update available: '+remoteVersion+'</span><br><span style="color:#9aa;font-size:11px">Download it from the GitHub release, then flash like any module update.</span>';
+    } else {
+      result.innerHTML='<span style="color:#9aa">You\'re on the latest version ('+remoteVersion+').</span>';
+    }
+  }catch(e){
+    result.style.display='block';
+    result.innerHTML='<span style="color:#f87171">Couldn\'t check for updates — no connection or GitHub is unreachable.</span>';
+  }finally{
+    btn.disabled=false;
+    btn.innerHTML=origLabel;
+  }
+}
+
+async function checkWhatsNew(){
+  const base='/data/adb/modules/transsion-flagship';
+  const seenR=await exec('cat '+base+'/.whatsnew_seen 2>/dev/null').catch(()=>({stdout:''}));
+  const lastSeen=(seenR.stdout||'').trim();
+
+  const propR=await exec('grep "^version=" '+base+'/module.prop').catch(()=>({stdout:''}));
+  const versionLine=(propR.stdout||'').trim();
+  const currentVersion=versionLine.replace(/^version=/,'').split(' ')[0];
+  if(!currentVersion) return;
+  if(currentVersion.toLowerCase()===lastSeen.toLowerCase()) return;
+
+  const clR=await exec('cat '+base+'/CHANGELOG.md 2>/dev/null').catch(()=>({stdout:''}));
+  const changelog=clR.stdout||'';
+  if(!changelog) return;
+
+  const match=changelog.match(/##\s+(v[\d.]+[^\n]*)\n([\s\S]*?)(?=\n##\s+v|\s*$)/);
+  if(!match) return;
+
+  const versionHeading=match[1].trim();
+  const body=match[2].trim();
+  const bullets=body.split('\n').filter(l=>l.trim().startsWith('-'));
+  let contentHtml='';
+  if(bullets.length){
+    contentHtml='<ul>'+bullets.map(b=>{
+      let text=b.replace(/^-\s*/,'');
+      text=text.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
+      return '<li>'+text+'</li>';
+    }).join('')+'</ul>';
+  } else {
+    contentHtml='<div>'+body.replace(/\n/g,'<br>')+'</div>';
+  }
+
+  document.getElementById('whatsnew-version').textContent=versionHeading;
+  document.getElementById('whatsnew-content').innerHTML=contentHtml;
+  document.getElementById('whatsnew-backdrop').classList.add('show');
+  _whatsNewCurrentVersion=currentVersion;
+}
+
+async function closeWhatsNew(){
+  document.getElementById('whatsnew-backdrop').classList.remove('show');
+  if(_whatsNewCurrentVersion){
+    await exec('echo "'+_whatsNewCurrentVersion+'" > /data/adb/modules/transsion-flagship/.whatsnew_seen').catch(()=>{});
+  }
+}
+
+async function checkInstallTimeConflicts(){
+  const r=await exec('cat /data/adb/transsion-flagship-staging/install_conflicts.txt 2>/dev/null').catch(()=>({stdout:''}));
+  const lines=(r.stdout||'').trim().split('\n').filter(l=>l.trim());
+  if(lines.length===0) return;
+  renderConflictLines(lines);
+}
+
+function renderConflictLines(lines){
+  const box=document.getElementById('conflict-check-list');
+
+  if(lines.length===0){
+    box.innerHTML='<div style="display:flex;align-items:center;gap:8px;padding:8px 0">'+
+      '<div style="width:7px;height:7px;border-radius:50%;background:#34d399;flex-shrink:0"></div>'+
+      '<div style="font-size:12.5px;color:#ddd">No conflicts found with other installed modules.</div>'+
+    '</div>';
+    return;
+  }
+
+  const byModule={};
+  for(const line of lines){
+    const [mod,path]=line.split('|');
+    if(!mod||!path) continue;
+    if(!byModule[mod]) byModule[mod]=[];
+    byModule[mod].push(path);
+  }
+
+  let html='<div style="font-size:12px;color:#f59e0b;margin-bottom:8px">⚠ '+Object.keys(byModule).length+' module(s) share paths with this one</div>';
+  for(const mod in byModule){
+    html+='<div style="padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05)">'+
+      '<div style="font-size:12.5px;color:#ddd;font-weight:600">'+mod+'</div>'+
+      '<div style="font-size:10.5px;color:#777;font-family:monospace;margin-top:2px">'+byModule[mod].join(', ')+'</div>'+
+      '<div style="display:flex;gap:8px;margin-top:8px">'+
+        '<button class="action-btn btn-ghost" style="flex:1;padding:6px;font-size:11px" onclick="disableConflictingModule(\''+mod+'\')">Disable</button>'+
+        '<button class="action-btn btn-ghost" style="flex:1;padding:6px;font-size:11px;color:#f87171" onclick="removeConflictingModule(\''+mod+'\')">Remove</button>'+
+      '</div>'+
+    '</div>';
+  }
+  html+='<div style="font-size:11px;color:#9aa;margin-top:10px;line-height:1.5">Sharing a path isn\'t always a real problem. Disable first to test safely — it can be re-enabled. Remove deletes the other module entirely and can\'t be undone.</div>';
+  box.innerHTML=html;
+}
+
+async function scanForConflicts(){
+  const selfId='transsion-flagship';
+  const pathCmd='for d in /data/adb/modules/*/; do m=$(basename "$d"); [ "$m" = "'+selfId+'" ] && continue; [ -f "${d}disable" ] && continue; for p in '+CONFLICT_PATHS.join(' ')+'; do if [ -e "${d}${p}" ]; then echo "$m|$p"; fi; done; done';
+  const propCmd='for d in /data/adb/modules/*/; do m=$(basename "$d"); [ "$m" = "'+selfId+'" ] && continue; [ -f "${d}disable" ] && continue; sp="${d}system.prop"; [ -f "$sp" ] || continue; for k in '+CONFLICT_PROPS.join(' ')+'; do if grep -q "^$k=" "$sp" 2>/dev/null; then echo "$m|prop:$k"; fi; done; done';
+
+  const [pathR,propR]=await Promise.all([exec(pathCmd),exec(propCmd)]);
+  const pathLines=(pathR.stdout||'').trim().split('\n').filter(l=>l.trim());
+  const propLines=(propR.stdout||'').trim().split('\n').filter(l=>l.trim());
+  return [...pathLines,...propLines];
+}
+
+async function checkModuleConflicts(){
+  const box=document.getElementById('conflict-check-list');
+  box.innerHTML='<div style="font-size:12.5px;color:#666;padding:8px 0">Scanning other modules...</div>';
+  const lines=await scanForConflicts();
+  renderConflictLines(lines);
+}
+
+async function disableConflictingModule(modId){
+  const ok=await showConfirm('Disable '+modId+'?','This turns the module off without deleting it — you can re-enable it later from your root manager app. A reboot is needed to take effect.',{okLabel:'Disable',danger:false});
+  if(!ok) return;
+  await exec('touch /data/adb/modules/'+modId+'/disable').catch(()=>{});
+  toast('Disabled — reboot to apply');
+  checkModuleConflicts();
+}
+
+async function removeConflictingModule(modId){
+  const ok=await showConfirm('Remove '+modId+'?','This permanently deletes '+modId+' from your device. This cannot be undone. A reboot is needed to fully apply.',{okLabel:'Delete Permanently',danger:true});
+  if(!ok) return;
+  await exec('rm -rf /data/adb/modules/'+modId).catch(()=>{});
+  toast('Removed — reboot to apply');
+  checkModuleConflicts();
+}
+
+async function loadLiveStatus(){
+  const box=document.getElementById('live-status-list');
+  box.innerHTML='<div style="font-size:12.5px;color:#666;padding:8px 0">Loading...</div>';
+  const results=[];
+  for(const item of LIVE_STATUS_ITEMS){
+    const r=await exec('getprop '+item.prop);
+    const live=(r.stdout||'').trim()||'(empty)';
+    let expected, matches;
+    if(item.cfgKey){
+      const cfgOn=cfg[item.cfgKey]!==false; // treat undefined as on, matching most defaults
+      expected=cfgOn?item.onVal:item.offVal;
+      matches=live===expected;
+    } else {
+      expected=item.expect;
+      matches=live===expected;
+    }
+    results.push({...item,live,expected,matches});
+  }
+  let html='';
+  let currentGroup='';
+  for(const r of results){
+    if(r.group!==currentGroup){
+      currentGroup=r.group;
+      html+='<div style="font-size:11px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:0.05em;margin:14px 0 6px;padding-top:'+(html?'2px':'0')+'">'+currentGroup+'</div>';
+    }
+    const dotColor=r.matches?'#34d399':'#f87171';
+    const statusText=r.matches?'matches':'MISMATCH';
+    html+='<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.05)">'+
+      '<div style="width:7px;height:7px;border-radius:50%;background:'+dotColor+';flex-shrink:0"></div>'+
+      '<div style="flex:1;min-width:0">'+
+        '<div style="font-size:12.5px;color:#ddd;font-weight:500">'+r.label+'</div>'+
+        '<div style="font-size:10.5px;color:#777;font-family:monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+r.prop+'</div>'+
+      '</div>'+
+      '<div style="text-align:right;flex-shrink:0">'+
+        '<div style="font-size:11px;color:'+(r.matches?'#34d399':'#f87171')+';font-weight:600">'+statusText+'</div>'+
+        '<div style="font-size:10px;color:#666">live: '+r.live+' / want: '+r.expected+'</div>'+
+      '</div>'+
+    '</div>';
+  }
+  const mismatchCount=results.filter(r=>!r.matches).length;
+  const summary=mismatchCount===0
+    ? '<div style="padding:8px 0;font-size:12px;color:#34d399">✓ Everything matches — all settings are correctly applied.</div>'
+    : '<div style="padding:8px 0;font-size:12px;color:#f87171">'+mismatchCount+' setting(s) don\'t match yet — try Apply &amp; Save, then a reboot if it still doesn\'t match.</div>';
+  box.innerHTML=summary+html;
+}
+
 let _lastLog='';
 async function loadLog(){
   const r=await exec('cat "'+LOG_PATH+'" 2>/dev/null || echo "No log found."');
@@ -1264,6 +2485,34 @@ async function clearLog(){
   _lastLog='';
   document.getElementById('log-box').textContent='Log cleared.';toast('Log cleared');
 }
+async function copyDiagnostic(){
+  toast('Gathering diagnostic info...',10000);
+  try{
+    const logR=await exec('cat "'+LOG_PATH+'" 2>/dev/null || echo "(no log found)"');
+    const pfdLogR=await exec('cat /data/adb/modules/transsion-flagship/post_fs_data.log 2>/dev/null || echo "(no post-fs-data log found)"');
+    const modR=await exec('cat /data/adb/modules/transsion-flagship/module.prop 2>/dev/null');
+    const activeR=await exec('[ -f /data/adb/modules/transsion-flagship/disable ] && echo DISABLED || echo ENABLED');
+    const report=
+      '=== TransFlagship Diagnostic Report ===\n'+
+      'Generated: '+new Date().toISOString()+'\n\n'+
+      '--- module.prop ---\n'+(modR.stdout||'(not found)')+'\n\n'+
+      '--- Module state ---\n'+(activeR.stdout||'unknown').trim()+'\n\n'+
+      '--- post-fs-data log (boot-time file swaps: sounds, animations, overlays) ---\n'+
+      (pfdLogR.stdout||'(empty)')+'\n\n'+
+      '--- Full service log (includes boot-time + install-time diagnostics) ---\n'+
+      (logR.stdout||'(empty)');
+    let copied=false;
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      try{ await navigator.clipboard.writeText(report); copied=true; }catch(ce){}
+    }
+    if(copied){
+      toast('Diagnostic report copied — paste it wherever you need to share it',4000);
+    } else {
+      document.getElementById('log-box').textContent=report;
+      toast('Clipboard unavailable — report shown below, select & copy manually',5000);
+    }
+  }catch(e){toast('Could not gather diagnostic info: '+e.message,4000);}
+}
 let _logPoll=null;
 function startLogPolling(){
   if(_logPoll) return;
@@ -1273,7 +2522,6 @@ function stopLogPolling(){
   clearInterval(_logPoll);_logPoll=null;
 }
 
-// ── Reboot ────────────────────────────────────────────────────────────────────
 async function confirmReboot(){
   const msg=_uploadInProgress
     ? 'An upload is still in progress — rebooting now will cancel it. Restart anyway?'
@@ -1282,24 +2530,41 @@ async function confirmReboot(){
   if(ok) exec('reboot');
 }
 
-// ── Device Info ───────────────────────────────────────────────────────────────
 async function loadDeviceInfo(){
-  // Run each separately so one failure doesn't block others
   const g = async(cmd) => {
     try { const r = await exec(cmd); return (r.stdout||'').trim(); }
     catch(e){ return ''; }
   };
 
-  const os  = (await g('getprop ro.tran.os.type')) || 'XOS';
+  const propRaw=await g('cat /data/adb/modules/transsion-flagship/module.prop 2>/dev/null');
+  const verMatch=propRaw.match(/^version=(.+)$/m);
+  const verEl=document.getElementById('module-version-sub');
+  if(verEl) verEl.textContent='All OS Edition · '+(verMatch?verMatch[1].trim():'—');
+
+  let os = await g('getprop ro.tran.os.type');
+  if(!os){
+    const brand=((await g('getprop ro.product.brand'))||'').toLowerCase();
+    const desc=((await g('getprop ro.build.description'))||'').toLowerCase();
+    const combined=desc+brand;
+    if(combined.includes('hios')||combined.includes('tecno')) os='HiOS';
+    else if(combined.includes('itel')) os='iTelOS';
+    else if(combined.includes('xos')||combined.includes('infinix')) os='XOS';
+    else os='XOS'; // final fallback only after checking real signals, same as install.sh
+  }
   let dev = (await g('getprop ro.product.model'));
   if(!dev) dev = (await g('getprop ro.product.marketname'));
   if(!dev) dev = (await g('getprop ro.product.vendor.marketname'));
-  if(!dev) dev = (await g('getprop ro.vendor.product.model'));
   if(!dev) dev = (await g('getprop ro.product.odm.marketname'));
+  if(!dev) dev = (await g('getprop ro.product.odm.model'));
+  if(!dev) dev = (await g('getprop ro.product.product.model'));
+  if(!dev) dev = (await g('getprop ro.product.tr_product.model'));
+  if(!dev) dev = (await g('getprop ro.product.system_ext.model'));
+  if(!dev) dev = (await g('getprop ro.product.vendor.model'));
+  if(!dev) dev = (await g('getprop ro.product.name'));
+  if(!dev) dev = (await g('getprop ro.product.device'));
   if(!dev) dev = '—';
   const and = (await g('getprop ro.build.version.release')) || '—';
 
-  // RAM: read MemTotal directly, do math in JS — no awk needed
   let ram = '—';
   try {
     const memraw = await g('cat /proc/meminfo');
@@ -1315,8 +2580,12 @@ async function loadDeviceInfo(){
   n('hero-sub', dev + ' · ' + os + ' · Android ' + and);
 }
 
-// ── Init ──────────────────────────────────────────────────────────────────────
 async function init(){
+  const splashStart=Date.now();
+  const setSplash=(msg)=>{
+    const el=document.getElementById('splash-status');
+    if(el) el.textContent=msg;
+  };
   try {
     const bridge = await import('./bridge.js');
     _exec = bridge.exec;
@@ -1325,13 +2594,94 @@ async function init(){
   } catch(e) {
     console.warn('[Init] bridge import failed:', e);
   }
+  setSplash('Reading config');
   await loadConfig();
+  renderSoundSummary();
+  setSplash('Checking device');
   await loadDeviceInfo();
+  setSplash('Loading logs');
   await loadLog();
   startLogPolling();
   document.addEventListener('visibilitychange',()=>{
     if(document.hidden) stopLogPolling(); else startLogPolling();
   });
+  checkInstallTimeConflicts();
+  checkWhatsNew();
+
+  setSplash('Checking for conflicts');
+  const conflictLines=await scanForConflicts();
+
+  const elapsed=Date.now()-splashStart;
+  const minDisplay=900;
+  const remaining=Math.max(0, minDisplay-elapsed);
+
+  setTimeout(()=>{
+    if(conflictLines.length>0){
+      showSplashConflicts(conflictLines);
+    } else {
+      dismissSplash();
+    }
+  }, remaining);
+}
+
+function openInfoPanel(){
+  document.getElementById('info-panel-backdrop').classList.add('show');
+}
+
+function closeInfoPanel(e){
+  if(e&&e.target&&e.target!==e.currentTarget) return;
+  document.getElementById('info-panel-backdrop').classList.remove('show');
+}
+
+function dismissSplash(){
+  const splash=document.getElementById('splash');
+  if(splash) splash.classList.add('hide');
+}
+
+function showSplashConflicts(lines){
+  const byModule={};
+  for(const line of lines){
+    const [mod,path]=line.split('|');
+    if(!mod||!path) continue;
+    if(!byModule[mod]) byModule[mod]=[];
+    byModule[mod].push(path);
+  }
+  _splashConflictModules=Object.keys(byModule);
+  const listEl=document.getElementById('splash-conflict-list');
+  let html='';
+  for(const mod in byModule){
+    html+='<div class="splash-conflict-item">'+
+      '<div class="splash-conflict-item-name">'+mod+'</div>'+
+      '<div class="splash-conflict-item-paths">'+byModule[mod].join(', ')+'</div>'+
+    '</div>';
+  }
+  listEl.innerHTML=html;
+
+  document.getElementById('splash-loading-content').style.display='none';
+  document.getElementById('splash-conflict-content').style.display='block';
+}
+
+function skipSplashConflicts(){
+  dismissSplash();
+}
+
+async function continueFromSplash(){
+  if(_splashConflictModules.length===0){
+    dismissSplash();
+    return;
+  }
+  const names=_splashConflictModules.join(', ');
+  const ok=await showConfirm(
+    'Remove conflicting modules?',
+    'This will permanently delete: '+names+'. This can\'t be undone. A reboot is needed to fully apply.',
+    {okLabel:'Delete & Continue',danger:true}
+  );
+  if(!ok) return;
+  for(const mod of _splashConflictModules){
+    await exec('rm -rf /data/adb/modules/'+mod).catch(()=>{});
+  }
+  toast('Removed '+_splashConflictModules.length+' module(s) — reboot to apply');
+  dismissSplash();
 }
 
 if(document.readyState==='loading'){
@@ -1340,28 +2690,31 @@ if(document.readyState==='loading'){
   init();
 }
 
-function quickSave(){
-  // Quick toggles on Home mirror the master switches on their full pages.
-  // Write straight into cfg so collectConfig() (which reads the *other*
-  // element IDs) doesn't clobber this on the next Apply & Save.
-  cfg.game_master = document.getElementById('q-game').checked;
-  cfg.ai_master   = document.getElementById('q-ai').checked;
-  // Keep the full-page toggles in sync so switching tabs shows the same state
-  setT('feat-game', cfg.game_master);
-  setT('feat-ai', cfg.ai_master);
-  saveAll();
-}
-
-// ── Expose all functions called from HTML onclick to window ───────────────────
-// Required because <script type="module"> is scoped — onclick can't reach them
 window.switchTab      = switchTab;
+window.goToSoundsTab  = goToSoundsTab;
+window.checkPerfComboWarning = checkPerfComboWarning;
+window.undoLastUpload = undoLastUpload;
+window.closeWhatsNew = closeWhatsNew;
+window.checkForUpdates = checkForUpdates;
+window.openInfoPanel = openInfoPanel;
+window.showHint = showHint;
+window.closeInfoPanel = closeInfoPanel;
+window.checkModuleConflicts = checkModuleConflicts;
+window.skipSplashConflicts = skipSplashConflicts;
+window.continueFromSplash = continueFromSplash;
+window.disableConflictingModule = disableConflictingModule;
+window.removeConflictingModule = removeConflictingModule;
 window.saveAll        = saveAll;
 window.loadLog        = loadLog;
 window.clearLog       = clearLog;
 window.confirmReboot  = confirmReboot;
 window.confirmResetDefaults = confirmResetDefaults;
 window.handleFile     = handleFile;
-window.quickSave      = quickSave;
+window.copyDiagnostic = copyDiagnostic;
+window.setStatusbarStyle = setStatusbarStyle;
+window.save = save;
+window.loadLiveStatus = loadLiveStatus;
+window.setSoundStyle = setSoundStyle;
 </script>
 </body>
 </html>
