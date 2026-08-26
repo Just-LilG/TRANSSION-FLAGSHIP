@@ -1970,6 +1970,9 @@ async function applyRuntime(onPhase){
   await rp('ro.sys.tran.ai_subtitles_support', c.ai_master&&c.ai_subtitles?1:0);
   await rp('ro.sys.tran.aiphone_summary_support', c.ai_master&&c.ai_call_summary?1:0);
   await rp('ro.os_soundrecorder_speech_support', c.ai_master&&c.ai_sound_rec?1:0);
+  await rp('ro.os_ai_notification_summary_sr_sa_0003_001_support', c.ai_master&&c.ai_notif_summary?1:0);
+  await rp('ro.os_note_ai_bg_support', c.ai_master&&c.ai_notes?1:0);
+  await rp('ro.os_note_ai_draw_support', c.ai_master&&c.ai_notes?1:0);
   await rp('ro.os_social_turbo_record', c.social_master&&c.social_record?1:0);
   await rp('ro.os_social_turbo_translator', c.social_master&&c.social_translate?1:0);
   await rp('ro.os_social_turbo_makeup', c.social_master&&c.social_beauty?1:0);
@@ -2245,6 +2248,9 @@ const LIVE_STATUS_ITEMS=[
   {group:'AI',label:'AI Subtitles',prop:'ro.sys.tran.ai_subtitles_support',cfgKey:'ai_subtitles',onVal:'1',offVal:'0'},
   {group:'AI',label:'Call Summary',prop:'ro.sys.tran.aiphone_summary_support',cfgKey:'ai_call_summary',onVal:'1',offVal:'0'},
   {group:'AI',label:'Sound Recorder Speech',prop:'ro.os_soundrecorder_speech_support',cfgKey:'ai_sound_rec',onVal:'1',offVal:'0'},
+  {group:'AI',label:'Notification Summary',prop:'ro.os_ai_notification_summary_sr_sa_0003_001_support',cfgKey:'ai_notif_summary',onVal:'1',offVal:'0'},
+  {group:'AI',label:'AI Notes (bg)',prop:'ro.os_note_ai_bg_support',cfgKey:'ai_notes',onVal:'1',offVal:'0'},
+  {group:'AI',label:'AI Notes (draw)',prop:'ro.os_note_ai_draw_support',cfgKey:'ai_notes',onVal:'1',offVal:'0'},
 ];
 
 const CONFLICT_PROPS=[
