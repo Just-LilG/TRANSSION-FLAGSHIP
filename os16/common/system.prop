@@ -1,8 +1,7 @@
-# Flagship 16 — AI Suite off via Magisk system.prop (early load).
-# Not written from service.sh / late boot.
-ro.sys.tran.ai_subtitles_support=0
-ro.sys.tran.aiphone_summary_support=0
-ro.os_soundrecorder_speech_support=0
-ro.os_ai_notification_summary_sr_sa_0003_001_support=0
-ro.os_note_ai_bg_support=0
-ro.os_note_ai_draw_support=0
+# Flagship 16 — OS 16 AI keys (from device dump). Off via Magisk system.prop.
+# Flagship 15 names did not hide Settings. Not written from service.sh.
+ro.tr_aiservice.aicorespeech_subtitle.feature.support=0
+ro.tr_aiservice.aicorespeech_livecaption.feature.support=0
+ro.tr_soundrecorder.summary.feature.support=0
+ro.tr_note.ai_draw.support=0
+ro.os_ai_writing.support=0

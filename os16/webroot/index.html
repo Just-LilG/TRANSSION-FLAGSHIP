@@ -140,7 +140,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
         </div>
         <div class="hero-card">
           <div class="hero-title">Transsion Flagship 16</div>
-          <div class="hero-sub" id="module-version-sub">V1.20 · copy log</div>
+          <div class="hero-sub" id="module-version-sub">V1.21 · OS 16 AI keys off</div>
         </div>
         <div class="h8"></div>
         <div class="warn-card" id="old-mod-warn">Flagship 15 is still installed. This installer disables it. Remove it from Magisk/KSU so the two modules do not fight.</div>
@@ -157,7 +157,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
             <li class="on">Boot animation — verified</li>
             <li class="on">Reboot animation — verified</li>
             <li>Status bar overlay — upload your own APK</li>
-            <li class="next">AI Suite — Dump AI flags below; paste that log if Settings still show AI</li>
+            <li class="next">AI Suite — OS 16 keys off; Dump AI flags and check Settings</li>
           </ul>
         </div>
         <div class="section-label">Status bar</div>
@@ -185,7 +185,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
           <div class="setting-row">
             <div class="row-text">
               <div class="row-title">AI Suite</div>
-              <div class="row-sub">Forced off in Magisk props this build (not applied late in boot)</div>
+              <div class="row-sub">Uses this phone’s OS 16 keys (off). Dump + Copy log after reboot.</div>
             </div>
             <label class="toggle"><input type="checkbox" id="feat-ai" onchange="setAi('ai_master',this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
           </div>
@@ -415,12 +415,11 @@ async function saveAll(){
 async function dumpAi(){
   toast('Reading flags…', 8000);
   const keys=[
-    'ro.sys.tran.ai_subtitles_support',
-    'ro.sys.tran.aiphone_summary_support',
-    'ro.os_soundrecorder_speech_support',
-    'ro.os_ai_notification_summary_sr_sa_0003_001_support',
-    'ro.os_note_ai_bg_support',
-    'ro.os_note_ai_draw_support'
+    'ro.tr_aiservice.aicorespeech_subtitle.feature.support',
+    'ro.tr_aiservice.aicorespeech_livecaption.feature.support',
+    'ro.tr_soundrecorder.summary.feature.support',
+    'ro.tr_note.ai_draw.support',
+    'ro.os_ai_writing.support'
   ];
   const lines=['=== keys this module writes ==='];
   for(const k of keys){
@@ -436,7 +435,7 @@ async function dumpAi(){
   lines.push(live||'(none)');
   lines.push('');
   lines.push('=== stock build files (do these keys exist without the module?) ===');
-  const stock=await g("for f in /system/build.prop /system/system/build.prop /product/build.prop /system/product/build.prop /system/product/etc/build.prop /vendor/build.prop /odm/etc/build.prop /tr_product/build.prop /tr_product/etc/build.prop; do [ -f \"$f\" ] || continue; hits=$(grep -E 'ai_subtitles|aiphone_summary|os_note_ai|os_ai_notification_summary|soundrecorder_speech' \"$f\" 2>/dev/null); [ -n \"$hits\" ] && echo \"$f\" && echo \"$hits\"; done");
+  const stock=await g("for f in /system/build.prop /system/system/build.prop /product/build.prop /system/product/build.prop /system/product/etc/build.prop /vendor/build.prop /odm/etc/build.prop /tr_product/build.prop /tr_product/etc/build.prop; do [ -f \"$f\" ] || continue; hits=$(grep -E 'aicorespeech_subtitle|aicorespeech_livecaption|tr_soundrecorder.summary|tr_note.ai_draw|os_ai_writing' \"$f\" 2>/dev/null); [ -n \"$hits\" ] && echo \"$f\" && echo \"$hits\"; done");
   lines.push(stock||'(none of those keys in readable stock build files)');
   const text=lines.join('\n');
   document.getElementById('pfd-log').textContent=text;
@@ -540,8 +539,8 @@ async function handleStatusbar(input){
 }
 async function loadDevice(){
   const prop=await g('cat "'+MOD+'/module.prop" 2>/dev/null');
-  const ver=(prop.match(/^version=(.+)$/m)||[])[1]||'V1.20';
-  n('module-version-sub', ver+' · copy log');
+  const ver=(prop.match(/^version=(.+)$/m)||[])[1]||'V1.21';
+  n('module-version-sub', ver+' · OS 16 AI keys off');
   let type=await g('getprop ro.tran.os.type');
   let verOs=await g('getprop ro.transsion.os.version');
   const brand=(await g('getprop ro.product.brand')||'').toLowerCase();
