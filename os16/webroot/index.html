@@ -142,7 +142,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
         </div>
         <div class="hero-card">
           <div class="hero-title">Transsion Flagship 16</div>
-          <div class="hero-sub" id="module-version-sub">V1.27 · OS 16 AI Suite</div>
+          <div class="hero-sub" id="module-version-sub">V1.28 · OS 16 AI Suite</div>
         </div>
         <div class="h8"></div>
         <div class="warn-card" id="old-mod-warn">Flagship 15 is still installed. This installer disables it. Remove it from Magisk/KSU so the two modules do not fight.</div>
@@ -160,6 +160,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
             <li class="on">Reboot animation — verified</li>
             <li>Status bar overlay — upload your own APK</li>
             <li class="on">AI Suite — verified OS 16 keys; Apply + reboot</li>
+            <li class="on">AI Call Summary — Ella briefing</li>
             <li class="next">AI Gallery — all menus for show; some tools may crash when tapped</li>
             <li class="on">AI Video Enhancement — VEE flag on</li>
           </ul>
@@ -203,9 +204,9 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
           <div class="setting-row">
             <div class="row-text">
               <div class="row-title">AI Call Summary</div>
-              <div class="row-sub">Stock is off on this phone. Turn on to try.</div>
+              <div class="row-sub">Ella briefing. On by default.</div>
             </div>
-            <label class="toggle"><input type="checkbox" id="feat-ai-call" onchange="setAi('ai_call_summary',this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+            <label class="toggle"><input type="checkbox" id="feat-ai-call" checked onchange="setAi('ai_call_summary',this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
           </div>
           <div class="setting-row">
             <div class="row-text">
@@ -326,7 +327,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
 <script type="module">
 const MOD='/data/adb/modules/transsion-flagship-16';
 const CONFIG_PATH=MOD+'/config.json';
-let cfg={bootanim_style:'hios16',bootanim_file:'',rebootanim_style:'hios16',rebootanim_file:'',statusbar_style:'off',statusbarcustom_file:'',ai_master:true,ai_subtitles:true,ai_call_summary:false,ai_writing:true,ai_sound_rec:true,ai_notes:true,ai_gallery:true,ai_video:true};
+let cfg={bootanim_style:'hios16',bootanim_file:'',rebootanim_style:'hios16',rebootanim_file:'',statusbar_style:'off',statusbarcustom_file:'',ai_master:true,ai_subtitles:true,ai_call_summary:true,ai_writing:true,ai_sound_rec:true,ai_notes:true,ai_gallery:true,ai_video:true};
 let _exec=null;
 
 async function exec(cmd){
@@ -468,7 +469,7 @@ async function saveAll(){
     statusbarcustom_file:cfg.statusbarcustom_file||'',
     ai_master:cfg.ai_master===true,
     ai_subtitles:cfg.ai_subtitles!==false,
-    ai_call_summary:cfg.ai_call_summary===true,
+    ai_call_summary:cfg.ai_call_summary!==false,
     ai_writing:cfg.ai_writing!==false,
     ai_sound_rec:cfg.ai_sound_rec!==false,
     ai_notes:cfg.ai_notes!==false,
@@ -614,7 +615,7 @@ async function handleStatusbar(input){
 }
 async function loadDevice(){
   const prop=await g('cat "'+MOD+'/module.prop" 2>/dev/null');
-  const ver=(prop.match(/^version=(.+)$/m)||[])[1]||'V1.27';
+  const ver=(prop.match(/^version=(.+)$/m)||[])[1]||'V1.28';
   n('module-version-sub', ver+' · OS 16 AI Suite');
   let type=await g('getprop ro.tran.os.type');
   let verOs=await g('getprop ro.transsion.os.version');
@@ -653,7 +654,7 @@ async function loadCfg(){
   const raw=await g('cat "'+CONFIG_PATH+'" 2>/dev/null');
   try{ if(raw) cfg={...cfg, ...JSON.parse(raw)}; }catch(e){}
   if(cfg.ai_writing===undefined) cfg.ai_writing=cfg.ai_notif_summary!==false;
-  if(cfg.ai_call_summary===undefined) cfg.ai_call_summary=false;
+  if(cfg.ai_call_summary===undefined) cfg.ai_call_summary=true;
   if(cfg.ai_gallery===undefined) cfg.ai_gallery=true;
   if(cfg.ai_video===undefined) cfg.ai_video=true;
   setStyle(cfg.bootanim_style||'hios16');
@@ -675,7 +676,7 @@ async function loadCfg(){
   }
   setT('feat-ai', cfg.ai_master===true);
   setT('feat-ai-sub', cfg.ai_subtitles!==false);
-  setT('feat-ai-call', cfg.ai_call_summary===true);
+  setT('feat-ai-call', cfg.ai_call_summary!==false);
   setT('feat-ai-write', cfg.ai_writing!==false);
   setT('feat-ai-rec', cfg.ai_sound_rec!==false);
   setT('feat-ai-note', cfg.ai_notes!==false);

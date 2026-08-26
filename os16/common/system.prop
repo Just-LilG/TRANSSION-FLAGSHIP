@@ -6,8 +6,9 @@ ro.tr_aiservice.aicorespeech_livecaption.feature.support=1
 ro.tr_soundrecorder.summary.feature.support=1
 ro.tr_note.ai_draw.support=1
 ro.os_ai_writing.support=1
-ro.tr_aiassistant.aiphone.feature.support=false
-ro.tr_aiassistant.aiphone_summany.feature.support=false
+# Call summary / Ella briefing — user confirmed these flags unhide it.
+ro.tr_aiassistant.aiphone.feature.support=true
+ro.tr_aiassistant.aiphone_summany.feature.support=true
 # AI Gallery menus (for show). Tapping Art / Studio / HD / etc can still crash
 # AI Gallery Edit on this G99 — those tools need a GT editor + NPU models.
 ro.tr_gallery.eraser.v2.support=1
