@@ -8,7 +8,7 @@ LOG="$MODDIR/transflagship_service.log"
 rm -f "$LOG"
 log_p() { echo "[$(date '+%H:%M:%S')] $1" >> "$LOG"; }
 
-log_p "=== TransFlagship V4.22 diagnostic header ==="
+log_p "=== TransFlagship V4.23 diagnostic header ==="
 log_p "Device model    : $(getprop ro.product.model 2>/dev/null)"
 log_p "Device marketname: $(getprop ro.product.marketname 2>/dev/null)"
 log_p "Brand           : $(getprop ro.product.brand 2>/dev/null)"
@@ -163,4 +163,4 @@ log_p "Charging anim = $CA_ON"
 resetprop ro.tranos_hidenavigationbar_support $(cfg_bool nav_hide false)
 log_p "Nav hide = $(cfg_bool nav_hide false)"
 
-log_p "=== TransFlagship V4.22 service complete ==="
+log_p "=== TransFlagship V4.23 service complete ==="
