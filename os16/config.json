@@ -5,10 +5,10 @@
   "rebootanim_file": "",
   "statusbar_style": "off",
   "statusbarcustom_file": "",
-  "ai_master": false,
+  "ai_master": true,
   "ai_subtitles": true,
-  "ai_call_summary": true,
-  "ai_notif_summary": true,
+  "ai_call_summary": false,
+  "ai_writing": true,
   "ai_sound_rec": true,
   "ai_notes": true
 }

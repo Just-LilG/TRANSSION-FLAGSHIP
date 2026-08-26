@@ -5,7 +5,7 @@ LOG="$MODDIR/transflagship16_service.log"
 rm -f "$LOG"
 log_p() { echo "[$(date '+%H:%M:%S')] $1" >> "$LOG"; }
 
-log_p "=== TransFlagship 16 V1.21 ==="
+log_p "=== TransFlagship 16 V1.22 ==="
 log_p "Device : $(getprop ro.product.model 2>/dev/null)"
 log_p "Brand  : $(getprop ro.product.brand 2>/dev/null)"
 log_p "Android: $(getprop ro.build.version.release 2>/dev/null)"
@@ -22,4 +22,6 @@ log_p "  livecaption=$(getprop ro.tr_aiservice.aicorespeech_livecaption.feature.
 log_p "  recorder=$(getprop ro.tr_soundrecorder.summary.feature.support 2>/dev/null)"
 log_p "  notes_draw=$(getprop ro.tr_note.ai_draw.support 2>/dev/null)"
 log_p "  writing=$(getprop ro.os_ai_writing.support 2>/dev/null)"
+log_p "  aiphone=$(getprop ro.tr_aiassistant.aiphone.feature.support 2>/dev/null)"
+log_p "  aiphone_summany=$(getprop ro.tr_aiassistant.aiphone_summany.feature.support 2>/dev/null)"
 log_p "=== service complete ==="

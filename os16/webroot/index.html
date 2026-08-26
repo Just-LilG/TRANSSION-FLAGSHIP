@@ -64,6 +64,8 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
 .toggle input:checked~.toggle-track{background:var(--accent);border-color:var(--accent);box-shadow:0 0 14px var(--accent-glow);}
 .toggle-thumb{position:absolute;top:3px;left:3px;width:23px;height:23px;border-radius:50%;background:#fff;}
 .toggle input:checked~.toggle-thumb{transform:translateX(20px);}
+.toggle input:disabled~.toggle-track,.toggle input:disabled~.toggle-thumb{opacity:0.45;}
+.toggle:has(input:disabled){cursor:default;}
 .action-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:14px;border-radius:14px;border:none;
   font-size:15px;font-weight:600;cursor:pointer;}
 .btn-primary{background:linear-gradient(135deg,var(--accent) 0%,var(--accent2) 100%);color:#fff;box-shadow:0 4px 18px var(--accent-glow);}
@@ -140,7 +142,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
         </div>
         <div class="hero-card">
           <div class="hero-title">Transsion Flagship 16</div>
-          <div class="hero-sub" id="module-version-sub">V1.21 · OS 16 AI keys off</div>
+          <div class="hero-sub" id="module-version-sub">V1.22 · OS 16 AI Suite</div>
         </div>
         <div class="h8"></div>
         <div class="warn-card" id="old-mod-warn">Flagship 15 is still installed. This installer disables it. Remove it from Magisk/KSU so the two modules do not fight.</div>
@@ -157,7 +159,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
             <li class="on">Boot animation — verified</li>
             <li class="on">Reboot animation — verified</li>
             <li>Status bar overlay — upload your own APK</li>
-            <li class="next">AI Suite — OS 16 keys off; Dump AI flags and check Settings</li>
+            <li class="on">AI Suite — verified OS 16 keys; Apply + reboot</li>
           </ul>
         </div>
         <div class="section-label">Status bar</div>
@@ -185,30 +187,30 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
           <div class="setting-row">
             <div class="row-text">
               <div class="row-title">AI Suite</div>
-              <div class="row-sub">Uses this phone’s OS 16 keys (off). Dump + Copy log after reboot.</div>
+              <div class="row-sub">OS 16 keys. Apply writes Magisk props — reboot to take effect.</div>
             </div>
-            <label class="toggle"><input type="checkbox" id="feat-ai" onchange="setAi('ai_master',this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+            <label class="toggle"><input type="checkbox" id="feat-ai" checked onchange="setAi('ai_master',this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
           </div>
           <div class="setting-row">
             <div class="row-text">
               <div class="row-title">AI Subtitles</div>
-              <div class="row-sub">Live call transcription</div>
+              <div class="row-sub">Speech subtitles and live caption</div>
             </div>
             <label class="toggle"><input type="checkbox" id="feat-ai-sub" checked onchange="setAi('ai_subtitles',this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
           </div>
           <div class="setting-row">
             <div class="row-text">
               <div class="row-title">AI Call Summary</div>
-              <div class="row-sub">Auto-summarise calls</div>
+              <div class="row-sub">Stock is off on this phone. Turn on to try.</div>
             </div>
-            <label class="toggle"><input type="checkbox" id="feat-ai-call" checked onchange="setAi('ai_call_summary',this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+            <label class="toggle"><input type="checkbox" id="feat-ai-call" onchange="setAi('ai_call_summary',this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
           </div>
           <div class="setting-row">
             <div class="row-text">
-              <div class="row-title">AI Notification Summary</div>
-              <div class="row-sub">Smart notification digest</div>
+              <div class="row-title">AI Writing</div>
+              <div class="row-sub">Writing suggestions</div>
             </div>
-            <label class="toggle"><input type="checkbox" id="feat-ai-notif" checked onchange="setAi('ai_notif_summary',this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+            <label class="toggle"><input type="checkbox" id="feat-ai-write" checked onchange="setAi('ai_writing',this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
           </div>
           <div class="setting-row">
             <div class="row-text">
@@ -220,7 +222,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
           <div class="setting-row">
             <div class="row-text">
               <div class="row-title">AI Notes</div>
-              <div class="row-sub">Drawing and backgrounds</div>
+              <div class="row-sub">AI draw in Notes</div>
             </div>
             <label class="toggle"><input type="checkbox" id="feat-ai-note" checked onchange="setAi('ai_notes',this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
           </div>
@@ -308,7 +310,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
 <script type="module">
 const MOD='/data/adb/modules/transsion-flagship-16';
 const CONFIG_PATH=MOD+'/config.json';
-let cfg={bootanim_style:'hios16',bootanim_file:'',rebootanim_style:'hios16',rebootanim_file:'',statusbar_style:'off',statusbarcustom_file:'',ai_master:false,ai_subtitles:true,ai_call_summary:true,ai_notif_summary:true,ai_sound_rec:true,ai_notes:true};
+let cfg={bootanim_style:'hios16',bootanim_file:'',rebootanim_style:'hios16',rebootanim_file:'',statusbar_style:'off',statusbarcustom_file:'',ai_master:true,ai_subtitles:true,ai_call_summary:false,ai_writing:true,ai_sound_rec:true,ai_notes:true};
 let _exec=null;
 
 async function exec(cmd){
@@ -347,9 +349,24 @@ function setStatusbarStyle(val){
     o.classList.toggle('active', o.dataset.val===val);
   });
 }
-function setAi(key,el){ cfg[key]=el.checked; }
+function setAi(key,el){ cfg[key]=el.checked; if(key==='ai_master') syncAiChildren(); }
 function setT(id,v){ const el=document.getElementById(id); if(el) el.checked=!!v; }
 function aiOn(key){ return cfg.ai_master===true && cfg[key]!==false; }
+function syncAiChildren(){
+  const on=cfg.ai_master===true;
+  ['feat-ai-sub','feat-ai-call','feat-ai-write','feat-ai-rec','feat-ai-note'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.disabled=!on;
+  });
+}
+function ai01(key){ return aiOn(key)?'1':'0'; }
+function aiTf(key){ return aiOn(key)?'true':'false'; }
+function describeAiFlag(v){
+  if(!v) return 'EMPTY — not on this phone, or Magisk did not apply it';
+  if(v==='0' || v==='false') return '='+v+' — Magisk set off';
+  if(v==='1' || v==='true') return '='+v+' — Magisk set on';
+  return '='+v;
+}
 function showConfirm(title,msg,opts={}){
   return new Promise(resolve=>{
     const bd=document.getElementById('modal-backdrop');
@@ -392,7 +409,26 @@ async function writeB64File(bytes, dests, tmp){
   await exec('rm -f "'+tmp+'"');
   return true;
 }
+async function writeAiSystemProp(){
+  const lines=[
+    '# Flagship 16 — OS 16 AI keys. Magisk loads this file at boot.',
+    '# Apply in WebUI rewrites this file from the AI Suite toggles. Reboot to take effect.',
+    '# Not written from service.sh.',
+    'ro.tr_aiservice.aicorespeech_subtitle.feature.support='+ai01('ai_subtitles'),
+    'ro.tr_aiservice.aicorespeech_livecaption.feature.support='+ai01('ai_subtitles'),
+    'ro.tr_soundrecorder.summary.feature.support='+ai01('ai_sound_rec'),
+    'ro.tr_note.ai_draw.support='+ai01('ai_notes'),
+    'ro.os_ai_writing.support='+ai01('ai_writing'),
+    'ro.tr_aiassistant.aiphone.feature.support='+aiTf('ai_call_summary'),
+    'ro.tr_aiassistant.aiphone_summany.feature.support='+aiTf('ai_call_summary')
+  ];
+  const body=lines.join('\n')+'\n';
+  const esc=body.replace(/'/g,"'\\''");
+  const r=await exec("printf '%s' '"+esc+"' > \""+MOD+"/system.prop\" && echo OK");
+  return (r.stdout||'').includes('OK');
+}
 async function saveAll(){
+  if(cfg.ai_writing===undefined) cfg.ai_writing=cfg.ai_notif_summary!==false;
   const slim={
     bootanim_style:cfg.bootanim_style||'hios16',
     bootanim_file:cfg.bootanim_file||'',
@@ -402,15 +438,17 @@ async function saveAll(){
     statusbarcustom_file:cfg.statusbarcustom_file||'',
     ai_master:cfg.ai_master===true,
     ai_subtitles:cfg.ai_subtitles!==false,
-    ai_call_summary:cfg.ai_call_summary!==false,
-    ai_notif_summary:cfg.ai_notif_summary!==false,
+    ai_call_summary:cfg.ai_call_summary===true,
+    ai_writing:cfg.ai_writing!==false,
     ai_sound_rec:cfg.ai_sound_rec!==false,
     ai_notes:cfg.ai_notes!==false
   };
   const json=JSON.stringify(slim,null,2).replace(/'/g,"'\\''");
   const r=await exec("echo '"+json+"' > \""+CONFIG_PATH+"\" && echo OK");
   if(!(r.stdout||'').includes('OK')){ toast('Save failed — is the module installed?'); return; }
-  toast('Saved — reboot to apply');
+  const props=await writeAiSystemProp();
+  if(!props){ toast('Saved config, but AI props failed to write'); return; }
+  toast('Saved — reboot to apply AI flags');
 }
 async function dumpAi(){
   toast('Reading flags…', 8000);
@@ -419,15 +457,14 @@ async function dumpAi(){
     'ro.tr_aiservice.aicorespeech_livecaption.feature.support',
     'ro.tr_soundrecorder.summary.feature.support',
     'ro.tr_note.ai_draw.support',
-    'ro.os_ai_writing.support'
+    'ro.os_ai_writing.support',
+    'ro.tr_aiassistant.aiphone.feature.support',
+    'ro.tr_aiassistant.aiphone_summany.feature.support'
   ];
   const lines=['=== keys this module writes ==='];
   for(const k of keys){
     const v=await g('getprop '+k);
-    if(!v) lines.push(k+'  EMPTY — not on this phone, or Magisk did not apply it');
-    else if(v==='0') lines.push(k+'  =0 — Magisk set off; if AI still shows, the ROM ignores this key');
-    else if(v==='1' || v==='true') lines.push(k+'  ='+v+' — still on; Magisk did not override stock');
-    else lines.push(k+'  ='+v);
+    lines.push(k+'  '+describeAiFlag(v));
   }
   lines.push('');
   lines.push('=== other live AI-like keys (first 80) ===');
@@ -435,7 +472,7 @@ async function dumpAi(){
   lines.push(live||'(none)');
   lines.push('');
   lines.push('=== stock build files (do these keys exist without the module?) ===');
-  const stock=await g("for f in /system/build.prop /system/system/build.prop /product/build.prop /system/product/build.prop /system/product/etc/build.prop /vendor/build.prop /odm/etc/build.prop /tr_product/build.prop /tr_product/etc/build.prop; do [ -f \"$f\" ] || continue; hits=$(grep -E 'aicorespeech_subtitle|aicorespeech_livecaption|tr_soundrecorder.summary|tr_note.ai_draw|os_ai_writing' \"$f\" 2>/dev/null); [ -n \"$hits\" ] && echo \"$f\" && echo \"$hits\"; done");
+  const stock=await g("for f in /system/build.prop /system/system/build.prop /product/build.prop /system/product/build.prop /system/product/etc/build.prop /vendor/build.prop /odm/etc/build.prop /tr_product/build.prop /tr_product/etc/build.prop; do [ -f \"$f\" ] || continue; hits=$(grep -E 'aicorespeech_subtitle|aicorespeech_livecaption|tr_soundrecorder.summary|tr_note.ai_draw|os_ai_writing|aiphone.feature|aiphone_summany' \"$f\" 2>/dev/null); [ -n \"$hits\" ] && echo \"$f\" && echo \"$hits\"; done");
   lines.push(stock||'(none of those keys in readable stock build files)');
   const text=lines.join('\n');
   document.getElementById('pfd-log').textContent=text;
@@ -539,8 +576,8 @@ async function handleStatusbar(input){
 }
 async function loadDevice(){
   const prop=await g('cat "'+MOD+'/module.prop" 2>/dev/null');
-  const ver=(prop.match(/^version=(.+)$/m)||[])[1]||'V1.21';
-  n('module-version-sub', ver+' · OS 16 AI keys off');
+  const ver=(prop.match(/^version=(.+)$/m)||[])[1]||'V1.22';
+  n('module-version-sub', ver+' · OS 16 AI Suite');
   let type=await g('getprop ro.tran.os.type');
   let verOs=await g('getprop ro.transsion.os.version');
   const brand=(await g('getprop ro.product.brand')||'').toLowerCase();
@@ -577,6 +614,8 @@ async function loadDevice(){
 async function loadCfg(){
   const raw=await g('cat "'+CONFIG_PATH+'" 2>/dev/null');
   try{ if(raw) cfg={...cfg, ...JSON.parse(raw)}; }catch(e){}
+  if(cfg.ai_writing===undefined) cfg.ai_writing=cfg.ai_notif_summary!==false;
+  if(cfg.ai_call_summary===undefined) cfg.ai_call_summary=false;
   setStyle(cfg.bootanim_style||'hios16');
   if(!cfg.rebootanim_style) cfg.rebootanim_style=cfg.shutdownanim_style||'hios16';
   setRebootStyle(cfg.rebootanim_style||'hios16');
@@ -596,10 +635,11 @@ async function loadCfg(){
   }
   setT('feat-ai', cfg.ai_master===true);
   setT('feat-ai-sub', cfg.ai_subtitles!==false);
-  setT('feat-ai-call', cfg.ai_call_summary!==false);
-  setT('feat-ai-notif', cfg.ai_notif_summary!==false);
+  setT('feat-ai-call', cfg.ai_call_summary===true);
+  setT('feat-ai-write', cfg.ai_writing!==false);
   setT('feat-ai-rec', cfg.ai_sound_rec!==false);
   setT('feat-ai-note', cfg.ai_notes!==false);
+  syncAiChildren();
 }
 async function init(){
   try{
