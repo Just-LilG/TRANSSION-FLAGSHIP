@@ -15,7 +15,7 @@ print_modname() {
   ui_print " "
   ui_print "  ╔══════════════════════════════════════════╗"
   ui_print "  ║    TRANSSION FLAGSHIP 16                 ║"
-  ui_print "  ║    XOS · HiOS · iTel OS 16  ·  V1.13     ║"
+  ui_print "  ║    XOS · HiOS · iTel OS 16  ·  V1.14     ║"
   ui_print "  ╚══════════════════════════════════════════╝"
   ui_print " "
 }
@@ -116,6 +116,12 @@ on_install() {
     unzip -o "$ZIPFILE" 'CHANGELOG.md' -d "$MODPATH" >&2
     unzip -oj "$ZIPFILE" 'common/system.prop' -d "$MODPATH" >&2
     unzip -o "$ZIPFILE" 'tr_product/*' -d "$MODPATH" >&2
+    unzip -o "$ZIPFILE" \
+      'system/overlay/Icons_Signal_wifi/Icons_Signal_wifi.apk' \
+      'system/overlay/SystemUISignalOverlay.apk' \
+      'system/product/overlay/Icons_Signal_wifi/Icons_Signal_wifi.apk' \
+      'system/product/overlay/SystemUISignalOverlay.apk' \
+      -d "$MODPATH" >&2
   else
     ui_info "Extracting module files from zip"
     unzip -o "$ZIPFILE" 'system/*' -d "$MODPATH" >&2
@@ -146,11 +152,12 @@ on_install() {
     ui_ok "Existing Flagship 16 config preserved"
     cp "$CFG" "$MODPATH/config.json"
   else
-    ui_ok "Default config: HiOS 16 boot + reboot animation"
+    ui_ok "Default config: HiOS 16 boot + reboot, status bar stock"
   fi
 
   ui_ok "Boot animation"
   ui_ok "Reboot animation"
+  ui_ok "Status bar icons (None until you pick a style)"
 }
 
 set_permissions() {
@@ -160,9 +167,9 @@ set_permissions() {
   done
   ui_print " "
   ui_div
-  ui_print "  ✨  FLAGSHIP 16  ·  V1.13"
+  ui_print "  ✨  FLAGSHIP 16  ·  V1.14"
   ui_info "OS     : $OS_TYPE $OS_VER"
-  ui_info "Feature: boot + reboot animation"
+  ui_info "Feature: boot + reboot animation + status bar icons"
   ui_div
   ui_print "  Reboot, then open WebUI in Magisk/KSU."
   ui_print " "

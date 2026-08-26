@@ -139,7 +139,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
         </div>
         <div class="hero-card">
           <div class="hero-title">Transsion Flagship 16</div>
-          <div class="hero-sub" id="module-version-sub">V1.13 · boot + reboot animation</div>
+          <div class="hero-sub" id="module-version-sub">V1.14 · boot, reboot, status bar</div>
         </div>
         <div class="h8"></div>
         <div class="warn-card" id="old-mod-warn">Flagship 15 is still installed. This installer disables it. Remove it from Magisk/KSU so the two modules do not fight.</div>
@@ -155,7 +155,30 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
           <ul>
             <li class="on">Boot animation — verified</li>
             <li class="on">Reboot animation — verified</li>
+            <li class="next">Signal &amp; WiFi icons — pick a style, Apply, reboot</li>
           </ul>
+        </div>
+        <div class="section-label">Status bar</div>
+        <div class="glass-card">
+          <div class="setting-row">
+            <div class="row-text">
+              <div class="row-title">Signal &amp; WiFi icons</div>
+              <div class="row-sub">None keeps stock. XOS 16 also forces the 5G badge.</div>
+            </div>
+          </div>
+          <div class="segmented" id="statusbar-style-picker">
+            <div class="segmented-opt active" data-val="off" onclick="setStatusbarStyle('off')">None</div>
+            <div class="segmented-opt" data-val="ios" onclick="setStatusbarStyle('ios')">iOS</div>
+            <div class="segmented-opt" data-val="xos16" onclick="setStatusbarStyle('xos16')">XOS 16</div>
+            <div class="segmented-opt" data-val="custom" onclick="setStatusbarStyle('custom')" id="statusbar-custom-opt" style="display:none">Custom</div>
+          </div>
+          <div class="file-row">
+            <label class="file-btn">
+              Upload custom overlay
+              <input type="file" accept=".apk,application/vnd.android.package-archive" onchange="handleStatusbar(this)">
+            </label>
+            <div class="file-name" id="statusbar-file-name">No custom overlay uploaded</div>
+          </div>
         </div>
         <div class="h8"></div>
         <button class="action-btn btn-primary" onclick="saveAll()">Apply &amp; Save</button>
@@ -236,7 +259,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
 <script type="module">
 const MOD='/data/adb/modules/transsion-flagship-16';
 const CONFIG_PATH=MOD+'/config.json';
-let cfg={bootanim_style:'hios16',bootanim_file:'',rebootanim_style:'hios16',rebootanim_file:''};
+let cfg={bootanim_style:'hios16',bootanim_file:'',rebootanim_style:'hios16',rebootanim_file:'',statusbar_style:'off',statusbarcustom_file:''};
 let _exec=null;
 
 async function exec(cmd){
@@ -266,6 +289,12 @@ function setStyle(val){
 function setRebootStyle(val){
   cfg.rebootanim_style=val;
   document.querySelectorAll('#rebootanim-style-picker .segmented-opt').forEach(o=>{
+    o.classList.toggle('active', o.dataset.val===val);
+  });
+}
+function setStatusbarStyle(val){
+  cfg.statusbar_style=val;
+  document.querySelectorAll('#statusbar-style-picker .segmented-opt').forEach(o=>{
     o.classList.toggle('active', o.dataset.val===val);
   });
 }
@@ -312,14 +341,14 @@ async function writeB64File(bytes, dests, tmp){
   return true;
 }
 async function saveAll(){
-  const slim={bootanim_style:cfg.bootanim_style||'hios16',bootanim_file:cfg.bootanim_file||'',rebootanim_style:cfg.rebootanim_style||'hios16',rebootanim_file:cfg.rebootanim_file||''};
+  const slim={bootanim_style:cfg.bootanim_style||'hios16',bootanim_file:cfg.bootanim_file||'',rebootanim_style:cfg.rebootanim_style||'hios16',rebootanim_file:cfg.rebootanim_file||'',statusbar_style:cfg.statusbar_style||'off',statusbarcustom_file:cfg.statusbarcustom_file||''};
   const json=JSON.stringify(slim,null,2).replace(/'/g,"'\\''");
   const r=await exec("echo '"+json+"' > \""+CONFIG_PATH+"\" && echo OK");
   if((r.stdout||'').includes('OK')) toast('Saved — reboot to apply');
   else toast('Save failed — is the module installed?');
 }
 async function confirmReboot(){
-  const ok=await showConfirm('Reboot Device','Restart now so animations can apply.',{okLabel:'Reboot',danger:true});
+  const ok=await showConfirm('Reboot Device','Restart now so boot, reboot, and status-bar changes can apply.',{okLabel:'Reboot',danger:true});
   if(ok) exec('reboot');
 }
 async function handleBootanim(input){
@@ -364,10 +393,31 @@ async function handleRebootanim(input){
   toast('Custom zip saved — reboot to apply');
   input.value='';
 }
+async function handleStatusbar(input){
+  if(!input.files.length) return;
+  const file=input.files[0];
+  if(file.size>8*1024*1024){ toast('File too large (max 8MB)'); input.value=''; return; }
+  toast('Writing overlay…', 20000);
+  const bytes=new Uint8Array(await file.arrayBuffer());
+  const dests=[
+    MOD+'/system/overlay/Icons_Signal_wifi_custom.apk',
+    MOD+'/system/product/overlay/Icons_Signal_wifi_custom.apk'
+  ];
+  const ok=await writeB64File(bytes, dests, '/data/local/tmp/tf16_statusbar.b64');
+  if(!ok){ toast('Write failed'); return; }
+  cfg.statusbar_style='custom';
+  cfg.statusbarcustom_file=file.name;
+  document.getElementById('statusbar-custom-opt').style.display='';
+  setStatusbarStyle('custom');
+  n('statusbar-file-name','Custom overlay uploaded');
+  await saveAll();
+  toast('Custom overlay saved — reboot to apply');
+  input.value='';
+}
 async function loadDevice(){
   const prop=await g('cat "'+MOD+'/module.prop" 2>/dev/null');
-  const ver=(prop.match(/^version=(.+)$/m)||[])[1]||'V1.13';
-  n('module-version-sub', ver+' · boot + reboot animation');
+  const ver=(prop.match(/^version=(.+)$/m)||[])[1]||'V1.14';
+  n('module-version-sub', ver+' · boot, reboot, status bar');
   let type=await g('getprop ro.tran.os.type');
   let verOs=await g('getprop ro.transsion.os.version');
   const brand=(await g('getprop ro.product.brand')||'').toLowerCase();
@@ -411,6 +461,11 @@ async function loadCfg(){
     document.getElementById('rebootanim-custom-opt').style.display='';
     n('rebootanim-file-name','Custom: '+cfg.rebootanim_file);
   }
+  setStatusbarStyle(cfg.statusbar_style||'off');
+  if(cfg.statusbarcustom_file){
+    document.getElementById('statusbar-custom-opt').style.display='';
+    n('statusbar-file-name','Custom overlay uploaded');
+  }
 }
 async function init(){
   try{
@@ -429,8 +484,10 @@ window.setStyle=setStyle;
 window.setRebootStyle=setRebootStyle;
 window.saveAll=saveAll;
 window.confirmReboot=confirmReboot;
+window.setStatusbarStyle=setStatusbarStyle;
 window.handleBootanim=handleBootanim;
 window.handleRebootanim=handleRebootanim;
+window.handleStatusbar=handleStatusbar;
 </script>
 </body>
 </html>
