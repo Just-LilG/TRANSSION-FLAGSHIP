@@ -139,7 +139,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
         </div>
         <div class="hero-card">
           <div class="hero-title">Transsion Flagship 16</div>
-          <div class="hero-sub" id="module-version-sub">V1.15 · boot, reboot, custom overlay</div>
+          <div class="hero-sub" id="module-version-sub">V1.16 · boot, reboot, overlay, AI</div>
         </div>
         <div class="h8"></div>
         <div class="warn-card" id="old-mod-warn">Flagship 15 is still installed. This installer disables it. Remove it from Magisk/KSU so the two modules do not fight.</div>
@@ -155,7 +155,8 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
           <ul>
             <li class="on">Boot animation — verified</li>
             <li class="on">Reboot animation — verified</li>
-            <li class="next">Status bar overlay — upload your own APK, or leave stock</li>
+            <li>Status bar overlay — upload your own APK</li>
+            <li class="next">AI Suite — Apply, reboot, then check Settings</li>
           </ul>
         </div>
         <div class="section-label">Status bar</div>
@@ -176,6 +177,51 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
               <input type="file" accept=".apk,application/vnd.android.package-archive" onchange="handleStatusbar(this)">
             </label>
             <div class="file-name" id="statusbar-file-name">No custom overlay uploaded</div>
+          </div>
+        </div>
+        <div class="section-label">AI Suite</div>
+        <div class="glass-card">
+          <div class="setting-row">
+            <div class="row-text">
+              <div class="row-title">AI Suite</div>
+              <div class="row-sub">Master switch for the options below</div>
+            </div>
+            <label class="toggle"><input type="checkbox" id="feat-ai" checked onchange="setAi('ai_master',this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+          </div>
+          <div class="setting-row">
+            <div class="row-text">
+              <div class="row-title">AI Subtitles</div>
+              <div class="row-sub">Live call transcription</div>
+            </div>
+            <label class="toggle"><input type="checkbox" id="feat-ai-sub" checked onchange="setAi('ai_subtitles',this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+          </div>
+          <div class="setting-row">
+            <div class="row-text">
+              <div class="row-title">AI Call Summary</div>
+              <div class="row-sub">Auto-summarise calls</div>
+            </div>
+            <label class="toggle"><input type="checkbox" id="feat-ai-call" checked onchange="setAi('ai_call_summary',this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+          </div>
+          <div class="setting-row">
+            <div class="row-text">
+              <div class="row-title">AI Notification Summary</div>
+              <div class="row-sub">Smart notification digest</div>
+            </div>
+            <label class="toggle"><input type="checkbox" id="feat-ai-notif" checked onchange="setAi('ai_notif_summary',this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+          </div>
+          <div class="setting-row">
+            <div class="row-text">
+              <div class="row-title">AI Sound Recorder</div>
+              <div class="row-sub">Transcription and summary</div>
+            </div>
+            <label class="toggle"><input type="checkbox" id="feat-ai-rec" checked onchange="setAi('ai_sound_rec',this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+          </div>
+          <div class="setting-row">
+            <div class="row-text">
+              <div class="row-title">AI Notes</div>
+              <div class="row-sub">Drawing and backgrounds</div>
+            </div>
+            <label class="toggle"><input type="checkbox" id="feat-ai-note" checked onchange="setAi('ai_notes',this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
           </div>
         </div>
         <div class="h8"></div>
@@ -257,7 +303,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
 <script type="module">
 const MOD='/data/adb/modules/transsion-flagship-16';
 const CONFIG_PATH=MOD+'/config.json';
-let cfg={bootanim_style:'hios16',bootanim_file:'',rebootanim_style:'hios16',rebootanim_file:'',statusbar_style:'off',statusbarcustom_file:''};
+let cfg={bootanim_style:'hios16',bootanim_file:'',rebootanim_style:'hios16',rebootanim_file:'',statusbar_style:'off',statusbarcustom_file:'',ai_master:true,ai_subtitles:true,ai_call_summary:true,ai_notif_summary:true,ai_sound_rec:true,ai_notes:true};
 let _exec=null;
 
 async function exec(cmd){
@@ -296,6 +342,9 @@ function setStatusbarStyle(val){
     o.classList.toggle('active', o.dataset.val===val);
   });
 }
+function setAi(key,el){ cfg[key]=el.checked; }
+function setT(id,v){ const el=document.getElementById(id); if(el) el.checked=!!v; }
+function aiOn(key){ return cfg.ai_master!==false && cfg[key]!==false; }
 function showConfirm(title,msg,opts={}){
   return new Promise(resolve=>{
     const bd=document.getElementById('modal-backdrop');
@@ -339,14 +388,33 @@ async function writeB64File(bytes, dests, tmp){
   return true;
 }
 async function saveAll(){
-  const slim={bootanim_style:cfg.bootanim_style||'hios16',bootanim_file:cfg.bootanim_file||'',rebootanim_style:cfg.rebootanim_style||'hios16',rebootanim_file:cfg.rebootanim_file||'',statusbar_style:cfg.statusbar_style||'off',statusbarcustom_file:cfg.statusbarcustom_file||''};
+  const slim={
+    bootanim_style:cfg.bootanim_style||'hios16',
+    bootanim_file:cfg.bootanim_file||'',
+    rebootanim_style:cfg.rebootanim_style||'hios16',
+    rebootanim_file:cfg.rebootanim_file||'',
+    statusbar_style:cfg.statusbar_style||'off',
+    statusbarcustom_file:cfg.statusbarcustom_file||'',
+    ai_master:cfg.ai_master!==false,
+    ai_subtitles:cfg.ai_subtitles!==false,
+    ai_call_summary:cfg.ai_call_summary!==false,
+    ai_notif_summary:cfg.ai_notif_summary!==false,
+    ai_sound_rec:cfg.ai_sound_rec!==false,
+    ai_notes:cfg.ai_notes!==false
+  };
   const json=JSON.stringify(slim,null,2).replace(/'/g,"'\\''");
   const r=await exec("echo '"+json+"' > \""+CONFIG_PATH+"\" && echo OK");
-  if((r.stdout||'').includes('OK')) toast('Saved — reboot to apply');
-  else toast('Save failed — is the module installed?');
+  if(!(r.stdout||'').includes('OK')){ toast('Save failed — is the module installed?'); return; }
+  await exec('resetprop ro.sys.tran.ai_subtitles_support '+(aiOn('ai_subtitles')?'1':'0'));
+  await exec('resetprop ro.sys.tran.aiphone_summary_support '+(aiOn('ai_call_summary')?'1':'0'));
+  await exec('resetprop ro.os_soundrecorder_speech_support '+(aiOn('ai_sound_rec')?'1':'0'));
+  await exec('resetprop ro.os_ai_notification_summary_sr_sa_0003_001_support '+(aiOn('ai_notif_summary')?'1':'0'));
+  await exec('resetprop ro.os_note_ai_bg_support '+(aiOn('ai_notes')?'1':'0'));
+  await exec('resetprop ro.os_note_ai_draw_support '+(aiOn('ai_notes')?'1':'0'));
+  toast('Saved — reboot if AI options do not appear yet');
 }
 async function confirmReboot(){
-  const ok=await showConfirm('Reboot Device','Restart now so boot, reboot, and status-bar changes can apply.',{okLabel:'Reboot',danger:true});
+  const ok=await showConfirm('Reboot Device','Restart now so boot, overlay, and AI changes can apply.',{okLabel:'Reboot',danger:true});
   if(ok) exec('reboot');
 }
 async function handleBootanim(input){
@@ -414,8 +482,8 @@ async function handleStatusbar(input){
 }
 async function loadDevice(){
   const prop=await g('cat "'+MOD+'/module.prop" 2>/dev/null');
-  const ver=(prop.match(/^version=(.+)$/m)||[])[1]||'V1.15';
-  n('module-version-sub', ver+' · boot, reboot, custom overlay');
+  const ver=(prop.match(/^version=(.+)$/m)||[])[1]||'V1.16';
+  n('module-version-sub', ver+' · boot, reboot, overlay, AI');
   let type=await g('getprop ro.tran.os.type');
   let verOs=await g('getprop ro.transsion.os.version');
   const brand=(await g('getprop ro.product.brand')||'').toLowerCase();
@@ -443,7 +511,11 @@ async function loadDevice(){
   const old=await g('[ -d /data/adb/modules/transsion-flagship ] && echo yes || echo no');
   if(old==='yes') document.getElementById('old-mod-warn').style.display='block';
   const log=await g('cat "'+MOD+'/post_fs_data.log" 2>/dev/null');
-  document.getElementById('pfd-log').textContent=log||'(no boot log yet — reboot once)';
+  const slog=await g('cat "'+MOD+'/transflagship16_service.log" 2>/dev/null');
+  const parts=[];
+  if(log) parts.push(log);
+  if(slog) parts.push(slog);
+  document.getElementById('pfd-log').textContent=parts.join('\n--- service ---\n')||'(no boot log yet — reboot once)';
 }
 async function loadCfg(){
   const raw=await g('cat "'+CONFIG_PATH+'" 2>/dev/null');
@@ -465,6 +537,12 @@ async function loadCfg(){
     document.getElementById('statusbar-custom-opt').style.display='';
     n('statusbar-file-name','Custom overlay uploaded');
   }
+  setT('feat-ai', cfg.ai_master!==false);
+  setT('feat-ai-sub', cfg.ai_subtitles!==false);
+  setT('feat-ai-call', cfg.ai_call_summary!==false);
+  setT('feat-ai-notif', cfg.ai_notif_summary!==false);
+  setT('feat-ai-rec', cfg.ai_sound_rec!==false);
+  setT('feat-ai-note', cfg.ai_notes!==false);
 }
 async function init(){
   try{
@@ -484,6 +562,7 @@ window.setRebootStyle=setRebootStyle;
 window.saveAll=saveAll;
 window.confirmReboot=confirmReboot;
 window.setStatusbarStyle=setStatusbarStyle;
+window.setAi=setAi;
 window.handleBootanim=handleBootanim;
 window.handleRebootanim=handleRebootanim;
 window.handleStatusbar=handleStatusbar;

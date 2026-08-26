@@ -1,5 +1,8 @@
 # Transsion Flagship 16
 
+## v1.16
+- **AI Suite.** Same master + sub-toggles as Flagship 15 (subtitles, call summary, notification summary, sound recorder, notes). Applied with `resetprop` at boot and on Apply — no overlay files. Default on. After flash, look in Settings for those AI options. If nothing appears, this OS 16 build may not read the props.
+
 ## v1.15
 - **Custom status-bar overlay only.** The bundled iOS / XOS 16 overlay APKs from V1.14 are removed (flash also deletes leftover copies). Home keeps an upload for your own signal/WiFi overlay APK, plus **None** for stock icons.
 

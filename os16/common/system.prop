@@ -1,1 +1,1 @@
-# Flagship 16 — props are added per verified feature. Empty until a suite is proven.
+# Flagship 16 — AI props are written at boot from config (service.sh), not baked in here.
