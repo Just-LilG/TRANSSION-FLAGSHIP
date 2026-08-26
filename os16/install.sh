@@ -15,7 +15,7 @@ print_modname() {
   ui_print " "
   ui_print "  ╔══════════════════════════════════════════╗"
   ui_print "  ║    TRANSSION FLAGSHIP 16                 ║"
-  ui_print "  ║    XOS · HiOS · iTel OS 16  ·  V1.14     ║"
+  ui_print "  ║    XOS · HiOS · iTel OS 16  ·  V1.15     ║"
   ui_print "  ╚══════════════════════════════════════════╝"
   ui_print " "
 }
@@ -116,12 +116,6 @@ on_install() {
     unzip -o "$ZIPFILE" 'CHANGELOG.md' -d "$MODPATH" >&2
     unzip -oj "$ZIPFILE" 'common/system.prop' -d "$MODPATH" >&2
     unzip -o "$ZIPFILE" 'tr_product/*' -d "$MODPATH" >&2
-    unzip -o "$ZIPFILE" \
-      'system/overlay/Icons_Signal_wifi/Icons_Signal_wifi.apk' \
-      'system/overlay/SystemUISignalOverlay.apk' \
-      'system/product/overlay/Icons_Signal_wifi/Icons_Signal_wifi.apk' \
-      'system/product/overlay/SystemUISignalOverlay.apk' \
-      -d "$MODPATH" >&2
   else
     ui_info "Extracting module files from zip"
     unzip -o "$ZIPFILE" 'system/*' -d "$MODPATH" >&2
@@ -147,17 +141,42 @@ on_install() {
   rm -f /data/local/bootaudio.mp3 /data/local/shutaudio.mp3
   ui_ok "Removed unused charging and boot-sound files"
 
+  # V1.14 shipped bundled iOS / XOS 16 overlay APKs. Drop them; keep a custom
+  # upload if the user already wrote one.
+  rm -rf "$MODPATH/system/overlay/Icons_Signal_wifi" \
+         "$MODPATH/system/product/overlay/Icons_Signal_wifi" \
+         "$MODPATH/product/overlay/Icons_Signal_wifi" \
+         /mnt/vendor/mountify/system/overlay/Icons_Signal_wifi \
+         /mnt/vendor/mountify/system/product/overlay/Icons_Signal_wifi \
+         /mnt/vendor/mountify/product/overlay/Icons_Signal_wifi
+  rm -f "$MODPATH/system/overlay/SystemUISignalOverlay.apk" \
+        "$MODPATH/system/overlay/SystemUISignalOverlay.apk.disabled" \
+        "$MODPATH/system/product/overlay/SystemUISignalOverlay.apk" \
+        "$MODPATH/system/product/overlay/SystemUISignalOverlay.apk.disabled" \
+        "$MODPATH/product/overlay/SystemUISignalOverlay.apk" \
+        "$MODPATH/product/overlay/SystemUISignalOverlay.apk.disabled" \
+        /mnt/vendor/mountify/system/overlay/SystemUISignalOverlay.apk \
+        /mnt/vendor/mountify/system/overlay/SystemUISignalOverlay.apk.disabled \
+        /mnt/vendor/mountify/system/product/overlay/SystemUISignalOverlay.apk \
+        /mnt/vendor/mountify/system/product/overlay/SystemUISignalOverlay.apk.disabled \
+        /mnt/vendor/mountify/product/overlay/SystemUISignalOverlay.apk \
+        /mnt/vendor/mountify/product/overlay/SystemUISignalOverlay.apk.disabled
+  ui_ok "Removed bundled status-bar overlay APKs"
+
   CFG=/data/adb/modules/transsion-flagship-16/config.json
   if [ -f "$CFG" ]; then
     ui_ok "Existing Flagship 16 config preserved"
     cp "$CFG" "$MODPATH/config.json"
+    sed -i -e 's/"statusbar_style": *"ios"/"statusbar_style": "off"/' \
+           -e 's/"statusbar_style": *"xos16"/"statusbar_style": "off"/' \
+           "$MODPATH/config.json"
   else
     ui_ok "Default config: HiOS 16 boot + reboot, status bar stock"
   fi
 
   ui_ok "Boot animation"
   ui_ok "Reboot animation"
-  ui_ok "Status bar icons (None until you pick a style)"
+  ui_ok "Status bar: upload your own overlay, or leave stock"
 }
 
 set_permissions() {
@@ -167,9 +186,9 @@ set_permissions() {
   done
   ui_print " "
   ui_div
-  ui_print "  ✨  FLAGSHIP 16  ·  V1.14"
+  ui_print "  ✨  FLAGSHIP 16  ·  V1.15"
   ui_info "OS     : $OS_TYPE $OS_VER"
-  ui_info "Feature: boot + reboot animation + status bar icons"
+  ui_info "Feature: boot + reboot animation + custom status-bar overlay"
   ui_div
   ui_print "  Reboot, then open WebUI in Magisk/KSU."
   ui_print " "

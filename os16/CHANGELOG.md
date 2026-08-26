@@ -1,5 +1,8 @@
 # Transsion Flagship 16
 
+## v1.15
+- **Custom status-bar overlay only.** The bundled iOS / XOS 16 overlay APKs from V1.14 are removed (flash also deletes leftover copies). Home keeps an upload for your own signal/WiFi overlay APK, plus **None** for stock icons.
+
 ## v1.14
 - **Signal & WiFi icon style.** None (stock, default) / iOS / XOS 16 / Custom overlay. XOS 16 also forces the network-type badge to 5G. Pick a style on Home, Apply, reboot, then check the status bar.
 

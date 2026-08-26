@@ -139,7 +139,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
         </div>
         <div class="hero-card">
           <div class="hero-title">Transsion Flagship 16</div>
-          <div class="hero-sub" id="module-version-sub">V1.14 · boot, reboot, status bar</div>
+          <div class="hero-sub" id="module-version-sub">V1.15 · boot, reboot, custom overlay</div>
         </div>
         <div class="h8"></div>
         <div class="warn-card" id="old-mod-warn">Flagship 15 is still installed. This installer disables it. Remove it from Magisk/KSU so the two modules do not fight.</div>
@@ -155,21 +155,19 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
           <ul>
             <li class="on">Boot animation — verified</li>
             <li class="on">Reboot animation — verified</li>
-            <li class="next">Signal &amp; WiFi icons — pick a style, Apply, reboot</li>
+            <li class="next">Status bar overlay — upload your own APK, or leave stock</li>
           </ul>
         </div>
         <div class="section-label">Status bar</div>
         <div class="glass-card">
           <div class="setting-row">
             <div class="row-text">
-              <div class="row-title">Signal &amp; WiFi icons</div>
-              <div class="row-sub">None keeps stock. XOS 16 also forces the 5G badge.</div>
+              <div class="row-title">Custom overlay</div>
+              <div class="row-sub">Upload a signal/WiFi overlay APK. None keeps stock.</div>
             </div>
           </div>
           <div class="segmented" id="statusbar-style-picker">
             <div class="segmented-opt active" data-val="off" onclick="setStatusbarStyle('off')">None</div>
-            <div class="segmented-opt" data-val="ios" onclick="setStatusbarStyle('ios')">iOS</div>
-            <div class="segmented-opt" data-val="xos16" onclick="setStatusbarStyle('xos16')">XOS 16</div>
             <div class="segmented-opt" data-val="custom" onclick="setStatusbarStyle('custom')" id="statusbar-custom-opt" style="display:none">Custom</div>
           </div>
           <div class="file-row">
@@ -416,8 +414,8 @@ async function handleStatusbar(input){
 }
 async function loadDevice(){
   const prop=await g('cat "'+MOD+'/module.prop" 2>/dev/null');
-  const ver=(prop.match(/^version=(.+)$/m)||[])[1]||'V1.14';
-  n('module-version-sub', ver+' · boot, reboot, status bar');
+  const ver=(prop.match(/^version=(.+)$/m)||[])[1]||'V1.15';
+  n('module-version-sub', ver+' · boot, reboot, custom overlay');
   let type=await g('getprop ro.tran.os.type');
   let verOs=await g('getprop ro.transsion.os.version');
   const brand=(await g('getprop ro.product.brand')||'').toLowerCase();
@@ -453,6 +451,7 @@ async function loadCfg(){
   setStyle(cfg.bootanim_style||'hios16');
   if(!cfg.rebootanim_style) cfg.rebootanim_style=cfg.shutdownanim_style||'hios16';
   setRebootStyle(cfg.rebootanim_style||'hios16');
+  if(cfg.statusbar_style==='ios' || cfg.statusbar_style==='xos16') cfg.statusbar_style='off';
   if(cfg.bootanim_file){
     document.getElementById('bootanim-custom-opt').style.display='';
     n('bootanim-file-name','Custom: '+cfg.bootanim_file);
