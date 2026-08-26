@@ -1,5 +1,8 @@
 # Transsion Flagship 16
 
+## v1.18
+- **AI flags in Magisk `system.prop`, not late boot.** V1.17 set them to off from `service.sh` after boot had already started; stock AI stayed. This build writes the six AI flags as **0** in the module property file Magisk loads early, and does not `resetprop` them from the boot script or from Apply. After reboot, stock AI should hide if the ROM reads these flags.
+
 ## v1.17
 - **AI Suite defaults off** so we can tell if the props actually work. V1.16 defaulted on, but stock OS 16 already had those AI options, so nothing visible changed. This flash turns the master switch **off** (including an upgrade from V1.16). After reboot, stock AI should disappear if the flags are real. Turn AI Suite back on in WebUI if they vanish and you want them again.
 
