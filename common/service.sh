@@ -8,7 +8,7 @@ LOG="$MODDIR/transflagship_service.log"
 rm -f "$LOG"
 log_p() { echo "[$(date '+%H:%M:%S')] $1" >> "$LOG"; }
 
-log_p "=== TransFlagship V4.28 diagnostic header ==="
+log_p "=== TransFlagship V4.29 diagnostic header ==="
 log_p "Device model    : $(getprop ro.product.model 2>/dev/null)"
 log_p "Device marketname: $(getprop ro.product.marketname 2>/dev/null)"
 log_p "Brand           : $(getprop ro.product.brand 2>/dev/null)"
@@ -126,10 +126,16 @@ if [ "$AM" = "1" ]; then
     resetprop ro.sys.tran.ai_subtitles_support $(cfg_bool ai_subtitles true)
     resetprop ro.sys.tran.aiphone_summary_support $(cfg_bool ai_call_summary true)
     resetprop ro.os_soundrecorder_speech_support $(cfg_bool ai_sound_rec true)
+    resetprop ro.os_ai_notification_summary_sr_sa_0003_001_support $(cfg_bool ai_notif_summary true)
+    resetprop ro.os_note_ai_bg_support $(cfg_bool ai_notes true)
+    resetprop ro.os_note_ai_draw_support $(cfg_bool ai_notes true)
 else
     resetprop ro.sys.tran.ai_subtitles_support 0
     resetprop ro.sys.tran.aiphone_summary_support 0
     resetprop ro.os_soundrecorder_speech_support 0
+    resetprop ro.os_ai_notification_summary_sr_sa_0003_001_support 0
+    resetprop ro.os_note_ai_bg_support 0
+    resetprop ro.os_note_ai_draw_support 0
 fi
 log_p "AI suite = $AM"
 
@@ -184,4 +190,4 @@ log_p "Charging anim = $CA_ON"
 resetprop ro.tranos_hidenavigationbar_support $(cfg_bool nav_hide false)
 log_p "Nav hide = $(cfg_bool nav_hide false)"
 
-log_p "=== TransFlagship V4.28 service complete ==="
+log_p "=== TransFlagship V4.29 service complete ==="

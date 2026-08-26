@@ -3,7 +3,7 @@
 LOG=/data/adb/transflagship_uninstall.log
 log_msg() { echo "[$(date '+%H:%M:%S')] $1" >> "$LOG"; }
 
-log_msg "=== TransFlagship V4.28 uninstall start ==="
+log_msg "=== TransFlagship V4.29 uninstall start ==="
 
 settings put global window_animation_scale 1.0
 settings put global transition_animation_scale 1.0
@@ -35,4 +35,4 @@ log_msg "Screenshot settings restored"
 rm -f /data/adb/transflagship_service.log
 log_msg "Service log cleaned"
 
-log_msg "=== TransFlagship V4.28 uninstall complete — reboot to fully restore ==="
+log_msg "=== TransFlagship V4.29 uninstall complete — reboot to fully restore ==="
