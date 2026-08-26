@@ -1,5 +1,8 @@
 # Transsion Flagship 16
 
+## v1.25
+- **Gallery eraser/expand back on.** Tapping V1.23’s new tools crashed AI Gallery Edit — Art/Studio/HD need a GT editor this phone does not have. This build only turns on `eraser.v2` and `ext.image` (AICore erase/expand are already `1` on device). Art, Studio lite, HD, bokeh, compose, and VEE stay `0`. Try Eraser and Expand in Gallery after reboot.
+
 ## v1.24
 - **AI Gallery / video off.** V1.23 unhid GT Gallery and VEE menus, but **AI Gallery Edit keeps stopping** — this phone has the flags, not the GT editor/models. Those keys go back to `0`. Settings AI Suite stays on. Leave the Gallery and video toggles off.
 
