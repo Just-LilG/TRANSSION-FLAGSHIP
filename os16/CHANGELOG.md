@@ -1,5 +1,8 @@
 # Transsion Flagship 16
 
+## v1.28
+- **AI Call Summary / Ella briefing on.** Turning the toggle on unhid Ella briefing on this phone. This build writes `aiphone` / `aiphone_summany` as `true` by default (upgrade from earlier builds turns the toggle on). Apply + reboot. GT generative Gallery is still not bundled.
+
 ## v1.27
 - **AI Video Enhancement back on.** V1.24–V1.26 left `ro.tr_video.vee.support` at `0`. This build writes it to `1` again (toggle on by default; upgrade from those builds turns it back on). Apply + reboot, then check video playback. Gallery menus stay as in V1.26.
 
