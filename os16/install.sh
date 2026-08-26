@@ -56,13 +56,13 @@ ro.tr_aiassistant.aiphone.feature.support=$call
 ro.tr_aiassistant.aiphone_summany.feature.support=$call
 ro.tr_gallery.eraser.v2.support=$gal
 ro.tr_gallery.ext.image.support=$gal
-ro.tr_gallery.ai_art.support=0
-ro.tr_gallery.ai.studio.lite.support=0
-ro.tr_gallery.hd.support=0
-ro.tr_gallery.group.enhance.support=0
-ro.tr_gallery.shadow.enhance.support=0
-ro.tr_gallery.bokeh.support=0
-ro.tr_gallery.compose.support=0
+ro.tr_gallery.ai_art.support=$gal
+ro.tr_gallery.ai.studio.lite.support=$gal
+ro.tr_gallery.hd.support=$gal
+ro.tr_gallery.group.enhance.support=$gal
+ro.tr_gallery.shadow.enhance.support=$gal
+ro.tr_gallery.bokeh.support=$gal
+ro.tr_gallery.compose.support=$gal
 ro.tr_video.vee.support=$vee
 EOF
 }
@@ -71,7 +71,7 @@ print_modname() {
   ui_print " "
   ui_print "  ╔══════════════════════════════════════════╗"
   ui_print "  ║    TRANSSION FLAGSHIP 16                 ║"
-  ui_print "  ║    XOS · HiOS · iTel OS 16  ·  V1.25     ║"
+  ui_print "  ║    XOS · HiOS · iTel OS 16  ·  V1.26     ║"
   ui_print "  ╚══════════════════════════════════════════╝"
   ui_print " "
 }
@@ -223,8 +223,8 @@ on_install() {
   if [ -f "$CFG" ]; then
     ui_ok "Existing Flagship 16 config preserved"
     cp "$CFG" "$MODPATH/config.json"
-    # Undo V1.24 gallery-off. Keep video off. Art/Studio keys stay 0
-    # in system.prop even when gallery is on (they crash AI Gallery Edit).
+    # Undo V1.24 gallery-off and V1.25 eraser-only. Keep video off.
+    # Gallery keys are all written from ai_gallery (menus for show).
     sed -i -e 's/"statusbar_style": *"ios"/"statusbar_style": "off"/' \
            -e 's/"statusbar_style": *"xos16"/"statusbar_style": "off"/' \
            -e 's/"ai_notif_summary"/"ai_writing"/' \
@@ -253,7 +253,7 @@ set_permissions() {
   done
   ui_print " "
   ui_div
-  ui_print "  ✨  FLAGSHIP 16  ·  V1.25"
+  ui_print "  ✨  FLAGSHIP 16  ·  V1.26"
   ui_info "OS     : $OS_TYPE $OS_VER"
   ui_info "Feature: boot + reboot + overlay + OS 16 AI Suite"
   ui_div

@@ -142,7 +142,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
         </div>
         <div class="hero-card">
           <div class="hero-title">Transsion Flagship 16</div>
-          <div class="hero-sub" id="module-version-sub">V1.25 · OS 16 AI Suite</div>
+          <div class="hero-sub" id="module-version-sub">V1.26 · OS 16 AI Suite</div>
         </div>
         <div class="h8"></div>
         <div class="warn-card" id="old-mod-warn">Flagship 15 is still installed. This installer disables it. Remove it from Magisk/KSU so the two modules do not fight.</div>
@@ -160,7 +160,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
             <li class="on">Reboot animation — verified</li>
             <li>Status bar overlay — upload your own APK</li>
             <li class="on">AI Suite — verified OS 16 keys; Apply + reboot</li>
-            <li class="next">AI Gallery — eraser/expand only; Art/Studio crash on this phone</li>
+            <li class="next">AI Gallery — all menus for show; some tools may crash when tapped</li>
           </ul>
         </div>
         <div class="section-label">Status bar</div>
@@ -230,7 +230,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
           <div class="setting-row">
             <div class="row-text">
               <div class="row-title">AI Gallery</div>
-              <div class="row-sub">Eraser and expand only. Art/Studio stay off — they crash.</div>
+              <div class="row-sub">Art, Studio, Eraser, Expand, HD, and the rest. For show.</div>
             </div>
             <label class="toggle"><input type="checkbox" id="feat-ai-gallery" checked onchange="setAi('ai_gallery',this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
           </div>
@@ -382,11 +382,9 @@ function describeAiFlag(v){
   if(v==='1' || v==='true') return '='+v+' — Magisk set on';
   return '='+v;
 }
-const GALLERY_AICORE_KEYS=[
+const GALLERY_KEYS=[
   'ro.tr_gallery.eraser.v2.support',
-  'ro.tr_gallery.ext.image.support'
-];
-const GALLERY_CRASH_KEYS=[
+  'ro.tr_gallery.ext.image.support',
   'ro.tr_gallery.ai_art.support',
   'ro.tr_gallery.ai.studio.lite.support',
   'ro.tr_gallery.hd.support',
@@ -451,8 +449,7 @@ async function writeAiSystemProp(){
     'ro.tr_aiassistant.aiphone_summany.feature.support='+aiTf('ai_call_summary')
   ];
   const gal=ai01('ai_gallery');
-  GALLERY_AICORE_KEYS.forEach(k=>lines.push(k+'='+gal));
-  GALLERY_CRASH_KEYS.forEach(k=>lines.push(k+'=0'));
+  GALLERY_KEYS.forEach(k=>lines.push(k+'='+gal));
   lines.push('ro.tr_video.vee.support='+ai01('ai_video'));
   const body=lines.join('\n')+'\n';
   const esc=body.replace(/'/g,"'\\''");
@@ -494,8 +491,7 @@ async function dumpAi(){
     'ro.os_ai_writing.support',
     'ro.tr_aiassistant.aiphone.feature.support',
     'ro.tr_aiassistant.aiphone_summany.feature.support',
-    ...GALLERY_AICORE_KEYS,
-    ...GALLERY_CRASH_KEYS,
+    ...GALLERY_KEYS,
     'ro.tr_video.vee.support'
   ];
   const lines=['=== keys this module writes ==='];
@@ -617,7 +613,7 @@ async function handleStatusbar(input){
 }
 async function loadDevice(){
   const prop=await g('cat "'+MOD+'/module.prop" 2>/dev/null');
-  const ver=(prop.match(/^version=(.+)$/m)||[])[1]||'V1.25';
+  const ver=(prop.match(/^version=(.+)$/m)||[])[1]||'V1.26';
   n('module-version-sub', ver+' · OS 16 AI Suite');
   let type=await g('getprop ro.tran.os.type');
   let verOs=await g('getprop ro.transsion.os.version');
