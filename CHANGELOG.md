@@ -1,6 +1,6 @@
 # Changelog
 
-## v4.21-beta2
+## v4.22
 - **Fixed XOS 16 (and HiOS/iTel) props never actually applying.** Magisk's installer copies `common/system.prop` over the module's `system.prop` *after* `on_install` returns, which silently discarded every OS-specific append — including all of the XOS 16 animation/blur/dynamic-bar props this beta is built around. Appends now go to the file Magisk actually copies (`$TMPDIR/system.prop`).
 - **Fixed XOS 16 fresh-install defaults.** Charging Animation, Fingerprint Animation, and the Signal/WiFi overlay now default to **off** on XOS 16 at flash time, matching the WebUI and README. Previously only "Reset to Defaults" in the WebUI used those defaults; a fresh flash still turned all three on for the first boot. Existing configs are still never overwritten. If you already flashed beta1 on XOS 16, turn those three off manually or tap Reset to Defaults.
 - **Fixed the in-app update checker** pointing at a non-existent `v4.21/TransFlagship_V4_21.zip` and reporting `versionCode` 67 against the installed 68.

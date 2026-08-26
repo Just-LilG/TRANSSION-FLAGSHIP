@@ -21,7 +21,7 @@ print_modname() {
   ui_print "  ╠══════════════════════════════════════════╣"
   ui_print "  ║                                          ║"
   ui_print "  ║   TRANSSION FLAGSHIP                     ║"
-  ui_print "  ║   ALL OS EDITION  ·  V4.21-beta2          ║"
+  ui_print "  ║   ALL OS EDITION  ·  V4.22                 ║"
   ui_print "  ║   XOS · HiOS · iTel OS                   ║"
   ui_print "  ║                                          ║"
   ui_print "  ╚══════════════════════════════════════════╝"
@@ -434,7 +434,7 @@ set_permissions() {
   ui_print " "
   ui_div
   ui_print "  ✨  INSTALLATION COMPLETE"
-  ui_info "Module : Transsion Flagship V4.21-beta2"
+  ui_info "Module : Transsion Flagship V4.22"
   ui_info "Author : LIL G TECH LABS"
   ui_info "OS     : $OS_TYPE $OS_VER"
   ui_info "RAM    : ${RAM_GB}GB"
