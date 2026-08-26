@@ -74,7 +74,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
 .roadmap li.on{color:var(--success);}
 .roadmap li.next{color:var(--accent);}
 .log-box{font-family:ui-monospace,monospace;font-size:11px;line-height:1.7;color:rgba(167,139,250,0.85);
-  background:rgba(0,0,0,0.35);border-radius:12px;padding:12px;margin:10px 16px;max-height:180px;overflow-y:auto;
+  background:rgba(0,0,0,0.35);border-radius:12px;padding:12px;margin:10px 16px;max-height:280px;overflow-y:auto;
   white-space:pre-wrap;word-break:break-all;border:1px solid rgba(167,139,250,0.1);}
 .tab-bar-wrap{position:absolute;left:0;right:0;bottom:0;z-index:50;padding:0 24px calc(env(safe-area-inset-bottom,0px) + 16px);
   display:flex;justify-content:center;pointer-events:none;}
@@ -139,7 +139,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
         </div>
         <div class="hero-card">
           <div class="hero-title">Transsion Flagship 16</div>
-          <div class="hero-sub" id="module-version-sub">V1.18 · AI off in Magisk props</div>
+          <div class="hero-sub" id="module-version-sub">V1.19 · dump AI flags</div>
         </div>
         <div class="h8"></div>
         <div class="warn-card" id="old-mod-warn">Flagship 15 is still installed. This installer disables it. Remove it from Magisk/KSU so the two modules do not fight.</div>
@@ -156,7 +156,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
             <li class="on">Boot animation — verified</li>
             <li class="on">Reboot animation — verified</li>
             <li>Status bar overlay — upload your own APK</li>
-            <li class="next">AI Suite — off in Magisk props; stock AI should hide after reboot</li>
+            <li class="next">AI Suite — Dump AI flags below; paste that log if Settings still show AI</li>
           </ul>
         </div>
         <div class="section-label">Status bar</div>
@@ -228,6 +228,8 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
         <button class="action-btn btn-primary" onclick="saveAll()">Apply &amp; Save</button>
         <div class="h8"></div>
         <button class="action-btn btn-danger" onclick="confirmReboot()">Reboot Device</button>
+        <div class="h8"></div>
+        <button class="action-btn btn-primary" onclick="dumpAi()">Dump AI flags</button>
         <div class="section-label">Boot log</div>
         <div class="glass-card"><div class="log-box" id="pfd-log">—</div></div>
       </div>
@@ -407,6 +409,37 @@ async function saveAll(){
   if(!(r.stdout||'').includes('OK')){ toast('Save failed — is the module installed?'); return; }
   toast('Saved — reboot to apply');
 }
+async function dumpAi(){
+  toast('Reading flags…', 8000);
+  const keys=[
+    'ro.sys.tran.ai_subtitles_support',
+    'ro.sys.tran.aiphone_summary_support',
+    'ro.os_soundrecorder_speech_support',
+    'ro.os_ai_notification_summary_sr_sa_0003_001_support',
+    'ro.os_note_ai_bg_support',
+    'ro.os_note_ai_draw_support'
+  ];
+  const lines=['=== keys this module writes ==='];
+  for(const k of keys){
+    const v=await g('getprop '+k);
+    if(!v) lines.push(k+'  EMPTY — not on this phone, or Magisk did not apply it');
+    else if(v==='0') lines.push(k+'  =0 — Magisk set off; if AI still shows, the ROM ignores this key');
+    else if(v==='1' || v==='true') lines.push(k+'  ='+v+' — still on; Magisk did not override stock');
+    else lines.push(k+'  ='+v);
+  }
+  lines.push('');
+  lines.push('=== other live AI-like keys (first 80) ===');
+  const live=await g("getprop | grep -iE 'ai_|aiphone|subtitle|soundrecorder|note_ai|aicore|aipower|ask_ai' | head -80");
+  lines.push(live||'(none)');
+  lines.push('');
+  lines.push('=== stock build files (do these keys exist without the module?) ===');
+  const stock=await g("for f in /system/build.prop /system/system/build.prop /product/build.prop /system/product/build.prop /system/product/etc/build.prop /vendor/build.prop /odm/etc/build.prop /tr_product/build.prop /tr_product/etc/build.prop; do [ -f \"$f\" ] || continue; hits=$(grep -E 'ai_subtitles|aiphone_summary|os_note_ai|os_ai_notification_summary|soundrecorder_speech' \"$f\" 2>/dev/null); [ -n \"$hits\" ] && echo \"$f\" && echo \"$hits\"; done");
+  lines.push(stock||'(none of those keys in readable stock build files)');
+  const text=lines.join('\n');
+  document.getElementById('pfd-log').textContent=text;
+  await exec("printf '%s\\n' '"+text.replace(/'/g,"'\\''")+"' > \""+MOD+"/ai_dump.txt\"");
+  toast('Dump ready — scroll the log and paste it');
+}
 async function confirmReboot(){
   const ok=await showConfirm('Reboot Device','Restart now so boot, overlay, and AI changes can apply.',{okLabel:'Reboot',danger:true});
   if(ok) exec('reboot');
@@ -476,8 +509,8 @@ async function handleStatusbar(input){
 }
 async function loadDevice(){
   const prop=await g('cat "'+MOD+'/module.prop" 2>/dev/null');
-  const ver=(prop.match(/^version=(.+)$/m)||[])[1]||'V1.18';
-  n('module-version-sub', ver+' · AI off in Magisk props');
+  const ver=(prop.match(/^version=(.+)$/m)||[])[1]||'V1.19';
+  n('module-version-sub', ver+' · dump AI flags');
   let type=await g('getprop ro.tran.os.type');
   let verOs=await g('getprop ro.transsion.os.version');
   const brand=(await g('getprop ro.product.brand')||'').toLowerCase();
@@ -560,6 +593,7 @@ window.setAi=setAi;
 window.handleBootanim=handleBootanim;
 window.handleRebootanim=handleRebootanim;
 window.handleStatusbar=handleStatusbar;
+window.dumpAi=dumpAi;
 </script>
 </body>
 </html>

@@ -15,7 +15,7 @@ print_modname() {
   ui_print " "
   ui_print "  ╔══════════════════════════════════════════╗"
   ui_print "  ║    TRANSSION FLAGSHIP 16                 ║"
-  ui_print "  ║    XOS · HiOS · iTel OS 16  ·  V1.18     ║"
+  ui_print "  ║    XOS · HiOS · iTel OS 16  ·  V1.19     ║"
   ui_print "  ╚══════════════════════════════════════════╝"
   ui_print " "
 }
@@ -178,7 +178,7 @@ on_install() {
   ui_ok "Boot animation"
   ui_ok "Reboot animation"
   ui_ok "Status bar: upload your own overlay, or leave stock"
-  ui_ok "AI Suite OFF in Magisk props — reboot, then check if stock AI hid"
+  ui_ok "AI dump on Home — tap Dump AI flags after reboot"
 }
 
 set_permissions() {
@@ -188,9 +188,9 @@ set_permissions() {
   done
   ui_print " "
   ui_div
-  ui_print "  ✨  FLAGSHIP 16  ·  V1.18"
+  ui_print "  ✨  FLAGSHIP 16  ·  V1.19"
   ui_info "OS     : $OS_TYPE $OS_VER"
-  ui_info "Feature: boot + reboot + overlay + AI off in Magisk props"
+  ui_info "Feature: boot + reboot + overlay + AI dump"
   ui_div
   ui_print "  Reboot, then open WebUI in Magisk/KSU."
   ui_print " "

@@ -5,7 +5,7 @@ LOG="$MODDIR/transflagship16_service.log"
 rm -f "$LOG"
 log_p() { echo "[$(date '+%H:%M:%S')] $1" >> "$LOG"; }
 
-log_p "=== TransFlagship 16 V1.18 ==="
+log_p "=== TransFlagship 16 V1.19 ==="
 log_p "Device : $(getprop ro.product.model 2>/dev/null)"
 log_p "Brand  : $(getprop ro.product.brand 2>/dev/null)"
 log_p "Android: $(getprop ro.build.version.release 2>/dev/null)"
@@ -16,7 +16,7 @@ if [ -f "$MODDIR/install_diagnostic.txt" ]; then
     while IFS= read -r line; do log_p "$line"; done < "$MODDIR/install_diagnostic.txt"
 fi
 log_p "config: $([ -f "$MODDIR/config.json" ] && cat "$MODDIR/config.json" || echo missing)"
-log_p "AI props (from Magisk system.prop, not written here):"
+log_p "AI props (read only — EMPTY means the key is not on this phone):"
 log_p "  subtitles=$(getprop ro.sys.tran.ai_subtitles_support 2>/dev/null)"
 log_p "  call_summary=$(getprop ro.sys.tran.aiphone_summary_support 2>/dev/null)"
 log_p "  notif_summary=$(getprop ro.os_ai_notification_summary_sr_sa_0003_001_support 2>/dev/null)"
