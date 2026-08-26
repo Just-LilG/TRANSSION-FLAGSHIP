@@ -68,6 +68,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
   font-size:15px;font-weight:600;cursor:pointer;}
 .btn-primary{background:linear-gradient(135deg,var(--accent) 0%,var(--accent2) 100%);color:#fff;box-shadow:0 4px 18px var(--accent-glow);}
 .btn-danger{background:rgba(248,113,113,0.12);border:1px solid rgba(248,113,113,0.2);color:var(--danger);}
+.btn-ghost{background:rgba(167,139,250,0.12);border:1px solid rgba(167,139,250,0.28);color:var(--accent);}
 .h8{height:8px;}
 .warn-card{margin:0 0 12px;padding:12px 14px;border-radius:14px;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.28);font-size:12.5px;color:#fbbf24;line-height:1.45;display:none;}
 .roadmap li{font-size:13px;color:var(--text2);padding:8px 16px;border-top:1px solid var(--glass-b);list-style:none;}
@@ -139,7 +140,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
         </div>
         <div class="hero-card">
           <div class="hero-title">Transsion Flagship 16</div>
-          <div class="hero-sub" id="module-version-sub">V1.19 · dump AI flags</div>
+          <div class="hero-sub" id="module-version-sub">V1.20 · copy log</div>
         </div>
         <div class="h8"></div>
         <div class="warn-card" id="old-mod-warn">Flagship 15 is still installed. This installer disables it. Remove it from Magisk/KSU so the two modules do not fight.</div>
@@ -232,6 +233,8 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
         <button class="action-btn btn-primary" onclick="dumpAi()">Dump AI flags</button>
         <div class="section-label">Boot log</div>
         <div class="glass-card"><div class="log-box" id="pfd-log">—</div></div>
+        <div class="h8"></div>
+        <button class="action-btn btn-ghost" onclick="copyLog()">Copy log</button>
       </div>
 
       <div class="page" id="page-media">
@@ -438,7 +441,35 @@ async function dumpAi(){
   const text=lines.join('\n');
   document.getElementById('pfd-log').textContent=text;
   await exec("printf '%s\\n' '"+text.replace(/'/g,"'\\''")+"' > \""+MOD+"/ai_dump.txt\"");
-  toast('Dump ready — scroll the log and paste it');
+  const copied=await copyLog(true);
+  toast(copied ? 'Dump copied — paste it here' : 'Dump ready — tap Copy log');
+}
+async function copyLog(silent){
+  const text=(document.getElementById('pfd-log').textContent||'').trim();
+  if(!text || text==='—'){
+    if(silent!==true) toast('Nothing to copy yet');
+    return false;
+  }
+  let copied=false;
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    try{ await navigator.clipboard.writeText(text); copied=true; }catch(e){}
+  }
+  if(!copied){
+    try{
+      const ta=document.createElement('textarea');
+      ta.value=text;
+      ta.setAttribute('readonly','');
+      ta.style.cssText='position:fixed;top:0;left:0;width:1px;height:1px;opacity:0.02';
+      document.body.appendChild(ta);
+      ta.focus();
+      ta.select();
+      ta.setSelectionRange(0, ta.value.length);
+      copied=document.execCommand('copy');
+      document.body.removeChild(ta);
+    }catch(e){}
+  }
+  if(silent!==true) toast(copied ? 'Log copied — paste it here' : 'Copy failed — long-press the log and copy');
+  return copied;
 }
 async function confirmReboot(){
   const ok=await showConfirm('Reboot Device','Restart now so boot, overlay, and AI changes can apply.',{okLabel:'Reboot',danger:true});
@@ -509,8 +540,8 @@ async function handleStatusbar(input){
 }
 async function loadDevice(){
   const prop=await g('cat "'+MOD+'/module.prop" 2>/dev/null');
-  const ver=(prop.match(/^version=(.+)$/m)||[])[1]||'V1.19';
-  n('module-version-sub', ver+' · dump AI flags');
+  const ver=(prop.match(/^version=(.+)$/m)||[])[1]||'V1.20';
+  n('module-version-sub', ver+' · copy log');
   let type=await g('getprop ro.tran.os.type');
   let verOs=await g('getprop ro.transsion.os.version');
   const brand=(await g('getprop ro.product.brand')||'').toLowerCase();
@@ -594,6 +625,7 @@ window.handleBootanim=handleBootanim;
 window.handleRebootanim=handleRebootanim;
 window.handleStatusbar=handleStatusbar;
 window.dumpAi=dumpAi;
+window.copyLog=copyLog;
 </script>
 </body>
 </html>

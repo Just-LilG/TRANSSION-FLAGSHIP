@@ -1,5 +1,8 @@
 # Transsion Flagship 16
 
+## v1.20
+- **Copy log on Home.** Dump AI flags (and the boot log) can be copied with one tap. Dump also tries to copy automatically.
+
 ## v1.19
 - **Dump AI flags.** Setting those Flagship 15 keys to 0 did not hide stock AI — they may not exist on OS 16 at all. Home has **Dump AI flags**: EMPTY means the key is not on the phone (or Magisk did not apply it); `=0` with AI still visible means the ROM ignores that key. The dump also lists other live AI-like keys and whether the six names appear in stock build files. Paste that log.
 
