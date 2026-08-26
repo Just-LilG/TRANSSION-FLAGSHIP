@@ -1,5 +1,8 @@
 # Changelog
 
+## v4.27
+- **Bypass Charging now defaults on at boot, matching the WebUI.** `service.sh` used `cfg_bool game_bypass_charge false`, so a missing key (or first boot before config was written) turned the feature off even though `config.json`, install defaults, and the in-app toggle all default to on. The boot default now matches those.
+
 ## v4.26
 - **Social Turbo toggles now actually apply.** Call recording, translation, and beauty/makeup were collected into `config.json` and shown in the WebUI, but neither `service.sh` nor Apply & Save ever wrote the matching props — they stayed at the always-on `system.prop` values. Boot and Apply now set `ro.os_social_turbo_record` / `translator` / `makeup` (and invert `beauty_default_off`) from those toggles, gated by the Social Turbo master switch.
 
