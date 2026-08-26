@@ -1,5 +1,8 @@
 # Transsion Flagship 16
 
+## v1.09
+- **Boot sound via Transsion MediaPlayer paths (from the X6886 firmware dump).** `libbootanimation.so` `initAudioPath()` does **not** play zip `audio.wav`. It looks for, in order: `/product/media/audio/bootsound/Waltz.ogg`, `/tr_product/media/audio/bootsound/bootaudio.ogg`, `/data/local/bootaudio.mp3`. Stock ships none of those files, so boot is silent. V1.09 places Waltz on those three paths (bind-file / overlay / copy — not bind-dir of `audio/`). Custom **.ogg** or **.mp3**. Set Sounds to **Waltz**, flash, reboot.
+
 ## v1.08
 - **Boot sound via zip `audio.wav` + audio-service restart.** Stock dump on X6886: no PowerOn.ogg, no sibling `bootsound.mp3`, no tinyplay. The 52KB `bootanimation` binary is AOSP `audioplay.cpp` — it plays `folder1/audio.wav` (XOS) / `part1/audio.wav` (HiOS) and only if AudioFlinger is already up. If not, it logs "Audio service is not ready yet" and never retries. V1.08 packs a canonical 48 kHz stereo PCM wav in those part folders, keeps `play_sound=1`, and restarts bootanim once `service check audio` returns found while the animation is still running. Custom should be **.wav**. Set Sounds to **Waltz**, flash, reboot. If silent, Home dump should show `wait audio=... anim=running` and `ctl.restart bootanim`.
 
