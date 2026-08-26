@@ -1,5 +1,8 @@
 # Changelog
 
+## v4.33
+- **Boot animation and boot sound work on XOS 16 again.** Android 16's bootanimation process prefers `/product/media/bootanimation.zip` (then apex/oem/system), and it starts before KernelSU OverlayFS / Magisk Magic Mount apply the module tree — so the copies under `system/media` that worked on XOS 15 were ignored. `post-fs-data.sh` now bind-mounts the selected boot animation, shutdown animation, and Waltz boot sound over every live path that already exists (`/product/media`, `/system/media`, PowerOn.ogg, the Transsion `bootsound` folder). Off still leaves stock unbound.
+
 ## v4.32
 - **eSports Touch and the level slider now actually apply.** The toggle and 1–3 slider were saved to `config.json` only. Boot used `ro.os_game_tp_esports10.support` as a Gaming Suite master flag, and levels 2/3 (`esports20` / `esports30`) stayed always-on from `system.prop`. They now follow Gaming Suite + eSports Touch: L1 → `esports10`, L2 also `esports20`, L3 also `esports30` (and `esports_update11`).
 
