@@ -1,5 +1,8 @@
 # Changelog
 
+## v4.26
+- **Social Turbo toggles now actually apply.** Call recording, translation, and beauty/makeup were collected into `config.json` and shown in the WebUI, but neither `service.sh` nor Apply & Save ever wrote the matching props — they stayed at the always-on `system.prop` values. Boot and Apply now set `ro.os_social_turbo_record` / `translator` / `makeup` (and invert `beauty_default_off`) from those toggles, gated by the Social Turbo master switch.
+
 ## v4.25
 - **AI Suite master toggle now actually gates AI props.** Turning off AI Suite only flipped the in-app switch — boot (`service.sh`) and Apply & Save still enabled subtitles, call summary, and sound-recorder speech from the individual toggles. Those props now follow the master switch, matching how Gaming Suite already works.
 

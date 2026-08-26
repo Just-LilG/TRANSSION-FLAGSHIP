@@ -1960,10 +1960,14 @@ async function applyRuntime(onPhase){
 
   await rp('ro.tranos_hidenavigationbar_support', c.nav_hide?1:0);
 
-  phase(5,TOTAL,'AI features');
+  phase(5,TOTAL,'AI & Social Turbo');
   await rp('ro.sys.tran.ai_subtitles_support', c.ai_master&&c.ai_subtitles?1:0);
   await rp('ro.sys.tran.aiphone_summary_support', c.ai_master&&c.ai_call_summary?1:0);
   await rp('ro.os_soundrecorder_speech_support', c.ai_master&&c.ai_sound_rec?1:0);
+  await rp('ro.os_social_turbo_record', c.social_master&&c.social_record?1:0);
+  await rp('ro.os_social_turbo_translator', c.social_master&&c.social_translate?1:0);
+  await rp('ro.os_social_turbo_makeup', c.social_master&&c.social_beauty?1:0);
+  await rp('ro.os_social_turbo_beauty_default_off', c.social_master&&c.social_beauty?0:1);
 
   phase(6,TOTAL,'AOD');
   await rp('ro.aod_alwaysshow_support', c.aod?1:0);
