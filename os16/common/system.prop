@@ -1,7 +1,10 @@
-# Flagship 16 — OS 16 AI keys (from device dump). Off via Magisk system.prop.
-# Flagship 15 names did not hide Settings. Not written from service.sh.
-ro.tr_aiservice.aicorespeech_subtitle.feature.support=0
-ro.tr_aiservice.aicorespeech_livecaption.feature.support=0
-ro.tr_soundrecorder.summary.feature.support=0
-ro.tr_note.ai_draw.support=0
-ro.os_ai_writing.support=0
+# Flagship 16 — OS 16 AI keys. Magisk loads this file at boot.
+# Apply in WebUI rewrites this file from the AI Suite toggles. Reboot to take effect.
+# Not written from service.sh.
+ro.tr_aiservice.aicorespeech_subtitle.feature.support=1
+ro.tr_aiservice.aicorespeech_livecaption.feature.support=1
+ro.tr_soundrecorder.summary.feature.support=1
+ro.tr_note.ai_draw.support=1
+ro.os_ai_writing.support=1
+ro.tr_aiassistant.aiphone.feature.support=false
+ro.tr_aiassistant.aiphone_summany.feature.support=false

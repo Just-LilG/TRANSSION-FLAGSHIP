@@ -11,11 +11,55 @@ ui_warn() { ui_print "  ⚠️  $1"; }
 ui_step() { ui_print "  ▶ $1"; }
 ui_div()  { ui_print "  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"; }
 
+json_bool() {
+  f="$1"; k="$2"; d="$3"
+  [ -f "$f" ] || { echo "$d"; return; }
+  val=$(grep -o "\"$k\"[[:space:]]*:[[:space:]]*[^,}]*" "$f" | head -1 | sed 's/.*:[[:space:]]*//' | tr -d '" ')
+  [ -n "$val" ] && echo "$val" || echo "$d"
+}
+
+ai_01() {
+  cfg="$1"; master="$2"; key="$3"; def="$4"
+  [ "$master" = "true" ] || { echo 0; return; }
+  v=$(json_bool "$cfg" "$key" "$def")
+  [ "$v" = "false" ] && echo 0 || echo 1
+}
+
+ai_tf() {
+  cfg="$1"; master="$2"; key="$3"; def="$4"
+  [ "$master" = "true" ] || { echo false; return; }
+  v=$(json_bool "$cfg" "$key" "$def")
+  [ "$v" = "false" ] && echo false || echo true
+}
+
+write_os16_ai_prop() {
+  cfg="$1"
+  dest="$2"
+  master=$(json_bool "$cfg" ai_master true)
+  sub=$(ai_01 "$cfg" "$master" ai_subtitles true)
+  rec=$(ai_01 "$cfg" "$master" ai_sound_rec true)
+  notes=$(ai_01 "$cfg" "$master" ai_notes true)
+  writing=$(ai_01 "$cfg" "$master" ai_writing true)
+  call=$(ai_tf "$cfg" "$master" ai_call_summary false)
+  cat > "$dest" <<EOF
+# Flagship 16 — OS 16 AI keys. Magisk loads this file at boot.
+# Apply in WebUI rewrites this file from the AI Suite toggles. Reboot to take effect.
+# Not written from service.sh.
+ro.tr_aiservice.aicorespeech_subtitle.feature.support=$sub
+ro.tr_aiservice.aicorespeech_livecaption.feature.support=$sub
+ro.tr_soundrecorder.summary.feature.support=$rec
+ro.tr_note.ai_draw.support=$notes
+ro.os_ai_writing.support=$writing
+ro.tr_aiassistant.aiphone.feature.support=$call
+ro.tr_aiassistant.aiphone_summany.feature.support=$call
+EOF
+}
+
 print_modname() {
   ui_print " "
   ui_print "  ╔══════════════════════════════════════════╗"
   ui_print "  ║    TRANSSION FLAGSHIP 16                 ║"
-  ui_print "  ║    XOS · HiOS · iTel OS 16  ·  V1.21     ║"
+  ui_print "  ║    XOS · HiOS · iTel OS 16  ·  V1.22     ║"
   ui_print "  ╚══════════════════════════════════════════╝"
   ui_print " "
 }
@@ -167,30 +211,40 @@ on_install() {
   if [ -f "$CFG" ]; then
     ui_ok "Existing Flagship 16 config preserved"
     cp "$CFG" "$MODPATH/config.json"
+    # V1.21 hide-test forced master off. Restore on. Notification Summary
+    # had no OS 16 key — rename to AI Writing. Call summary stays stock-off
+    # (aiphone keys were already false on this phone).
     sed -i -e 's/"statusbar_style": *"ios"/"statusbar_style": "off"/' \
            -e 's/"statusbar_style": *"xos16"/"statusbar_style": "off"/' \
-           -e 's/"ai_master": true/"ai_master": false/' \
+           -e 's/"ai_master": false/"ai_master": true/' \
+           -e 's/"ai_notif_summary"/"ai_writing"/' \
+           -e 's/"ai_call_summary": true/"ai_call_summary": false/' \
            "$MODPATH/config.json"
   else
-    ui_ok "Default config: HiOS 16 boot + reboot, AI off, status bar stock"
+    ui_ok "Default config: HiOS 16 boot + reboot, AI on, status bar stock"
   fi
+  write_os16_ai_prop "$MODPATH/config.json" "$MODPATH/system.prop"
+  ui_ok "OS 16 AI keys written from config (reboot to apply)"
 
   ui_ok "Boot animation"
   ui_ok "Reboot animation"
   ui_ok "Status bar: upload your own overlay, or leave stock"
-  ui_ok "OS 16 AI keys off — Dump AI flags after reboot"
+  ui_ok "OS 16 AI Suite — Apply in WebUI, then reboot"
 }
 
 set_permissions() {
+  # Magisk copies zip system.prop after on_install. Rewrite from config so
+  # WebUI toggles survive an upgrade.
+  write_os16_ai_prop "$MODPATH/config.json" "$MODPATH/system.prop"
   set_perm_recursive "$MODPATH" 0 0 0755 0644
   for sh in "$MODPATH/post-fs-data.sh" "$MODPATH/service.sh" "$MODPATH/uninstall.sh"; do
     [ -f "$sh" ] && set_perm "$sh" 0 0 0755
   done
   ui_print " "
   ui_div
-  ui_print "  ✨  FLAGSHIP 16  ·  V1.21"
+  ui_print "  ✨  FLAGSHIP 16  ·  V1.22"
   ui_info "OS     : $OS_TYPE $OS_VER"
-  ui_info "Feature: boot + reboot + overlay + OS 16 AI keys off"
+  ui_info "Feature: boot + reboot + overlay + OS 16 AI Suite"
   ui_div
   ui_print "  Reboot, then open WebUI in Magisk/KSU."
   ui_print " "

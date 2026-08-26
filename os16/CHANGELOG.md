@@ -1,5 +1,8 @@
 # Transsion Flagship 16
 
+## v1.22
+- **AI Suite restored.** The V1.21 hide test worked: those five OS 16 keys removed some Settings AI options. This build turns them back on (stock `=1`). Apply in WebUI rewrites Magisk `system.prop` from the toggles — reboot, no `resetprop` on boot. Master on by default; upgrade from V1.21 turns it back on. AI Writing replaces Notification Summary (`ro.os_ai_writing.support`). Call summary stays stock-off (`aiphone` / `aiphone_summany`). Dump + Copy log still on Home.
+
 ## v1.21
 - **OS 16 AI keys off.** Device dump showed Flagship 15 names at 0 with stock AI still visible. This phone uses `ro.tr_*` keys. Magisk `system.prop` now sets off: speech subtitles, live caption, sound-recorder summary, notes draw, and AI writing. Dump AI flags + Copy log after reboot. If those Settings options hide, the keys are real.
 
