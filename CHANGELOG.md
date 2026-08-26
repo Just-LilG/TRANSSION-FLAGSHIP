@@ -1,5 +1,8 @@
 # Changelog
 
+## v4.30
+- **Live Status now follows master toggles and the recents prop we actually ship.** Gaming and AI sub-items (and Social Turbo) were compared against their own switches even when the suite master was off, so they showed MISMATCH after a correct Apply. Recent Apps still expected `ro.transsion_recent_animation_support=3`, which was removed because it ghosted recents — it now checks `ro.transsion.recent_animation.model=3` instead.
+
 ## v4.29
 - **AI Notes and Notification Summary toggles now actually apply.** Both were saved to `config.json` and shown in the WebUI, but boot and Apply & Save never wrote the matching props, so they stayed at the always-on `system.prop` values. They now follow those toggles (and the AI Suite master): `ro.os_ai_notification_summary_sr_sa_0003_001_support` for notification digest, `ro.os_note_ai_bg_support` / `ro.os_note_ai_draw_support` for notes.
 

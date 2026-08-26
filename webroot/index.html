@@ -2228,7 +2228,7 @@ async function handleFile(input,type,nameId){
 const LIVE_STATUS_ITEMS=[
   {group:'Animations',label:'Unlock (static)',prop:'ro.transsion_unlock_mode_support',expect:'3'},
   {group:'Animations',label:'Launch/Exit (static)',prop:'ro.transsion_launch_start_exit_support',expect:'3'},
-  {group:'Animations',label:'Recent Apps (static)',prop:'ro.transsion_recent_animation_support',expect:'3'},
+  {group:'Animations',label:'Recent Apps (static)',prop:'ro.transsion.recent_animation.model',expect:'3'},
   {group:'Launcher',label:'Launcher Blur',prop:'ro.transsion_launcher_gaussian_blur_support',cfgKey:'launcher_blur',onVal:'2',offVal:'0'},
   {group:'Launcher',label:'Launcher Blur (alt)',prop:'tr_launcher.gaussianblur.support',cfgKey:'launcher_blur',onVal:'2',offVal:'0'},
   {group:'Launcher',label:'Blur Engine',prop:'ro.tran.effectengine.dynamicblur.support',cfgKey:'launcher_blur',onVal:'1',offVal:'0'},
@@ -2241,16 +2241,19 @@ const LIVE_STATUS_ITEMS=[
   {group:'Charging',label:'Charging Animation',prop:'ro.tran.charge_animation_support',cfgKey:'charge_anim',onVal:'1',offVal:'0'},
   {group:'Charging',label:'Lockscreen Charge Anim',prop:'ro.tran.lockscreen_charge_anim',cfgKey:'charge_anim',onVal:'1',offVal:'0'},
   {group:'Gaming',label:'eSports Mode',prop:'ro.os_game_tp_esports10.support',cfgKey:'game_master',onVal:'1',offVal:'0'},
-  {group:'Gaming',label:'Ray Tracing',prop:'ro.os_game_ray_tracing.support',cfgKey:'game_raytracing',onVal:'1',offVal:'0'},
-  {group:'Gaming',label:'Frame Interpolation',prop:'ro.os_game_frame_game_interpolation.support',cfgKey:'game_interpolation',onVal:'1',offVal:'0'},
-  {group:'Gaming',label:'Graphic HDR',prop:'ro.os_game_graphic_hdr.support',cfgKey:'game_hdr',onVal:'1',offVal:'0'},
-  {group:'Gaming',label:'Bypass Charging',prop:'ro.os_game_bypass_charging_support',cfgKey:'game_bypass_charge',onVal:'1',offVal:'0'},
-  {group:'AI',label:'AI Subtitles',prop:'ro.sys.tran.ai_subtitles_support',cfgKey:'ai_subtitles',onVal:'1',offVal:'0'},
-  {group:'AI',label:'Call Summary',prop:'ro.sys.tran.aiphone_summary_support',cfgKey:'ai_call_summary',onVal:'1',offVal:'0'},
-  {group:'AI',label:'Sound Recorder Speech',prop:'ro.os_soundrecorder_speech_support',cfgKey:'ai_sound_rec',onVal:'1',offVal:'0'},
-  {group:'AI',label:'Notification Summary',prop:'ro.os_ai_notification_summary_sr_sa_0003_001_support',cfgKey:'ai_notif_summary',onVal:'1',offVal:'0'},
-  {group:'AI',label:'AI Notes (bg)',prop:'ro.os_note_ai_bg_support',cfgKey:'ai_notes',onVal:'1',offVal:'0'},
-  {group:'AI',label:'AI Notes (draw)',prop:'ro.os_note_ai_draw_support',cfgKey:'ai_notes',onVal:'1',offVal:'0'},
+  {group:'Gaming',label:'Ray Tracing',prop:'ro.os_game_ray_tracing.support',cfgKey:'game_raytracing',masterKey:'game_master',onVal:'1',offVal:'0'},
+  {group:'Gaming',label:'Frame Interpolation',prop:'ro.os_game_frame_game_interpolation.support',cfgKey:'game_interpolation',masterKey:'game_master',onVal:'1',offVal:'0'},
+  {group:'Gaming',label:'Graphic HDR',prop:'ro.os_game_graphic_hdr.support',cfgKey:'game_hdr',masterKey:'game_master',onVal:'1',offVal:'0'},
+  {group:'Gaming',label:'Bypass Charging',prop:'ro.os_game_bypass_charging_support',cfgKey:'game_bypass_charge',masterKey:'game_master',onVal:'1',offVal:'0'},
+  {group:'AI',label:'AI Subtitles',prop:'ro.sys.tran.ai_subtitles_support',cfgKey:'ai_subtitles',masterKey:'ai_master',onVal:'1',offVal:'0'},
+  {group:'AI',label:'Call Summary',prop:'ro.sys.tran.aiphone_summary_support',cfgKey:'ai_call_summary',masterKey:'ai_master',onVal:'1',offVal:'0'},
+  {group:'AI',label:'Sound Recorder Speech',prop:'ro.os_soundrecorder_speech_support',cfgKey:'ai_sound_rec',masterKey:'ai_master',onVal:'1',offVal:'0'},
+  {group:'AI',label:'Notification Summary',prop:'ro.os_ai_notification_summary_sr_sa_0003_001_support',cfgKey:'ai_notif_summary',masterKey:'ai_master',onVal:'1',offVal:'0'},
+  {group:'AI',label:'AI Notes (bg)',prop:'ro.os_note_ai_bg_support',cfgKey:'ai_notes',masterKey:'ai_master',onVal:'1',offVal:'0'},
+  {group:'AI',label:'AI Notes (draw)',prop:'ro.os_note_ai_draw_support',cfgKey:'ai_notes',masterKey:'ai_master',onVal:'1',offVal:'0'},
+  {group:'Social Turbo',label:'Call Recording',prop:'ro.os_social_turbo_record',cfgKey:'social_record',masterKey:'social_master',onVal:'1',offVal:'0'},
+  {group:'Social Turbo',label:'Translation',prop:'ro.os_social_turbo_translator',cfgKey:'social_translate',masterKey:'social_master',onVal:'1',offVal:'0'},
+  {group:'Social Turbo',label:'Beauty / Makeup',prop:'ro.os_social_turbo_makeup',cfgKey:'social_beauty',masterKey:'social_master',onVal:'1',offVal:'0'},
 ];
 
 const CONFLICT_PROPS=[
@@ -2438,6 +2441,15 @@ async function removeConflictingModule(modId){
   checkModuleConflicts();
 }
 
+function liveExpected(item, cfgObj){
+  if(item.cfgKey){
+    const cfgOn=cfgObj[item.cfgKey]!==false;
+    const masterOn=!item.masterKey || cfgObj[item.masterKey]!==false;
+    return (cfgOn && masterOn)?item.onVal:item.offVal;
+  }
+  return item.expect;
+}
+
 async function loadLiveStatus(){
   const box=document.getElementById('live-status-list');
   box.innerHTML='<div style="font-size:12.5px;color:#666;padding:8px 0">Loading...</div>';
@@ -2445,15 +2457,8 @@ async function loadLiveStatus(){
   for(const item of LIVE_STATUS_ITEMS){
     const r=await exec('getprop '+item.prop);
     const live=(r.stdout||'').trim()||'(empty)';
-    let expected, matches;
-    if(item.cfgKey){
-      const cfgOn=cfg[item.cfgKey]!==false; // treat undefined as on, matching most defaults
-      expected=cfgOn?item.onVal:item.offVal;
-      matches=live===expected;
-    } else {
-      expected=item.expect;
-      matches=live===expected;
-    }
+    const expected=liveExpected(item, cfg);
+    const matches=live===expected;
     results.push({...item,live,expected,matches});
   }
   let html='';
