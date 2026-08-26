@@ -139,7 +139,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
         </div>
         <div class="hero-card">
           <div class="hero-title">Transsion Flagship 16</div>
-          <div class="hero-sub" id="module-version-sub">V1.10 · boot + reboot animation</div>
+          <div class="hero-sub" id="module-version-sub">V1.11 · charging animation</div>
         </div>
         <div class="h8"></div>
         <div class="warn-card" id="old-mod-warn">Flagship 15 is still installed. This installer disables it. Remove it from Magisk/KSU so the two modules do not fight.</div>
@@ -154,8 +154,9 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
         <div class="glass-card roadmap">
           <ul>
             <li class="on">Boot animation — verified</li>
-            <li class="on">Reboot animation</li>
-            <li class="next">Boot sound — still silent on device, parked</li>
+            <li class="on">Reboot animation — verified</li>
+            <li class="next">Charging animation</li>
+            <li>Boot sound — parked (still silent on device)</li>
           </ul>
         </div>
         <div class="h8"></div>
@@ -222,6 +223,28 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
           </div>
         </div>
         <div class="h8"></div>
+        <div class="glass-card">
+          <div class="setting-row">
+            <div class="row-text">
+              <div class="row-title">Charging animation</div>
+              <div class="row-sub">Shown on the lockscreen when you plug in a charger</div>
+            </div>
+          </div>
+          <div class="segmented" id="chargeanim-style-picker">
+            <div class="segmented-opt" data-val="default" onclick="setChargeStyle('default')">XOS</div>
+            <div class="segmented-opt active" data-val="hios16" onclick="setChargeStyle('hios16')">HiOS 16</div>
+            <div class="segmented-opt" data-val="custom" onclick="setChargeStyle('custom')" id="chargeanim-custom-opt" style="display:none">Custom</div>
+            <div class="segmented-opt" data-val="off" onclick="setChargeStyle('off')">Off</div>
+          </div>
+          <div class="file-row">
+            <label class="file-btn">
+              Upload custom mp4
+              <input type="file" accept=".mp4,video/mp4" onchange="handleChargeanim(this)">
+            </label>
+            <div class="file-name" id="chargeanim-file-name">No custom animation uploaded</div>
+          </div>
+        </div>
+        <div class="h8"></div>
         <button class="action-btn btn-primary" onclick="saveAll()">Apply &amp; Save</button>
       </div>
 
@@ -277,7 +300,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
 <script type="module">
 const MOD='/data/adb/modules/transsion-flagship-16';
 const CONFIG_PATH=MOD+'/config.json';
-let cfg={bootanim_style:'hios16',bootanim_file:'',rebootanim_style:'hios16',rebootanim_file:'',boot_sound:'waltz',boot_sound_file:''};
+let cfg={bootanim_style:'hios16',bootanim_file:'',rebootanim_style:'hios16',rebootanim_file:'',chargeanim_style:'hios16',chargeanim_file:'',boot_sound:'waltz',boot_sound_file:''};
 let _exec=null;
 
 async function exec(cmd){
@@ -307,6 +330,12 @@ function setStyle(val){
 function setRebootStyle(val){
   cfg.rebootanim_style=val;
   document.querySelectorAll('#rebootanim-style-picker .segmented-opt').forEach(o=>{
+    o.classList.toggle('active', o.dataset.val===val);
+  });
+}
+function setChargeStyle(val){
+  cfg.chargeanim_style=val;
+  document.querySelectorAll('#chargeanim-style-picker .segmented-opt').forEach(o=>{
     o.classList.toggle('active', o.dataset.val===val);
   });
 }
@@ -367,7 +396,7 @@ async function saveAll(){
   else toast('Save failed — is the module installed?');
 }
 async function confirmReboot(){
-  const ok=await showConfirm('Reboot Device','Restart now so boot animation and sound can apply.',{okLabel:'Reboot',danger:true});
+  const ok=await showConfirm('Reboot Device','Restart now so animations can apply.',{okLabel:'Reboot',danger:true});
   if(ok) exec('reboot');
 }
 async function dumpAudio(){
@@ -420,6 +449,29 @@ async function handleRebootanim(input){
   toast('Custom zip saved — reboot to apply');
   input.value='';
 }
+async function handleChargeanim(input){
+  if(!input.files.length) return;
+  const file=input.files[0];
+  if(file.size>40*1024*1024){ toast('File too large (max 40MB)'); input.value=''; return; }
+  const name=file.name.toLowerCase();
+  if(!name.endsWith('.mp4')){ toast('Use an .mp4 video'); input.value=''; return; }
+  toast('Writing custom mp4…', 20000);
+  const bytes=new Uint8Array(await file.arrayBuffer());
+  const dests=[
+    MOD+'/system/product/theme/charge/custom.mp4',
+    MOD+'/charge_custom.mp4'
+  ];
+  const ok=await writeB64File(bytes, dests, '/data/local/tmp/tf16_chargeanim.b64');
+  if(!ok){ toast('Write failed'); return; }
+  cfg.chargeanim_style='custom';
+  cfg.chargeanim_file=file.name;
+  document.getElementById('chargeanim-custom-opt').style.display='';
+  setChargeStyle('custom');
+  n('chargeanim-file-name','Custom: '+file.name);
+  await saveAll();
+  toast('Custom mp4 saved — reboot to apply');
+  input.value='';
+}
 async function handleBootsound(input){
   if(!input.files.length) return;
   const file=input.files[0];
@@ -454,8 +506,8 @@ async function handleBootsound(input){
 }
 async function loadDevice(){
   const prop=await g('cat "'+MOD+'/module.prop" 2>/dev/null');
-  const ver=(prop.match(/^version=(.+)$/m)||[])[1]||'V1.10';
-  n('module-version-sub', ver+' · boot + reboot animation');
+  const ver=(prop.match(/^version=(.+)$/m)||[])[1]||'V1.11';
+  n('module-version-sub', ver+' · charging animation');
   let type=await g('getprop ro.tran.os.type');
   let verOs=await g('getprop ro.transsion.os.version');
   const brand=(await g('getprop ro.product.brand')||'').toLowerCase();
@@ -493,6 +545,7 @@ async function loadCfg(){
   setStyle(cfg.bootanim_style||'hios16');
   if(!cfg.rebootanim_style) cfg.rebootanim_style=cfg.shutdownanim_style||'hios16';
   setRebootStyle(cfg.rebootanim_style||'hios16');
+  setChargeStyle(cfg.chargeanim_style||'hios16');
   setBootSound(cfg.boot_sound||'waltz');
   if(cfg.bootanim_file){
     document.getElementById('bootanim-custom-opt').style.display='';
@@ -501,6 +554,10 @@ async function loadCfg(){
   if(cfg.rebootanim_file){
     document.getElementById('rebootanim-custom-opt').style.display='';
     n('rebootanim-file-name','Custom: '+cfg.rebootanim_file);
+  }
+  if(cfg.chargeanim_file){
+    document.getElementById('chargeanim-custom-opt').style.display='';
+    n('chargeanim-file-name','Custom: '+cfg.chargeanim_file);
   }
   if(cfg.boot_sound_file){
     document.getElementById('bootsound-custom-opt').style.display='';
@@ -522,11 +579,13 @@ init();
 window.switchTab=switchTab;
 window.setStyle=setStyle;
 window.setRebootStyle=setRebootStyle;
+window.setChargeStyle=setChargeStyle;
 window.setBootSound=setBootSound;
 window.saveAll=saveAll;
 window.confirmReboot=confirmReboot;
 window.handleBootanim=handleBootanim;
 window.handleRebootanim=handleRebootanim;
+window.handleChargeanim=handleChargeanim;
 window.handleBootsound=handleBootsound;
 window.dumpAudio=dumpAudio;
 </script>

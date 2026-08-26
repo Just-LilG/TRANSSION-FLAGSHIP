@@ -15,7 +15,7 @@ print_modname() {
   ui_print " "
   ui_print "  ╔══════════════════════════════════════════╗"
   ui_print "  ║    TRANSSION FLAGSHIP 16                 ║"
-  ui_print "  ║    XOS · HiOS · iTel OS 16  ·  V1.10     ║"
+  ui_print "  ║    XOS · HiOS · iTel OS 16  ·  V1.11     ║"
   ui_print "  ╚══════════════════════════════════════════╝"
   ui_print " "
 }
@@ -110,12 +110,13 @@ on_install() {
   fi
   if [ "$KEEP_EXTRACT" = true ] || [ "$have_zips" = true ]; then
     ui_ok "Boot animation zips already extracted"
-    ui_info "Refreshing scripts, webroot, and boot sound files"
+    ui_info "Refreshing scripts, webroot, boot sound, and charging files"
     unzip -o "$ZIPFILE" 'webroot/*' -d "$MODPATH" >&2
     unzip -o "$ZIPFILE" 'config.json' -d "$MODPATH" >&2
     unzip -o "$ZIPFILE" 'CHANGELOG.md' -d "$MODPATH" >&2
     unzip -oj "$ZIPFILE" 'common/system.prop' -d "$MODPATH" >&2
     unzip -o "$ZIPFILE" 'system/product/media/audio/bootsound/*' -d "$MODPATH" >&2
+    unzip -o "$ZIPFILE" 'system/product/theme/charge/*' -d "$MODPATH" >&2
     unzip -o "$ZIPFILE" 'tr_product/*' -d "$MODPATH" >&2
   else
     ui_info "Extracting module files from zip"
@@ -127,17 +128,25 @@ on_install() {
     unzip -oj "$ZIPFILE" 'common/system.prop' -d "$MODPATH" >&2
   fi
 
+  if [ -f "$MODPATH/system/product/theme/charge/hios_wire_charging_lockscreen.mp4" ] \
+      && [ -f "$MODPATH/system/product/theme/charge/xos_wire_charging_lockscreen.mp4" ]; then
+    ui_ok "Charging animation files ready"
+  else
+    ui_warn "Charging animation files missing — flash may be incomplete"
+  fi
+
   CFG=/data/adb/modules/transsion-flagship-16/config.json
   if [ -f "$CFG" ]; then
     ui_ok "Existing Flagship 16 config preserved"
     cp "$CFG" "$MODPATH/config.json"
   else
-    ui_ok "Default config: HiOS 16 boot + reboot animation"
+    ui_ok "Default config: HiOS 16 boot, reboot, and charging animation"
   fi
 
   ui_ok "Feature 1: boot animation"
   ui_ok "Feature 2: reboot animation"
-  ui_ok "Feature 3: boot sound (still being verified)"
+  ui_ok "Feature 3: charging animation"
+  ui_ok "Boot sound (still being verified)"
 }
 
 set_permissions() {
@@ -147,9 +156,9 @@ set_permissions() {
   done
   ui_print " "
   ui_div
-  ui_print "  ✨  FLAGSHIP 16  ·  V1.10"
+  ui_print "  ✨  FLAGSHIP 16  ·  V1.11"
   ui_info "OS     : $OS_TYPE $OS_VER"
-  ui_info "Feature: boot + reboot animation"
+  ui_info "Feature: boot + reboot + charging animation"
   ui_div
   ui_print "  Reboot, then open WebUI in Magisk/KSU."
   ui_print " "
