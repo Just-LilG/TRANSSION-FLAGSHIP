@@ -1,8 +1,8 @@
 id=transsion-flagship-16
 name=Transsion Flagship 16
-version=V1.09
-versionCode=109
+version=V1.10
+versionCode=110
 author=𝙻𝙸𝙻 𝙶 𝚃𝙴𝙲𝙷 𝙻𝙰𝙱𝚂
-description=Transsion OS 16 (XOS / HiOS / iTel). Features added one at a time and verified on device. Now: boot animation + boot sound.
+description=Transsion OS 16 (XOS / HiOS / iTel). Features added one at a time and verified on device. Now: boot animation + reboot animation.
 minMagisk=20400
 updateJson=https://raw.githubusercontent.com/Just-LilG/TRANSSION-FLAGSHIP/main/os16/update.json

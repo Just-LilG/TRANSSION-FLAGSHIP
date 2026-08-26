@@ -15,7 +15,7 @@ print_modname() {
   ui_print " "
   ui_print "  ╔══════════════════════════════════════════╗"
   ui_print "  ║    TRANSSION FLAGSHIP 16                 ║"
-  ui_print "  ║    XOS · HiOS · iTel OS 16  ·  V1.09     ║"
+  ui_print "  ║    XOS · HiOS · iTel OS 16  ·  V1.10     ║"
   ui_print "  ╚══════════════════════════════════════════╝"
   ui_print " "
 }
@@ -132,11 +132,12 @@ on_install() {
     ui_ok "Existing Flagship 16 config preserved"
     cp "$CFG" "$MODPATH/config.json"
   else
-    ui_ok "Default config: HiOS 16 boot animation + Waltz boot sound"
+    ui_ok "Default config: HiOS 16 boot + reboot animation"
   fi
 
   ui_ok "Feature 1: boot animation"
-  ui_ok "Feature 2: boot sound"
+  ui_ok "Feature 2: reboot animation"
+  ui_ok "Feature 3: boot sound (still being verified)"
 }
 
 set_permissions() {
@@ -146,9 +147,9 @@ set_permissions() {
   done
   ui_print " "
   ui_div
-  ui_print "  ✨  FLAGSHIP 16  ·  V1.09"
+  ui_print "  ✨  FLAGSHIP 16  ·  V1.10"
   ui_info "OS     : $OS_TYPE $OS_VER"
-  ui_info "Feature: boot animation + boot sound"
+  ui_info "Feature: boot + reboot animation"
   ui_div
   ui_print "  Reboot, then open WebUI in Magisk/KSU."
   ui_print " "

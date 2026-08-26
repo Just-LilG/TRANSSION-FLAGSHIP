@@ -354,6 +354,14 @@ for dest in \
     /system/media/bootanimation.zip \
     /oem/media/bootanimation.zip \
     /apex/com.android.bootanimation/etc/bootanimation.zip \
+    /tr_product/media/shutdownanimation.zip \
+    /product/media/shutdownanimation.zip \
+    /system/product/media/shutdownanimation.zip \
+    /system/media/shutdownanimation.zip \
+    /oem/media/shutdownanimation.zip \
+    /tr_product/media/userspace-reboot.zip \
+    /product/media/userspace-reboot.zip \
+    /system/media/userspace-reboot.zip \
     /product/media/audio/ui/PowerOn.ogg \
     /system/product/media/audio/ui/PowerOn.ogg \
     /system/media/audio/ui/PowerOn.ogg \
@@ -415,27 +423,30 @@ if [ -f /tr_product/media/bootanimation.zip ]; then
 fi
 
 BA_STYLE=$(cfg_get bootanim_style "hios16")
+RA_STYLE=$(cfg_get rebootanim_style "hios16")
+[ -z "$RA_STYLE" ] && RA_STYLE=$(cfg_get shutdownanim_style "hios16")
 BS=$(cfg_get boot_sound "waltz")
 [ "$BS" = "true" ] && BS=waltz
 [ "$BS" = "false" ] && BS=off
-log_pfd "bootanim_style=$BA_STYLE boot_sound=$BS market=$(getprop ro.tran.sw.market 2>/dev/null)"
+log_pfd "bootanim_style=$BA_STYLE rebootanim_style=$RA_STYLE boot_sound=$BS market=$(getprop ro.tran.sw.market 2>/dev/null)"
 if [ "$BS" = "off" ]; then
     set_play_sound 0
 else
     set_play_sound 1
 fi
 
-pick_boot_zip() {
+pick_pack_zip() {
     style="$1"
+    custom_name="$2"
     hit=""
     case "$style" in
         off) return 1 ;;
         custom)
             hit=$(first_existing \
-                "$MODDIR/tr_product/media/bootanimation_custom.zip" \
-                "$MODDIR/product/media/bootanimation_custom.zip" \
-                "$MODDIR/system/product/media/bootanimation_custom.zip" \
-                "$MODDIR/system/media/bootanimation_custom.zip")
+                "$MODDIR/tr_product/media/${custom_name}" \
+                "$MODDIR/product/media/${custom_name}" \
+                "$MODDIR/system/product/media/${custom_name}" \
+                "$MODDIR/system/media/${custom_name}")
             ;;
         *)
             hit=$(first_existing \
@@ -448,15 +459,29 @@ pick_boot_zip() {
     [ -n "$hit" ] && echo "$hit"
 }
 
+bind_media_zip() {
+    src="$1"
+    name="$2"
+    [ -f "$src" ] || return 1
+    try_bind_file "$src" "/tr_product/media/$name"
+    try_bind_file "$src" "/product/media/$name"
+    try_bind_file "$src" "/system/product/media/$name"
+    try_bind_file "$src" "/system/media/$name"
+    try_bind_file "$src" "/oem/media/$name"
+    for dest in $(find_named "$name"); do
+        bind_over_file "$src" "$dest"
+    done
+}
+
 TRP_STAGE="$MODDIR/tr_product/media"
 mkdir -p "$TRP_STAGE"
-rm -f "$TRP_STAGE/bootanimation.zip" "$TRP_STAGE/bootanimation-dark.zip"
+rm -f "$TRP_STAGE/bootanimation.zip" "$TRP_STAGE/bootanimation-dark.zip" "$TRP_STAGE/shutdownanimation.zip"
 
 SRC=""
 if [ "$BA_STYLE" = "off" ]; then
     log_pfd "bootanim: off — leave stock zip"
 else
-    SRC=$(pick_boot_zip "$BA_STYLE")
+    SRC=$(pick_pack_zip "$BA_STYLE" "bootanimation_custom.zip")
     if [ -z "$SRC" ] && [ "$BA_STYLE" = "custom" ]; then
         for dir in "$MODDIR/tr_product/media" "$MODDIR/product/media" "$MODDIR/system/product/media"; do
             for f in "$dir"/bootanimation_custom.*; do
@@ -473,6 +498,33 @@ else
         log_pfd "bootanim staged from $SRC style=$BA_STYLE"
     else
         log_pfd "bootanim: no module zip to stage (style=$BA_STYLE)"
+    fi
+fi
+
+SRC_REBOOT=""
+if [ "$RA_STYLE" = "off" ]; then
+    log_pfd "rebootanim: off — leave stock shutdown zip"
+else
+    SRC_REBOOT=$(pick_pack_zip "$RA_STYLE" "shutdownanimation_custom.zip")
+    if [ -z "$SRC_REBOOT" ]; then
+        SRC_REBOOT=$(pick_pack_zip "$RA_STYLE" "rebootanimation_custom.zip")
+    fi
+    if [ -z "$SRC_REBOOT" ] && [ "$RA_STYLE" = "custom" ]; then
+        for dir in "$MODDIR/tr_product/media" "$MODDIR/product/media" "$MODDIR/system/product/media"; do
+            for f in "$dir"/shutdownanimation_custom.* "$dir"/rebootanimation_custom.*; do
+                [ -f "$f" ] || continue
+                SRC_REBOOT="$f"
+                break
+            done
+            [ -n "$SRC_REBOOT" ] && break
+        done
+    fi
+    if [ -n "$SRC_REBOOT" ]; then
+        cp -f "$SRC_REBOOT" "$TRP_STAGE/shutdownanimation.zip"
+        chmod 644 "$TRP_STAGE/shutdownanimation.zip" 2>/dev/null
+        log_pfd "rebootanim staged from $SRC_REBOOT style=$RA_STYLE"
+    else
+        log_pfd "rebootanim: no module zip to stage (style=$RA_STYLE)"
     fi
 fi
 
@@ -571,6 +623,14 @@ if [ -f "$STAGED" ]; then
         bind_over_file "$STAGED" "$dest"
     done
     log_pfd "bootanim bind pass done"
+fi
+
+STAGED_REBOOT="$TRP_STAGE/shutdownanimation.zip"
+if [ -f "$STAGED_REBOOT" ]; then
+    bind_media_zip "$STAGED_REBOOT" shutdownanimation.zip
+    bind_media_zip "$STAGED_REBOOT" userspace-reboot.zip
+    log_pfd "rebootanim bind pass done"
+    ls -l /tr_product/media/shutdownanimation.zip >> "$PFD_LOG" 2>/dev/null
 fi
 log_pfd "live /tr_product/media (stock audio tree, zip bound):"
 ls -la /tr_product/media >> "$PFD_LOG" 2>/dev/null
