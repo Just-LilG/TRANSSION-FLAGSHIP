@@ -19,4 +19,5 @@ ro.tr_gallery.group.enhance.support=1
 ro.tr_gallery.shadow.enhance.support=1
 ro.tr_gallery.bokeh.support=1
 ro.tr_gallery.compose.support=1
-ro.tr_video.vee.support=0
+# Video Enhancement Engine — user confirmed this flag was working.
+ro.tr_video.vee.support=1

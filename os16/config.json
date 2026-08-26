@@ -12,5 +12,5 @@
   "ai_sound_rec": true,
   "ai_notes": true,
   "ai_gallery": true,
-  "ai_video": false
+  "ai_video": true
 }
