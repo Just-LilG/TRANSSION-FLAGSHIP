@@ -5,7 +5,7 @@ LOG="$MODDIR/transflagship16_service.log"
 rm -f "$LOG"
 log_p() { echo "[$(date '+%H:%M:%S')] $1" >> "$LOG"; }
 
-log_p "=== TransFlagship 16 V1.63 ==="
+log_p "=== TransFlagship 16 V1.64 ==="
 log_p "Device : $(getprop ro.product.model 2>/dev/null)"
 log_p "Brand  : $(getprop ro.product.brand 2>/dev/null)"
 log_p "Android: $(getprop ro.build.version.release 2>/dev/null)"
@@ -22,15 +22,18 @@ if [ -f "$MODDIR/apply_blur.sh" ]; then
   os16_apply_blur_props
   os16_apply_aod_props
   os16_apply_settings_vconfig
+  os16_apply_gt_apps_vconfig
   os16_apply_dynamicbar_props
   os16_clear_failed_feature_leftovers
   os16_apply_aod_settings
+  os16_apply_gt_apps_runtime
   os16_apply_dynamicbar_runtime
   os16_apply_blur_runtime
   os16_restart_surfaceflinger
   log_p "blur apply: anim=$(os16_cfg_bool anim_os16 true) on=$(os16_cfg_bool blur_os16 true) lvl=$(os16_cfg_int blur_os16_level 2) platform=$(getprop ro.tr_animation.platform_level 2>/dev/null) union=$(getprop ro.tran_display_unionrender.support 2>/dev/null) liquidglass=$(getprop ro.tr_display.liquidglass.support 2>/dev/null)"
   log_p "aod apply: on=$(os16_cfg_bool aod_os16 true) feature=$(getprop ro.tr_aod.feature.support 2>/dev/null) always_show=$(getprop tr_aod.always.show.feature.support 2>/dev/null) vconfig=$(grep always.show /tr_product/etc/vconfig/com.transsion.aod/build.prop 2>/dev/null) doze_always=$(settings get secure doze_always_on 2>/dev/null)"
   log_p "scale apply: on=$(os16_cfg_bool scale_os16 true) vconfig=$(cat /tr_product/etc/vconfig/com.android.settings/build.prop 2>/dev/null | tr '\n' ' ') prop=$(getprop tr_display.resolution.scalingup.support 2>/dev/null)"
+  log_p "gt apps: on=$(os16_cfg_bool gt_apps_os16 true) scan=$(cat /tr_product/etc/vconfig/com.transsion.scanningrecharger/build.prop 2>/dev/null | tr '\n' ' ') rec=$(cat /tr_product/etc/vconfig/com.transsion.soundrecorder/build.prop 2>/dev/null | tr '\n' ' ') gal=$(grep -E 'search|easypic|matting' /tr_product/etc/vconfig/com.gallery20/build.prop 2>/dev/null | tr '\n' ' ')"
   log_p "dynamicbar apply: on=$(os16_cfg_bool dynamicbar_os16 true) bar=$(getprop ro.tr_dynamicbar.support 2>/dev/null) translate=$(getprop ro.os_dynamicbar_ai_translation_support 2>/dev/null) plane=$(getprop ro.os_dynamic_bar_resident_plane_support 2>/dev/null) hide_land=$(getprop ro.os.tran_hide_status_bar_for_land_recent 2>/dev/null) hios=$(getprop ro.tran_hios_dynamic_bar_support 2>/dev/null)"
 else
   log_p "apply_blur.sh missing"
@@ -90,8 +93,10 @@ log_p "  home=$(cmd package resolve-activity --brief -a android.intent.action.MA
   os16_apply_blur_props
   os16_apply_aod_props
   os16_apply_settings_vconfig
+  os16_apply_gt_apps_vconfig
   os16_apply_dynamicbar_props
   os16_apply_aod_settings
+  os16_apply_gt_apps_runtime
   os16_apply_dynamicbar_runtime
     echo "[$(date '+%H:%M:%S')] blur props after settle liquidglass=$(getprop ro.tr_display.liquidglass.support 2>/dev/null) aod_always=$(getprop ro.aod_alwaysshow_support 2>/dev/null) bar=$(getprop ro.tr_dynamicbar.support 2>/dev/null) plane=$(getprop ro.os_dynamic_bar_resident_plane_support 2>/dev/null)" >> "$LOG"
   if [ -f "$MODDIR/apply_120hz.sh" ]; then

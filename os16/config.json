@@ -24,5 +24,6 @@
   "aod_os16": true,
   "dynamicbar_os16": true,
   "scale_os16": true,
+  "gt_apps_os16": true,
   "force_120hz": false
 }

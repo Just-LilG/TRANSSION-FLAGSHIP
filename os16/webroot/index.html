@@ -335,6 +335,13 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
           </div>
           <div class="setting-row">
             <div class="row-text">
+              <div class="row-title">GT app extras</div>
+              <div class="row-sub">Binds GT vconfig for Smart Scan, Gallery extras, Recorder speech, Motions, PC Connect, Zero Screen, Smart Hub. Apply + reboot.</div>
+            </div>
+            <label class="toggle"><input type="checkbox" id="feat-gtapps" checked onchange="cfg.gt_apps_os16=this.checked"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+          </div>
+          <div class="setting-row">
+            <div class="row-text">
               <div class="row-title">Dynamic bar</div>
               <div class="row-sub">Always Show Background in Settings. Recents pill fix is launcher3 vconfig (same path Flagship 15 uses). Apply + reboot.</div>
             </div>
@@ -449,7 +456,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
 <script type="module">
 const MOD='/data/adb/modules/transsion-flagship-16';
 const CONFIG_PATH=MOD+'/config.json';
-let cfg={bootanim_style:'hios16',bootanim_file:'',rebootanim_style:'hios16',rebootanim_file:'',statusbar_style:'off',statusbarcustom_file:'',ai_master:true,ai_subtitles:true,ai_call_summary:true,ai_writing:true,ai_sound_rec:true,ai_notes:true,ai_gallery:true,ai_video:true,game_master:true,game_esports_touch:true,game_esports_level:3,game_bypass_charge:true,game_gt_triggers:true,anim_os16:true,blur_os16:true,blur_os16_level:2,aod_os16:true,scale_os16:true,dynamicbar_os16:true,force_120hz:false};
+let cfg={bootanim_style:'hios16',bootanim_file:'',rebootanim_style:'hios16',rebootanim_file:'',statusbar_style:'off',statusbarcustom_file:'',ai_master:true,ai_subtitles:true,ai_call_summary:true,ai_writing:true,ai_sound_rec:true,ai_notes:true,ai_gallery:true,ai_video:true,game_master:true,game_esports_touch:true,game_esports_level:3,game_bypass_charge:true,game_gt_triggers:true,anim_os16:true,blur_os16:true,blur_os16_level:2,aod_os16:true,scale_os16:true,gt_apps_os16:true,dynamicbar_os16:true,force_120hz:false};
 let _exec=null;
 
 async function exec(cmd){
@@ -789,6 +796,7 @@ async function saveAll(){
     blur_os16_level:blurLevel(),
     aod_os16:cfg.aod_os16!==false,
     scale_os16:cfg.scale_os16!==false,
+    gt_apps_os16:cfg.gt_apps_os16!==false,
     dynamicbar_os16:cfg.dynamicbar_os16!==false,
     force_120hz:cfg.force_120hz===true
   };
@@ -884,6 +892,21 @@ async function dumpAi(){
   const scale=await g('getprop tr_display.resolution.scalingup.support');
   lines.push('tr_display.resolution.scalingup.support  '+describeAiFlag(scale));
   lines.push('scale_os16  '+String(cfg.scale_os16!==false));
+  lines.push('gt_apps_os16  '+String(cfg.gt_apps_os16!==false));
+  const scanvc=await g('cat /tr_product/etc/vconfig/com.transsion.scanningrecharger/build.prop 2>/dev/null');
+  lines.push('vconfig scan: '+(scanvc||'EMPTY'));
+  const recvc=await g('cat /tr_product/etc/vconfig/com.transsion.soundrecorder/build.prop 2>/dev/null');
+  lines.push('vconfig recorder: '+(recvc||'EMPTY'));
+  const galvc=await g('cat /tr_product/etc/vconfig/com.gallery20/build.prop 2>/dev/null');
+  lines.push('vconfig gallery20: '+(galvc||'EMPTY'));
+  const mivc=await g('cat /tr_product/etc/vconfig/com.transsion.microintelligence/build.prop 2>/dev/null');
+  lines.push('vconfig motions: '+(mivc||'EMPTY'));
+  const pcvc=await g('cat /tr_product/etc/vconfig/com.transsion.pcconnect/build.prop 2>/dev/null');
+  lines.push('vconfig pcconnect: '+(pcvc||'EMPTY'));
+  const zvc=await g('cat /tr_product/etc/vconfig/com.transsion.personalizedService/build.prop 2>/dev/null');
+  lines.push('vconfig zeroscreen: '+(zvc||'EMPTY'));
+  const spvc=await g('cat /tr_product/etc/vconfig/com.transsion.smartpanel/build.prop 2>/dev/null');
+  lines.push('vconfig smartpanel: '+(spvc||'EMPTY'));
   const lvc=await g('grep hide_status_bar /tr_product/etc/vconfig/com.transsion.launcher3/build.prop 2>/dev/null');
   lines.push('vconfig launcher hide_land  '+(lvc||'EMPTY'));
   const horiz=await g('getprop tr_aod.horizontal.display.feature.support');
@@ -1088,6 +1111,7 @@ async function loadCfg(){
   if(cfg.blur_os16_level===undefined) cfg.blur_os16_level=2;
   if(cfg.aod_os16===undefined) cfg.aod_os16=true;
   if(cfg.scale_os16===undefined) cfg.scale_os16=true;
+  if(cfg.gt_apps_os16===undefined) cfg.gt_apps_os16=true;
   if(cfg.dynamicbar_os16===undefined) cfg.dynamicbar_os16=true;
   if(cfg.force_120hz===undefined) cfg.force_120hz=false;
   if(cfg.force_refresh_hz===120||cfg.force_refresh_hz===144) cfg.force_120hz=true;
@@ -1127,6 +1151,7 @@ async function loadCfg(){
   setT('feat-blur', cfg.blur_os16!==false);
   setT('feat-aod', cfg.aod_os16!==false);
   setT('feat-scale', cfg.scale_os16!==false);
+  setT('feat-gtapps', cfg.gt_apps_os16!==false);
   setT('feat-dynamicbar', cfg.dynamicbar_os16!==false);
   setT('feat-force120hz', cfg.force_120hz===true);
   setEsportsLevel(esportsLevel());

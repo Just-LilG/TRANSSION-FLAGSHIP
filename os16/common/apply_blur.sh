@@ -280,6 +280,86 @@ os16_apply_settings_vconfig() {
   os16_rp_overwrite ro.tr_display.resolution.scalingup.support "$val"
 }
 
+os16_vconfig_pkg_keys() {
+  pkg="$1"
+  shift
+  staged=$(os16_seed_vconfig_pkg "$pkg")
+  while [ $# -ge 2 ]; do
+    os16_vconfig_upsert "$staged" "$1" "$2"
+    shift 2
+  done
+  os16_bind_vconfig_pkg "$staged" "$pkg"
+}
+
+os16_apply_gt_apps_vconfig() {
+  on=$(os16_cfg_bool gt_apps_os16 true)
+  [ "$on" = "true" ] || [ "$on" = "1" ] || return 0
+  # GT X6858 app vconfigs (Settings scale did not unhide Display). Skip dump 0s
+  # (3d photo, Camon-only motions, PC extend-screen, IoT Go).
+  os16_vconfig_pkg_keys com.gallery20 \
+    tr_gallery.custom.fliters.support 1 \
+    tr_gallery.drag.sort.support 1 \
+    tr_gallery.easypic.support 1 \
+    tr_gallery.matting.support 1 \
+    tr_gallery.photo.16grid.support 1 \
+    tr_gallery.photo.8grid.support 1 \
+    tr_gallery.photo.cover.support 1 \
+    tr_gallery.photo.feature.support 1 \
+    tr_gallery.search.support 1 \
+    tr_gallery.soft.player.support 1
+  os16_vconfig_pkg_keys com.transsion.soundrecorder \
+    tr_soundrecorder.speech.feature.support 1
+  os16_vconfig_pkg_keys com.transsion.scanningrecharger \
+    tr_smartscan.ar_measure.support true \
+    tr_smartscan.document_scan.support true \
+    tr_smartscan.medicine_verification.support true \
+    tr_smartscan.recharge.support true
+  os16_vconfig_pkg_keys com.transsion.microintelligence \
+    tr_microIntelligence.gesture_functions.feature.support 1
+  os16_vconfig_pkg_keys com.transsion.pcconnect \
+    tr_pcconnect.backup.feature.support 1 \
+    tr_pcconnect.gesture_file_transfer.feature.support 1 \
+    tr_pcconnect.network_sharing.feature.support 1 \
+    tr_pcconnect.pc_mouse_button.feature.support 1
+  os16_vconfig_pkg_keys com.transsion.personalizedService \
+    tr_zeroscreen.ai.card.support 1
+  os16_vconfig_pkg_keys com.transsion.globalsearch \
+    tr_globalsearch.easypic.support 1
+  os16_vconfig_pkg_keys com.transsion.smartpanel \
+    ro.tr_smartpanel.os_slider_panel_default_close.config 0 \
+    ro.tr_smartpanel.os_smart_hub_def_off.config 0
+  os16_vconfig_pkg_keys com.sh.smart.caller \
+    ro.tr_dialer.contact.carlcare.feature.support 1
+  os16_rp_overwrite tr_soundrecorder.speech.feature.support 1
+  os16_rp_overwrite tr_smartscan.ar_measure.support true
+  os16_rp_overwrite tr_smartscan.document_scan.support true
+  os16_rp_overwrite tr_zeroscreen.ai.card.support 1
+  os16_rp_overwrite tr_microIntelligence.gesture_functions.feature.support 1
+  os16_rp_overwrite tr_globalsearch.easypic.support 1
+  os16_rp_overwrite tr_gallery.search.support 1
+  os16_rp_overwrite tr_gallery.easypic.support 1
+  os16_rp_overwrite tr_gallery.matting.support 1
+}
+
+os16_apply_gt_apps_runtime() {
+  on=$(os16_cfg_bool gt_apps_os16 true)
+  [ "$on" = "true" ] || [ "$on" = "1" ] || return 0
+  for pkg in \
+      com.gallery20 \
+      com.transsion.gallery \
+      com.transsion.soundrecorder \
+      com.transsion.scanningrecharger \
+      com.transsion.microintelligence \
+      com.transsion.pcconnect \
+      com.transsion.personalizedService \
+      com.transsion.globalsearch \
+      com.transsion.smartpanel \
+      com.sh.smart.caller
+  do
+    am force-stop "$pkg" >/dev/null 2>&1
+  done
+}
+
 os16_apply_aod_props() {
   aod=$(os16_cfg_01 aod_os16 true)
   os16_rp_overwrite ro.tr_aod.feature.support "$aod"
@@ -405,15 +485,17 @@ os16_apply_blur_runtime() {
 if [ "${0##*/}" = "apply_blur.sh" ]; then
   mode="${1:-all}"
   case "$mode" in
-    props) os16_apply_blur_props; os16_apply_aod_props; os16_apply_settings_vconfig; os16_apply_dynamicbar_props ;;
-    runtime) os16_apply_blur_runtime; os16_apply_aod_settings; os16_apply_dynamicbar_runtime ;;
+    props) os16_apply_blur_props; os16_apply_aod_props; os16_apply_settings_vconfig; os16_apply_gt_apps_vconfig; os16_apply_dynamicbar_props ;;
+    runtime) os16_apply_blur_runtime; os16_apply_aod_settings; os16_apply_gt_apps_runtime; os16_apply_dynamicbar_runtime ;;
     *)
       os16_apply_blur_props
       os16_apply_aod_props
       os16_apply_settings_vconfig
+      os16_apply_gt_apps_vconfig
       os16_apply_dynamicbar_props
       os16_clear_failed_feature_leftovers
       os16_apply_aod_settings
+      os16_apply_gt_apps_runtime
       os16_apply_dynamicbar_runtime
       os16_apply_blur_runtime
       os16_restart_surfaceflinger
