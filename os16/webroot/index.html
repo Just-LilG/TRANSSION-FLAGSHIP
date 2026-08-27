@@ -851,7 +851,7 @@ async function saveAll(){
   if(!props){ toast('Saved config, but AI props failed to write'); return; }
   await applyBlurRuntime();
   await apply120HzRuntime();
-  toast(cfg.force_120hz ? 'Saved — reboot so Mountify overlays 144Hz' : 'Saved');
+  toast('Saved — reboot for Magisk / Mountify changes');
 }
 async function applyBlurRuntime(){
   await exec('sh "'+MOD+'/apply_blur.sh" all >/dev/null 2>&1; echo OK');

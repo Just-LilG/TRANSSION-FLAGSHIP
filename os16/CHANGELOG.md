@@ -1,5 +1,8 @@
 # Transsion Flagship 16
 
+## v1.72
+- **Apply & Save must not soft-reboot.** V1.71 stopped killing SurfaceFlinger at boot, but WebUI Apply still force-stopped the home launcher (and AOD/Settings). That is the flicker when you tap Apply. Apply now only writes config, Magisk props, and settings. Reboot yourself when you want Mountify / Magisk props.
+
 ## v1.71
 - **No more post-boot soft reboot.** Late_start was killing SurfaceFlinger (`ctl.restart` / `stop` / `killall`) and force-stopping the home launcher plus AOD/Settings after the UI was already up. That is the flicker/soft reboot. Boot now only `resetprop`s and writes settings. Cute Pet keys stay for other Trans OS 16 devices.
 
