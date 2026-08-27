@@ -1,5 +1,8 @@
 # Transsion Flagship 16
 
+## v1.64
+- **GT app vconfigs in one pass.** Settings resolution scale-up did not unhide Display. This build binds the remaining GT X6858 **app** vconfigs the same way AOD worked: Smart Scan, Gallery extras (search / EasyPic / matting / grids — not Art/Studio), Recorder speech, Motions gestures, PC Connect, Zero Screen AI cards, Smart Hub, global-search EasyPic. Skips dump 0s (3D photo, Camon-only, PC extend-screen). Apply + reboot, then check those apps. Dump the new vconfig files.
+
 ## v1.63
 - **Resolution scale-up (first Settings vconfig try).** AOD worked because we bound `com.transsion.aod` vconfig. Next is the same path for Settings: GT dump `/tr_product/etc/vconfig/com.android.settings/build.prop` is `tr_display.resolution.scalingup.support=true`. Apply + reboot, then Settings → Display for a resolution / scale-up row. Dump that vconfig file.
 

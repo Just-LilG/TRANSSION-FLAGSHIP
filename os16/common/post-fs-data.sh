@@ -332,6 +332,7 @@ if [ -f "$MODDIR/apply_blur.sh" ]; then
   os16_apply_blur_props
   os16_apply_aod_props
   os16_apply_settings_vconfig
+  os16_apply_gt_apps_vconfig
   os16_apply_dynamicbar_props
   log_pfd "blur props resetprop liquidglass=$(getprop ro.tr_display.liquidglass.support 2>/dev/null) sf_disable=$(getprop persist.sys.sf.disable_blurs 2>/dev/null)"
   log_pfd "settings vconfig=$(cat /tr_product/etc/vconfig/com.android.settings/build.prop 2>/dev/null | tr '\n' ' ')"
