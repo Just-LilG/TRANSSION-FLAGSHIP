@@ -1,5 +1,8 @@
 # Transsion Flagship 16
 
+## v1.51
+- **Listed app refresh is 120, not 90.** Magellan `auto="90"` is what Customize App Refresh shows until you pick another rate. This build sets `auto="120"` on those apps (games stay `auto="144"`) and still keeps 144 in the picker. Force 120Hz on → Apply → reboot.
+
 ## v1.50
 - **Control center / keyboard stay high refresh.** The TranOS XML that unlocked 144 had `input_method_switch` and `navigation_switch` off, so Magellan dropped those overlays to 60Hz. This build turns those switches on and gives SystemUI, launchers, and Gboard `max="144"`. Force 120Hz on → Apply → reboot, then check the on-screen Hz counter on home, QS, and keyboard.
 - **Developer options game FPS is 120Hz.** Same Flagship 15 keys: `ro.surface_flinger.game_default_frame_rate_override=120` and `debug.graphics.game_default_frame_rate.disabled=true`. The row should read “Disable limiting the maximum frame rate for games at **120 Hz**” like other Trans OS. Applies even if Force 120Hz is off; reboot.
