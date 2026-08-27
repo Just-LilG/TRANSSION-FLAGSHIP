@@ -5,7 +5,7 @@ LOG="$MODDIR/transflagship16_service.log"
 rm -f "$LOG"
 log_p() { echo "[$(date '+%H:%M:%S')] $1" >> "$LOG"; }
 
-log_p "=== TransFlagship 16 V1.30 ==="
+log_p "=== TransFlagship 16 V1.31 ==="
 log_p "Device : $(getprop ro.product.model 2>/dev/null)"
 log_p "Brand  : $(getprop ro.product.brand 2>/dev/null)"
 log_p "Android: $(getprop ro.build.version.release 2>/dev/null)"
@@ -34,4 +34,19 @@ log_p "  bypass=$(getprop ro.tr_game.bypass_charging.support 2>/dev/null)"
 log_p "  shoulder=$(getprop ro.tr_game.shoulder_key.support 2>/dev/null)"
 log_p "  pic_trig=$(getprop ro.tr_game.ai_picture_triggers.support 2>/dev/null)"
 log_p "  shoulderbtn=$(getprop ro.tr_smartbutton.shoulderbutton20.feature.support 2>/dev/null)"
+log_p "  anim_level=$(getprop ro.tr_animation.platform_level 2>/dev/null)"
+log_p "  launch_model=$(getprop ro.tr_perf.launch_start_exit.model 2>/dev/null)"
+log_p "  recent_model=$(getprop ro.tr_perf.recent_animation.model 2>/dev/null)"
+log_p "  async_anim=$(getprop ro.transsion_async_animation_support 2>/dev/null)"
+log_p "  liquidglass=$(getprop ro.tr_display.liquidglass.support 2>/dev/null)"
+log_p "  sf_blur=$(getprop ro.surface_flinger.supports_background_blur 2>/dev/null)"
+log_p "  recent_blur=$(getprop ro.os.recent.blur 2>/dev/null)"
+log_p "  gaussian=$(getprop ro.transsion_launcher_gaussian_blur_support 2>/dev/null)"
+# Launcher gaussian enable is a Settings key, not a Magisk prop.
+blur_cfg=1
+if [ -f "$MODDIR/config.json" ] && grep -q '"blur_os16"[[:space:]]*:[[:space:]]*false' "$MODDIR/config.json"; then
+    blur_cfg=0
+fi
+settings put system transsion_launcher_gaussian_blur_enable "$blur_cfg" 2>/dev/null
+log_p "  blur_settings_enable=$blur_cfg"
 log_p "=== service complete ==="
