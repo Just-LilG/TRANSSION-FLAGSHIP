@@ -72,26 +72,28 @@ write_os16_ai_prop() {
   fi
   anim=$(json_bool "$cfg" anim_os16 true)
   blur=$(json_bool "$cfg" blur_os16 true)
-  if [ "$anim" = "true" ]; then
-    alvl=3
-    a01=1
-  else
-    alvl=0
-    a01=0
-  fi
+  blvl=0
   if [ "$blur" = "true" ]; then
     blvl=$(json_int "$cfg" blur_os16_level 2)
     [ "$blvl" -ge 1 ] 2>/dev/null || blvl=2
     [ "$blvl" -le 3 ] 2>/dev/null || blvl=2
-    if [ "$blvl" -ge 2 ]; then
+  fi
+  # Flagship glass needs Parallel on and blur level 2/3. platform_level 3
+  # is what kept system blur on when only the blur toggle changed.
+  if [ "$anim" = "true" ]; then
+    a01=1
+    if [ "$blur" = "true" ] && [ "$blvl" -ge 2 ]; then
+      alvl=3
       b01=1
       sfdis=0
     else
+      alvl=2
       b01=0
       sfdis=1
     fi
   else
-    blvl=0
+    a01=0
+    alvl=0
     b01=0
     sfdis=1
   fi
@@ -143,7 +145,7 @@ ro.transsion_unlock_mode_support=$alvl
 ro.transsion_launch_start_exit_support=$alvl
 ro.transsion_power_keyguard_animation_support=$alvl
 ro.transsion.recent_animation.model=$alvl
-ro.tran_display_unionrender.support=$a01
+ro.tran_display_unionrender.support=$b01
 ro.tr_display.liquidglass.support=$b01
 ro.surface_flinger.supports_background_blur=$b01
 ro.os.recent.blur=$b01
@@ -163,7 +165,7 @@ print_modname() {
   ui_print " "
   ui_print "  ╔══════════════════════════════════════════╗"
   ui_print "  ║    TRANSSION FLAGSHIP 16                 ║"
-  ui_print "  ║    XOS · HiOS · iTel OS 16  ·  V1.36     ║"
+  ui_print "  ║    XOS · HiOS · iTel OS 16  ·  V1.37     ║"
   ui_print "  ╚══════════════════════════════════════════╝"
   ui_print " "
 }
@@ -347,7 +349,7 @@ set_permissions() {
   done
   ui_print " "
   ui_div
-  ui_print "  ✨  FLAGSHIP 16  ·  V1.36"
+  ui_print "  ✨  FLAGSHIP 16  ·  V1.37"
   ui_info "OS     : $OS_TYPE $OS_VER"
   ui_info "Feature: boot + reboot + overlay + AI + gaming + anim/blur"
   ui_div

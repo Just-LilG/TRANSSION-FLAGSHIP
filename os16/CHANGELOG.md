@@ -1,5 +1,8 @@
 # Transsion Flagship 16
 
+## v1.37
+- **System glass is Parallel animations at platform 3, not the blur picker.** Device test: 1/2/3 only changed the dock while Parallel stayed on. Turning Parallel off is what made notifications/QS solid. Flagship glass now requires **Parallel on and blur level 2 or 3** (`platform_level=3`, unionrender, liquid glass). Parallel on + blur off or **level 1** uses platform **2** (motion without flagship glass). Parallel off keeps platform 0. Removed the level-1 lock-clock solid scrim (`accessibility_reduce_transparency` / blur radius while compositor off). Apply + reboot. Check shade with Parallel on and level 1 vs 3.
+
 ## v1.36
 - **System blur is SurfaceFlinger, not the dock.** Off and level 1 only dimmed launcher gaussian — notifications/QS stayed flagship glass because SystemUI restart does not recreate the compositor. This build sets `persist.sys.sf.disable_blurs` / `supports_background_blur` then **restarts SurfaceFlinger**. **Level 1** = Smart-series solid shade. **Level 2/3** = flagship glass (dock gaussian 2 vs 3). **Off** = Smart shade and no dock blur. Apply flickers the screen; reboot. Pull down notifications to check.
 
