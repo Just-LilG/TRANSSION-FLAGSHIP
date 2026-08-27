@@ -20,5 +20,6 @@
   "game_gt_triggers": true,
   "anim_os16": true,
   "blur_os16": true,
-  "blur_os16_level": 2
+  "blur_os16_level": 2,
+  "force_120hz": false
 }

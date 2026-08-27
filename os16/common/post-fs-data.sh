@@ -334,3 +334,21 @@ if [ -f "$MODDIR/apply_blur.sh" ]; then
 else
   log_pfd "apply_blur.sh missing"
 fi
+
+# Force 120Hz: bind bypass APM json over a live file only.
+HZ_ON=$(cfg_get force_120hz "false")
+log_pfd "force_120hz=$HZ_ON"
+for name in refresh_rate_config.json project_refresh_rate_config.json; do
+  src="$MODDIR/apm_120hz_bypass/$name"
+  for dest in \
+      /product/apm/config/$name \
+      /system/product/apm/config/$name \
+      /tr_product/etc/apm/config/$name \
+      /tr_product/apm/config/$name
+  do
+    ns_umount "$dest"
+    if [ "$HZ_ON" = "true" ] || [ "$HZ_ON" = "1" ]; then
+      bind_over_file "$src" "$dest"
+    fi
+  done
+done

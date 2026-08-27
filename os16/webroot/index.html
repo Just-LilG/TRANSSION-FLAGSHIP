@@ -143,7 +143,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
         </div>
         <div class="hero-card">
           <div class="hero-title">Transsion Flagship 16</div>
-          <div class="hero-sub" id="module-version-sub">V1.38 · OS 16</div>
+          <div class="hero-sub" id="module-version-sub">V1.39 · OS 16</div>
         </div>
         <div class="h8"></div>
         <div class="warn-card" id="old-mod-warn">Flagship 15 is still installed. This installer disables it. Remove it from Magisk/KSU so the two modules do not fight.</div>
@@ -313,6 +313,16 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
             <div class="segmented-opt" data-val="3" onclick="setBlurLevel(3)">3</div>
           </div>
         </div>
+        <div class="section-label">Display</div>
+        <div class="glass-card">
+          <div class="setting-row">
+            <div class="row-text">
+              <div class="row-title">Force 120Hz</div>
+              <div class="row-sub">Raises the refresh ceiling. Off by default. Some apps may still sit below 120. Apply + reboot.</div>
+            </div>
+            <label class="toggle"><input type="checkbox" id="feat-force120hz" onchange="cfg.force_120hz=this.checked"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+          </div>
+        </div>
         <div class="section-label">Status bar</div>
         <div class="glass-card">
           <div class="setting-row">
@@ -414,7 +424,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
 <script type="module">
 const MOD='/data/adb/modules/transsion-flagship-16';
 const CONFIG_PATH=MOD+'/config.json';
-let cfg={bootanim_style:'hios16',bootanim_file:'',rebootanim_style:'hios16',rebootanim_file:'',statusbar_style:'off',statusbarcustom_file:'',ai_master:true,ai_subtitles:true,ai_call_summary:true,ai_writing:true,ai_sound_rec:true,ai_notes:true,ai_gallery:true,ai_video:true,game_master:true,game_esports_touch:true,game_esports_level:3,game_bypass_charge:true,game_gt_triggers:true,anim_os16:true,blur_os16:true,blur_os16_level:2};
+let cfg={bootanim_style:'hios16',bootanim_file:'',rebootanim_style:'hios16',rebootanim_file:'',statusbar_style:'off',statusbarcustom_file:'',ai_master:true,ai_subtitles:true,ai_call_summary:true,ai_writing:true,ai_sound_rec:true,ai_notes:true,ai_gallery:true,ai_video:true,game_master:true,game_esports_touch:true,game_esports_level:3,game_bypass_charge:true,game_gt_triggers:true,anim_os16:true,blur_os16:true,blur_os16_level:2,force_120hz:false};
 let _exec=null;
 
 async function exec(cmd){
@@ -711,7 +721,8 @@ async function saveAll(){
     game_gt_triggers:cfg.game_gt_triggers!==false,
     anim_os16:cfg.anim_os16!==false,
     blur_os16:cfg.blur_os16!==false,
-    blur_os16_level:blurLevel()
+    blur_os16_level:blurLevel(),
+    force_120hz:cfg.force_120hz===true
   };
   const json=JSON.stringify(slim,null,2).replace(/'/g,"'\\''");
   const r=await exec("echo '"+json+"' > \""+CONFIG_PATH+"\" && echo OK");
@@ -719,10 +730,14 @@ async function saveAll(){
   const props=await writeAiSystemProp();
   if(!props){ toast('Saved config, but AI props failed to write'); return; }
   await applyBlurRuntime();
-  toast('Saved — reboot so animation platform and glass apply');
+  await apply120HzRuntime();
+  toast('Saved — reboot so 120Hz and animation/glass apply');
 }
 async function applyBlurRuntime(){
   await exec('sh "'+MOD+'/apply_blur.sh" all >/dev/null 2>&1; echo OK');
+}
+async function apply120HzRuntime(){
+  await exec('sh "'+MOD+'/apply_120hz.sh" >/dev/null 2>&1; echo OK');
 }
 async function dumpAi(){
   toast('Reading flags…', 8000);
@@ -769,6 +784,18 @@ async function dumpAi(){
   lines.push('disable_window_blurs  '+(dw||'EMPTY'));
   lines.push('accessibility_reduce_transparency  '+(rt||'EMPTY'));
   lines.push('wm disable-blur  '+(wm||'EMPTY'));
+  lines.push('');
+  lines.push('=== refresh rate ===');
+  const trm=await g('settings get system tran_refresh_mode');
+  const peak=await g('settings get system peak_refresh_rate');
+  const minr=await g('settings get system min_refresh_rate');
+  const lastt=await g('settings get system last_tran_refresh_mode_in_refresh_setting');
+  lines.push('tran_refresh_mode  '+(trm||'EMPTY'));
+  lines.push('peak_refresh_rate  '+(peak||'EMPTY'));
+  lines.push('min_refresh_rate  '+(minr||'EMPTY'));
+  lines.push('last_tran_refresh_mode_in_refresh_setting  '+(lastt||'EMPTY'));
+  const apm=await g('ls -l /product/apm/config/refresh_rate_config.json /system/product/apm/config/refresh_rate_config.json /tr_product/etc/apm/config/refresh_rate_config.json 2>/dev/null');
+  lines.push(apm||'no live APM refresh_rate_config.json');
   lines.push('');
   lines.push('=== other live AI-like keys (first 80) ===');
   const live=await g("getprop | grep -iE 'ai_|aiphone|subtitle|soundrecorder|note_ai|aicore|aipower|ask_ai|tr_gallery|tr_video.vee|studio.lite|tr_game|os_game|esports|bypass_charg|shoulder|smartbutton|tr_animation|tr_perf|liquidglass|dynamicbar|dreamanimation|anim_arc|unionrender|async_anim|gaussian|dynamicblur|recent.blur|background_blur|xos16_blur|disable_blurs|disableBlur|disable_blur' | head -80");
@@ -883,7 +910,7 @@ async function handleStatusbar(input){
 }
 async function loadDevice(){
   const prop=await g('cat "'+MOD+'/module.prop" 2>/dev/null');
-  const ver=(prop.match(/^version=(.+)$/m)||[])[1]||'V1.38';
+  const ver=(prop.match(/^version=(.+)$/m)||[])[1]||'V1.39';
   n('module-version-sub', ver+' · OS 16');
   let type=await g('getprop ro.tran.os.type');
   let verOs=await g('getprop ro.transsion.os.version');
@@ -933,6 +960,7 @@ async function loadCfg(){
   if(cfg.anim_os16===undefined) cfg.anim_os16=true;
   if(cfg.blur_os16===undefined) cfg.blur_os16=true;
   if(cfg.blur_os16_level===undefined) cfg.blur_os16_level=2;
+  if(cfg.force_120hz===undefined) cfg.force_120hz=false;
   setStyle(cfg.bootanim_style||'hios16');
   if(!cfg.rebootanim_style) cfg.rebootanim_style=cfg.shutdownanim_style||'hios16';
   setRebootStyle(cfg.rebootanim_style||'hios16');
@@ -964,6 +992,7 @@ async function loadCfg(){
   setT('feat-game-triggers', cfg.game_gt_triggers!==false);
   setT('feat-anim', cfg.anim_os16!==false);
   setT('feat-blur', cfg.blur_os16!==false);
+  setT('feat-force120hz', cfg.force_120hz===true);
   setEsportsLevel(esportsLevel());
   setBlurLevel(blurLevel());
   syncAiChildren();

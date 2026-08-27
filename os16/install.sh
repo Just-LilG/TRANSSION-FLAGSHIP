@@ -162,7 +162,7 @@ print_modname() {
   ui_print " "
   ui_print "  ╔══════════════════════════════════════════╗"
   ui_print "  ║    TRANSSION FLAGSHIP 16                 ║"
-  ui_print "  ║    XOS · HiOS · iTel OS 16  ·  V1.38     ║"
+  ui_print "  ║    XOS · HiOS · iTel OS 16  ·  V1.39     ║"
   ui_print "  ╚══════════════════════════════════════════╝"
   ui_print " "
 }
@@ -263,6 +263,8 @@ on_install() {
     unzip -o "$ZIPFILE" 'CHANGELOG.md' -d "$MODPATH" >&2
     unzip -oj "$ZIPFILE" 'common/system.prop' -d "$MODPATH" >&2
     unzip -oj "$ZIPFILE" 'common/apply_blur.sh' -d "$MODPATH" >&2
+    unzip -oj "$ZIPFILE" 'common/apply_120hz.sh' -d "$MODPATH" >&2
+    unzip -o "$ZIPFILE" 'apm_120hz_bypass/*' -d "$MODPATH" >&2
     unzip -o "$ZIPFILE" 'tr_product/*' -d "$MODPATH" >&2
   else
     ui_info "Extracting module files from zip"
@@ -273,6 +275,8 @@ on_install() {
     unzip -o "$ZIPFILE" 'CHANGELOG.md' -d "$MODPATH" >&2
     unzip -oj "$ZIPFILE" 'common/system.prop' -d "$MODPATH" >&2
     unzip -oj "$ZIPFILE" 'common/apply_blur.sh' -d "$MODPATH" >&2
+    unzip -oj "$ZIPFILE" 'common/apply_120hz.sh' -d "$MODPATH" >&2
+    unzip -o "$ZIPFILE" 'apm_120hz_bypass/*' -d "$MODPATH" >&2
   fi
 
   # Drop failed boot-sound / charging packs left by V1.02–V1.12.
@@ -333,7 +337,7 @@ on_install() {
   ui_ok "Boot animation"
   ui_ok "Reboot animation"
   ui_ok "Status bar: upload your own overlay, or leave stock"
-  ui_ok "OS 16 AI + Gaming + Animations/Blur — Features tab, Apply, then reboot"
+  ui_ok "OS 16 AI + Gaming + Animations/Blur + Force 120Hz — Features tab, Apply, then reboot"
 }
 
 set_permissions() {
@@ -341,12 +345,12 @@ set_permissions() {
   # WebUI toggles survive an upgrade.
   write_os16_ai_prop "$MODPATH/config.json" "$MODPATH/system.prop"
   set_perm_recursive "$MODPATH" 0 0 0755 0644
-  for sh in "$MODPATH/post-fs-data.sh" "$MODPATH/service.sh" "$MODPATH/uninstall.sh" "$MODPATH/apply_blur.sh"; do
+  for sh in "$MODPATH/post-fs-data.sh" "$MODPATH/service.sh" "$MODPATH/uninstall.sh" "$MODPATH/apply_blur.sh" "$MODPATH/apply_120hz.sh"; do
     [ -f "$sh" ] && set_perm "$sh" 0 0 0755
   done
   ui_print " "
   ui_div
-  ui_print "  ✨  FLAGSHIP 16  ·  V1.38"
+  ui_print "  ✨  FLAGSHIP 16  ·  V1.39"
   ui_info "OS     : $OS_TYPE $OS_VER"
   ui_info "Feature: boot + reboot + overlay + AI + gaming + anim/blur"
   ui_div
