@@ -1,5 +1,8 @@
 # Transsion Flagship 16
 
+## v1.40
+- **Force 120Hz = default 120 for every app.** V1.39 copied Flagship 15’s **partial** APM whitelist, so Chrome / Play / Gallery and anything not listed could stay capped. That Flagship 15 list was never confirmed on Trans OS 15 either. This build, after `pm` is up (late_start and WebUI Apply), writes **every installed package** (system + user) into `auto_refresh_rate_whitelist`, `slide_in_higher_setting_mode_120hz`, and `high_refresh_rate_gameList_in_120hz_mode`, and clears 60/90/120 limit lists and the 45Hz video lists. Still a per-file bind only (not bind-dir `/tr_product`). Settings go to system **and** global, plus `persist.sys.peak_refresh_rate` / `min_refresh_rate`. Off by default; off does not force 60Hz. Apply + reboot. Dump flags — if `min_refresh_rate` reads back 60, the panel still clamped it. Check Settings, Chrome, Play Store, Gallery, SystemUI.
+
 ## v1.39
 - **Force 120Hz (first try).** Same Transsion settings as Flagship 15 on this X6886: `tran_refresh_mode` / recovery keys, `peak_refresh_rate` / `min_refresh_rate`. Off by default (battery). Off does not force 60Hz. If a live APM `refresh_rate_config.json` exists, a per-file bind applies the 120Hz bypass (not a bind-dir of `/tr_product`). Features tab, Apply, reboot. Some apps may still sit below 120. Dump flags for the refresh keys.
 
