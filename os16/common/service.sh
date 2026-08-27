@@ -5,7 +5,7 @@ LOG="$MODDIR/transflagship16_service.log"
 rm -f "$LOG"
 log_p() { echo "[$(date '+%H:%M:%S')] $1" >> "$LOG"; }
 
-log_p "=== TransFlagship 16 V1.53 ==="
+log_p "=== TransFlagship 16 V1.54 ==="
 log_p "Device : $(getprop ro.product.model 2>/dev/null)"
 log_p "Brand  : $(getprop ro.product.brand 2>/dev/null)"
 log_p "Android: $(getprop ro.build.version.release 2>/dev/null)"
@@ -27,7 +27,7 @@ if [ -f "$MODDIR/apply_blur.sh" ]; then
   os16_restart_surfaceflinger
   log_p "blur apply: anim=$(os16_cfg_bool anim_os16 true) on=$(os16_cfg_bool blur_os16 true) lvl=$(os16_cfg_int blur_os16_level 2) platform=$(getprop ro.tr_animation.platform_level 2>/dev/null) union=$(getprop ro.tran_display_unionrender.support 2>/dev/null) liquidglass=$(getprop ro.tr_display.liquidglass.support 2>/dev/null)"
   log_p "social apply: master=$(os16_cfg_bool social_master true) turbo=$(getprop ro.tr_social.turbo_mode.support 2>/dev/null) record=$(getprop ro.tr_social.record.support 2>/dev/null) translator=$(getprop ro.tr_social.call_translator.support 2>/dev/null) makeup=$(getprop ro.tr_socialturbo.makeup.support 2>/dev/null)"
-  log_p "display apply: hdr=$(getprop ro.tr_display.sdr2hdr.support 2>/dev/null) xdr=$(getprop ro.tr_light.xdr.support 2>/dev/null) colormode=$(getprop ro.tr_display.colormode.feature.support 2>/dev/null) dc=$(settings get system tran_dc_dimming_enable 2>/dev/null) color=$(settings get system tran_display_color_enhance 2>/dev/null) reading=$(settings get system tran_reading_mode_enable 2>/dev/null)"
+  log_p "display apply: hdr=$(getprop ro.tr_display.sdr2hdr.support 2>/dev/null) xdr=$(getprop ro.tr_light.xdr.support 2>/dev/null) colormode=$(getprop ro.tr_display.colormode.feature.support 2>/dev/null) tran_hdr=$(getprop ro.tran.display_hdr_support 2>/dev/null) tran_dc=$(getprop ro.tran.display_dc_dimming_support 2>/dev/null) dc=$(settings get system tran_dc_dimming_enable 2>/dev/null) color=$(settings get system tran_display_color_enhance 2>/dev/null) reading=$(settings get system tran_reading_mode_enable 2>/dev/null)"
 else
   log_p "apply_blur.sh missing"
 fi
