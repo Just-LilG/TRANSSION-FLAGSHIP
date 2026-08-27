@@ -331,10 +331,10 @@ if [ -f "$MODDIR/apply_blur.sh" ]; then
   . "$MODDIR/apply_blur.sh"
   os16_apply_blur_props
   os16_apply_aod_props
-  os16_apply_supervol_props
+  os16_apply_videosr_props
   os16_apply_dynamicbar_props
   log_pfd "blur props resetprop liquidglass=$(getprop ro.tr_display.liquidglass.support 2>/dev/null) sf_disable=$(getprop persist.sys.sf.disable_blurs 2>/dev/null)"
-  log_pfd "aod vconfig=$(cat /tr_product/etc/vconfig/com.transsion.aod/build.prop 2>/dev/null | tr '\n' ' ') supervol=$(getprop ro.tr_audio.supervol.feature.support 2>/dev/null)"
+  log_pfd "aod vconfig=$(cat /tr_product/etc/vconfig/com.transsion.aod/build.prop 2>/dev/null | tr '\n' ' ') videosr=$(getprop persist.tr_video.ai_super_resolution.support 2>/dev/null)"
 else
   log_pfd "apply_blur.sh missing"
 fi
