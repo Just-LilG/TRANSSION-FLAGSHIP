@@ -190,12 +190,24 @@ os16_apply_aod_settings() {
 
 os16_apply_dynamicbar_props() {
   bar=$(os16_cfg_01 dynamicbar_os16 true)
-  # V1.57: ro.tr_dynamicbar.support already 1 in stock tr_product. Flagship 15
-  # extras that unhid extra Dynamic bar tools on OS 15.
   os16_rp_overwrite ro.tr_dynamicbar.support "$bar"
   os16_rp_overwrite ro.os_dynamicbar_ai_translation_support "$bar"
-  os16_rp_overwrite ro.os_dynamic_bar_resident_plane_support "$bar"
   os16_rp_overwrite ro.tran_hios_dynamic_bar_support "$bar"
+  # V1.58 forced resident_plane=1. That is "Always Show Background" — the empty
+  # black pill stays even when the Settings toggle is off. Keep it 0.
+  os16_rp_overwrite ro.os_dynamic_bar_resident_plane_support 0
+}
+
+os16_apply_dynamicbar_runtime() {
+  os16_settings_put system os_dynamic_bar_resident_plane 0
+  os16_settings_put global os_dynamic_bar_resident_plane 0
+  os16_settings_put secure os_dynamic_bar_resident_plane 0
+  os16_settings_put system island_always_show_background 0
+  os16_settings_put global island_always_show_background 0
+  os16_settings_put system tran_dynamic_bar_always_show 0
+  os16_settings_put global tran_dynamic_bar_always_show 0
+  am force-stop com.transsion.dynamicbar >/dev/null 2>&1
+  os16_restart_systemui
 }
 
 os16_clear_failed_feature_leftovers() {
@@ -269,13 +281,14 @@ if [ "${0##*/}" = "apply_blur.sh" ]; then
   mode="${1:-all}"
   case "$mode" in
     props) os16_apply_blur_props; os16_apply_aod_props; os16_apply_dynamicbar_props ;;
-    runtime) os16_apply_blur_runtime; os16_apply_aod_settings; os16_restart_systemui ;;
+    runtime) os16_apply_blur_runtime; os16_apply_aod_settings; os16_apply_dynamicbar_runtime ;;
     *)
       os16_apply_blur_props
       os16_apply_aod_props
       os16_apply_dynamicbar_props
       os16_clear_failed_feature_leftovers
       os16_apply_aod_settings
+      os16_apply_dynamicbar_runtime
       os16_apply_blur_runtime
       os16_restart_surfaceflinger
       ;;

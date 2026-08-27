@@ -1,5 +1,8 @@
 # Transsion Flagship 16
 
+## v1.59
+- **Dynamic bar empty pill.** V1.58 unhid Dynamic Bar Settings, but forced `ro.os_dynamic_bar_resident_plane_support=1`. That is Always Show Background — the black capsule stayed even with the Settings toggle off. This build sets resident_plane to **0** and restarts SystemUI. AOD is unchanged (still no Lock screen row after two tries). Apply + reboot, then check the status bar with Always Show Background off.
+
 ## v1.58
 - **AOD + Dynamic bar (second try).** V1.57 flags all stuck, but stock already had `ro.tr_aod.feature.support=1` and `ro.tr_dynamicbar.support=1`. Only half-screen AOD was stock 0→1, and Settings still hid both. This same X6886 unhid AOD on OS 15 with `ro.aod_alwaysshow_support` — that row was EMPTY on 16. This build writes that key plus `ro.tran_aod_v3_support`, product `tr_aod.horizontal.display`, AOSP `doze_always_on`, and Flagship 15 Dynamic bar extras (`os_dynamicbar_ai_translation`, resident plane, HiOS). Apply + reboot, then Lock screen / AOD and the pill. Dump — if `ro.aod_alwaysshow_support` is still EMPTY, this phone does not have that gate.
 

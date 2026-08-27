@@ -81,7 +81,7 @@ ro.tran_doze_brightness_support=1
 # Dynamic bar — OS 16 key plus Flagship 15 extras (stock tr_dynamicbar already 1).
 ro.tr_dynamicbar.support=1
 ro.os_dynamicbar_ai_translation_support=1
-ro.os_dynamic_bar_resident_plane_support=1
+ro.os_dynamic_bar_resident_plane_support=0
 ro.tran_hios_dynamic_bar_support=1
 ro.surface_flinger.game_default_frame_rate_override=120
 debug.graphics.game_default_frame_rate.disabled=true

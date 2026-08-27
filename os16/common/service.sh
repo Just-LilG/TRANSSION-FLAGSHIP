@@ -5,7 +5,7 @@ LOG="$MODDIR/transflagship16_service.log"
 rm -f "$LOG"
 log_p() { echo "[$(date '+%H:%M:%S')] $1" >> "$LOG"; }
 
-log_p "=== TransFlagship 16 V1.58 ==="
+log_p "=== TransFlagship 16 V1.59 ==="
 log_p "Device : $(getprop ro.product.model 2>/dev/null)"
 log_p "Brand  : $(getprop ro.product.brand 2>/dev/null)"
 log_p "Android: $(getprop ro.build.version.release 2>/dev/null)"
@@ -24,6 +24,7 @@ if [ -f "$MODDIR/apply_blur.sh" ]; then
   os16_apply_dynamicbar_props
   os16_clear_failed_feature_leftovers
   os16_apply_aod_settings
+  os16_apply_dynamicbar_runtime
   os16_apply_blur_runtime
   os16_restart_surfaceflinger
   log_p "blur apply: anim=$(os16_cfg_bool anim_os16 true) on=$(os16_cfg_bool blur_os16 true) lvl=$(os16_cfg_int blur_os16_level 2) platform=$(getprop ro.tr_animation.platform_level 2>/dev/null) union=$(getprop ro.tran_display_unionrender.support 2>/dev/null) liquidglass=$(getprop ro.tr_display.liquidglass.support 2>/dev/null)"
@@ -88,7 +89,8 @@ log_p "  home=$(cmd package resolve-activity --brief -a android.intent.action.MA
   os16_apply_aod_props
   os16_apply_dynamicbar_props
   os16_apply_aod_settings
-    echo "[$(date '+%H:%M:%S')] blur props after settle liquidglass=$(getprop ro.tr_display.liquidglass.support 2>/dev/null) aod_always=$(getprop ro.aod_alwaysshow_support 2>/dev/null) bar=$(getprop ro.tr_dynamicbar.support 2>/dev/null) translate=$(getprop ro.os_dynamicbar_ai_translation_support 2>/dev/null)" >> "$LOG"
+  os16_apply_dynamicbar_runtime
+    echo "[$(date '+%H:%M:%S')] blur props after settle liquidglass=$(getprop ro.tr_display.liquidglass.support 2>/dev/null) aod_always=$(getprop ro.aod_alwaysshow_support 2>/dev/null) bar=$(getprop ro.tr_dynamicbar.support 2>/dev/null) plane=$(getprop ro.os_dynamic_bar_resident_plane_support 2>/dev/null)" >> "$LOG"
   if [ -f "$MODDIR/apply_120hz.sh" ]; then
     . "$MODDIR/apply_120hz.sh"
     os16_apply_game_fps_props
