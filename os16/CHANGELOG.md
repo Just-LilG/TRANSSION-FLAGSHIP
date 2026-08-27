@@ -1,5 +1,8 @@
 # Transsion Flagship 16
 
+## v1.44
+- **Force 120Hz goes through Mountify, like TranOS 16 custom refresh.zip.** That Telegram module is a 15.6KB Magellan XML: more apps on the 60/90/120/144 list, 120Hz multi-window/launcher, **flash with Mountify**. V1.43 Magisk-bound `/tr_product/etc/vconfig/magellan/refresh_rate_config.xml`, but Mountify remounts `/tr_product` and the bind loses. This build copies the generated XML into `/mnt/vendor/mountify/tr_product/etc/vconfig/magellan/` (per-file, not bind-dir), sets `multi_window_refresh_rate` to 120, and still fills every installed package with `auto="120" max="144"`. Disable the separate TranOS 16 custom refresh module so the two XMLs do not fight. Apply + reboot.
+
 ## v1.43
 - **Force 120Hz targets XOS 16 Magellan, not the old APM JSON.** V1.42 overlaid `/product/apm/config` like XOS 15. This phone’s Customize App Refresh does not use that file: “Apps Supporting 144 Hz” is Magellan `max="144"` in `/tr_product/etc/vconfig/magellan/refresh_rate_config.xml` (Settings / Phone / Messages). Other apps have no `max="144"`, so the picker stops at 120 and the list stays 90. This build per-file binds that XML (not bind-dir `/tr_product`), writes **every installed package** as `auto="120" high="120" max="144"`, and copies it into `/data/magellan` if Magellan cached a copy. Off by default. Apply + reboot, then open Customize App Refresh — Agent 2 should be in the 144 section with 120 selected and 144 in the picker.
 

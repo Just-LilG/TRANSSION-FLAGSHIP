@@ -1,10 +1,11 @@
 #!/system/bin/sh
-# Flagship 16 Force 120Hz — XOS 16 Magellan, not the XOS 15 APM JSON.
+# Flagship 16 Force 120Hz — XOS 16 Magellan via Mountify overlay.
 # Customize App Refresh reads /tr_product/etc/vconfig/magellan/refresh_rate_config.xml
 #   max="144"  → “Apps Supporting 144 Hz” and 144 in the picker
 #   auto="120" → listed default for that app
-# Packages missing from WHITELIST stay in Other Apps (picker max 120, default 90).
-# Per-file bind only. Never bind-dir /tr_product.
+# TranOS 16 custom refresh.zip (t.me/nyellnpr/35509) is a 15.6KB Magellan XML
+# flashed with Mountify. Magisk bind of /tr_product loses when Mountify remounts.
+# Per-file copy into /mnt/vendor/mountify/tr_product/... — never bind-dir /tr_product.
 
 if [ -z "$MODDIR" ]; then
   MODDIR=${0%/*}
@@ -265,7 +266,7 @@ os16_generate_magellan_xml() {
         <high_temperature_refresh_rate>0</high_temperature_refresh_rate>
         <camera_notification_high_temerature_switch>false</camera_notification_high_temerature_switch>
         <high_temperature_white_list_switch>false</high_temperature_white_list_switch>
-        <multi_window_refresh_rate>60</multi_window_refresh_rate>
+        <multi_window_refresh_rate>120</multi_window_refresh_rate>
         <screen_record>60</screen_record>
     </switch>
 EOF
@@ -273,6 +274,10 @@ EOF
     <activity>
     </activity>
 EOF
+  # Same as TranOS 16 custom refresh (Mountify): 120Hz split-screen, not stock 60.
+  if [ -s "$switchf" ]; then
+    sed 's/<multi_window_refresh_rate>[0-9][0-9]*<\/multi_window_refresh_rate>/<multi_window_refresh_rate>120<\/multi_window_refresh_rate>/' "$switchf" > "$switchf.new" && mv "$switchf.new" "$switchf"
+  fi
   {
     echo '<?xml version="1.0" encoding="UTF-8" ?>'
     echo '<refresh_rate_config version="20260827">'
@@ -286,6 +291,27 @@ EOF
     echo '</refresh_rate_config>'
   } > "$MAGELLAN_XML"
   chmod 644 "$MAGELLAN_XML" 2>/dev/null
+}
+
+os16_copy_magellan_mountify() {
+  dest_mod="$MODDIR/tr_product/etc/vconfig/magellan/refresh_rate_config.xml"
+  dest_mfy="/mnt/vendor/mountify/tr_product/etc/vconfig/magellan/refresh_rate_config.xml"
+  if ! os16_hz_on; then
+    rm -f "$dest_mod" "$dest_mfy"
+    return 0
+  fi
+  [ -f "$MAGELLAN_XML" ] || return 0
+  mkdir -p "$(dirname "$dest_mod")"
+  cp -f "$MAGELLAN_XML" "$dest_mod"
+  chmod 644 "$dest_mod" 2>/dev/null
+  # Mountify owns overlay on /tr_product. Magisk bind of that path loses after
+  # the metamodule remounts. Drop the XML into Mountify's tree like the
+  # TranOS 16 custom refresh zip (flash with Mountify).
+  if [ -d /mnt/vendor/mountify/tr_product ]; then
+    mkdir -p "$(dirname "$dest_mfy")"
+    cp -f "$MAGELLAN_XML" "$dest_mfy"
+    chmod 644 "$dest_mfy" 2>/dev/null
+  fi
 }
 
 os16_copy_magellan_data() {
@@ -354,6 +380,7 @@ os16_apply_120hz_settings() {
 
 os16_apply_120hz_all() {
   os16_generate_120hz_jsons
+  os16_copy_magellan_mountify
   os16_bind_120hz_files
   os16_copy_magellan_data
   os16_apply_120hz_settings

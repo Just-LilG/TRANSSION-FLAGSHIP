@@ -9,7 +9,7 @@
         <high_temperature_refresh_rate>0</high_temperature_refresh_rate>
         <camera_notification_high_temerature_switch>false</camera_notification_high_temerature_switch>
         <high_temperature_white_list_switch>false</high_temperature_white_list_switch>
-        <multi_window_refresh_rate>60</multi_window_refresh_rate>
+        <multi_window_refresh_rate>120</multi_window_refresh_rate>
         <screen_record>60</screen_record>
     </switch>
     <WHITELIST>
