@@ -143,7 +143,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
         </div>
         <div class="hero-card">
           <div class="hero-title">Transsion Flagship 16</div>
-          <div class="hero-sub" id="module-version-sub">V1.35 · OS 16</div>
+          <div class="hero-sub" id="module-version-sub">V1.36 · OS 16</div>
         </div>
         <div class="h8"></div>
         <div class="warn-card" id="old-mod-warn">Flagship 15 is still installed. This installer disables it. Remove it from Magisk/KSU so the two modules do not fight.</div>
@@ -297,14 +297,14 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
           <div class="setting-row">
             <div class="row-text">
               <div class="row-title">Dynamic blur</div>
-              <div class="row-sub">Notifications, QS, recents, dock. Off = Smart-series solid panels. Apply restarts System UI.</div>
+              <div class="row-sub">Notifications/QS are SurfaceFlinger. Off = Smart solid shade + no dock blur. Apply restarts the compositor (screen flickers).</div>
             </div>
             <label class="toggle"><input type="checkbox" id="feat-blur" checked onchange="setAnimBlur('blur_os16',this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
           </div>
           <div class="setting-row">
             <div class="row-text">
               <div class="row-title">Blur level</div>
-              <div class="row-sub">1 light / 2 default / 3 flagship. Compositor on/off is the toggle. Apply restarts System UI.</div>
+              <div class="row-sub">1 = Smart solid shade. 2 / 3 = flagship glass (dock stronger at 3). Apply restarts compositor.</div>
             </div>
           </div>
           <div class="segmented" id="blur-level">
@@ -513,14 +513,15 @@ function blurLevel(){
   return (n>=1 && n<=3)?n:2;
 }
 function blurLvl(){ return blurOn()?String(blurLevel()):'0'; }
-function blur01(){ return blurOn()?'1':'0'; }
+function compositorOn(){ return blurOn() && blurLevel()>=2; }
+function blur01(){ return compositorOn()?'1':'0'; }
 function blurRadius(){
   if(!blurOn()) return 0;
   if(blurLevel()===1) return 20;
   if(blurLevel()===3) return 80;
   return 45;
 }
-function blurDisable(){ return blurOn()?'0':'1'; }
+function blurDisable(){ return compositorOn()?'0':'1'; }
 const GALLERY_KEYS=[
   'ro.tr_gallery.eraser.v2.support',
   'ro.tr_gallery.ext.image.support',
@@ -719,7 +720,7 @@ async function saveAll(){
   const props=await writeAiSystemProp();
   if(!props){ toast('Saved config, but AI props failed to write'); return; }
   await applyBlurRuntime();
-  toast('Saved — System UI restarted; reboot if the shade still has glass');
+  toast('Saved — compositor restarted (flicker); reboot if the shade is still glass');
 }
 async function applyBlurRuntime(){
   await exec('sh "'+MOD+'/apply_blur.sh" all >/dev/null 2>&1; echo OK');
@@ -883,7 +884,7 @@ async function handleStatusbar(input){
 }
 async function loadDevice(){
   const prop=await g('cat "'+MOD+'/module.prop" 2>/dev/null');
-  const ver=(prop.match(/^version=(.+)$/m)||[])[1]||'V1.35';
+  const ver=(prop.match(/^version=(.+)$/m)||[])[1]||'V1.36';
   n('module-version-sub', ver+' · OS 16');
   let type=await g('getprop ro.tran.os.type');
   let verOs=await g('getprop ro.transsion.os.version');

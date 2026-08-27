@@ -55,9 +55,8 @@ ro.transsion_launch_start_exit_support=3
 ro.transsion_power_keyguard_animation_support=3
 ro.transsion.recent_animation.model=3
 ro.tran_display_unionrender.support=1
-# Blur — notifications/QS/recents/dock. persist.sys.sf.disable_blurs and
-# persist.sysui.disableBlur are read when SystemUI starts. gaussian 1/2/3
-# plus transsion_launcher_blur_radius (px) are the level when blur is on.
+# Blur — notifications/QS need SurfaceFlinger restart. Level 1 disables
+# compositor (Smart solid). Level 2/3 enable flagship glass.
 ro.tr_display.liquidglass.support=1
 ro.surface_flinger.supports_background_blur=1
 ro.os.recent.blur=1

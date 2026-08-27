@@ -1,5 +1,8 @@
 # Transsion Flagship 16
 
+## v1.36
+- **System blur is SurfaceFlinger, not the dock.** Off and level 1 only dimmed launcher gaussian — notifications/QS stayed flagship glass because SystemUI restart does not recreate the compositor. This build sets `persist.sys.sf.disable_blurs` / `supports_background_blur` then **restarts SurfaceFlinger**. **Level 1** = Smart-series solid shade. **Level 2/3** = flagship glass (dock gaussian 2 vs 3). **Off** = Smart shade and no dock blur. Apply flickers the screen; reboot. Pull down notifications to check.
+
 ## v1.35
 - **Notification / QS blur is SystemUI, not the dock.** Off was supposed to look like Smart-series (solid panels, slight transparency). V1.31 turned flagship Gaussian on; V1.33–V1.34 only restarted the launcher, so the shade kept the glass. SystemUI caches `persist.sys.sf.disable_blurs` until that process dies. This build also writes `persist.sysui.disableBlur`, `wm disable-blur`, and `accessibility_reduce_transparency`, then **restarts System UI**. Levels 1/2/3 still map gaussian + radius (20/45/80); compositor blur itself is on with the toggle and off without it. Apply (shade will flicker), then reboot. Pull down notifications — should be solid when off.
 
