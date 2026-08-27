@@ -335,10 +335,12 @@ else
   log_pfd "apply_blur.sh missing"
 fi
 
-# Refresh: Mountify does not overlay /tr_product (targets are product/vendor/…).
-# Same per-file bind as bootanimation.zip. Do this at post-fs before Magellan loads.
+# Refresh: Mountify does not overlay /tr_product. Bind Magellan like bootanim.
+# Game default FPS props always (developer option 120Hz, not only Force 120Hz).
 if [ -f "$MODDIR/apply_120hz.sh" ]; then
   . "$MODDIR/apply_120hz.sh"
+  os16_apply_game_fps_props
+  log_pfd "game_fps override=$(getprop ro.surface_flinger.game_default_frame_rate_override 2>/dev/null) disabled=$(getprop debug.graphics.game_default_frame_rate.disabled 2>/dev/null)"
   if os16_hz_on; then
     os16_generate_120hz_jsons
     os16_copy_magellan_mountify

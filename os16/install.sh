@@ -157,6 +157,9 @@ persist.sys.disable_blur=$sfdis
 persist.sysui.disableBlur=$sfdis
 persist.sysui.disable_blur=$sfdis
 ro.sf.blurs_are_expensive=$sfdis
+ro.surface_flinger.game_default_frame_rate_override=120
+debug.graphics.game_default_frame_rate.disabled=true
+persist.graphics.game_default_frame_rate.enabled=false
 EOF
 }
 
@@ -375,7 +378,7 @@ set_permissions() {
   done
   ui_print " "
   ui_div
-  ui_print "  ✨  FLAGSHIP 16  ·  V1.49"
+  ui_print "  ✨  FLAGSHIP 16  ·  V1.50"
   ui_info "OS     : $OS_TYPE $OS_VER"
   ui_info "Feature: boot + reboot + overlay + AI + gaming + anim/blur"
   ui_div

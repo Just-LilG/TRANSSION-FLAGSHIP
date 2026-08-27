@@ -1,5 +1,9 @@
 # Transsion Flagship 16
 
+## v1.50
+- **Control center / keyboard stay high refresh.** The TranOS XML that unlocked 144 had `input_method_switch` and `navigation_switch` off, so Magellan dropped those overlays to 60Hz. This build turns those switches on and gives SystemUI, launchers, and Gboard `max="144"`. Force 120Hz on → Apply → reboot, then check the on-screen Hz counter on home, QS, and keyboard.
+- **Developer options game FPS is 120Hz.** Same Flagship 15 keys: `ro.surface_flinger.game_default_frame_rate_override=120` and `debug.graphics.game_default_frame_rate.disabled=true`. The row should read “Disable limiting the maximum frame rate for games at **120 Hz**” like other Trans OS. Applies even if Force 120Hz is off; reboot.
+
 ## v1.49
 - **Last try for 144Hz: bind Magellan like bootanim.** Mountify v2 never overlays `/tr_product` (only product/vendor/odm/…). The TranOS zip’s `system/tr_product/` tree lands on `/system/tr_product`, which Magellan does not read — Customize stays stock (Messages/Phone/Settings in 144, Agent 1 picker 60/90/120). This build bind-mounts the exact TranOS XML onto `/tr_product/etc/vconfig/magellan/refresh_rate_config.xml` the same way bootanim reaches that partition, and also puts the file under `system/product/etc/vconfig/magellan/` so Mountify overlays `/product`. Force 120Hz on → Apply → reboot. If Agent 1 still has no 144 after this, Magellan is not using that XML on this phone and we move on.
 
