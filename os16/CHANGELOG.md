@@ -1,5 +1,8 @@
 # Transsion Flagship 16
 
+## v1.34
+- **Blur off/level: resetprop after overlay.** V1.33 still left glass on: Magisk `system.prop` does not override stock `ro.tr_display.liquidglass.support=1` from `/tr_product/etc/build.prop`, settings/wm only hit `com.transsion.launcher3` (this phone may use XOSLauncher), and gaussian keys are often EMPTY. This build `resetprop`s liquid glass, SurfaceFlinger blur, recents blur, gaussian level, `persist.sys.sf.disable_blurs`, and `ro.sf.blurs_are_expensive` in post-fs-data, at late_start, 8s later, and on Apply. Force-stops the default home app plus `launcher3` / `XOSLauncher` / `hilauncher`. Apply, then reboot. Dump flags — if liquidglass is still 1 after reboot, paste that log.
+
 ## v1.33
 - **Blur off and blur level actually apply.** V1.32 left OS 16 liquid glass on with Parallel animations, so turning Dynamic blur off did nothing. The 1/2/3 picker only wrote Flagship 15 gaussian keys (often EMPTY here). This build: liquid glass follows Dynamic blur; Apply writes AOSP `disable_window_blurs` / `wm disable-blur`, `persist.sys.sf.disable_blurs`, and `transsion_launcher_blur_radius` (20 / 45 / 80 px for levels 1 / 2 / 3). Restarts the launcher. Apply, then check dock/recents. Reboot still needed for SurfaceFlinger.
 

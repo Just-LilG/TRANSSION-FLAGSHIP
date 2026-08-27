@@ -92,8 +92,9 @@ write_os16_ai_prop() {
   fi
   cat > "$dest" <<EOF
 # Flagship 16 — OS 16 keys. Magisk loads this file at boot.
-# Apply in WebUI rewrites this file from the Features toggles. Reboot to take effect.
-# Not written from service.sh.
+# Apply in WebUI rewrites this file from the Features toggles.
+# Blur keys that already exist in /tr_product/etc/build.prop are also
+# resetprop'd from apply_blur.sh (post-fs-data + late_start + WebUI).
 ro.tr_aiservice.aicorespeech_subtitle.feature.support=$sub
 ro.tr_aiservice.aicorespeech_livecaption.feature.support=$sub
 ro.tr_soundrecorder.summary.feature.support=$rec
@@ -146,6 +147,8 @@ tr_launcher.gaussianblur.support=$blvl
 ro.tran.effectengine.dynamicblur.support=$b01
 ro.os_xos16_blur_v2_support=$b01
 persist.sys.sf.disable_blurs=$sfdis
+persist.sys.disable_blur=$sfdis
+ro.sf.blurs_are_expensive=$sfdis
 EOF
 }
 
@@ -153,7 +156,7 @@ print_modname() {
   ui_print " "
   ui_print "  ╔══════════════════════════════════════════╗"
   ui_print "  ║    TRANSSION FLAGSHIP 16                 ║"
-  ui_print "  ║    XOS · HiOS · iTel OS 16  ·  V1.33     ║"
+  ui_print "  ║    XOS · HiOS · iTel OS 16  ·  V1.34     ║"
   ui_print "  ╚══════════════════════════════════════════╝"
   ui_print " "
 }
@@ -253,6 +256,7 @@ on_install() {
     unzip -o "$ZIPFILE" 'config.json' -d "$MODPATH" >&2
     unzip -o "$ZIPFILE" 'CHANGELOG.md' -d "$MODPATH" >&2
     unzip -oj "$ZIPFILE" 'common/system.prop' -d "$MODPATH" >&2
+    unzip -oj "$ZIPFILE" 'common/apply_blur.sh' -d "$MODPATH" >&2
     unzip -o "$ZIPFILE" 'tr_product/*' -d "$MODPATH" >&2
   else
     ui_info "Extracting module files from zip"
@@ -262,6 +266,7 @@ on_install() {
     unzip -o "$ZIPFILE" 'config.json' -d "$MODPATH" >&2
     unzip -o "$ZIPFILE" 'CHANGELOG.md' -d "$MODPATH" >&2
     unzip -oj "$ZIPFILE" 'common/system.prop' -d "$MODPATH" >&2
+    unzip -oj "$ZIPFILE" 'common/apply_blur.sh' -d "$MODPATH" >&2
   fi
 
   # Drop failed boot-sound / charging packs left by V1.02–V1.12.
@@ -330,12 +335,12 @@ set_permissions() {
   # WebUI toggles survive an upgrade.
   write_os16_ai_prop "$MODPATH/config.json" "$MODPATH/system.prop"
   set_perm_recursive "$MODPATH" 0 0 0755 0644
-  for sh in "$MODPATH/post-fs-data.sh" "$MODPATH/service.sh" "$MODPATH/uninstall.sh"; do
+  for sh in "$MODPATH/post-fs-data.sh" "$MODPATH/service.sh" "$MODPATH/uninstall.sh" "$MODPATH/apply_blur.sh"; do
     [ -f "$sh" ] && set_perm "$sh" 0 0 0755
   done
   ui_print " "
   ui_div
-  ui_print "  ✨  FLAGSHIP 16  ·  V1.33"
+  ui_print "  ✨  FLAGSHIP 16  ·  V1.34"
   ui_info "OS     : $OS_TYPE $OS_VER"
   ui_info "Feature: boot + reboot + overlay + AI + gaming + anim/blur"
   ui_div
