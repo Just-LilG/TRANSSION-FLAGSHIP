@@ -1,5 +1,8 @@
 # Transsion Flagship 16
 
+## v1.45
+- **Magellan XML is patched at post-fs, before system_server.** V1.44 bound a tiny seed list (Settings/Phone/Messages only) then filled every package at late_start. Magellan loads `tr_product/etc/vconfig/magellan/refresh_rate_config.xml` once when the policy starts — Agent 1 stayed in Other Apps with no 144. This build reads `/data/system/packages.list` at post-fs (no `pm`), **patches the stock XML** (`max="144" auto="120"` on every package, keep OEM version/attrs), then binds that file like bootanim. Mountify does not overlay `/tr_product` (only system/product/vendor/…). Apply + reboot once.
+
 ## v1.44
 - **Force 120Hz goes through Mountify, like TranOS 16 custom refresh.zip.** That Telegram module is a 15.6KB Magellan XML: more apps on the 60/90/120/144 list, 120Hz multi-window/launcher, **flash with Mountify**. V1.43 Magisk-bound `/tr_product/etc/vconfig/magellan/refresh_rate_config.xml`, but Mountify remounts `/tr_product` and the bind loses. This build copies the generated XML into `/mnt/vendor/mountify/tr_product/etc/vconfig/magellan/` (per-file, not bind-dir), sets `multi_window_refresh_rate` to 120, and still fills every installed package with `auto="120" max="144"`. Disable the separate TranOS 16 custom refresh module so the two XMLs do not fight. Apply + reboot.
 
