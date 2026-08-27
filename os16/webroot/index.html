@@ -318,7 +318,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
           <div class="setting-row">
             <div class="row-text">
               <div class="row-title">Force 120Hz</div>
-              <div class="row-sub">Same Magellan XML as TranOS 16 custom refresh.zip (144 in the picker; list can still show 90). Off by default. Apply + reboot. Disable the other refresh module.</div>
+              <div class="row-sub">Same Magellan XML as TranOS 16 custom refresh.zip. Off by default. Apply saves the toggle (no soft reboot). Then reboot. Disable the other refresh module.</div>
             </div>
             <label class="toggle"><input type="checkbox" id="feat-force120hz" onchange="cfg.force_120hz=this.checked"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
           </div>
@@ -699,6 +699,8 @@ async function writeAiSystemProp(){
 }
 async function saveAll(){
   if(cfg.ai_writing===undefined) cfg.ai_writing=cfg.ai_notif_summary!==false;
+  const hzEl=document.getElementById('feat-force120hz');
+  if(hzEl) cfg.force_120hz=hzEl.checked;
   const slim={
     bootanim_style:cfg.bootanim_style||'hios16',
     bootanim_file:cfg.bootanim_file||'',
@@ -725,13 +727,14 @@ async function saveAll(){
     force_120hz:cfg.force_120hz===true
   };
   const json=JSON.stringify(slim,null,2).replace(/'/g,"'\\''");
-  const r=await exec("echo '"+json+"' > \""+CONFIG_PATH+"\" && echo OK");
+  const hzFlag=cfg.force_120hz===true?'1':'0';
+  const r=await exec("printf '%s\\n' '"+json+"' > \""+CONFIG_PATH+"\" && printf '%s\\n' '"+hzFlag+"' > \""+MOD+"/.force_120hz\" && sync \""+CONFIG_PATH+"\" \""+MOD+"/.force_120hz\" && echo OK");
   if(!(r.stdout||'').includes('OK')){ toast('Save failed — is the module installed?'); return; }
   const props=await writeAiSystemProp();
   if(!props){ toast('Saved config, but AI props failed to write'); return; }
   await applyBlurRuntime();
   await apply120HzRuntime();
-  toast('Saved — reboot so 120Hz overlay and animation/glass apply');
+  toast(cfg.force_120hz ? 'Saved — reboot so Mountify overlays 144Hz' : 'Saved');
 }
 async function applyBlurRuntime(){
   await exec('sh "'+MOD+'/apply_blur.sh" all >/dev/null 2>&1; echo OK');
@@ -787,6 +790,8 @@ async function dumpAi(){
   lines.push('');
   lines.push('=== refresh rate ===');
   lines.push('force_120hz  '+String(cfg.force_120hz===true));
+  const hzf=await g('cat "'+MOD+'/.force_120hz" 2>/dev/null');
+  lines.push('force_120hz_flag  '+(hzf||'EMPTY'));
   const trm=await g('settings get system tran_refresh_mode');
   const peak=await g('settings get system peak_refresh_rate');
   const minr=await g('settings get system min_refresh_rate');
@@ -978,6 +983,9 @@ async function loadCfg(){
   if(cfg.blur_os16_level===undefined) cfg.blur_os16_level=2;
   if(cfg.force_120hz===undefined) cfg.force_120hz=false;
   if(cfg.force_refresh_hz===120||cfg.force_refresh_hz===144) cfg.force_120hz=true;
+  const hzFlag=await g('cat "'+MOD+'/.force_120hz" 2>/dev/null');
+  if(hzFlag==='1'||hzFlag==='true') cfg.force_120hz=true;
+  if(hzFlag==='0'||hzFlag==='false') cfg.force_120hz=false;
   setStyle(cfg.bootanim_style||'hios16');
   if(!cfg.rebootanim_style) cfg.rebootanim_style=cfg.shutdownanim_style||'hios16';
   setRebootStyle(cfg.rebootanim_style||'hios16');

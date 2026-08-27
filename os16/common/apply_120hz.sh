@@ -27,6 +27,13 @@ os16_cfg_bool() {
 }
 
 os16_hz_on() {
+  if [ -f "$MODDIR/.force_120hz" ]; then
+    f=$(tr -d ' \r\n' < "$MODDIR/.force_120hz" 2>/dev/null)
+    [ "$f" = "1" ] && return 0
+    [ "$f" = "true" ] && return 0
+    [ "$f" = "0" ] && return 1
+    [ "$f" = "false" ] && return 1
+  fi
   on=$(os16_cfg_bool force_120hz false)
   [ "$on" = "true" ] || [ "$on" = "1" ]
 }
@@ -138,10 +145,6 @@ os16_write_pkg_array() {
     if [ -f /data/system/packages.xml ]; then
       grep -oE 'name="[A-Za-z0-9._]+"' /data/system/packages.xml | sed 's/name="//;s/"$//'
     fi
-    pm list packages 2>/dev/null | sed 's/^package://'
-    pm list packages -s 2>/dev/null | sed 's/^package://'
-    pm list packages -3 2>/dev/null | sed 's/^package://'
-    pm list packages -a 2>/dev/null | sed 's/^package://'
   } 2>/dev/null | tr -d '\r' | grep -E '^[A-Za-z0-9._]+$' | sort -u > "$tmp"
   n=$(wc -l < "$tmp" 2>/dev/null | tr -d ' ')
   [ -z "$n" ] && n=0
@@ -314,8 +317,6 @@ os16_apply_120hz_settings() {
   os16_put_hz system default_app_refresh_rate 120
   os16_put_hz system tran_other_app_refresh_rate 120
   resetprop ro.tr_display.refreshrate.default_refreshmode.config 120 >/dev/null 2>&1
-  am force-stop com.android.settings >/dev/null 2>&1
-  am force-stop com.transsion.ossettingsext >/dev/null 2>&1
 }
 
 os16_apply_120hz_all() {
@@ -326,8 +327,21 @@ os16_apply_120hz_all() {
   os16_apply_120hz_settings
 }
 
+# WebUI Apply: copy the TranOS XML into the module tree for the next Mountify
+# boot. Do not wipe package_cache (that soft-reboots and can lose config.json),
+# do not force-stop Settings, do not call pm.
+os16_webui_apply_120hz() {
+  if os16_hz_on; then
+    mkdir -p "$(dirname "$MAGELLAN_XML")"
+    if [ -f "$MAGELLAN_TEMPLATE" ]; then
+      cp -f "$MAGELLAN_TEMPLATE" "$MAGELLAN_XML"
+      chmod 644 "$MAGELLAN_XML" 2>/dev/null
+    fi
+  fi
+  os16_copy_magellan_mountify
+  os16_swap_magisk_apm
+}
+
 if [ "${0##*/}" = "apply_120hz.sh" ]; then
-  os16_apply_120hz_all
-  # Same as TranOS 16 custom refresh customize.sh — once on Apply, not every boot.
-  rm -rf /data/system/package_cache/* 2>/dev/null
+  os16_webui_apply_120hz
 fi

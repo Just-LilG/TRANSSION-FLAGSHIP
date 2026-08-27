@@ -336,6 +336,9 @@ on_install() {
   else
     ui_ok "Default config: HiOS 16 boot + reboot, AI + gaming + anim/blur on, status bar stock"
   fi
+  if [ -f /data/adb/modules/transsion-flagship-16/.force_120hz ]; then
+    cp /data/adb/modules/transsion-flagship-16/.force_120hz "$MODPATH/.force_120hz"
+  fi
   write_os16_ai_prop "$MODPATH/config.json" "$MODPATH/system.prop"
   ui_ok "OS 16 keys written from config (reboot to apply)"
 
@@ -359,7 +362,6 @@ set_permissions() {
     if os16_hz_on; then
       os16_generate_120hz_jsons
       os16_copy_magellan_mountify
-      rm -rf /data/system/package_cache/* 2>/dev/null
     else
       os16_copy_magellan_mountify
     fi
@@ -370,7 +372,7 @@ set_permissions() {
   done
   ui_print " "
   ui_div
-  ui_print "  ✨  FLAGSHIP 16  ·  V1.47"
+  ui_print "  ✨  FLAGSHIP 16  ·  V1.48"
   ui_info "OS     : $OS_TYPE $OS_VER"
   ui_info "Feature: boot + reboot + overlay + AI + gaming + anim/blur"
   ui_div

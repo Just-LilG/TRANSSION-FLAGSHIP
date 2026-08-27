@@ -1,5 +1,8 @@
 # Transsion Flagship 16
 
+## v1.48
+- **Force 120Hz stays on after Apply.** V1.47 ran the TranOS installer’s `package_cache` wipe from WebUI Apply, which soft-rebooted the phone before `config.json` was flushed — the toggle came back off. Apply now writes the toggle (and a `.force_120hz` flag) then `sync`s, copies the Magellan XML for the next reboot, and does **not** wipe package cache or force-stop Settings. Apply should not reboot by itself. Then reboot once so Mountify overlays 144.
+
 ## v1.47
 - **Force 120Hz uses the exact TranOS 16 custom refresh.xml.** That zip is only `system/tr_product/etc/vconfig/magellan/refresh_rate_config.xml` (Mountify overlay). V1.43–1.46 rewrote every item to `auto="120"` and `touch="0"`, then umount/bound `/tr_product` and fought Mountify. This build ships that XML unchanged (`auto="90"` + `max="144"` on the 144 list, including Chrome / Play / WhatsApp / Termux), appends any extra installed packages the same way, and does not bind Magellan. Disable the TranOS refresh zip. Force 120Hz on → Apply → reboot. The Customize App Refresh list can still show 90 until you pick 120/144.
 
