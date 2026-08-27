@@ -28,6 +28,7 @@
   "cutepet_os16": true,
   "outdoorboost_os16": true,
   "gallerylive_os16": true,
+  "airtransfer_os16": true,
   "dynamicbar_os16": false,
   "force_120hz": false
 }

@@ -334,7 +334,7 @@ if [ -f "$MODDIR/apply_blur.sh" ]; then
   os16_apply_os16_extras_props
   os16_apply_dynamicbar_props
   log_pfd "blur props resetprop liquidglass=$(getprop ro.tr_display.liquidglass.support 2>/dev/null) sf_disable=$(getprop persist.sys.sf.disable_blurs 2>/dev/null)"
-  log_pfd "aod vconfig=$(cat /tr_product/etc/vconfig/com.transsion.aod/build.prop 2>/dev/null | tr '\n' ' ') extras videosr=$(getprop persist.tr_video.ai_super_resolution.support 2>/dev/null) cutepet=$(getprop ro.tr_cutepet.feature.support 2>/dev/null) outdoor=$(getprop ro.tr_outdoorboost.feature.support 2>/dev/null) gallerylive=$(getprop tr_gallery.live.support 2>/dev/null)"
+  log_pfd "aod vconfig=$(cat /tr_product/etc/vconfig/com.transsion.aod/build.prop 2>/dev/null | tr '\n' ' ') extras videosr=$(getprop persist.tr_video.ai_super_resolution.support 2>/dev/null) cutepet=$(getprop ro.tr_cutepet.feature.support 2>/dev/null) outdoor=$(getprop ro.tr_outdoorboost.feature.support 2>/dev/null) gallerylive=$(getprop tr_gallery.live.support 2>/dev/null) airtransfer=$(getprop ro.tr_airtransfer.feature.support 2>/dev/null)"
 else
   log_pfd "apply_blur.sh missing"
 fi

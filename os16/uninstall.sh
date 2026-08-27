@@ -1,7 +1,7 @@
 #!/system/bin/sh
 LOG=/data/adb/transflagship16_uninstall.log
 log_msg() { echo "[$(date '+%H:%M:%S')] $1" >> "$LOG"; }
-log_msg "=== TransFlagship 16 V1.74 uninstall start ==="
+log_msg "=== TransFlagship 16 V1.75 uninstall start ==="
 rm -f /data/adb/transflagship16_service.log
 rm -f /data/local/bootaudio.mp3 /data/local/shutaudio.mp3
 rm -rf /mnt/vendor/mountify/tr_product/theme/charge
@@ -84,4 +84,4 @@ cmd window disable-blur 0 2>/dev/null
 rm -f /data/adb/modules/transsion-flagship-16/system/tr_product/etc/vconfig/magellan/refresh_rate_config.xml 2>/dev/null
 rm -f /data/magellan/refresh_rate_config.xml 2>/dev/null
 rm -f /mnt/vendor/mountify/tr_product/etc/vconfig/magellan/refresh_rate_config.xml 2>/dev/null
-log_msg "=== TransFlagship 16 V1.74 uninstall complete — reboot ==="
+log_msg "=== TransFlagship 16 V1.75 uninstall complete — reboot ==="
