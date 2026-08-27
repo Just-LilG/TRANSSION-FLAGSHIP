@@ -5,7 +5,7 @@ LOG="$MODDIR/transflagship16_service.log"
 rm -f "$LOG"
 log_p() { echo "[$(date '+%H:%M:%S')] $1" >> "$LOG"; }
 
-log_p "=== TransFlagship 16 V1.39 ==="
+log_p "=== TransFlagship 16 V1.40 ==="
 log_p "Device : $(getprop ro.product.model 2>/dev/null)"
 log_p "Brand  : $(getprop ro.product.brand 2>/dev/null)"
 log_p "Android: $(getprop ro.build.version.release 2>/dev/null)"
@@ -29,8 +29,12 @@ fi
 
 if [ -f "$MODDIR/apply_120hz.sh" ]; then
   . "$MODDIR/apply_120hz.sh"
-  os16_apply_120hz_settings
-  log_p "force_120hz=$(os16_cfg_bool force_120hz false) peak=$(settings get system peak_refresh_rate 2>/dev/null) tran_mode=$(settings get system tran_refresh_mode 2>/dev/null)"
+  os16_apply_120hz_all
+  minr=$(settings get system min_refresh_rate 2>/dev/null)
+  log_p "force_120hz=$(os16_cfg_bool force_120hz false) peak=$(settings get system peak_refresh_rate 2>/dev/null) min=$minr tran_mode=$(settings get system tran_refresh_mode 2>/dev/null) pkgs=$(cat "$MODDIR/apm_120hz_bypass/.pkg_count" 2>/dev/null)"
+  case "$minr" in
+    60|60.0|60.00) log_p "WARN min_refresh_rate clamped back to 60" ;;
+  esac
 else
   log_p "apply_120hz.sh missing"
 fi

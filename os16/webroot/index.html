@@ -143,7 +143,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
         </div>
         <div class="hero-card">
           <div class="hero-title">Transsion Flagship 16</div>
-          <div class="hero-sub" id="module-version-sub">V1.39 · OS 16</div>
+          <div class="hero-sub" id="module-version-sub">V1.40 · OS 16</div>
         </div>
         <div class="h8"></div>
         <div class="warn-card" id="old-mod-warn">Flagship 15 is still installed. This installer disables it. Remove it from Magisk/KSU so the two modules do not fight.</div>
@@ -165,7 +165,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
             <li class="next">AI Gallery — all menus for show; some tools may crash when tapped</li>
             <li class="on">AI Video Enhancement — VEE flag on</li>
             <li class="on">Gaming — OS 16 GT triggers in XArena</li>
-            <li class="next">Animations &amp; blur — Features tab; dump if EMPTY</li>
+            <li class="next">Force 120Hz — default 120 for all apps; not confirmed yet</li>
           </ul>
         </div>
         <div class="h8"></div>
@@ -182,7 +182,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
         <div class="page-header">
           <div class="eyebrow">System</div>
           <h1>Features</h1>
-          <div class="sub">AI, gaming, animations, status bar</div>
+          <div class="sub">AI, gaming, animations, display</div>
         </div>
         <div class="section-label">AI Suite</div>
         <div class="glass-card">
@@ -318,7 +318,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
           <div class="setting-row">
             <div class="row-text">
               <div class="row-title">Force 120Hz</div>
-              <div class="row-sub">Raises the refresh ceiling. Off by default. Some apps may still sit below 120. Apply + reboot.</div>
+              <div class="row-sub">Makes 120Hz the default for every app (system + installed). Off by default. Apply + reboot. Dump flags if some apps stay at 90/60.</div>
             </div>
             <label class="toggle"><input type="checkbox" id="feat-force120hz" onchange="cfg.force_120hz=this.checked"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
           </div>
@@ -787,14 +787,28 @@ async function dumpAi(){
   lines.push('');
   lines.push('=== refresh rate ===');
   const trm=await g('settings get system tran_refresh_mode');
+  const trmg=await g('settings get global tran_refresh_mode');
   const peak=await g('settings get system peak_refresh_rate');
+  const peakg=await g('settings get global peak_refresh_rate');
   const minr=await g('settings get system min_refresh_rate');
+  const minrg=await g('settings get global min_refresh_rate');
   const lastt=await g('settings get system last_tran_refresh_mode_in_refresh_setting');
-  lines.push('tran_refresh_mode  '+(trm||'EMPTY'));
-  lines.push('peak_refresh_rate  '+(peak||'EMPTY'));
-  lines.push('min_refresh_rate  '+(minr||'EMPTY'));
+  const user=await g('settings get system user_refresh_rate');
+  const pref=await g('settings get system preferred_refresh_rate');
+  const ppeak=await g('getprop persist.sys.peak_refresh_rate');
+  const pmin=await g('getprop persist.sys.min_refresh_rate');
+  const pkgc=await g('cat "'+MOD+'/apm_120hz_bypass/.pkg_count" 2>/dev/null');
+  lines.push('tran_refresh_mode system  '+(trm||'EMPTY')+'  global  '+(trmg||'EMPTY'));
+  lines.push('peak_refresh_rate system  '+(peak||'EMPTY')+'  global  '+(peakg||'EMPTY'));
+  lines.push('min_refresh_rate system  '+(minr||'EMPTY')+'  global  '+(minrg||'EMPTY'));
+  if(minr==='60'||minr==='60.0'||minr==='60.00') lines.push('WARN min_refresh_rate clamped back to 60');
   lines.push('last_tran_refresh_mode_in_refresh_setting  '+(lastt||'EMPTY'));
-  const apm=await g('ls -l /product/apm/config/refresh_rate_config.json /system/product/apm/config/refresh_rate_config.json /tr_product/etc/apm/config/refresh_rate_config.json 2>/dev/null');
+  lines.push('user_refresh_rate  '+(user||'EMPTY'));
+  lines.push('preferred_refresh_rate  '+(pref||'EMPTY'));
+  lines.push('persist.sys.peak_refresh_rate  '+(ppeak||'EMPTY'));
+  lines.push('persist.sys.min_refresh_rate  '+(pmin||'EMPTY'));
+  lines.push('generated_package_count  '+(pkgc||'EMPTY'));
+  const apm=await g('ls -l /product/apm/config/refresh_rate_config.json /system/product/apm/config/refresh_rate_config.json /tr_product/etc/apm/config/refresh_rate_config.json /tr_product/apm/config/refresh_rate_config.json 2>/dev/null; find /tr_product /product /system -maxdepth 6 -name refresh_rate_config.json 2>/dev/null');
   lines.push(apm||'no live APM refresh_rate_config.json');
   lines.push('');
   lines.push('=== other live AI-like keys (first 80) ===');
@@ -910,7 +924,7 @@ async function handleStatusbar(input){
 }
 async function loadDevice(){
   const prop=await g('cat "'+MOD+'/module.prop" 2>/dev/null');
-  const ver=(prop.match(/^version=(.+)$/m)||[])[1]||'V1.39';
+  const ver=(prop.match(/^version=(.+)$/m)||[])[1]||'V1.40';
   n('module-version-sub', ver+' · OS 16');
   let type=await g('getprop ro.tran.os.type');
   let verOs=await g('getprop ro.transsion.os.version');
