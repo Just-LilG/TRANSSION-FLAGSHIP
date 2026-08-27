@@ -1,5 +1,8 @@
 # Transsion Flagship 16
 
+## v1.56
+- **Removed failed features.** Social Turbo did not add anything this X6886 did not already have in stock Phone (call record / translate / beauty). Display extras (DC / color / HDR / reading) stuck flags on OS 16 but never unhid Settings rows after three tries — OS 16 Display is overlay/Settings-compiled, not those props. Force 120Hz stays. Apply + reboot so leftover Display settings writes are dropped.
+
 ## v1.55
 - **Display extras (third try).** Same X6886 had DC / color / HDR / reading on Trans OS 15. V1.53–1.54 flags all stuck on 16 (`ro.tran.display_*`, `sdr2hdr`) but Settings still hid the rows. Dump showed `has_HDR_display=false` — OS 16 Settings likely ANDs that SurfaceFlinger bit. This build sets it to **true** when HDR is on, and writes Display settings the same way Flagship 15 did on this phone (`settings put` **and** `content update`). Apply + reboot, then Settings → Display. If HDR/DC still missing, dump and check `has_HDR_display` plus the new `dumpsys display` HDR lines.
 
