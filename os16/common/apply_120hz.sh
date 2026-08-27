@@ -55,6 +55,8 @@ os16_patch_magellan_ui_hz() {
     -e 's/<input_method_switch>false</<input_method_switch>true</' \
     -e 's/<navigation_switch>false</<navigation_switch>true</' \
     -e 's/<video_switch>false</<video_switch>true</' \
+    -e 's/auto="90"/auto="120"/g' \
+    -e 's/auto="60"/auto="120"/g' \
     "$f"
 }
 
@@ -234,6 +236,7 @@ os16_generate_magellan_xml() {
   out="$MAGELLAN_XML"
   if [ ! -f "$tmp" ]; then
     cp -f "$MAGELLAN_TEMPLATE" "$out"
+    os16_patch_magellan_ui_hz "$out"
     chmod 644 "$out" 2>/dev/null
     return 0
   fi
@@ -256,7 +259,7 @@ os16_generate_magellan_xml() {
     /<\/WHITELIST>/ {
       for (p in need) {
         if (!seen[p]) {
-          printf "    <item package=\"%s\" auto=\"90\" high=\"120\" touch=\"1\" app_request=\"0\" max=\"144\"/>\n", p
+          printf "    <item package=\"%s\" auto=\"120\" high=\"120\" touch=\"1\" app_request=\"0\" max=\"144\"/>\n", p
         }
       }
       print
@@ -286,6 +289,7 @@ os16_copy_magellan_mountify() {
     cp -f "$MAGELLAN_TEMPLATE" "$MAGELLAN_XML"
   fi
   [ -f "$MAGELLAN_XML" ] || return 0
+  os16_patch_magellan_ui_hz "$MAGELLAN_XML"
   chmod 644 "$MAGELLAN_XML" 2>/dev/null
   cp -f "$MAGELLAN_XML" "$prod_xml"
   chmod 644 "$prod_xml" 2>/dev/null
@@ -374,7 +378,21 @@ os16_apply_120hz_settings() {
   os16_put_hz system other_apps_refresh_rate 120
   os16_put_hz system default_app_refresh_rate 120
   os16_put_hz system tran_other_app_refresh_rate 120
+  os16_put_hz global other_apps_refresh_rate 120
+  os16_put_hz global default_app_refresh_rate 120
+  os16_put_hz global tran_other_app_refresh_rate 120
   resetprop ro.tr_display.refreshrate.default_refreshmode.config 120 >/dev/null 2>&1
+  # Listed 90 is Magellan's saved per-app choice. Drop those prefs so XML auto=120 is used.
+  for pkg in com.android.settings com.transsion.ossettingsext com.transsion.trsettings; do
+    for dir in /data/user_de/0/$pkg/shared_prefs /data/user/0/$pkg/shared_prefs /data/data/$pkg/shared_prefs; do
+      rm -f "$dir/flagship16_app_refresh_rate.xml" \
+            "$dir/app_refresh_rate.xml" \
+            "$dir/tran_app_refresh_rate.xml" \
+            "$dir/pref_app_refresh_rate.xml" \
+            "$dir/custom_app_refresh_rate.xml" \
+            "$dir/RefreshRate.xml"
+    done
+  done
 }
 
 os16_apply_120hz_all() {
