@@ -1,7 +1,7 @@
 #!/system/bin/sh
 LOG=/data/adb/transflagship16_uninstall.log
 log_msg() { echo "[$(date '+%H:%M:%S')] $1" >> "$LOG"; }
-log_msg "=== TransFlagship 16 V1.40 uninstall start ==="
+log_msg "=== TransFlagship 16 V1.41 uninstall start ==="
 rm -f /data/adb/transflagship16_service.log
 rm -f /data/local/bootaudio.mp3 /data/local/shutaudio.mp3
 rm -rf /mnt/vendor/mountify/tr_product/theme/charge
@@ -23,13 +23,41 @@ for ns in system global; do
   settings delete "$ns" tran_need_recovery_refresh_mode 2>/dev/null
   settings delete "$ns" tran_need_recovery_refresh_rate 2>/dev/null
   settings delete "$ns" last_tran_refresh_mode_in_refresh_setting 2>/dev/null
+  settings delete "$ns" tran_default_refresh_mode 2>/dev/null
   settings delete "$ns" peak_refresh_rate 2>/dev/null
   settings delete "$ns" min_refresh_rate 2>/dev/null
   settings delete "$ns" user_refresh_rate 2>/dev/null
   settings delete "$ns" preferred_refresh_rate 2>/dev/null
+  settings delete "$ns" max_refresh_rate 2>/dev/null
+  settings delete "$ns" min_frame_rate 2>/dev/null
+  settings delete "$ns" max_frame_rate 2>/dev/null
+  settings delete "$ns" other_apps_refresh_rate 2>/dev/null
+  settings delete "$ns" default_app_refresh_rate 2>/dev/null
+  settings delete "$ns" tran_other_app_refresh_rate 2>/dev/null
+  settings delete "$ns" tran_app_refresh_rate 2>/dev/null
+  settings delete "$ns" tran_custom_app_refresh_rate 2>/dev/null
+  settings delete "$ns" app_refresh_rate_config 2>/dev/null
+  settings delete "$ns" custom_app_refresh_rate 2>/dev/null
+  settings delete "$ns" tran_refresh_rate_apps 2>/dev/null
 done
+settings delete secure user_refresh_rate 2>/dev/null
+settings delete global tran_default_auto_refresh.support 2>/dev/null
+settings delete global tran_90hz_refresh_rate.not_support 2>/dev/null
+settings delete global tran_144hz_refresh_rate.support 2>/dev/null
+settings delete global tran_low_battery_60hz_refresh_rate.support 2>/dev/null
+settings delete global tran_custom_refresh_rate_config.support 2>/dev/null
 resetprop --delete persist.sys.peak_refresh_rate 2>/dev/null
 resetprop --delete persist.sys.min_refresh_rate 2>/dev/null
+for pkg in com.android.settings com.transsion.ossettingsext com.transsion.trsettings; do
+  for dir in /data/user_de/0/$pkg/shared_prefs /data/user/0/$pkg/shared_prefs /data/data/$pkg/shared_prefs; do
+    rm -f "$dir/flagship16_app_refresh_rate.xml" \
+          "$dir/app_refresh_rate.xml" \
+          "$dir/tran_app_refresh_rate.xml" \
+          "$dir/pref_app_refresh_rate.xml" \
+          "$dir/custom_app_refresh_rate.xml" \
+          "$dir/RefreshRate.xml"
+  done
+done
 wm disable-blur 0 2>/dev/null
 cmd window disable-blur 0 2>/dev/null
-log_msg "=== TransFlagship 16 V1.40 uninstall complete — reboot ==="
+log_msg "=== TransFlagship 16 V1.41 uninstall complete — reboot ==="
