@@ -293,11 +293,13 @@ os16_apply_aod_props() {
   os16_apply_aod_vconfig
 }
 
-os16_apply_supervol_props() {
-  v=$(os16_cfg_tf supervol_os16 true)
-  # GT X6858 tr_product stock is false (same 0→1 class as Ella / VEE).
-  os16_rp_overwrite ro.tr_audio.supervol.feature.support "$v"
-  os16_rp_overwrite tr_audio.supervol.feature.support "$v"
+os16_apply_videosr_props() {
+  v=$(os16_cfg_01 videosr_os16 true)
+  # Live on this G99: persist.tr_video.ai_super_resolution.support=0.
+  # Same video stack as VEE (that flag unhid UI).
+  os16_rp_overwrite persist.tr_video.ai_super_resolution.support "$v"
+  os16_rp_overwrite ro.tr_video.ai_super_resolution.support "$v"
+  os16_rp_overwrite tr_video.ai_super_resolution.support "$v"
 }
 
 os16_apply_aod_settings() {
@@ -410,12 +412,12 @@ os16_apply_blur_runtime() {
 if [ "${0##*/}" = "apply_blur.sh" ]; then
   mode="${1:-all}"
   case "$mode" in
-    props) os16_apply_blur_props; os16_apply_aod_props; os16_apply_supervol_props; os16_apply_dynamicbar_props ;;
+    props) os16_apply_blur_props; os16_apply_aod_props; os16_apply_videosr_props; os16_apply_dynamicbar_props ;;
     runtime) os16_apply_blur_runtime; os16_apply_aod_settings; os16_apply_dynamicbar_runtime ;;
     *)
       os16_apply_blur_props
       os16_apply_aod_props
-      os16_apply_supervol_props
+      os16_apply_videosr_props
       os16_apply_dynamicbar_props
       os16_clear_failed_feature_leftovers
       os16_apply_aod_settings

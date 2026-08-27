@@ -1,5 +1,9 @@
 # Transsion Flagship 16
 
+## v1.69
+- **Dropped Super volume.** Magisk did apply it (`=true` in Dump flags). Settings still hid the row — same class as Display extras: flag sticks, UI is compiled/overlay, and GT has **no** audio vconfig to bind (AOD was the exception because the AOD app reads its own vconfig file).
+- **Video Super Resolution.** Your dump already has `persist.tr_video.ai_super_resolution.support=0`. That is a live key on this G99, on the same video stack as VEE (which did unhide). Apply + reboot, then the video player. Dump that persist flag — if it sticks at 1 and the player still has no SR, that gate is also compiled.
+
 ## v1.68
 - **Dropped AI Treasure Box.** Flag stuck or UI still hidden on this G99 — same class as failed extras, not Ella/VEE. Gone from Features.
 - **Super volume.** Next `tr_product` extra: GT dump `ro.tr_audio.supervol.feature.support` is **false**. Apply + reboot, then Sound / volume. Dump that flag in **=== keys this module writes ===** — EMPTY means this G99 does not expose the key.
