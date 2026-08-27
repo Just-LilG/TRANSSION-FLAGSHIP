@@ -335,6 +335,13 @@ os16_apply_gallerylive_props() {
   os16_rp_overwrite ro.tr_gallery.live.slow.support "$lv"
 }
 
+os16_apply_airtransfer_props() {
+  at=$(os16_cfg_01 airtransfer_os16 true)
+  # GT dump 1 = on. That is a real GT extra, not a dump-0 off flag.
+  os16_rp_overwrite ro.tr_airtransfer.feature.support "$at"
+  os16_rp_overwrite tr_airtransfer.feature.support "$at"
+}
+
 os16_apply_os16_extras_props() {
   os16_apply_videosr_props
   os16_apply_supervol_props
@@ -342,6 +349,7 @@ os16_apply_os16_extras_props() {
   os16_apply_cutepet_props
   os16_apply_outdoorboost_props
   os16_apply_gallerylive_props
+  os16_apply_airtransfer_props
 }
 
 os16_apply_aod_settings() {

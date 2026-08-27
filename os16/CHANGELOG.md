@@ -1,5 +1,8 @@
 # Transsion Flagship 16
 
+## v1.75
+- **Dump 0 is off, dump 1 is on.** Gallery Live was GT dump **0** (stock off) — that is not a GT extra. Magisk keys stay. Next extra is **Air Transfer**: GT dump `ro.tr_airtransfer.feature.support=1`. Apply + reboot, then Share / Air Transfer. Dump that flag — EMPTY means this G99 does not expose the key.
+
 ## v1.74
 - **Gallery Live Photos.** Next extra: GT dump `tr_gallery.live.support` is **0** (Flagship 15 already shipped this). Also writes `tr_gallery.live.slow.support`. Outdoor boost Magisk keys stay. Apply + reboot, then Gallery for live photos. Dump those flags — EMPTY means this G99 does not expose the key.
 

@@ -169,8 +169,9 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
             <li class="next">AOD — second try still hid Lock screen AOD</li>
             <li>Dynamic bar — off by default (empty pill leftover)</li>
             <li class="next">Cute Pet — Magisk keys stay; this G99 did not unhide</li>
-            <li class="next">Outdoor boost — Magisk keys stay; dump that flag</li>
-            <li class="next">Gallery Live — next extra (GT dump tr_gallery.live.support=0)</li>
+            <li class="next">Outdoor boost — Magisk keys stay (GT dump 1 = on)</li>
+            <li>Gallery Live — GT dump 0 = off; Magisk keys stay</li>
+            <li class="next">Air Transfer — next extra (GT dump ro.tr_airtransfer=1)</li>
             <li>Social Turbo — removed (stock already had call tools)</li>
             <li>Display extras — removed (OS 16 Settings hid DC / HDR / reading)</li>
           </ul>
@@ -259,9 +260,16 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
           <div class="setting-row">
             <div class="row-text">
               <div class="row-title">Gallery Live Photos</div>
-              <div class="row-sub">OS 16 tr_gallery.live (GT dump 0). Same Flagship 15 live-photo key. Apply + reboot, then Gallery. Dump that flag.</div>
+              <div class="row-sub">GT dump 0 = off. Magisk keys stay. Not a GT-on extra.</div>
             </div>
             <label class="toggle"><input type="checkbox" id="feat-gallerylive" checked onchange="cfg.gallerylive_os16=this.checked"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+          </div>
+          <div class="setting-row">
+            <div class="row-text">
+              <div class="row-title">Air Transfer</div>
+              <div class="row-sub">OS 16 ro.tr_airtransfer.feature.support (GT dump 1 = on). Apply + reboot, then Share / Air Transfer. Dump that flag.</div>
+            </div>
+            <label class="toggle"><input type="checkbox" id="feat-airtransfer" checked onchange="cfg.airtransfer_os16=this.checked"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
           </div>
           <div class="setting-row">
             <div class="row-text">
@@ -487,7 +495,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
 <script type="module">
 const MOD='/data/adb/modules/transsion-flagship-16';
 const CONFIG_PATH=MOD+'/config.json';
-let cfg={bootanim_style:'hios16',bootanim_file:'',rebootanim_style:'hios16',rebootanim_file:'',statusbar_style:'off',statusbarcustom_file:'',ai_master:true,ai_subtitles:true,ai_call_summary:true,ai_writing:true,ai_sound_rec:true,ai_notes:true,ai_gallery:true,ai_video:true,game_master:true,game_esports_touch:true,game_esports_level:3,game_bypass_charge:true,game_gt_triggers:true,anim_os16:true,blur_os16:true,blur_os16_level:2,aod_os16:true,videosr_os16:true,supervol_os16:true,treasure_os16:true,cutepet_os16:true,outdoorboost_os16:true,gallerylive_os16:true,dynamicbar_os16:false,force_120hz:false};
+let cfg={bootanim_style:'hios16',bootanim_file:'',rebootanim_style:'hios16',rebootanim_file:'',statusbar_style:'off',statusbarcustom_file:'',ai_master:true,ai_subtitles:true,ai_call_summary:true,ai_writing:true,ai_sound_rec:true,ai_notes:true,ai_gallery:true,ai_video:true,game_master:true,game_esports_touch:true,game_esports_level:3,game_bypass_charge:true,game_gt_triggers:true,anim_os16:true,blur_os16:true,blur_os16_level:2,aod_os16:true,videosr_os16:true,supervol_os16:true,treasure_os16:true,cutepet_os16:true,outdoorboost_os16:true,gallerylive_os16:true,airtransfer_os16:true,dynamicbar_os16:false,force_120hz:false};
 let _exec=null;
 let _saving=false;
 
@@ -672,6 +680,10 @@ const GALLERYLIVE_KEYS=[
   'ro.tr_gallery.live.support',
   'ro.tr_gallery.live.slow.support'
 ];
+const AIRTRANSFER_KEYS=[
+  'ro.tr_airtransfer.feature.support',
+  'tr_airtransfer.feature.support'
+];
 const SUPERVOL_KEYS=[
   'ro.tr_audio.supervol.feature.support',
   'tr_audio.supervol.feature.support'
@@ -834,6 +846,8 @@ async function writeAiSystemProp(){
   lines.push('tr_gallery.live.slow.support='+feat01('gallerylive_os16'));
   lines.push('ro.tr_gallery.live.support='+feat01('gallerylive_os16'));
   lines.push('ro.tr_gallery.live.slow.support='+feat01('gallerylive_os16'));
+  lines.push('ro.tr_airtransfer.feature.support='+feat01('airtransfer_os16'));
+  lines.push('tr_airtransfer.feature.support='+feat01('airtransfer_os16'));
   lines.push('ro.surface_flinger.game_default_frame_rate_override=120');
   lines.push('debug.graphics.game_default_frame_rate.disabled=true');
   lines.push('persist.graphics.game_default_frame_rate.enabled=false');
@@ -880,6 +894,7 @@ async function saveAll(){
       cutepet_os16:cfg.cutepet_os16!==false,
       outdoorboost_os16:cfg.outdoorboost_os16!==false,
       gallerylive_os16:cfg.gallerylive_os16!==false,
+      airtransfer_os16:cfg.airtransfer_os16!==false,
       dynamicbar_os16:cfg.dynamicbar_os16===true,
       force_120hz:cfg.force_120hz===true
     };
@@ -926,6 +941,7 @@ async function dumpAi(){
     ...CUTEPET_KEYS,
     ...OUTDOOR_KEYS,
     ...GALLERYLIVE_KEYS,
+    ...AIRTRANSFER_KEYS,
     ...BLUR_KEYS
   ];
   const lines=['=== keys this module writes ==='];
@@ -987,6 +1003,7 @@ async function dumpAi(){
   lines.push('cutepet_os16  '+String(cfg.cutepet_os16!==false));
   lines.push('outdoorboost_os16  '+String(cfg.outdoorboost_os16!==false));
   lines.push('gallerylive_os16  '+String(cfg.gallerylive_os16!==false));
+  lines.push('airtransfer_os16  '+String(cfg.airtransfer_os16!==false));
   const vsr=await g('getprop persist.tr_video.ai_super_resolution.support');
   lines.push('persist.tr_video.ai_super_resolution.support  '+describeAiFlag(vsr));
   const vsr2=await g('getprop ro.tr_video.ai_super_resolution.support');
@@ -1001,6 +1018,8 @@ async function dumpAi(){
   lines.push('tr_gallery.live.support  '+describeAiFlag(glive));
   const glive2=await g('getprop tr_gallery.live.slow.support');
   lines.push('tr_gallery.live.slow.support  '+describeAiFlag(glive2));
+  const air=await g('getprop ro.tr_airtransfer.feature.support');
+  lines.push('ro.tr_airtransfer.feature.support  '+describeAiFlag(air));
   const lvc=await g('grep hide_status_bar /tr_product/etc/vconfig/com.transsion.launcher3/build.prop 2>/dev/null');
   lines.push('vconfig launcher hide_land  '+(lvc||'EMPTY'));
   const horiz=await g('getprop tr_aod.horizontal.display.feature.support');
@@ -1041,7 +1060,7 @@ async function dumpAi(){
   lines.push(head||'(no product APM json)');
   lines.push('');
   lines.push('=== other live AI-like keys (first 80) ===');
-  const live=await g("getprop | grep -iE 'ai_|aiphone|subtitle|soundrecorder|note_ai|aicore|aipower|ask_ai|tr_gallery|tr_video.vee|studio.lite|tr_game|os_game|esports|bypass_charg|shoulder|smartbutton|tr_aod|aod_|dynamicbar|outdoorboost|cutepet|tr_animation|tr_perf|liquidglass|dreamanimation|anim_arc|unionrender|async_anim|gaussian|dynamicblur|recent.blur|background_blur|xos16_blur|disable_blurs|disableBlur|disable_blur' | head -80");
+  const live=await g("getprop | grep -iE 'ai_|aiphone|subtitle|soundrecorder|note_ai|aicore|aipower|ask_ai|tr_gallery|tr_video.vee|studio.lite|tr_game|os_game|esports|bypass_charg|shoulder|smartbutton|tr_aod|aod_|dynamicbar|outdoorboost|cutepet|airtransfer|tr_animation|tr_perf|liquidglass|dreamanimation|anim_arc|unionrender|async_anim|gaussian|dynamicblur|recent.blur|background_blur|xos16_blur|disable_blurs|disableBlur|disable_blur' | head -80");
   lines.push(live||'(none)');
   lines.push('');
   lines.push('=== gallery / aicore packages ===');
@@ -1210,6 +1229,7 @@ async function loadCfg(){
   if(cfg.cutepet_os16===undefined) cfg.cutepet_os16=true;
   if(cfg.outdoorboost_os16===undefined) cfg.outdoorboost_os16=true;
   if(cfg.gallerylive_os16===undefined) cfg.gallerylive_os16=true;
+  if(cfg.airtransfer_os16===undefined) cfg.airtransfer_os16=true;
   if(cfg.dynamicbar_os16===undefined) cfg.dynamicbar_os16=false;
   if(cfg.force_120hz===undefined) cfg.force_120hz=false;
   if(cfg.force_refresh_hz===120||cfg.force_refresh_hz===144) cfg.force_120hz=true;
@@ -1254,6 +1274,7 @@ async function loadCfg(){
   setT('feat-cutepet', cfg.cutepet_os16!==false);
   setT('feat-outdoor', cfg.outdoorboost_os16!==false);
   setT('feat-gallerylive', cfg.gallerylive_os16!==false);
+  setT('feat-airtransfer', cfg.airtransfer_os16!==false);
   setT('feat-dynamicbar', cfg.dynamicbar_os16===true);
   setT('feat-force120hz', cfg.force_120hz===true);
   setEsportsLevel(esportsLevel());
