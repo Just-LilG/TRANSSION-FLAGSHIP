@@ -98,8 +98,10 @@ write_os16_ai_prop() {
   fi
   aod=$(json_bool "$cfg" aod_os16 true)
   dbar=$(json_bool "$cfg" dynamicbar_os16 true)
+  scale=$(json_bool "$cfg" scale_os16 true)
   [ "$aod" = "false" ] && aod=0 || aod=1
   [ "$dbar" = "false" ] && dbar=0 || dbar=1
+  [ "$scale" = "false" ] && scale=false || scale=true
   cat > "$dest" <<EOF
 # Flagship 16 — OS 16 keys. Magisk loads this file at boot.
 # Apply in WebUI rewrites this file from the Features toggles.
@@ -175,6 +177,8 @@ ro.os_dynamicbar_ai_translation_support=$dbar
 ro.os_dynamic_bar_resident_plane_support=$dbar
 ro.os.tran_hide_status_bar_for_land_recent=$dbar
 ro.tran_hios_dynamic_bar_support=$dbar
+tr_display.resolution.scalingup.support=$scale
+ro.tr_display.resolution.scalingup.support=$scale
 ro.surface_flinger.game_default_frame_rate_override=120
 debug.graphics.game_default_frame_rate.disabled=true
 persist.graphics.game_default_frame_rate.enabled=false
@@ -185,7 +189,7 @@ print_modname() {
   ui_print " "
   ui_print "  ╔══════════════════════════════════════════╗"
   ui_print "  ║    TRANSSION FLAGSHIP 16                 ║"
-  ui_print "  ║    XOS · HiOS · iTel OS 16  ·  V1.62     ║"
+  ui_print "  ║    XOS · HiOS · iTel OS 16  ·  V1.63     ║"
   ui_print "  ╚══════════════════════════════════════════╝"
   ui_print " "
 }
@@ -396,7 +400,7 @@ set_permissions() {
   done
   ui_print " "
   ui_div
-  ui_print "  ✨  FLAGSHIP 16  ·  V1.62"
+  ui_print "  ✨  FLAGSHIP 16  ·  V1.63"
   ui_info "OS     : $OS_TYPE $OS_VER"
   ui_info "Feature: boot + reboot + overlay + AI + gaming + anim/blur + AOD + Dynamic bar + Force 120Hz"
   ui_div

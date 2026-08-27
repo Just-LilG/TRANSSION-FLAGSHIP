@@ -32,7 +32,7 @@ imageless_magisk() {
 OUTFD=$2
 ZIPFILE=$3
 
-ui_print "- Flagship 16 V1.62 installer"
+ui_print "- Flagship 16 V1.63 installer"
 
 mount /data 2>/dev/null
 
