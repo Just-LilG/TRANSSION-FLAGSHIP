@@ -23,6 +23,9 @@
   "blur_os16_level": 2,
   "aod_os16": true,
   "videosr_os16": true,
+  "supervol_os16": true,
+  "treasure_os16": true,
+  "cutepet_os16": true,
   "dynamicbar_os16": true,
   "force_120hz": false
 }

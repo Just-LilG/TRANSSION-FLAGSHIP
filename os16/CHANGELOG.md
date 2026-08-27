@@ -1,5 +1,8 @@
 # Transsion Flagship 16
 
+## v1.70
+- **All Trans OS 16 devices, not only one G99.** Magisk extras that stick stay in the module even if this X6886 Settings row is compiled. Video Super Resolution, Super volume, and AI Treasure Box stay on. Next extra is **Cute Pet**: `ro.tr_cutepet.feature.support` plus Flagship 15 `ro.os_cutepet_support`. Apply + reboot, then Themes / lockscreen pet.
+
 ## v1.69
 - **Dropped Super volume.** Magisk did apply it (`=true` in Dump flags). Settings still hid the row — same class as Display extras: flag sticks, UI is compiled/overlay, and GT has **no** audio vconfig to bind (AOD was the exception because the AOD app reads its own vconfig file).
 - **Video Super Resolution.** Your dump already has `persist.tr_video.ai_super_resolution.support=0`. That is a live key on this G99, on the same video stack as VEE (which did unhide). Apply + reboot, then the video player. Dump that persist flag — if it sticks at 1 and the player still has no SR, that gate is also compiled.
