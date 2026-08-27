@@ -1,5 +1,8 @@
 # Transsion Flagship 16
 
+## v1.46
+- **Same layout as TranOS 16 custom refresh.zip.** That module works with Mountify because the Magellan XML lives in the module’s `system/tr_product/etc/vconfig/magellan/` tree — Mountify only copies `system/*`, then overlays `/tr_product`. V1.43–1.45 wrote the XML next to the module scripts (`magellan/`) and Magisk-bound `/tr_product` after Mountify had already copied; Magellan never saw it. This build writes the patched XML to `system/tr_product/...` on Apply and at install if Force 120Hz is already on, then you reboot so Mountify overlays it. Keep the custom refresh module **disabled**. Force 120Hz on → Apply → reboot.
+
 ## v1.45
 - **Magellan XML is patched at post-fs, before system_server.** V1.44 bound a tiny seed list (Settings/Phone/Messages only) then filled every package at late_start. Magellan loads `tr_product/etc/vconfig/magellan/refresh_rate_config.xml` once when the policy starts — Agent 1 stayed in Other Apps with no 144. This build reads `/data/system/packages.list` at post-fs (no `pm`), **patches the stock XML** (`max="144" auto="120"` on every package, keep OEM version/attrs), then binds that file like bootanim. Mountify does not overlay `/tr_product` (only system/product/vendor/…). Apply + reboot once.
 

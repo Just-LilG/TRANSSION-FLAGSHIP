@@ -1,11 +1,8 @@
 #!/system/bin/sh
-# Flagship 16 Force 120Hz — XOS 16 Magellan via Mountify overlay.
-# Customize App Refresh reads /tr_product/etc/vconfig/magellan/refresh_rate_config.xml
-#   max="144"  → “Apps Supporting 144 Hz” and 144 in the picker
-#   auto="120" → listed default for that app
-# TranOS 16 custom refresh.zip (t.me/nyellnpr/35509) is a 15.6KB Magellan XML
-# flashed with Mountify. Magisk bind of /tr_product loses when Mountify remounts.
-# Per-file copy into /mnt/vendor/mountify/tr_product/... — never bind-dir /tr_product.
+# Flagship 16 Force 120Hz — same layout as TranOS 16 custom refresh.zip:
+# Magellan XML at $MODDIR/system/tr_product/etc/vconfig/magellan/refresh_rate_config.xml
+# Mountify copies module system/* then overlays /tr_product if that partition is a target.
+# Magisk bind of /tr_product is a fallback (bootanim-style) after Mountify runs.
 
 if [ -z "$MODDIR" ]; then
   MODDIR=${0%/*}
@@ -18,7 +15,8 @@ if [ ! -d "$APM_BYPASS" ] && [ -d "$MODDIR/apm_120hz_bypass" ]; then
 fi
 HZDIR="$APM_BYPASS"
 MAGELLAN_DIR="$MODDIR/magellan"
-MAGELLAN_XML="$MAGELLAN_DIR/refresh_rate_config.xml"
+MAGELLAN_XML="$MODDIR/system/tr_product/etc/vconfig/magellan/refresh_rate_config.xml"
+MAGELLAN_TEMPLATE="$MAGELLAN_DIR/refresh_rate_config.xml"
 
 os16_cfg_bool() {
   k="$1"; d="$2"
@@ -51,13 +49,13 @@ os16_try_bind_file() {
   src="$1"
   dest="$2"
   [ -f "$src" ] || return 1
+  parent=$(dirname "$dest")
   if [ ! -e "$dest" ]; then
-    parent=$(dirname "$dest")
-    if [ -d "$parent" ]; then
-      touch "$dest" 2>/dev/null
-      NS=$(os16_120hz_nsenter)
-      [ -e "$dest" ] || { [ -n "$NS" ] && $NS touch "$dest" 2>/dev/null; }
-    fi
+    mkdir -p "$parent" 2>/dev/null
+    NS=$(os16_120hz_nsenter)
+    [ -d "$parent" ] || { [ -n "$NS" ] && $NS mkdir -p "$parent" 2>/dev/null; }
+    touch "$dest" 2>/dev/null
+    [ -e "$dest" ] || { [ -n "$NS" ] && $NS touch "$dest" 2>/dev/null; }
   fi
   [ -e "$dest" ] || return 1
   chcon --reference="$dest" "$src" 2>/dev/null
@@ -224,7 +222,7 @@ os16_json_replace_top_array() {
 }
 
 os16_generate_magellan_xml() {
-  mkdir -p "$MAGELLAN_DIR"
+  mkdir -p "$(dirname "$MAGELLAN_XML")" "$MAGELLAN_DIR"
   tmp="$HZDIR/.pkgs.txt"
   [ -f "$tmp" ] || return 1
   stock=""
@@ -232,10 +230,11 @@ os16_generate_magellan_xml() {
     "$MAGELLAN_DIR/refresh_rate_config.xml.stock" \
     /tr_product/etc/vconfig/magellan/refresh_rate_config.xml \
     /product/etc/vconfig/magellan/refresh_rate_config.xml \
-    /system_ext/etc/vconfig/magellan/refresh_rate_config.xml
+    /system_ext/etc/vconfig/magellan/refresh_rate_config.xml \
+    "$MAGELLAN_TEMPLATE"
   do
     if [ -f "$cand" ] && grep -q '<WHITELIST>' "$cand" 2>/dev/null; then
-      if ! grep -q 'transsion-flagship-16' "$cand" 2>/dev/null; then
+      if [ "$cand" = "$MAGELLAN_TEMPLATE" ] || ! grep -q 'transsion-flagship-16' "$cand" 2>/dev/null; then
         stock="$cand"
         break
       fi
@@ -319,22 +318,21 @@ EOF
 }
 
 os16_copy_magellan_mountify() {
-  dest_mod="$MODDIR/tr_product/etc/vconfig/magellan/refresh_rate_config.xml"
   dest_mfy="/mnt/vendor/mountify/tr_product/etc/vconfig/magellan/refresh_rate_config.xml"
   if ! os16_hz_on; then
-    rm -f "$dest_mod" "$dest_mfy"
+    rm -f "$MAGELLAN_XML" "$dest_mfy"
+    rm -f "$MODDIR/system/tr_product/etc/vconfig/magellan/refresh_rate_config.xml"
     return 0
   fi
+  mkdir -p "$(dirname "$MAGELLAN_XML")"
+  if [ ! -f "$MAGELLAN_XML" ] && [ -f "$MAGELLAN_TEMPLATE" ]; then
+    cp -f "$MAGELLAN_TEMPLATE" "$MAGELLAN_XML"
+  fi
   [ -f "$MAGELLAN_XML" ] || return 0
-  mkdir -p "$(dirname "$dest_mod")"
-  cp -f "$MAGELLAN_XML" "$dest_mod"
-  chmod 644 "$dest_mod" 2>/dev/null
-  # Mountify owns overlay on /tr_product. Magisk bind of that path loses after
-  # the metamodule remounts. Drop the XML into Mountify's tree like the
-  # TranOS 16 custom refresh zip (flash with Mountify).
-  if [ -d /mnt/vendor/mountify/tr_product ]; then
+  chmod 644 "$MAGELLAN_XML" 2>/dev/null
+  if [ -d /mnt/vendor/mountify/tr_product ] || [ -d /mnt/vendor/mountify ]; then
     mkdir -p "$(dirname "$dest_mfy")"
-    cp -f "$MAGELLAN_XML" "$dest_mfy"
+    cp -f "$MAGELLAN_XML" "$dest_mfy" 2>/dev/null
     chmod 644 "$dest_mfy" 2>/dev/null
   fi
 }
