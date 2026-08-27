@@ -38,6 +38,17 @@ ro.tr_game.esportsvirtualctrl.support=1
 ro.tr_game.screen_buttons.support=1
 ro.tr_game.magic_button.support=1
 ro.tr_smartbutton.shoulderbutton20.feature.support=true
+# Social Turbo — OS 16 keys from GT 30 Pro dump (X6858). Stock already has
+# these in /tr_product/etc/build.prop; Magisk system.prop can lose, so
+# apply_blur.sh also resetprop-overwrites them.
+ro.tr_social.turbo_mode.support=1
+ro.tr_social.record.support=1
+ro.tr_social.call_translator.support=1
+ro.tr_social.call_summary.support=1
+ro.tr_social.sound_change.support=1
+ro.tr_socialturbo.makeup.support=1
+ro.tr_social.beauty_disable.support=0
+ro.tr_social.default_off.support=0
 # Animations — OS 16 keys from GT 30 Pro dump (X6858). Dump stock is
 # model/level 2; this module writes 3 like Flagship 15 experimental.
 # Do not write ro.transsion_recent_animation_support — that doubled recents.

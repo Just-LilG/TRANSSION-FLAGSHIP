@@ -5,7 +5,7 @@ LOG="$MODDIR/transflagship16_service.log"
 rm -f "$LOG"
 log_p() { echo "[$(date '+%H:%M:%S')] $1" >> "$LOG"; }
 
-log_p "=== TransFlagship 16 V1.51 ==="
+log_p "=== TransFlagship 16 V1.52 ==="
 log_p "Device : $(getprop ro.product.model 2>/dev/null)"
 log_p "Brand  : $(getprop ro.product.brand 2>/dev/null)"
 log_p "Android: $(getprop ro.build.version.release 2>/dev/null)"
@@ -20,9 +20,11 @@ log_p "config: $([ -f "$MODDIR/config.json" ] && cat "$MODDIR/config.json" || ec
 if [ -f "$MODDIR/apply_blur.sh" ]; then
   . "$MODDIR/apply_blur.sh"
   os16_apply_blur_props
+  os16_apply_social_props
   os16_apply_blur_runtime
   os16_restart_surfaceflinger
   log_p "blur apply: anim=$(os16_cfg_bool anim_os16 true) on=$(os16_cfg_bool blur_os16 true) lvl=$(os16_cfg_int blur_os16_level 2) platform=$(getprop ro.tr_animation.platform_level 2>/dev/null) union=$(getprop ro.tran_display_unionrender.support 2>/dev/null) liquidglass=$(getprop ro.tr_display.liquidglass.support 2>/dev/null)"
+  log_p "social apply: master=$(os16_cfg_bool social_master true) turbo=$(getprop ro.tr_social.turbo_mode.support 2>/dev/null) record=$(getprop ro.tr_social.record.support 2>/dev/null) translator=$(getprop ro.tr_social.call_translator.support 2>/dev/null) makeup=$(getprop ro.tr_socialturbo.makeup.support 2>/dev/null)"
 else
   log_p "apply_blur.sh missing"
 fi
@@ -48,6 +50,11 @@ log_p "  gallery_art=$(getprop ro.tr_gallery.ai_art.support 2>/dev/null)"
 log_p "  gallery_studio=$(getprop ro.tr_gallery.ai.studio.lite.support 2>/dev/null)"
 log_p "  gallery_eraser=$(getprop ro.tr_gallery.eraser.v2.support 2>/dev/null)"
 log_p "  video_vee=$(getprop ro.tr_video.vee.support 2>/dev/null)"
+log_p "  social_turbo=$(getprop ro.tr_social.turbo_mode.support 2>/dev/null)"
+log_p "  social_record=$(getprop ro.tr_social.record.support 2>/dev/null)"
+log_p "  social_translator=$(getprop ro.tr_social.call_translator.support 2>/dev/null)"
+log_p "  social_makeup=$(getprop ro.tr_socialturbo.makeup.support 2>/dev/null)"
+log_p "  social_beauty_disable=$(getprop ro.tr_social.beauty_disable.support 2>/dev/null)"
 log_p "  game_esport=$(getprop ro.tr_game.e_sport_mode.support 2>/dev/null)"
 log_p "  esports10=$(getprop ro.tr_game.tp_esports10.feature.support 2>/dev/null)"
 log_p "  bypass=$(getprop ro.tr_game.bypass_charging.support 2>/dev/null)"
@@ -73,7 +80,8 @@ log_p "  home=$(cmd package resolve-activity --brief -a android.intent.action.MA
   [ -f "$MODDIR/apply_blur.sh" ] || exit 0
   . "$MODDIR/apply_blur.sh"
   os16_apply_blur_props
-    echo "[$(date '+%H:%M:%S')] blur props after settle liquidglass=$(getprop ro.tr_display.liquidglass.support 2>/dev/null) sf_disable=$(getprop persist.sys.sf.disable_blurs 2>/dev/null)" >> "$LOG"
+  os16_apply_social_props
+    echo "[$(date '+%H:%M:%S')] blur props after settle liquidglass=$(getprop ro.tr_display.liquidglass.support 2>/dev/null) sf_disable=$(getprop persist.sys.sf.disable_blurs 2>/dev/null) social=$(getprop ro.tr_social.turbo_mode.support 2>/dev/null)" >> "$LOG"
   if [ -f "$MODDIR/apply_120hz.sh" ]; then
     . "$MODDIR/apply_120hz.sh"
     os16_apply_game_fps_props
