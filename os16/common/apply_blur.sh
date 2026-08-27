@@ -326,12 +326,22 @@ os16_apply_outdoorboost_props() {
   os16_rp_overwrite tr_outdoorboost.feature.support "$o"
 }
 
+os16_apply_gallerylive_props() {
+  lv=$(os16_cfg_01 gallerylive_os16 true)
+  # GT dump: tr_gallery.live.support=0 (Flagship 15 already shipped this).
+  os16_rp_overwrite tr_gallery.live.support "$lv"
+  os16_rp_overwrite tr_gallery.live.slow.support "$lv"
+  os16_rp_overwrite ro.tr_gallery.live.support "$lv"
+  os16_rp_overwrite ro.tr_gallery.live.slow.support "$lv"
+}
+
 os16_apply_os16_extras_props() {
   os16_apply_videosr_props
   os16_apply_supervol_props
   os16_apply_treasure_props
   os16_apply_cutepet_props
   os16_apply_outdoorboost_props
+  os16_apply_gallerylive_props
 }
 
 os16_apply_aod_settings() {
