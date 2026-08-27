@@ -246,24 +246,59 @@ os16_generate_magellan_xml() {
   chmod 644 "$out" 2>/dev/null
 }
 
+os16_product_magellan_xml() {
+  echo "$MODDIR/system/product/etc/vconfig/magellan/refresh_rate_config.xml"
+}
+
 os16_copy_magellan_mountify() {
-  dest_mfy="/mnt/vendor/mountify/tr_product/etc/vconfig/magellan/refresh_rate_config.xml"
+  prod_xml=$(os16_product_magellan_xml)
+  dest_mfy_tr="/mnt/vendor/mountify/tr_product/etc/vconfig/magellan/refresh_rate_config.xml"
+  dest_mfy_pr="/mnt/vendor/mountify/product/etc/vconfig/magellan/refresh_rate_config.xml"
   if ! os16_hz_on; then
-    rm -f "$MAGELLAN_XML" "$dest_mfy"
-    rm -f "$MODDIR/system/tr_product/etc/vconfig/magellan/refresh_rate_config.xml"
+    rm -f "$MAGELLAN_XML" "$prod_xml" "$dest_mfy_tr" "$dest_mfy_pr"
     return 0
   fi
-  mkdir -p "$(dirname "$MAGELLAN_XML")"
+  mkdir -p "$(dirname "$MAGELLAN_XML")" "$(dirname "$prod_xml")"
   if [ ! -f "$MAGELLAN_XML" ] && [ -f "$MAGELLAN_TEMPLATE" ]; then
     cp -f "$MAGELLAN_TEMPLATE" "$MAGELLAN_XML"
   fi
   [ -f "$MAGELLAN_XML" ] || return 0
   chmod 644 "$MAGELLAN_XML" 2>/dev/null
-  if [ -d /mnt/vendor/mountify/tr_product ] || [ -d /mnt/vendor/mountify ]; then
-    mkdir -p "$(dirname "$dest_mfy")"
-    cp -f "$MAGELLAN_XML" "$dest_mfy" 2>/dev/null
-    chmod 644 "$dest_mfy" 2>/dev/null
+  cp -f "$MAGELLAN_XML" "$prod_xml"
+  chmod 644 "$prod_xml" 2>/dev/null
+  if [ -d /mnt/vendor/mountify ]; then
+    mkdir -p "$(dirname "$dest_mfy_tr")" "$(dirname "$dest_mfy_pr")"
+    cp -f "$MAGELLAN_XML" "$dest_mfy_tr" 2>/dev/null
+    cp -f "$MAGELLAN_XML" "$dest_mfy_pr" 2>/dev/null
+    chmod 644 "$dest_mfy_tr" "$dest_mfy_pr" 2>/dev/null
   fi
+}
+
+os16_bind_magellan_bootanim() {
+  # Mountify never overlays /tr_product (not in its target list). Bootanim
+  # reaches it with a per-file nsenter bind. Magellan must use the same path.
+  src="$MAGELLAN_XML"
+  [ -f "$src" ] || src=$(os16_product_magellan_xml)
+  [ -f "$src" ] || src="$MAGELLAN_TEMPLATE"
+  [ -f "$src" ] || return 1
+  NS=$(os16_120hz_nsenter)
+  for dest in \
+    /tr_product/etc/vconfig/magellan/refresh_rate_config.xml \
+    /system/tr_product/etc/vconfig/magellan/refresh_rate_config.xml \
+    /product/etc/vconfig/magellan/refresh_rate_config.xml \
+    /system/product/etc/vconfig/magellan/refresh_rate_config.xml
+  do
+    parent=$(dirname "$dest")
+    if [ ! -d "$parent" ]; then
+      mkdir -p "$parent" 2>/dev/null
+      [ -n "$NS" ] && $NS mkdir -p "$parent" 2>/dev/null
+    fi
+    if [ ! -e "$dest" ]; then
+      touch "$dest" 2>/dev/null
+      [ -e "$dest" ] || { [ -n "$NS" ] && $NS touch "$dest" 2>/dev/null; }
+    fi
+    os16_try_bind_file "$src" "$dest"
+  done
 }
 
 os16_copy_magellan_data() {
@@ -331,12 +366,10 @@ os16_apply_120hz_all() {
 # boot. Do not wipe package_cache (that soft-reboots and can lose config.json),
 # do not force-stop Settings, do not call pm.
 os16_webui_apply_120hz() {
-  if os16_hz_on; then
+  if os16_hz_on && [ -f "$MAGELLAN_TEMPLATE" ]; then
     mkdir -p "$(dirname "$MAGELLAN_XML")"
-    if [ -f "$MAGELLAN_TEMPLATE" ]; then
-      cp -f "$MAGELLAN_TEMPLATE" "$MAGELLAN_XML"
-      chmod 644 "$MAGELLAN_XML" 2>/dev/null
-    fi
+    cp -f "$MAGELLAN_TEMPLATE" "$MAGELLAN_XML"
+    chmod 644 "$MAGELLAN_XML" 2>/dev/null
   fi
   os16_copy_magellan_mountify
   os16_swap_magisk_apm

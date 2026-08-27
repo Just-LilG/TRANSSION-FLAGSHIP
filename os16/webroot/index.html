@@ -318,7 +318,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
           <div class="setting-row">
             <div class="row-text">
               <div class="row-title">Force 120Hz</div>
-              <div class="row-sub">Same Magellan XML as TranOS 16 custom refresh.zip. Off by default. Apply saves the toggle (no soft reboot). Then reboot. Disable the other refresh module.</div>
+              <div class="row-sub">Binds Magellan XML onto /tr_product like bootanim (Mountify cannot overlay that partition). Off by default. Apply, then reboot. Disable the other refresh module.</div>
             </div>
             <label class="toggle"><input type="checkbox" id="feat-force120hz" onchange="cfg.force_120hz=this.checked"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
           </div>
@@ -803,8 +803,8 @@ async function dumpAi(){
   if(minr==='60'||minr==='60.0'||minr==='60.00') lines.push('WARN min_refresh_rate clamped back to 60');
   lines.push('last_tran_refresh_mode_in_refresh_setting  '+(lastt||'EMPTY'));
   lines.push('generated_package_count  '+(pkgc||'EMPTY'));
-  const mag=await g('ls -l /tr_product/etc/vconfig/magellan/refresh_rate_config.xml /mnt/vendor/mountify/tr_product/etc/vconfig/magellan/refresh_rate_config.xml "'+MOD+'/system/tr_product/etc/vconfig/magellan/refresh_rate_config.xml" "'+MOD+'/magellan/refresh_rate_config.xml" 2>/dev/null');
-  lines.push(mag||'no magellan refresh_rate_config.xml');
+  const maglive=await g('ls -l /tr_product/etc/vconfig/magellan/refresh_rate_config.xml /product/etc/vconfig/magellan/refresh_rate_config.xml /system/tr_product/etc/vconfig/magellan/refresh_rate_config.xml 2>/dev/null');
+  lines.push(maglive||'no live magellan xml dests');
   const magn=await g('grep -c max=.144 /tr_product/etc/vconfig/magellan/refresh_rate_config.xml 2>/dev/null');
   lines.push('magellan_max144_items  '+(magn||'EMPTY'));
   const magsw=await g('grep -E "input_method_switch|multi_window_refresh_rate|screen_record" /tr_product/etc/vconfig/magellan/refresh_rate_config.xml 2>/dev/null | head -8');

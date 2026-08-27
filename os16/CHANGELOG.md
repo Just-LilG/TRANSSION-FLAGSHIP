@@ -1,5 +1,8 @@
 # Transsion Flagship 16
 
+## v1.49
+- **Last try for 144Hz: bind Magellan like bootanim.** Mountify v2 never overlays `/tr_product` (only product/vendor/odm/…). The TranOS zip’s `system/tr_product/` tree lands on `/system/tr_product`, which Magellan does not read — Customize stays stock (Messages/Phone/Settings in 144, Agent 1 picker 60/90/120). This build bind-mounts the exact TranOS XML onto `/tr_product/etc/vconfig/magellan/refresh_rate_config.xml` the same way bootanim reaches that partition, and also puts the file under `system/product/etc/vconfig/magellan/` so Mountify overlays `/product`. Force 120Hz on → Apply → reboot. If Agent 1 still has no 144 after this, Magellan is not using that XML on this phone and we move on.
+
 ## v1.48
 - **Force 120Hz stays on after Apply.** V1.47 ran the TranOS installer’s `package_cache` wipe from WebUI Apply, which soft-rebooted the phone before `config.json` was flushed — the toggle came back off. Apply now writes the toggle (and a `.force_120hz` flag) then `sync`s, copies the Magellan XML for the next reboot, and does **not** wipe package cache or force-stop Settings. Apply should not reboot by itself. Then reboot once so Mountify overlays 144.
 

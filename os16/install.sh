@@ -1,5 +1,7 @@
 
-SKIPMOUNT=false
+# Mountify copies system/* itself. Magisk magic-mount of /system fights that
+# overlay and still never reaches /tr_product (bootanim already bind-mounts).
+SKIPMOUNT=true
 PROPFILE=true
 POSTFSDATA=true
 LATESTARTSERVICE=true
@@ -366,13 +368,14 @@ set_permissions() {
       os16_copy_magellan_mountify
     fi
   fi
+  touch "$MODPATH/skip_mount"
   set_perm_recursive "$MODPATH" 0 0 0755 0644
   for sh in "$MODPATH/post-fs-data.sh" "$MODPATH/service.sh" "$MODPATH/uninstall.sh" "$MODPATH/apply_blur.sh" "$MODPATH/apply_120hz.sh"; do
     [ -f "$sh" ] && set_perm "$sh" 0 0 0755
   done
   ui_print " "
   ui_div
-  ui_print "  ✨  FLAGSHIP 16  ·  V1.48"
+  ui_print "  ✨  FLAGSHIP 16  ·  V1.49"
   ui_info "OS     : $OS_TYPE $OS_VER"
   ui_info "Feature: boot + reboot + overlay + AI + gaming + anim/blur"
   ui_div
