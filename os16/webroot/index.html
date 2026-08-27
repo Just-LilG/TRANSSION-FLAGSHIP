@@ -162,10 +162,11 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
             <li>Status bar overlay — upload your own APK</li>
             <li class="on">AI Suite — Features tab; verified OS 16 keys</li>
             <li class="on">AI Call Summary — Ella briefing</li>
-            <li class="next">AI Gallery — all menus for show; some tools may crash when tapped</li>
+            <li class="next">AI Gallery — menus on; Art/Studio need a GT editor this phone does not have</li>
             <li class="on">AI Video Enhancement — VEE flag on</li>
             <li class="on">Gaming — OS 16 GT triggers in XArena</li>
-            <li class="next">Force 120Hz — TranOS 16 custom refresh Magellan XML (144 picker)</li>
+            <li class="on">Force 120Hz — 144 picker verified</li>
+            <li class="next">Social Turbo — call record / translate / beauty (OS 16 keys)</li>
           </ul>
         </div>
         <div class="h8"></div>
@@ -182,7 +183,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
         <div class="page-header">
           <div class="eyebrow">System</div>
           <h1>Features</h1>
-          <div class="sub">AI, gaming, animations, display</div>
+          <div class="sub">AI, gaming, social, animations, display</div>
         </div>
         <div class="section-label">AI Suite</div>
         <div class="glass-card">
@@ -283,6 +284,37 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
               <div class="row-sub">Play while charging without battery-health throttle</div>
             </div>
             <label class="toggle"><input type="checkbox" id="feat-game-bypass" checked onchange="setGame('game_bypass_charge',this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+          </div>
+        </div>
+        <div class="section-label">Social Turbo</div>
+        <div class="glass-card">
+          <div class="setting-row">
+            <div class="row-text">
+              <div class="row-title">Social Turbo</div>
+              <div class="row-sub">OS 16 keys from GT dump (ro.tr_social.*). Apply + reboot, then check call tools.</div>
+            </div>
+            <label class="toggle"><input type="checkbox" id="feat-social" checked onchange="setSocial('social_master',this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+          </div>
+          <div class="setting-row">
+            <div class="row-text">
+              <div class="row-title">Call recording</div>
+              <div class="row-sub">Record voice and video calls</div>
+            </div>
+            <label class="toggle"><input type="checkbox" id="feat-social-record" checked onchange="setSocial('social_record',this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+          </div>
+          <div class="setting-row">
+            <div class="row-text">
+              <div class="row-title">Call translation</div>
+              <div class="row-sub">Live translator in calls</div>
+            </div>
+            <label class="toggle"><input type="checkbox" id="feat-social-translate" checked onchange="setSocial('social_translate',this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+          </div>
+          <div class="setting-row">
+            <div class="row-text">
+              <div class="row-title">Beauty &amp; makeup</div>
+              <div class="row-sub">Filters in video calls</div>
+            </div>
+            <label class="toggle"><input type="checkbox" id="feat-social-beauty" checked onchange="setSocial('social_beauty',this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
           </div>
         </div>
         <div class="section-label">Animations &amp; blur</div>
@@ -424,7 +456,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
 <script type="module">
 const MOD='/data/adb/modules/transsion-flagship-16';
 const CONFIG_PATH=MOD+'/config.json';
-let cfg={bootanim_style:'hios16',bootanim_file:'',rebootanim_style:'hios16',rebootanim_file:'',statusbar_style:'off',statusbarcustom_file:'',ai_master:true,ai_subtitles:true,ai_call_summary:true,ai_writing:true,ai_sound_rec:true,ai_notes:true,ai_gallery:true,ai_video:true,game_master:true,game_esports_touch:true,game_esports_level:3,game_bypass_charge:true,game_gt_triggers:true,anim_os16:true,blur_os16:true,blur_os16_level:2,force_120hz:false};
+let cfg={bootanim_style:'hios16',bootanim_file:'',rebootanim_style:'hios16',rebootanim_file:'',statusbar_style:'off',statusbarcustom_file:'',ai_master:true,ai_subtitles:true,ai_call_summary:true,ai_writing:true,ai_sound_rec:true,ai_notes:true,ai_gallery:true,ai_video:true,game_master:true,game_esports_touch:true,game_esports_level:3,game_bypass_charge:true,game_gt_triggers:true,social_master:true,social_record:true,social_translate:true,social_beauty:true,anim_os16:true,blur_os16:true,blur_os16_level:2,force_120hz:false};
 let _exec=null;
 
 async function exec(cmd){
@@ -465,6 +497,7 @@ function setStatusbarStyle(val){
 }
 function setAi(key,el){ cfg[key]=el.checked; if(key==='ai_master') syncAiChildren(); }
 function setGame(key,el){ cfg[key]=el.checked; if(key==='game_master'||key==='game_esports_touch') syncGameChildren(); }
+function setSocial(key,el){ cfg[key]=el.checked; if(key==='social_master') syncSocialChildren(); }
 function setAnimBlur(key,el){ cfg[key]=el.checked; if(key==='blur_os16') syncBlurChildren(); }
 function setEsportsLevel(val){
   cfg.game_esports_level=val;
@@ -497,6 +530,13 @@ function syncGameChildren(){
   const lvl=document.getElementById('game-esports-level');
   if(lvl) lvl.classList.toggle('disabled', !(on && cfg.game_esports_touch!==false));
 }
+function syncSocialChildren(){
+  const on=cfg.social_master===true;
+  ['feat-social-record','feat-social-translate','feat-social-beauty'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.disabled=!on;
+  });
+}
 function syncBlurChildren(){
   const lvl=document.getElementById('blur-level');
   if(lvl) lvl.classList.toggle('disabled', cfg.blur_os16===false);
@@ -504,6 +544,9 @@ function syncBlurChildren(){
 function ai01(key){ return aiOn(key)?'1':'0'; }
 function aiTf(key){ return aiOn(key)?'true':'false'; }
 function game01(key){ return gameOn(key)?'1':'0'; }
+function socialOn(key){ return cfg.social_master===true && cfg[key]!==false; }
+function social01(key){ return socialOn(key)?'1':'0'; }
+function socialMaster01(){ return cfg.social_master===true?'1':'0'; }
 function esportsLevel(){
   const n=parseInt(cfg.game_esports_level,10);
   return (n>=1 && n<=3)?n:3;
@@ -556,6 +599,16 @@ const GAME_KEYS=[
   'ro.tr_game.screen_buttons.support',
   'ro.tr_game.magic_button.support',
   'ro.tr_smartbutton.shoulderbutton20.feature.support'
+];
+const SOCIAL_KEYS=[
+  'ro.tr_social.turbo_mode.support',
+  'ro.tr_social.record.support',
+  'ro.tr_social.call_translator.support',
+  'ro.tr_social.call_summary.support',
+  'ro.tr_social.sound_change.support',
+  'ro.tr_socialturbo.makeup.support',
+  'ro.tr_social.beauty_disable.support',
+  'ro.tr_social.default_off.support'
 ];
 const ANIM_KEYS=[
   'ro.tr_animation.platform_level',
@@ -662,6 +715,18 @@ async function writeAiSystemProp(){
   lines.push('ro.tr_game.screen_buttons.support='+(trig?'1':'0'));
   lines.push('ro.tr_game.magic_button.support='+(trig?'1':'0'));
   lines.push('ro.tr_smartbutton.shoulderbutton20.feature.support='+(trig?'true':'false'));
+  const sm=socialMaster01();
+  const recs=social01('social_record');
+  const trs=social01('social_translate');
+  const bty=social01('social_beauty');
+  lines.push('ro.tr_social.turbo_mode.support='+sm);
+  lines.push('ro.tr_social.record.support='+recs);
+  lines.push('ro.tr_social.call_translator.support='+trs);
+  lines.push('ro.tr_social.call_summary.support='+trs);
+  lines.push('ro.tr_social.sound_change.support='+recs);
+  lines.push('ro.tr_socialturbo.makeup.support='+bty);
+  lines.push('ro.tr_social.beauty_disable.support='+(bty==='1'?'0':'1'));
+  lines.push('ro.tr_social.default_off.support='+(sm==='1'?'0':'1'));
   const alvl=animLvl();
   const a01=anim01();
   const blvl=blurLvl();
@@ -724,6 +789,10 @@ async function saveAll(){
     game_esports_level:esportsLevel(),
     game_bypass_charge:cfg.game_bypass_charge!==false,
     game_gt_triggers:cfg.game_gt_triggers!==false,
+    social_master:cfg.social_master!==false,
+    social_record:cfg.social_record!==false,
+    social_translate:cfg.social_translate!==false,
+    social_beauty:cfg.social_beauty!==false,
     anim_os16:cfg.anim_os16!==false,
     blur_os16:cfg.blur_os16!==false,
     blur_os16_level:blurLevel(),
@@ -758,6 +827,7 @@ async function dumpAi(){
     ...GALLERY_KEYS,
     'ro.tr_video.vee.support',
     ...GAME_KEYS,
+    ...SOCIAL_KEYS,
     ...ANIM_KEYS,
     ...BLUR_KEYS
   ];
@@ -826,7 +896,7 @@ async function dumpAi(){
   lines.push(head||'(no product APM json)');
   lines.push('');
   lines.push('=== other live AI-like keys (first 80) ===');
-  const live=await g("getprop | grep -iE 'ai_|aiphone|subtitle|soundrecorder|note_ai|aicore|aipower|ask_ai|tr_gallery|tr_video.vee|studio.lite|tr_game|os_game|esports|bypass_charg|shoulder|smartbutton|tr_animation|tr_perf|liquidglass|dynamicbar|dreamanimation|anim_arc|unionrender|async_anim|gaussian|dynamicblur|recent.blur|background_blur|xos16_blur|disable_blurs|disableBlur|disable_blur' | head -80");
+  const live=await g("getprop | grep -iE 'ai_|aiphone|subtitle|soundrecorder|note_ai|aicore|aipower|ask_ai|tr_gallery|tr_video.vee|studio.lite|tr_game|os_game|esports|bypass_charg|shoulder|smartbutton|tr_social|os_social_turbo|tr_animation|tr_perf|liquidglass|dynamicbar|dreamanimation|anim_arc|unionrender|async_anim|gaussian|dynamicblur|recent.blur|background_blur|xos16_blur|disable_blurs|disableBlur|disable_blur' | head -80");
   lines.push(live||'(none)');
   lines.push('');
   lines.push('=== gallery / aicore packages ===');
@@ -834,7 +904,7 @@ async function dumpAi(){
   lines.push(pkgs||'(none)');
   lines.push('');
   lines.push('=== stock build files (do these keys exist without the module?) ===');
-  const stock=await g("for f in /system/build.prop /system/system/build.prop /product/build.prop /system/product/build.prop /system/product/etc/build.prop /vendor/build.prop /odm/etc/build.prop /tr_product/build.prop /tr_product/etc/build.prop; do [ -f \"$f\" ] || continue; hits=$(grep -E 'aicorespeech_subtitle|aicorespeech_livecaption|tr_soundrecorder.summary|tr_note.ai_draw|os_ai_writing|aiphone.feature|aiphone_summany|tr_gallery|tr_video.vee|tr_game.|tr_smartbutton.shoulder|tr_animation|tr_perf.|liquidglass|dynamicbar|dreamanimation|anim_arc|unionrender|async_anim|gaussian|dynamicblur|recent.blur|background_blur|xos16_blur' \"$f\" 2>/dev/null); [ -n \"$hits\" ] && echo \"$f\" && echo \"$hits\"; done");
+  const stock=await g("for f in /system/build.prop /system/system/build.prop /product/build.prop /system/product/build.prop /system/product/etc/build.prop /vendor/build.prop /odm/etc/build.prop /tr_product/build.prop /tr_product/etc/build.prop; do [ -f \"$f\" ] || continue; hits=$(grep -E 'aicorespeech_subtitle|aicorespeech_livecaption|tr_soundrecorder.summary|tr_note.ai_draw|os_ai_writing|aiphone.feature|aiphone_summany|tr_gallery|tr_video.vee|tr_game.|tr_smartbutton.shoulder|tr_social|os_social_turbo|tr_animation|tr_perf.|liquidglass|dynamicbar|dreamanimation|anim_arc|unionrender|async_anim|gaussian|dynamicblur|recent.blur|background_blur|xos16_blur' \"$f\" 2>/dev/null); [ -n \"$hits\" ] && echo \"$f\" && echo \"$hits\"; done");
   lines.push(stock||'(none of those keys in readable stock build files)');
   const text=lines.join('\n');
   document.getElementById('pfd-log').textContent=text;
@@ -985,6 +1055,10 @@ async function loadCfg(){
   if(cfg.game_esports_level===undefined) cfg.game_esports_level=3;
   if(cfg.game_bypass_charge===undefined) cfg.game_bypass_charge=true;
   if(cfg.game_gt_triggers===undefined) cfg.game_gt_triggers=true;
+  if(cfg.social_master===undefined) cfg.social_master=true;
+  if(cfg.social_record===undefined) cfg.social_record=true;
+  if(cfg.social_translate===undefined) cfg.social_translate=true;
+  if(cfg.social_beauty===undefined) cfg.social_beauty=true;
   if(cfg.anim_os16===undefined) cfg.anim_os16=true;
   if(cfg.blur_os16===undefined) cfg.blur_os16=true;
   if(cfg.blur_os16_level===undefined) cfg.blur_os16_level=2;
@@ -1022,6 +1096,10 @@ async function loadCfg(){
   setT('feat-game-touch', cfg.game_esports_touch!==false);
   setT('feat-game-bypass', cfg.game_bypass_charge!==false);
   setT('feat-game-triggers', cfg.game_gt_triggers!==false);
+  setT('feat-social', cfg.social_master!==false);
+  setT('feat-social-record', cfg.social_record!==false);
+  setT('feat-social-translate', cfg.social_translate!==false);
+  setT('feat-social-beauty', cfg.social_beauty!==false);
   setT('feat-anim', cfg.anim_os16!==false);
   setT('feat-blur', cfg.blur_os16!==false);
   setT('feat-force120hz', cfg.force_120hz===true);
@@ -1029,6 +1107,7 @@ async function loadCfg(){
   setBlurLevel(blurLevel());
   syncAiChildren();
   syncGameChildren();
+  syncSocialChildren();
   syncBlurChildren();
 }
 async function init(){
@@ -1051,6 +1130,7 @@ window.confirmReboot=confirmReboot;
 window.setStatusbarStyle=setStatusbarStyle;
 window.setAi=setAi;
 window.setGame=setGame;
+window.setSocial=setSocial;
 window.setAnimBlur=setAnimBlur;
 window.setEsportsLevel=setEsportsLevel;
 window.setBlurLevel=setBlurLevel;

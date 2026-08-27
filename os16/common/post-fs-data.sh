@@ -330,7 +330,9 @@ log_pfd "custom overlay: $have_custom"
 if [ -f "$MODDIR/apply_blur.sh" ]; then
   . "$MODDIR/apply_blur.sh"
   os16_apply_blur_props
+  os16_apply_social_props
   log_pfd "blur props resetprop liquidglass=$(getprop ro.tr_display.liquidglass.support 2>/dev/null) sf_disable=$(getprop persist.sys.sf.disable_blurs 2>/dev/null)"
+  log_pfd "social turbo=$(getprop ro.tr_social.turbo_mode.support 2>/dev/null) record=$(getprop ro.tr_social.record.support 2>/dev/null) translator=$(getprop ro.tr_social.call_translator.support 2>/dev/null) makeup=$(getprop ro.tr_socialturbo.makeup.support 2>/dev/null)"
 else
   log_pfd "apply_blur.sh missing"
 fi

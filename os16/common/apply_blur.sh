@@ -147,6 +147,41 @@ os16_apply_blur_props() {
   os16_rp ro.sf.blurs_are_expensive "$EXP"
 }
 
+os16_apply_social_props() {
+  smaster=$(os16_cfg_bool social_master true)
+  if [ "$smaster" = "true" ] || [ "$smaster" = "1" ]; then
+    smode=1
+    sdefoff=0
+    srec_raw=$(os16_cfg_bool social_record true)
+    strans_raw=$(os16_cfg_bool social_translate true)
+    sbeau_raw=$(os16_cfg_bool social_beauty true)
+    srec=1; strans=1; sbeau=1
+    [ "$srec_raw" = "false" ] || [ "$srec_raw" = "0" ] && srec=0
+    [ "$strans_raw" = "false" ] || [ "$strans_raw" = "0" ] && strans=0
+    [ "$sbeau_raw" = "false" ] || [ "$sbeau_raw" = "0" ] && sbeau=0
+  else
+    smode=0
+    sdefoff=1
+    srec=0
+    strans=0
+    sbeau=0
+  fi
+  if [ "$sbeau" = "1" ]; then
+    sbeau_dis=0
+  else
+    sbeau_dis=1
+  fi
+  # GT dump has these in /tr_product/etc/build.prop — Magisk system.prop loses.
+  os16_rp_overwrite ro.tr_social.turbo_mode.support "$smode"
+  os16_rp_overwrite ro.tr_social.record.support "$srec"
+  os16_rp_overwrite ro.tr_social.call_translator.support "$strans"
+  os16_rp_overwrite ro.tr_social.call_summary.support "$strans"
+  os16_rp_overwrite ro.tr_social.sound_change.support "$srec"
+  os16_rp_overwrite ro.tr_socialturbo.makeup.support "$sbeau"
+  os16_rp_overwrite ro.tr_social.beauty_disable.support "$sbeau_dis"
+  os16_rp_overwrite ro.tr_social.default_off.support "$sdefoff"
+}
+
 os16_force_stop_launchers() {
   home=$(cmd package resolve-activity --brief -a android.intent.action.MAIN -c android.intent.category.HOME 2>/dev/null | tail -n 1)
   home_pkg=$(echo "$home" | cut -d/ -f1)
@@ -204,10 +239,12 @@ os16_apply_blur_runtime() {
 if [ "${0##*/}" = "apply_blur.sh" ]; then
   mode="${1:-all}"
   case "$mode" in
-    props) os16_apply_blur_props ;;
+    props) os16_apply_blur_props; os16_apply_social_props ;;
     runtime) os16_apply_blur_runtime; os16_restart_systemui ;;
+    social) os16_apply_social_props ;;
     *)
       os16_apply_blur_props
+      os16_apply_social_props
       os16_apply_blur_runtime
       os16_restart_surfaceflinger
       ;;

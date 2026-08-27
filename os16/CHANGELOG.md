@@ -1,5 +1,8 @@
 # Transsion Flagship 16
 
+## v1.52
+- **Social Turbo (first try).** Same Features card as Flagship 15, but OS 16 keys from the GT dump: `ro.tr_social.turbo_mode.support`, call record / translator / summary, sound change, makeup, and `beauty_disable` (0 = beauty on). Stock already has these in `/tr_product/etc/build.prop`, so Magisk `system.prop` is not enough — this build also `resetprop`s them at post-fs, late_start, and Apply. Defaults on. Apply + reboot, then check Phone / video-call tools. Dump flags — EMPTY means this G99 still does not expose that key.
+
 ## v1.51
 - **Listed app refresh is 120, not 90.** Magellan `auto="90"` is what Customize App Refresh shows until you pick another rate. This build sets `auto="120"` on those apps (games stay `auto="144"`) and still keeps 144 in the picker. Force 120Hz on → Apply → reboot.
 

@@ -1,8 +1,8 @@
 id=transsion-flagship-16
 name=Transsion Flagship 16
-version=V1.51
-versionCode=151
+version=V1.52
+versionCode=152
 author=𝙻𝙸𝙻 𝙶 𝚃𝙴𝙲𝙷 𝙻𝙰𝙱𝚂
-description=Transsion OS 16 (XOS / HiOS / iTel). Boot/reboot animation, custom overlay, OS 16 AI, gaming, animations, blur, Force 120Hz.
+description=Transsion OS 16 (XOS / HiOS / iTel). Boot/reboot animation, custom overlay, OS 16 AI, gaming, Social Turbo, animations, blur, Force 120Hz.
 minMagisk=20400
 updateJson=https://raw.githubusercontent.com/Just-LilG/TRANSSION-FLAGSHIP/main/os16/update.json
