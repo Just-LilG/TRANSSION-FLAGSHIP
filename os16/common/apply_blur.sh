@@ -268,6 +268,18 @@ os16_apply_launcher_vconfig() {
   os16_bind_vconfig_pkg "$staged" com.transsion.launcher3
 }
 
+os16_apply_settings_vconfig() {
+  on=$(os16_cfg_bool scale_os16 true)
+  if [ "$on" = "true" ] || [ "$on" = "1" ]; then val=true; else val=false; fi
+  staged=$(os16_seed_vconfig_pkg com.android.settings)
+  # GT X6858: /tr_product/etc/vconfig/com.android.settings/build.prop
+  #   tr_display.resolution.scalingup.support=true
+  os16_vconfig_upsert "$staged" "tr_display.resolution.scalingup.support" "$val"
+  os16_bind_vconfig_pkg "$staged" com.android.settings
+  os16_rp_overwrite tr_display.resolution.scalingup.support "$val"
+  os16_rp_overwrite ro.tr_display.resolution.scalingup.support "$val"
+}
+
 os16_apply_aod_props() {
   aod=$(os16_cfg_01 aod_os16 true)
   os16_rp_overwrite ro.tr_aod.feature.support "$aod"
@@ -393,11 +405,12 @@ os16_apply_blur_runtime() {
 if [ "${0##*/}" = "apply_blur.sh" ]; then
   mode="${1:-all}"
   case "$mode" in
-    props) os16_apply_blur_props; os16_apply_aod_props; os16_apply_dynamicbar_props ;;
+    props) os16_apply_blur_props; os16_apply_aod_props; os16_apply_settings_vconfig; os16_apply_dynamicbar_props ;;
     runtime) os16_apply_blur_runtime; os16_apply_aod_settings; os16_apply_dynamicbar_runtime ;;
     *)
       os16_apply_blur_props
       os16_apply_aod_props
+      os16_apply_settings_vconfig
       os16_apply_dynamicbar_props
       os16_clear_failed_feature_leftovers
       os16_apply_aod_settings
