@@ -59,26 +59,6 @@ write_os16_ai_prop() {
   gbypass=$(ai_01 "$cfg" "$gmaster" game_bypass_charge true)
   gtrig=$(ai_01 "$cfg" "$gmaster" game_gt_triggers true)
   gtrig_tf=$(ai_tf "$cfg" "$gmaster" game_gt_triggers true)
-  smaster=$(json_bool "$cfg" social_master true)
-  srec=$(ai_01 "$cfg" "$smaster" social_record true)
-  strans=$(ai_01 "$cfg" "$smaster" social_translate true)
-  sbeau=$(ai_01 "$cfg" "$smaster" social_beauty true)
-  smode=0
-  sdefoff=1
-  sbeau_dis=1
-  if [ "$smaster" = "true" ]; then
-    smode=1
-    sdefoff=0
-  fi
-  [ "$sbeau" = "1" ] && sbeau_dis=0
-  ddc=$(json_bool "$cfg" display_dc true)
-  dcol=$(json_bool "$cfg" display_color true)
-  dhdr=$(json_bool "$cfg" display_hdr true)
-  dread=$(json_bool "$cfg" display_reading false)
-  [ "$ddc" = "false" ] && ddc=0 || ddc=1
-  [ "$dcol" = "false" ] && dcol=0 || dcol=1
-  [ "$dhdr" = "false" ] && dhdr=0 || dhdr=1
-  [ "$dread" = "true" ] && dread=1 || dread=0
   glvl=$(json_int "$cfg" game_esports_level 3)
   [ "$glvl" -ge 1 ] 2>/dev/null || glvl=3
   [ "$glvl" -le 3 ] 2>/dev/null || glvl=3
@@ -151,23 +131,6 @@ ro.tr_game.esportsvirtualctrl.support=$gtrig
 ro.tr_game.screen_buttons.support=$gtrig
 ro.tr_game.magic_button.support=$gtrig
 ro.tr_smartbutton.shoulderbutton20.feature.support=$gtrig_tf
-ro.tr_social.turbo_mode.support=$smode
-ro.tr_social.record.support=$srec
-ro.tr_social.call_translator.support=$strans
-ro.tr_social.call_summary.support=$strans
-ro.tr_social.sound_change.support=$srec
-ro.tr_socialturbo.makeup.support=$sbeau
-ro.tr_social.beauty_disable.support=$sbeau_dis
-ro.tr_social.default_off.support=$sdefoff
-ro.tr_display.sdr2hdr.support=$dhdr
-ro.tr_light.xdr.support=$dhdr
-ro.tr_light.xdr.v2.support=$dhdr
-ro.tran.display_hdr_support=$dhdr
-ro.tran.display_dc_dimming_support=$ddc
-ro.surface_flinger.has_HDR_display=$([ "$dhdr" = "1" ] && echo true || echo false)
-ro.tr_display.colormode.feature.support=$dcol
-ro.tr_display.color.temperature.feature.support=$dcol
-persist.tr_display.color.temperature.aosp.support=$dcol
 ro.tr_animation.platform_level=$alvl
 ro.tr_perf.launch_start_exit.model=$alvl
 ro.tr_perf.power_keyguard_animation.model=$alvl
@@ -204,7 +167,7 @@ print_modname() {
   ui_print " "
   ui_print "  ╔══════════════════════════════════════════╗"
   ui_print "  ║    TRANSSION FLAGSHIP 16                 ║"
-  ui_print "  ║    XOS · HiOS · iTel OS 16  ·  V1.55     ║"
+  ui_print "  ║    XOS · HiOS · iTel OS 16  ·  V1.56     ║"
   ui_print "  ╚══════════════════════════════════════════╝"
   ui_print " "
 }
@@ -387,7 +350,7 @@ on_install() {
   ui_ok "Boot animation"
   ui_ok "Reboot animation"
   ui_ok "Status bar: upload your own overlay, or leave stock"
-  ui_ok "OS 16 AI + Gaming + Social Turbo + Display extras + Animations/Blur + Force 120Hz — Features tab, Apply, then reboot"
+  ui_ok "OS 16 AI + Gaming + Animations/Blur + Force 120Hz — Features tab, Apply, then reboot"
 }
 
 set_permissions() {
@@ -415,9 +378,9 @@ set_permissions() {
   done
   ui_print " "
   ui_div
-  ui_print "  ✨  FLAGSHIP 16  ·  V1.55"
+  ui_print "  ✨  FLAGSHIP 16  ·  V1.56"
   ui_info "OS     : $OS_TYPE $OS_VER"
-  ui_info "Feature: boot + reboot + overlay + AI + gaming + social + display + anim/blur"
+  ui_info "Feature: boot + reboot + overlay + AI + gaming + anim/blur + Force 120Hz"
   ui_div
   ui_print "  Reboot, then open WebUI in Magisk/KSU."
   ui_print " "

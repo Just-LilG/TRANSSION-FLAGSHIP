@@ -18,16 +18,8 @@
   "game_esports_level": 3,
   "game_bypass_charge": true,
   "game_gt_triggers": true,
-  "social_master": true,
-  "social_record": true,
-  "social_translate": true,
-  "social_beauty": true,
   "anim_os16": true,
   "blur_os16": true,
   "blur_os16_level": 2,
-  "display_dc": true,
-  "display_color": true,
-  "display_hdr": true,
-  "display_reading": false,
   "force_120hz": false
 }

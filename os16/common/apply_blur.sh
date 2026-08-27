@@ -151,101 +151,17 @@ os16_apply_blur_props() {
   os16_rp ro.sf.blurs_are_expensive "$EXP"
 }
 
-os16_apply_social_props() {
-  smaster=$(os16_cfg_bool social_master true)
-  if [ "$smaster" = "true" ] || [ "$smaster" = "1" ]; then
-    smode=1
-    sdefoff=0
-    srec_raw=$(os16_cfg_bool social_record true)
-    strans_raw=$(os16_cfg_bool social_translate true)
-    sbeau_raw=$(os16_cfg_bool social_beauty true)
-    srec=1; strans=1; sbeau=1
-    [ "$srec_raw" = "false" ] || [ "$srec_raw" = "0" ] && srec=0
-    [ "$strans_raw" = "false" ] || [ "$strans_raw" = "0" ] && strans=0
-    [ "$sbeau_raw" = "false" ] || [ "$sbeau_raw" = "0" ] && sbeau=0
-  else
-    smode=0
-    sdefoff=1
-    srec=0
-    strans=0
-    sbeau=0
-  fi
-  if [ "$sbeau" = "1" ]; then
-    sbeau_dis=0
-  else
-    sbeau_dis=1
-  fi
-  # GT dump has these in /tr_product/etc/build.prop — Magisk system.prop loses.
-  os16_rp_overwrite ro.tr_social.turbo_mode.support "$smode"
-  os16_rp_overwrite ro.tr_social.record.support "$srec"
-  os16_rp_overwrite ro.tr_social.call_translator.support "$strans"
-  os16_rp_overwrite ro.tr_social.call_summary.support "$strans"
-  os16_rp_overwrite ro.tr_social.sound_change.support "$srec"
-  os16_rp_overwrite ro.tr_socialturbo.makeup.support "$sbeau"
-  os16_rp_overwrite ro.tr_social.beauty_disable.support "$sbeau_dis"
-  os16_rp_overwrite ro.tr_social.default_off.support "$sdefoff"
-}
-
-os16_cfg_01() {
-  k="$1"; d="$2"
-  v=$(os16_cfg_bool "$k" "$d")
-  if [ "$v" = "false" ] || [ "$v" = "0" ]; then
-    echo 0
-  else
-    echo 1
-  fi
-}
-
-os16_apply_display_props() {
-  hdr=$(os16_cfg_01 display_hdr true)
-  col=$(os16_cfg_01 display_color true)
-  # GT dump has sdr2hdr/xdr at 0 in /tr_product/etc/build.prop.
-  os16_rp_overwrite ro.tr_display.sdr2hdr.support "$hdr"
-  os16_rp_overwrite ro.tr_light.xdr.support "$hdr"
-  os16_rp_overwrite ro.tr_light.xdr.v2.support "$hdr"
-  os16_rp_overwrite ro.tr_display.colormode.feature.support "$col"
-  os16_rp_overwrite ro.tr_display.color.temperature.feature.support "$col"
-  os16_rp persist.tr_display.color.temperature.aosp.support "$col"
-  # V1.53: OS 16 keys stuck, Settings unchanged. Flagship 15 gated
-  # Display rows on these names (not in the GT tr_product dump).
-  os16_rp_overwrite ro.tran.display_hdr_support "$hdr"
-  dc=$(os16_cfg_01 display_dc true)
-  os16_rp_overwrite ro.tran.display_dc_dimming_support "$dc"
-  # OS 16 Settings also checks SurfaceFlinger HDR capability (dump: false).
-  # Same phone showed HDR/DC on OS 15 — try flipping this like those flags.
-  if [ "$hdr" = "1" ]; then
-    os16_rp_overwrite ro.surface_flinger.has_HDR_display true
-  else
-    os16_rp_overwrite ro.surface_flinger.has_HDR_display false
-  fi
-}
-
-os16_apply_display_settings() {
-  dc=$(os16_cfg_01 display_dc true)
-  col=$(os16_cfg_01 display_color true)
-  hdr=$(os16_cfg_01 display_hdr true)
-  # Reading default is off (same as Flagship 15).
-  rd=$(os16_cfg_bool display_reading false)
-  if [ "$rd" = "true" ] || [ "$rd" = "1" ]; then
-    rd=1
-  else
-    rd=0
-  fi
-  os16_settings_put system tran_dc_dimming_enable "$dc"
-  os16_settings_put global tran_dc_dimming_enable "$dc"
-  os16_settings_put system tran_display_color_enhance "$col"
-  os16_settings_put global tran_display_color_enhance "$col"
-  os16_settings_put system tran_reading_mode_enable "$rd"
-  os16_settings_put global tran_reading_mode_enable "$rd"
-  os16_settings_put system tr_dc_dimming_enable "$dc"
-  os16_settings_put global tr_dc_dimming_enable "$dc"
-  os16_settings_put system tr_display_color_enhance "$col"
-  os16_settings_put global tr_display_color_enhance "$col"
-  os16_settings_put system tr_reading_mode_enable "$rd"
-  os16_settings_put global tr_reading_mode_enable "$rd"
-  os16_settings_put system tran_sdr2hdr_enable "$hdr"
-  os16_settings_put global tran_sdr2hdr_enable "$hdr"
-  am force-stop com.android.settings >/dev/null 2>&1
+os16_clear_failed_feature_leftovers() {
+  # V1.52–1.55 Social Turbo / Display extras never unhid OS 16 UI.
+  for ns in system global; do
+    settings delete "$ns" tran_dc_dimming_enable >/dev/null 2>&1
+    settings delete "$ns" tran_display_color_enhance >/dev/null 2>&1
+    settings delete "$ns" tran_reading_mode_enable >/dev/null 2>&1
+    settings delete "$ns" tr_dc_dimming_enable >/dev/null 2>&1
+    settings delete "$ns" tr_display_color_enhance >/dev/null 2>&1
+    settings delete "$ns" tr_reading_mode_enable >/dev/null 2>&1
+    settings delete "$ns" tran_sdr2hdr_enable >/dev/null 2>&1
+  done
 }
 
 os16_force_stop_launchers() {
@@ -305,15 +221,11 @@ os16_apply_blur_runtime() {
 if [ "${0##*/}" = "apply_blur.sh" ]; then
   mode="${1:-all}"
   case "$mode" in
-    props) os16_apply_blur_props; os16_apply_social_props; os16_apply_display_props ;;
-    runtime) os16_apply_blur_runtime; os16_apply_display_settings; os16_restart_systemui ;;
-    social) os16_apply_social_props ;;
-    display) os16_apply_display_props; os16_apply_display_settings ;;
+    props) os16_apply_blur_props ;;
+    runtime) os16_apply_blur_runtime; os16_restart_systemui ;;
     *)
       os16_apply_blur_props
-      os16_apply_social_props
-      os16_apply_display_props
-      os16_apply_display_settings
+      os16_clear_failed_feature_leftovers
       os16_apply_blur_runtime
       os16_restart_surfaceflinger
       ;;
