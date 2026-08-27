@@ -1,5 +1,8 @@
 # Transsion Flagship 16
 
+## v1.35
+- **Notification / QS blur is SystemUI, not the dock.** Off was supposed to look like Smart-series (solid panels, slight transparency). V1.31 turned flagship Gaussian on; V1.33–V1.34 only restarted the launcher, so the shade kept the glass. SystemUI caches `persist.sys.sf.disable_blurs` until that process dies. This build also writes `persist.sysui.disableBlur`, `wm disable-blur`, and `accessibility_reduce_transparency`, then **restarts System UI**. Levels 1/2/3 still map gaussian + radius (20/45/80); compositor blur itself is on with the toggle and off without it. Apply (shade will flicker), then reboot. Pull down notifications — should be solid when off.
+
 ## v1.34
 - **Blur off/level: resetprop after overlay.** V1.33 still left glass on: Magisk `system.prop` does not override stock `ro.tr_display.liquidglass.support=1` from `/tr_product/etc/build.prop`, settings/wm only hit `com.transsion.launcher3` (this phone may use XOSLauncher), and gaussian keys are often EMPTY. This build `resetprop`s liquid glass, SurfaceFlinger blur, recents blur, gaussian level, `persist.sys.sf.disable_blurs`, and `ro.sf.blurs_are_expensive` in post-fs-data, at late_start, 8s later, and on Apply. Force-stops the default home app plus `launcher3` / `XOSLauncher` / `hilauncher`. Apply, then reboot. Dump flags — if liquidglass is still 1 after reboot, paste that log.
 
