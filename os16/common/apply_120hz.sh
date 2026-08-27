@@ -1,9 +1,8 @@
 #!/system/bin/sh
-# Flagship 16 Force 120Hz: default 120 for every installed package
-# (system + user). Flagship 15 never confirmed this on X6886.
-# Generate APM lists when pm is up (late_start / WebUI Apply), not
-# post-fs-data. Bind per-file only — never bind-dir /tr_product.
-# Off does not write a fake 60Hz default.
+# Flagship 16 refresh: default 120 or 144 for every installed package.
+# The Customize App Refresh list reads Settings prefs / per-app keys, not
+# the APM whitelist. V1.40 only wrote APM + global mode, so the list stayed
+# at 90Hz. Off does not write a fake 60Hz default.
 
 if [ -z "$MODDIR" ]; then
   MODDIR=${0%/*}
@@ -18,9 +17,56 @@ os16_cfg_bool() {
   [ -n "$val" ] && echo "$val" || echo "$d"
 }
 
-os16_hz_on() {
+os16_cfg_int() {
+  k="$1"; d="$2"
+  v=$(os16_cfg_bool "$k" "$d")
+  case "$v" in
+    ''|*[!0-9]*) echo "$d" ;;
+    *) echo "$v" ;;
+  esac
+}
+
+os16_hz_target() {
+  v=$(os16_cfg_int force_refresh_hz 0)
+  case "$v" in
+    120|144) echo "$v"; return ;;
+  esac
   on=$(os16_cfg_bool force_120hz false)
-  [ "$on" = "true" ] || [ "$on" = "1" ]
+  if [ "$on" = "true" ] || [ "$on" = "1" ]; then
+    echo 120
+    return
+  fi
+  echo 0
+}
+
+os16_hz_on() {
+  t=$(os16_hz_target)
+  [ "$t" = "120" ] || [ "$t" = "144" ]
+}
+
+os16_hz_rp() {
+  k="$1"; v="$2"
+  if [ -x /data/adb/magisk/resetprop ]; then
+    /data/adb/magisk/resetprop --delete "$k" >/dev/null 2>&1
+  fi
+  if command -v resetprop >/dev/null 2>&1; then
+    resetprop --delete "$k" >/dev/null 2>&1
+  fi
+  if [ -x /data/adb/ksud ]; then
+    /data/adb/ksud resetprop --delete "$k" >/dev/null 2>&1
+  fi
+  if [ -x /data/adb/ksud ]; then
+    /data/adb/ksud resetprop "$k" "$v" >/dev/null 2>&1 && return 0
+  fi
+  if [ -x /data/adb/magisk/resetprop ]; then
+    /data/adb/magisk/resetprop -n "$k" "$v" >/dev/null 2>&1 && return 0
+    /data/adb/magisk/resetprop "$k" "$v" >/dev/null 2>&1 && return 0
+  fi
+  if command -v resetprop >/dev/null 2>&1; then
+    resetprop -n "$k" "$v" >/dev/null 2>&1 && return 0
+    resetprop "$k" "$v" >/dev/null 2>&1 && return 0
+  fi
+  setprop "$k" "$v" >/dev/null 2>&1
 }
 
 os16_120hz_nsenter() {
@@ -81,7 +127,6 @@ os16_bind_120hz_files() {
 }
 
 os16_write_pkg_array() {
-  # stdout: pretty JSON array of every package pm can see
   tmp="$HZDIR/.pkgs.txt"
   {
     echo android
@@ -154,7 +199,6 @@ os16_generate_120hz_jsons() {
   os16_write_pkg_array > "$arr"
   n=$(cat "$HZDIR/.pkg_count" 2>/dev/null)
   [ -z "$n" ] && n=0
-  # pm not ready yet — keep shipped / last generated lists
   if [ "$n" -lt 8 ]; then
     echo "pm-not-ready:$n" > "$HZDIR/.pkg_count"
     return 0
@@ -171,6 +215,9 @@ os16_generate_120hz_jsons() {
     os16_json_replace_top_array "$json" fast_slow_slide_blacklist "$empty"
     os16_json_replace_top_array "$json" video_45hz_whitelist "$empty"
     os16_json_replace_top_array "$json" video_call_45hz_whitelist "$empty"
+    os16_json_replace_top_array "$json" refresh_rate_90hz_whitelist_in_120hz_mode "$empty"
+    os16_json_replace_top_array "$json" refresh_rate_blacklist_in_90hz_mode "$empty"
+    os16_json_replace_top_array "$json" min_refresh_rate_90hz_in_auto_mode "$empty"
   done
 }
 
@@ -179,33 +226,160 @@ os16_put_hz() {
   settings put "$ns" "$key" "$val" >/dev/null 2>&1
 }
 
-os16_apply_120hz_settings() {
-  os16_hz_on || return 0
-  for ns in system global; do
-    os16_put_hz "$ns" tran_refresh_mode 120
-    os16_put_hz "$ns" tran_need_recovery_refresh_mode 120
-    os16_put_hz "$ns" tran_need_recovery_refresh_rate 120
-    os16_put_hz "$ns" last_tran_refresh_mode_in_refresh_setting 120
-    os16_put_hz "$ns" peak_refresh_rate 120.0
-    os16_put_hz "$ns" min_refresh_rate 120.0
-    os16_put_hz "$ns" user_refresh_rate 120
-    os16_put_hz "$ns" preferred_refresh_rate 120
+os16_pkg_uid() {
+  pkg="$1"
+  dumpsys package "$pkg" 2>/dev/null | grep -m1 'userId=' | sed 's/.*userId=\([0-9]*\).*/\1/'
+}
+
+os16_install_pref_xml() {
+  xml="$1"
+  pkg="$2"
+  [ -f "$xml" ] || return 1
+  uid=$(os16_pkg_uid "$pkg")
+  [ -z "$uid" ] && uid=1000
+  for dir in \
+      /data/user_de/0/$pkg/shared_prefs \
+      /data/user/0/$pkg/shared_prefs \
+      /data/data/$pkg/shared_prefs
+  do
+    parent=$(dirname "$dir")
+    [ -d "$parent" ] || continue
+    mkdir -p "$dir" 2>/dev/null
+    for name in flagship16_app_refresh_rate.xml app_refresh_rate.xml \
+                tran_app_refresh_rate.xml pref_app_refresh_rate.xml \
+                custom_app_refresh_rate.xml RefreshRate.xml; do
+      cp -f "$xml" "$dir/$name" 2>/dev/null || continue
+      chmod 660 "$dir/$name" 2>/dev/null
+      chown "$uid:$uid" "$dir/$name" 2>/dev/null
+      chcon u:object_r:app_data_file:s0 "$dir/$name" 2>/dev/null
+    done
   done
-  if command -v resetprop >/dev/null 2>&1; then
-    resetprop persist.sys.peak_refresh_rate 120 >/dev/null 2>&1
-    resetprop persist.sys.min_refresh_rate 120 >/dev/null 2>&1
+}
+
+os16_write_app_defaults() {
+  hz=$(os16_hz_target)
+  [ "$hz" = "120" ] || [ "$hz" = "144" ] || return 0
+  pkgs="$HZDIR/.pkgs.txt"
+  [ -s "$pkgs" ] || return 0
+
+  xml="$HZDIR/flagship16_app_refresh_rate.xml"
+  {
+    echo "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>"
+    echo '<map>'
+    echo "  <int name=\"__default__\" value=\"$hz\" />"
+    echo "  <int name=\"other_apps\" value=\"$hz\" />"
+    echo "  <int name=\"default_refresh_rate\" value=\"$hz\" />"
+    echo "  <int name=\"tran_default_refresh_rate\" value=\"$hz\" />"
+    while IFS= read -r pkg; do
+      [ -n "$pkg" ] || continue
+      echo "  <int name=\"$pkg\" value=\"$hz\" />"
+    done < "$pkgs"
+    echo '</map>'
+  } > "$xml"
+
+  json="$HZDIR/flagship16_app_refresh_rate.json"
+  awk -v hz="$hz" '
+    BEGIN { printf "{" }
+    NF {
+      if (n++) printf ","
+      printf "\"%s\":%s", $0, hz
+    }
+    END { print "}" }
+  ' "$pkgs" > "$json"
+
+  map="$HZDIR/flagship16_app_refresh_rate.map"
+  awk -v hz="$hz" '
+    NF {
+      if (n++) printf ";"
+      printf "%s:%s", $0, hz
+    }
+    END { print "" }
+  ' "$pkgs" > "$map"
+  blob=$(cat "$json" 2>/dev/null)
+  mapblob=$(cat "$map" 2>/dev/null)
+
+  for ns in system global secure; do
+    os16_put_hz "$ns" tran_app_refresh_rate "$blob"
+    os16_put_hz "$ns" tran_custom_app_refresh_rate "$blob"
+    os16_put_hz "$ns" app_refresh_rate_config "$blob"
+    os16_put_hz "$ns" custom_app_refresh_rate "$mapblob"
+    os16_put_hz "$ns" tran_refresh_rate_apps "$mapblob"
+    os16_put_hz "$ns" other_apps_refresh_rate "$hz"
+    os16_put_hz "$ns" default_app_refresh_rate "$hz"
+    os16_put_hz "$ns" tran_other_app_refresh_rate "$hz"
+  done
+
+  # Per-app keys the Customize list may store after a tap.
+  while IFS= read -r pkg; do
+    [ -n "$pkg" ] || continue
+    os16_put_hz system "tran_refresh_rate_$pkg" "$hz"
+    os16_put_hz system "refresh_rate_$pkg" "$hz"
+  done < "$pkgs"
+
+  os16_install_pref_xml "$xml" com.android.settings
+  os16_install_pref_xml "$xml" com.transsion.ossettingsext
+  os16_install_pref_xml "$xml" com.transsion.trsettings
+  am force-stop com.android.settings >/dev/null 2>&1
+  am force-stop com.transsion.ossettingsext >/dev/null 2>&1
+}
+
+os16_apply_120hz_props() {
+  hz=$(os16_hz_target)
+  [ "$hz" = "120" ] || [ "$hz" = "144" ] || return 0
+  os16_hz_rp ro.tran_90hz_refresh_rate.not_support 1
+  os16_hz_rp ro.tr_display.90hz.not_support 1
+  os16_hz_rp ro.tran_default_auto_refresh.support 0
+  os16_hz_rp ro.tr_display.default_auto_refresh.support 0
+  os16_hz_rp ro.tran_custom_refresh_rate_config.support 1
+  os16_hz_rp persist.sys.peak_refresh_rate "$hz"
+  os16_hz_rp persist.sys.min_refresh_rate "$hz"
+  if [ "$hz" = "144" ]; then
+    os16_hz_rp ro.tran_144hz_refresh_rate.support 1
+    os16_hz_rp ro.tr_display.144hz.support 1
+    os16_hz_rp ro.tran_144hz_refresh_rate.not_support 0
   else
-    setprop persist.sys.peak_refresh_rate 120 >/dev/null 2>&1
-    setprop persist.sys.min_refresh_rate 120 >/dev/null 2>&1
+    os16_hz_rp ro.tran_144hz_refresh_rate.support 0
+    os16_hz_rp ro.tr_display.144hz.support 0
   fi
-  cmd device_config put display_manager peak_refresh_rate_default 120 >/dev/null 2>&1
-  device_config put display_manager peak_refresh_rate_default 120 >/dev/null 2>&1
+}
+
+os16_apply_120hz_settings() {
+  hz=$(os16_hz_target)
+  [ "$hz" = "120" ] || [ "$hz" = "144" ] || return 0
+  f="$hz.0"
+  for ns in system global; do
+    os16_put_hz "$ns" tran_refresh_mode "$hz"
+    os16_put_hz "$ns" tran_need_recovery_refresh_mode "$hz"
+    os16_put_hz "$ns" tran_need_recovery_refresh_rate "$hz"
+    os16_put_hz "$ns" last_tran_refresh_mode_in_refresh_setting "$hz"
+    os16_put_hz "$ns" tran_default_refresh_mode "$hz"
+    os16_put_hz "$ns" peak_refresh_rate "$f"
+    os16_put_hz "$ns" min_refresh_rate "$f"
+    os16_put_hz "$ns" user_refresh_rate "$hz"
+    os16_put_hz "$ns" preferred_refresh_rate "$hz"
+    os16_put_hz "$ns" max_refresh_rate "$f"
+    os16_put_hz "$ns" min_frame_rate "$hz"
+    os16_put_hz "$ns" max_frame_rate "$hz"
+    os16_put_hz "$ns" other_apps_refresh_rate "$hz"
+    os16_put_hz "$ns" default_app_refresh_rate "$hz"
+  done
+  os16_put_hz secure user_refresh_rate "$hz"
+  os16_put_hz global tran_default_auto_refresh.support 0
+  os16_put_hz global tran_90hz_refresh_rate.not_support 1
+  os16_put_hz global tran_low_battery_60hz_refresh_rate.support 0
+  os16_put_hz global tran_custom_refresh_rate_config.support 1
+  if [ "$hz" = "144" ]; then
+    os16_put_hz global tran_144hz_refresh_rate.support 1
+  fi
+  cmd device_config put display_manager peak_refresh_rate_default "$hz" >/dev/null 2>&1
 }
 
 os16_apply_120hz_all() {
   os16_generate_120hz_jsons
   os16_bind_120hz_files
+  os16_apply_120hz_props
   os16_apply_120hz_settings
+  os16_write_app_defaults
 }
 
 if [ "${0##*/}" = "apply_120hz.sh" ]; then

@@ -335,15 +335,14 @@ else
   log_pfd "apply_blur.sh missing"
 fi
 
-# Force 120Hz: bind last generated / shipped APM json over a live file only.
-# Do not run pm here — package manager is not up. service.sh regenerates
-# the all-apps whitelist at late_start and binds again.
-HZ_ON=$(cfg_get force_120hz "false")
-log_pfd "force_120hz=$HZ_ON"
+# Refresh: bind last generated / shipped APM json over a live file only.
+# Do not run pm here — package manager is not up. service.sh writes per-app
+# defaults at late_start and binds again.
 if [ -f "$MODDIR/apply_120hz.sh" ]; then
   . "$MODDIR/apply_120hz.sh"
+  os16_apply_120hz_props
   os16_bind_120hz_files
-  log_pfd "120hz bind done pkg_count=$(cat "$MODDIR/apm_120hz_bypass/.pkg_count" 2>/dev/null)"
+  log_pfd "refresh hz=$(os16_hz_target) 90not=$(getprop ro.tran_90hz_refresh_rate.not_support 2>/dev/null) 144=$(getprop ro.tran_144hz_refresh_rate.support 2>/dev/null)"
 else
   log_pfd "apply_120hz.sh missing"
 fi

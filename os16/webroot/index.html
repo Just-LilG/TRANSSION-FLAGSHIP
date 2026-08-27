@@ -143,7 +143,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
         </div>
         <div class="hero-card">
           <div class="hero-title">Transsion Flagship 16</div>
-          <div class="hero-sub" id="module-version-sub">V1.40 · OS 16</div>
+          <div class="hero-sub" id="module-version-sub">V1.41 · OS 16</div>
         </div>
         <div class="h8"></div>
         <div class="warn-card" id="old-mod-warn">Flagship 15 is still installed. This installer disables it. Remove it from Magisk/KSU so the two modules do not fight.</div>
@@ -165,7 +165,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
             <li class="next">AI Gallery — all menus for show; some tools may crash when tapped</li>
             <li class="on">AI Video Enhancement — VEE flag on</li>
             <li class="on">Gaming — OS 16 GT triggers in XArena</li>
-            <li class="next">Force 120Hz — default 120 for all apps; not confirmed yet</li>
+            <li class="next">Refresh rate — Off / 120 / 144; Customize App list was still 90</li>
           </ul>
         </div>
         <div class="h8"></div>
@@ -317,10 +317,14 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
         <div class="glass-card">
           <div class="setting-row">
             <div class="row-text">
-              <div class="row-title">Force 120Hz</div>
-              <div class="row-sub">Makes 120Hz the default for every app (system + installed). Off by default. Apply + reboot. Dump flags if some apps stay at 90/60.</div>
+              <div class="row-title">App refresh default</div>
+              <div class="row-sub">Off keeps stock (this phone lists Other Apps at 90Hz). 120 or 144 writes that rate for every app, including the Customize App Refresh list. Apply + reboot.</div>
             </div>
-            <label class="toggle"><input type="checkbox" id="feat-force120hz" onchange="cfg.force_120hz=this.checked"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+          </div>
+          <div class="segmented" id="refresh-hz">
+            <div class="segmented-opt active" data-val="0" onclick="setRefreshHz(0)">Off</div>
+            <div class="segmented-opt" data-val="120" onclick="setRefreshHz(120)">120</div>
+            <div class="segmented-opt" data-val="144" onclick="setRefreshHz(144)">144</div>
           </div>
         </div>
         <div class="section-label">Status bar</div>
@@ -424,7 +428,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
 <script type="module">
 const MOD='/data/adb/modules/transsion-flagship-16';
 const CONFIG_PATH=MOD+'/config.json';
-let cfg={bootanim_style:'hios16',bootanim_file:'',rebootanim_style:'hios16',rebootanim_file:'',statusbar_style:'off',statusbarcustom_file:'',ai_master:true,ai_subtitles:true,ai_call_summary:true,ai_writing:true,ai_sound_rec:true,ai_notes:true,ai_gallery:true,ai_video:true,game_master:true,game_esports_touch:true,game_esports_level:3,game_bypass_charge:true,game_gt_triggers:true,anim_os16:true,blur_os16:true,blur_os16_level:2,force_120hz:false};
+let cfg={bootanim_style:'hios16',bootanim_file:'',rebootanim_style:'hios16',rebootanim_file:'',statusbar_style:'off',statusbarcustom_file:'',ai_master:true,ai_subtitles:true,ai_call_summary:true,ai_writing:true,ai_sound_rec:true,ai_notes:true,ai_gallery:true,ai_video:true,game_master:true,game_esports_touch:true,game_esports_level:3,game_bypass_charge:true,game_gt_triggers:true,anim_os16:true,blur_os16:true,blur_os16_level:2,force_120hz:false,force_refresh_hz:0};
 let _exec=null;
 
 async function exec(cmd){
@@ -477,6 +481,20 @@ function setBlurLevel(val){
   document.querySelectorAll('#blur-level .segmented-opt').forEach(o=>{
     o.classList.toggle('active', String(o.dataset.val)===String(val));
   });
+}
+function setRefreshHz(val){
+  const n=parseInt(val,10);
+  cfg.force_refresh_hz=(n===120||n===144)?n:0;
+  cfg.force_120hz=cfg.force_refresh_hz===120;
+  document.querySelectorAll('#refresh-hz .segmented-opt').forEach(o=>{
+    o.classList.toggle('active', String(o.dataset.val)===String(cfg.force_refresh_hz));
+  });
+}
+function refreshHz(){
+  const n=parseInt(cfg.force_refresh_hz,10);
+  if(n===120||n===144) return n;
+  if(cfg.force_120hz===true) return 120;
+  return 0;
 }
 function setT(id,v){ const el=document.getElementById(id); if(el) el.checked=!!v; }
 function aiOn(key){ return cfg.ai_master===true && cfg[key]!==false; }
@@ -692,6 +710,18 @@ async function writeAiSystemProp(){
   lines.push('persist.sysui.disableBlur='+blurDisable());
   lines.push('persist.sysui.disable_blur='+blurDisable());
   lines.push('ro.sf.blurs_are_expensive='+blurDisable());
+  const hz=refreshHz();
+  if(hz===120||hz===144){
+    lines.push('ro.tran_90hz_refresh_rate.not_support=1');
+    lines.push('ro.tr_display.90hz.not_support=1');
+    lines.push('ro.tran_default_auto_refresh.support=0');
+    lines.push('ro.tr_display.default_auto_refresh.support=0');
+    lines.push('ro.tran_custom_refresh_rate_config.support=1');
+    lines.push('ro.tran_144hz_refresh_rate.support='+(hz===144?'1':'0'));
+    lines.push('ro.tr_display.144hz.support='+(hz===144?'1':'0'));
+    lines.push('persist.sys.peak_refresh_rate='+hz);
+    lines.push('persist.sys.min_refresh_rate='+hz);
+  }
   const body=lines.join('\n')+'\n';
   const esc=body.replace(/'/g,"'\\''");
   const r=await exec("printf '%s' '"+esc+"' > \""+MOD+"/system.prop\" && echo OK");
@@ -722,7 +752,8 @@ async function saveAll(){
     anim_os16:cfg.anim_os16!==false,
     blur_os16:cfg.blur_os16!==false,
     blur_os16_level:blurLevel(),
-    force_120hz:cfg.force_120hz===true
+    force_120hz:refreshHz()===120,
+    force_refresh_hz:refreshHz()
   };
   const json=JSON.stringify(slim,null,2).replace(/'/g,"'\\''");
   const r=await exec("echo '"+json+"' > \""+CONFIG_PATH+"\" && echo OK");
@@ -731,7 +762,7 @@ async function saveAll(){
   if(!props){ toast('Saved config, but AI props failed to write'); return; }
   await applyBlurRuntime();
   await apply120HzRuntime();
-  toast('Saved — reboot so 120Hz and animation/glass apply');
+  toast('Saved — reboot so refresh rate and animation/glass apply');
 }
 async function applyBlurRuntime(){
   await exec('sh "'+MOD+'/apply_blur.sh" all >/dev/null 2>&1; echo OK');
@@ -786,6 +817,8 @@ async function dumpAi(){
   lines.push('wm disable-blur  '+(wm||'EMPTY'));
   lines.push('');
   lines.push('=== refresh rate ===');
+  const hzWant=refreshHz();
+  lines.push('force_refresh_hz  '+hzWant);
   const trm=await g('settings get system tran_refresh_mode');
   const trmg=await g('settings get global tran_refresh_mode');
   const peak=await g('settings get system peak_refresh_rate');
@@ -793,21 +826,34 @@ async function dumpAi(){
   const minr=await g('settings get system min_refresh_rate');
   const minrg=await g('settings get global min_refresh_rate');
   const lastt=await g('settings get system last_tran_refresh_mode_in_refresh_setting');
+  const other=await g('settings get system other_apps_refresh_rate');
   const user=await g('settings get system user_refresh_rate');
   const pref=await g('settings get system preferred_refresh_rate');
   const ppeak=await g('getprop persist.sys.peak_refresh_rate');
   const pmin=await g('getprop persist.sys.min_refresh_rate');
+  const p90=await g('getprop ro.tran_90hz_refresh_rate.not_support');
+  const p144=await g('getprop ro.tran_144hz_refresh_rate.support');
+  const p144b=await g('getprop ro.tr_display.144hz.support');
   const pkgc=await g('cat "'+MOD+'/apm_120hz_bypass/.pkg_count" 2>/dev/null');
+  const sample=await g('settings get system tran_refresh_rate_com.gallery20; settings get system other_apps_refresh_rate; settings get system tran_app_refresh_rate 2>/dev/null | head -c 120');
   lines.push('tran_refresh_mode system  '+(trm||'EMPTY')+'  global  '+(trmg||'EMPTY'));
   lines.push('peak_refresh_rate system  '+(peak||'EMPTY')+'  global  '+(peakg||'EMPTY'));
   lines.push('min_refresh_rate system  '+(minr||'EMPTY')+'  global  '+(minrg||'EMPTY'));
   if(minr==='60'||minr==='60.0'||minr==='60.00') lines.push('WARN min_refresh_rate clamped back to 60');
+  if(minr==='90'||minr==='90.0'||trm==='90') lines.push('WARN still 90 — Customize App list will stay at 90Hz');
   lines.push('last_tran_refresh_mode_in_refresh_setting  '+(lastt||'EMPTY'));
+  lines.push('other_apps_refresh_rate  '+(other||'EMPTY'));
   lines.push('user_refresh_rate  '+(user||'EMPTY'));
   lines.push('preferred_refresh_rate  '+(pref||'EMPTY'));
   lines.push('persist.sys.peak_refresh_rate  '+(ppeak||'EMPTY'));
   lines.push('persist.sys.min_refresh_rate  '+(pmin||'EMPTY'));
+  lines.push('ro.tran_90hz_refresh_rate.not_support  '+(p90||'EMPTY'));
+  lines.push('ro.tran_144hz_refresh_rate.support  '+(p144||'EMPTY'));
+  lines.push('ro.tr_display.144hz.support  '+(p144b||'EMPTY'));
   lines.push('generated_package_count  '+(pkgc||'EMPTY'));
+  lines.push('sample_app_keys  '+(sample||'EMPTY'));
+  const listed=await g("settings list system 2>/dev/null | grep -iE 'refresh|fps|tran_.*hz' | head -40");
+  lines.push(listed||'(no refresh keys in settings list system)');
   const apm=await g('ls -l /product/apm/config/refresh_rate_config.json /system/product/apm/config/refresh_rate_config.json /tr_product/etc/apm/config/refresh_rate_config.json /tr_product/apm/config/refresh_rate_config.json 2>/dev/null; find /tr_product /product /system -maxdepth 6 -name refresh_rate_config.json 2>/dev/null');
   lines.push(apm||'no live APM refresh_rate_config.json');
   lines.push('');
@@ -924,7 +970,7 @@ async function handleStatusbar(input){
 }
 async function loadDevice(){
   const prop=await g('cat "'+MOD+'/module.prop" 2>/dev/null');
-  const ver=(prop.match(/^version=(.+)$/m)||[])[1]||'V1.40';
+  const ver=(prop.match(/^version=(.+)$/m)||[])[1]||'V1.41';
   n('module-version-sub', ver+' · OS 16');
   let type=await g('getprop ro.tran.os.type');
   let verOs=await g('getprop ro.transsion.os.version');
@@ -975,6 +1021,9 @@ async function loadCfg(){
   if(cfg.blur_os16===undefined) cfg.blur_os16=true;
   if(cfg.blur_os16_level===undefined) cfg.blur_os16_level=2;
   if(cfg.force_120hz===undefined) cfg.force_120hz=false;
+  if(cfg.force_refresh_hz===undefined){
+    cfg.force_refresh_hz=cfg.force_120hz===true?120:0;
+  }
   setStyle(cfg.bootanim_style||'hios16');
   if(!cfg.rebootanim_style) cfg.rebootanim_style=cfg.shutdownanim_style||'hios16';
   setRebootStyle(cfg.rebootanim_style||'hios16');
@@ -1006,9 +1055,9 @@ async function loadCfg(){
   setT('feat-game-triggers', cfg.game_gt_triggers!==false);
   setT('feat-anim', cfg.anim_os16!==false);
   setT('feat-blur', cfg.blur_os16!==false);
-  setT('feat-force120hz', cfg.force_120hz===true);
   setEsportsLevel(esportsLevel());
   setBlurLevel(blurLevel());
+  setRefreshHz(refreshHz());
   syncAiChildren();
   syncGameChildren();
   syncBlurChildren();
@@ -1036,6 +1085,7 @@ window.setGame=setGame;
 window.setAnimBlur=setAnimBlur;
 window.setEsportsLevel=setEsportsLevel;
 window.setBlurLevel=setBlurLevel;
+window.setRefreshHz=setRefreshHz;
 window.handleBootanim=handleBootanim;
 window.handleRebootanim=handleRebootanim;
 window.handleStatusbar=handleStatusbar;

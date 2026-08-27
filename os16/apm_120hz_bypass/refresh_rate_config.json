@@ -136,6 +136,9 @@
   ],
   "limit_60hz_in_all_setting_mode": [],
   "limit_90hz_in_higher_setting_mode": [],
+  "refresh_rate_90hz_whitelist_in_120hz_mode": [],
+  "refresh_rate_blacklist_in_90hz_mode": [],
+  "min_refresh_rate_90hz_in_auto_mode": [],
   "limit_120hz_in_auto_mode": [],
   "app_request_black_list": [],
   "fast_slow_slide_blacklist": [
