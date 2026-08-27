@@ -80,12 +80,12 @@ ro.tr_aod.always.show.feature.support=1
 ro.aod_alwaysshow_support=1
 ro.tran_aod_v3_support=1
 ro.tran_doze_brightness_support=1
-# Dynamic bar — OS 16 key plus Flagship 15 extras (stock tr_dynamicbar already 1).
-ro.tr_dynamicbar.support=1
-ro.os_dynamicbar_ai_translation_support=1
-ro.os_dynamic_bar_resident_plane_support=1
-ro.os.tran_hide_status_bar_for_land_recent=1
-ro.tran_hios_dynamic_bar_support=1
+# Dynamic bar — off by default (empty pill leftover on this G99).
+ro.tr_dynamicbar.support=0
+ro.os_dynamicbar_ai_translation_support=0
+ro.os_dynamic_bar_resident_plane_support=0
+ro.os.tran_hide_status_bar_for_land_recent=0
+ro.tran_hios_dynamic_bar_support=0
 # OS 16 extras — Magisk + resetprop for every Trans OS 16 device.
 persist.tr_video.ai_super_resolution.support=1
 ro.tr_video.ai_super_resolution.support=1
@@ -97,6 +97,8 @@ tr_ai_treasure_box.feature.support=1
 ro.tr_cutepet.feature.support=1
 tr_cutepet.feature.support=1
 ro.os_cutepet_support=1
+ro.tr_outdoorboost.feature.support=1
+tr_outdoorboost.feature.support=1
 ro.surface_flinger.game_default_frame_rate_override=120
 debug.graphics.game_default_frame_rate.disabled=true
 persist.graphics.game_default_frame_rate.enabled=false
