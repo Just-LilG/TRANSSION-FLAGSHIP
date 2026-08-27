@@ -143,7 +143,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
         </div>
         <div class="hero-card">
           <div class="hero-title">Transsion Flagship 16</div>
-          <div class="hero-sub" id="module-version-sub">V1.33 · OS 16</div>
+          <div class="hero-sub" id="module-version-sub">V1.34 · OS 16</div>
         </div>
         <div class="h8"></div>
         <div class="warn-card" id="old-mod-warn">Flagship 15 is still installed. This installer disables it. Remove it from Magisk/KSU so the two modules do not fight.</div>
@@ -297,14 +297,14 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
           <div class="setting-row">
             <div class="row-text">
               <div class="row-title">Dynamic blur</div>
-              <div class="row-sub">Off kills liquid glass and window blurs. Apply restarts launcher.</div>
+              <div class="row-sub">Off resetprops stock liquid glass. Apply restarts home; reboot for SurfaceFlinger.</div>
             </div>
             <label class="toggle"><input type="checkbox" id="feat-blur" checked onchange="setAnimBlur('blur_os16',this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
           </div>
           <div class="setting-row">
             <div class="row-text">
               <div class="row-title">Blur level</div>
-              <div class="row-sub">Radius 20 / 45 / 80. Apply restarts launcher.</div>
+              <div class="row-sub">Gaussian 1/2/3 and radius 20/45/80. Apply restarts home.</div>
             </div>
           </div>
           <div class="segmented" id="blur-level">
@@ -571,7 +571,9 @@ const BLUR_KEYS=[
   'tr_launcher.gaussianblur.support',
   'ro.tran.effectengine.dynamicblur.support',
   'ro.os_xos16_blur_v2_support',
-  'persist.sys.sf.disable_blurs'
+  'persist.sys.sf.disable_blurs',
+  'persist.sys.disable_blur',
+  'ro.sf.blurs_are_expensive'
 ];
 function showConfirm(title,msg,opts={}){
   return new Promise(resolve=>{
@@ -674,6 +676,8 @@ async function writeAiSystemProp(){
   lines.push('ro.tran.effectengine.dynamicblur.support='+b01);
   lines.push('ro.os_xos16_blur_v2_support='+b01);
   lines.push('persist.sys.sf.disable_blurs='+blurDisable());
+  lines.push('persist.sys.disable_blur='+blurDisable());
+  lines.push('ro.sf.blurs_are_expensive='+blurDisable());
   const body=lines.join('\n')+'\n';
   const esc=body.replace(/'/g,"'\\''");
   const r=await exec("printf '%s' '"+esc+"' > \""+MOD+"/system.prop\" && echo OK");
@@ -711,18 +715,10 @@ async function saveAll(){
   const props=await writeAiSystemProp();
   if(!props){ toast('Saved config, but AI props failed to write'); return; }
   await applyBlurRuntime();
-  toast('Saved — launcher restarted; reboot if SurfaceFlinger blur stays');
+  toast('Saved — home restarted; reboot so SurfaceFlinger sees blur off');
 }
 async function applyBlurRuntime(){
-  const dis=blurDisable();
-  const en=blurOn()?'1':'0';
-  const rad=String(blurRadius());
-  await exec('settings put global disable_window_blurs '+dis+' 2>/dev/null');
-  await exec('settings put system transsion_launcher_gaussian_blur_enable '+en+' 2>/dev/null');
-  await exec('settings put system transsion_launcher_blur_radius '+rad+' 2>/dev/null');
-  await exec('wm disable-blur '+dis+' 2>/dev/null');
-  await exec('cmd window disable-blur '+dis+' 2>/dev/null');
-  await exec('am force-stop com.transsion.launcher3 2>/dev/null');
+  await exec('sh "'+MOD+'/apply_blur.sh" all >/dev/null 2>&1; echo OK');
 }
 async function dumpAi(){
   toast('Reading flags…', 8000);
@@ -750,12 +746,20 @@ async function dumpAi(){
   const ghost=await g('getprop ro.transsion_recent_animation_support');
   lines.push('ro.transsion_recent_animation_support  '+describeAiFlag(ghost));
   lines.push('');
+  lines.push('=== default home ===');
+  const home=await g("cmd package resolve-activity --brief -a android.intent.action.MAIN -c android.intent.category.HOME 2>/dev/null | tail -n 1");
+  lines.push(home||'EMPTY');
+  lines.push('');
   lines.push('=== launcher blur settings ===');
   const ge=await g('settings get system transsion_launcher_gaussian_blur_enable');
+  const geg=await g('settings get global transsion_launcher_gaussian_blur_enable');
+  const gs=await g('settings get system transsion_launcher_gaussian_blur_support');
   const gr=await g('settings get system transsion_launcher_blur_radius');
   const dw=await g('settings get global disable_window_blurs');
   const wm=await g('wm disable-blur 2>/dev/null');
-  lines.push('transsion_launcher_gaussian_blur_enable  '+(ge||'EMPTY'));
+  lines.push('transsion_launcher_gaussian_blur_enable system  '+(ge||'EMPTY'));
+  lines.push('transsion_launcher_gaussian_blur_enable global  '+(geg||'EMPTY'));
+  lines.push('transsion_launcher_gaussian_blur_support  '+(gs||'EMPTY'));
   lines.push('transsion_launcher_blur_radius  '+(gr||'EMPTY'));
   lines.push('disable_window_blurs  '+(dw||'EMPTY'));
   lines.push('wm disable-blur  '+(wm||'EMPTY'));
@@ -873,7 +877,7 @@ async function handleStatusbar(input){
 }
 async function loadDevice(){
   const prop=await g('cat "'+MOD+'/module.prop" 2>/dev/null');
-  const ver=(prop.match(/^version=(.+)$/m)||[])[1]||'V1.33';
+  const ver=(prop.match(/^version=(.+)$/m)||[])[1]||'V1.34';
   n('module-version-sub', ver+' · OS 16');
   let type=await g('getprop ro.tran.os.type');
   let verOs=await g('getprop ro.transsion.os.version');

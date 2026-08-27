@@ -323,3 +323,14 @@ for f in $CUSTOM_APKS; do
     fi
 done
 log_pfd "custom overlay: $have_custom"
+
+# Blur: stock liquid glass is already 1 in /tr_product/etc/build.prop.
+# Magisk system.prop does not win for those keys. resetprop here (before
+# zygote) and again from service.sh after overlay.
+if [ -f "$MODDIR/apply_blur.sh" ]; then
+  . "$MODDIR/apply_blur.sh"
+  os16_apply_blur_props
+  log_pfd "blur props resetprop liquidglass=$(getprop ro.tr_display.liquidglass.support 2>/dev/null) sf_disable=$(getprop persist.sys.sf.disable_blurs 2>/dev/null)"
+else
+  log_pfd "apply_blur.sh missing"
+fi
