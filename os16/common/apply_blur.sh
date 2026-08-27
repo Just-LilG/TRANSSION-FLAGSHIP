@@ -61,6 +61,10 @@ os16_rp_overwrite() {
 os16_settings_put() {
   ns="$1"; k="$2"; v="$3"
   settings put "$ns" "$k" "$v" >/dev/null 2>&1
+  # Same path Flagship 15 used on this X6886 (content + settings).
+  content update --uri content://settings/"$ns" \
+    --bind value:s:"$v" \
+    --where "name='$k'" >/dev/null 2>&1
 }
 
 os16_blur_vals() {
@@ -207,6 +211,13 @@ os16_apply_display_props() {
   os16_rp_overwrite ro.tran.display_hdr_support "$hdr"
   dc=$(os16_cfg_01 display_dc true)
   os16_rp_overwrite ro.tran.display_dc_dimming_support "$dc"
+  # OS 16 Settings also checks SurfaceFlinger HDR capability (dump: false).
+  # Same phone showed HDR/DC on OS 15 — try flipping this like those flags.
+  if [ "$hdr" = "1" ]; then
+    os16_rp_overwrite ro.surface_flinger.has_HDR_display true
+  else
+    os16_rp_overwrite ro.surface_flinger.has_HDR_display false
+  fi
 }
 
 os16_apply_display_settings() {

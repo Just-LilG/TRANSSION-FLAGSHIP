@@ -351,7 +351,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
           <div class="setting-row">
             <div class="row-text">
               <div class="row-title">DC Dimming</div>
-              <div class="row-sub">Flicker-free low brightness. V1.54 also writes Flagship 15 DC prop.</div>
+              <div class="row-sub">Flicker-free low brightness. Same Settings keys as OS 15, plus content:// write.</div>
             </div>
             <label class="toggle"><input type="checkbox" id="feat-dc" checked onchange="setDisplay('display_dc',this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
           </div>
@@ -365,7 +365,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
           <div class="setting-row">
             <div class="row-text">
               <div class="row-title">HDR Display</div>
-              <div class="row-sub">SDR→HDR / XDR plus Flagship 15 HDR prop. Stock sdr2hdr is 0.</div>
+              <div class="row-sub">Also sets has_HDR_display (OS 16 reported false). Same phone had HDR on OS 15.</div>
             </div>
             <label class="toggle"><input type="checkbox" id="feat-hdr" checked onchange="setDisplay('display_hdr',this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
           </div>
@@ -652,7 +652,8 @@ const DISPLAY_KEYS=[
   'ro.tran.display_dc_dimming_support',
   'ro.tr_display.colormode.feature.support',
   'ro.tr_display.color.temperature.feature.support',
-  'persist.tr_display.color.temperature.aosp.support'
+  'persist.tr_display.color.temperature.aosp.support',
+  'ro.surface_flinger.has_HDR_display'
 ];
 const ANIM_KEYS=[
   'ro.tr_animation.platform_level',
@@ -809,6 +810,7 @@ async function writeAiSystemProp(){
   lines.push('ro.tr_light.xdr.v2.support='+hdr);
   lines.push('ro.tran.display_hdr_support='+hdr);
   lines.push('ro.tran.display_dc_dimming_support='+dc);
+  lines.push('ro.surface_flinger.has_HDR_display='+(hdr==='1'?'true':'false'));
   lines.push('ro.tr_display.colormode.feature.support='+col);
   lines.push('ro.tr_display.color.temperature.feature.support='+col);
   lines.push('persist.tr_display.color.temperature.aosp.support='+col);
@@ -940,6 +942,8 @@ async function dumpAi(){
   lines.push('ro.tran.display_hdr_support  '+describeAiFlag(dch));
   lines.push('ro.tran.display_dc_dimming_support  '+describeAiFlag(dcd));
   lines.push('has_HDR_display  '+(sfhdr||'EMPTY'));
+  const dumphdr=await g("dumpsys display 2>/dev/null | grep -iE 'hdr|HdrCap' | head -12");
+  lines.push(dumphdr||'(no dumpsys hdr lines)');
   const setdc=await g("settings list system 2>/dev/null | grep -iE 'dc_dimm|color_enhance|reading_mode|sdr2hdr|xdr|hdr' | head -20");
   lines.push(setdc||'(no matching system settings names)');
   lines.push('');

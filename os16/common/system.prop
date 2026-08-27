@@ -57,6 +57,7 @@ ro.tr_light.xdr.support=1
 ro.tr_light.xdr.v2.support=1
 ro.tran.display_hdr_support=1
 ro.tran.display_dc_dimming_support=1
+ro.surface_flinger.has_HDR_display=true
 ro.tr_display.colormode.feature.support=1
 ro.tr_display.color.temperature.feature.support=1
 persist.tr_display.color.temperature.aosp.support=1
