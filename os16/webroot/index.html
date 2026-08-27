@@ -322,14 +322,14 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
           <div class="setting-row">
             <div class="row-text">
               <div class="row-title">Always-On Display</div>
-              <div class="row-sub">Two tries stuck flags but never unhid Lock screen / AOD (Settings-compiled on this G99). Toggle kept for later; no extra props this pass.</div>
+              <div class="row-sub">Binds GT vconfig tr_aod.always.show.feature.support (Always Show AOD). Apply + reboot, then Lock screen / AOD.</div>
             </div>
             <label class="toggle"><input type="checkbox" id="feat-aod" checked onchange="cfg.aod_os16=this.checked"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
           </div>
           <div class="setting-row">
             <div class="row-text">
               <div class="row-title">Dynamic bar</div>
-              <div class="row-sub">Always Show Background in Settings. Also hides the landscape-recents status-bar overlay (Flagship 15 key). Apply + reboot.</div>
+              <div class="row-sub">Always Show Background in Settings. Recents pill fix is launcher3 vconfig (same path Flagship 15 uses). Apply + reboot.</div>
             </div>
             <label class="toggle"><input type="checkbox" id="feat-dynamicbar" checked onchange="cfg.dynamicbar_os16=this.checked"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
           </div>
@@ -597,6 +597,8 @@ const AOD_KEYS=[
   'ro.tr_aod.half.screen.feature.support',
   'tr_aod.horizontal.display.feature.support',
   'ro.tr_aod.horizontal.display.feature.support',
+  'tr_aod.always.show.feature.support',
+  'ro.tr_aod.always.show.feature.support',
   'ro.aod_alwaysshow_support',
   'ro.tran_aod_v3_support',
   'ro.tran_doze_brightness_support'
@@ -731,6 +733,8 @@ async function writeAiSystemProp(){
   lines.push('ro.tr_aod.half.screen.feature.support='+feat01('aod_os16'));
   lines.push('tr_aod.horizontal.display.feature.support='+feat01('aod_os16'));
   lines.push('ro.tr_aod.horizontal.display.feature.support='+feat01('aod_os16'));
+  lines.push('tr_aod.always.show.feature.support='+feat01('aod_os16'));
+  lines.push('ro.tr_aod.always.show.feature.support='+feat01('aod_os16'));
   lines.push('ro.aod_alwaysshow_support='+feat01('aod_os16'));
   lines.push('ro.tran_aod_v3_support='+feat01('aod_os16'));
   lines.push('ro.tran_doze_brightness_support='+feat01('aod_os16'));
@@ -861,6 +865,12 @@ async function dumpAi(){
   lines.push('doze_enabled  '+(dozeen||'EMPTY'));
   lines.push('tran_aod_enable  '+(tena||'EMPTY'));
   lines.push('tr_aod_enable  '+(trena||'EMPTY'));
+  const alwaysShow=await g('getprop tr_aod.always.show.feature.support');
+  lines.push('tr_aod.always.show.feature.support  '+describeAiFlag(alwaysShow));
+  const aodvc=await g('cat /tr_product/etc/vconfig/com.transsion.aod/build.prop 2>/dev/null');
+  lines.push('vconfig aod: '+(aodvc||'EMPTY'));
+  const lvc=await g('grep hide_status_bar /tr_product/etc/vconfig/com.transsion.launcher3/build.prop 2>/dev/null');
+  lines.push('vconfig launcher hide_land  '+(lvc||'EMPTY'));
   const horiz=await g('getprop tr_aod.horizontal.display.feature.support');
   lines.push('tr_aod.horizontal.display.feature.support  '+describeAiFlag(horiz));
   lines.push('');

@@ -165,6 +165,8 @@ ro.tr_aod.doze.brightness.feature.support=$aod
 ro.tr_aod.half.screen.feature.support=$aod
 tr_aod.horizontal.display.feature.support=$aod
 ro.tr_aod.horizontal.display.feature.support=$aod
+tr_aod.always.show.feature.support=$aod
+ro.tr_aod.always.show.feature.support=$aod
 ro.aod_alwaysshow_support=$aod
 ro.tran_aod_v3_support=$aod
 ro.tran_doze_brightness_support=$aod
@@ -183,7 +185,7 @@ print_modname() {
   ui_print " "
   ui_print "  ╔══════════════════════════════════════════╗"
   ui_print "  ║    TRANSSION FLAGSHIP 16                 ║"
-  ui_print "  ║    XOS · HiOS · iTel OS 16  ·  V1.61     ║"
+  ui_print "  ║    XOS · HiOS · iTel OS 16  ·  V1.62     ║"
   ui_print "  ╚══════════════════════════════════════════╝"
   ui_print " "
 }
@@ -394,7 +396,7 @@ set_permissions() {
   done
   ui_print " "
   ui_div
-  ui_print "  ✨  FLAGSHIP 16  ·  V1.61"
+  ui_print "  ✨  FLAGSHIP 16  ·  V1.62"
   ui_info "OS     : $OS_TYPE $OS_VER"
   ui_info "Feature: boot + reboot + overlay + AI + gaming + anim/blur + AOD + Dynamic bar + Force 120Hz"
   ui_div

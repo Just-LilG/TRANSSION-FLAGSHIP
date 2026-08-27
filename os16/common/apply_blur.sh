@@ -160,18 +160,127 @@ os16_cfg_01() {
   fi
 }
 
+os16_vconfig_nsenter() {
+  if [ -x /system/bin/nsenter ]; then
+    echo "/system/bin/nsenter -t 1 -m --"
+  elif command -v nsenter >/dev/null 2>&1; then
+    echo "nsenter -t 1 -m --"
+  fi
+}
+
+os16_bind_file() {
+  src="$1"
+  dest="$2"
+  [ -f "$src" ] || return 1
+  NS=$(os16_vconfig_nsenter)
+  parent=$(dirname "$dest")
+  if [ ! -d "$parent" ]; then
+    mkdir -p "$parent" 2>/dev/null
+    [ -n "$NS" ] && $NS mkdir -p "$parent" 2>/dev/null
+  fi
+  [ -d "$parent" ] || return 1
+  if [ ! -e "$dest" ]; then
+    touch "$dest" 2>/dev/null
+    [ -e "$dest" ] || { [ -n "$NS" ] && $NS touch "$dest" 2>/dev/null; }
+  fi
+  [ -e "$dest" ] || return 1
+  chcon --reference="$dest" "$src" 2>/dev/null
+  chmod 644 "$src" 2>/dev/null
+  if [ -n "$NS" ]; then
+    $NS umount -l "$dest" 2>/dev/null
+    $NS mount --bind "$src" "$dest" && return 0
+  fi
+  umount -l "$dest" 2>/dev/null
+  mount --bind "$src" "$dest"
+}
+
+os16_vconfig_upsert() {
+  f="$1"
+  k="$2"
+  v="$3"
+  [ -f "$f" ] || : > "$f"
+  if grep -q "^${k}=" "$f" 2>/dev/null; then
+    sed -i "s|^${k}=.*|${k}=${v}|" "$f"
+  else
+    printf '%s=%s\n' "$k" "$v" >> "$f"
+  fi
+}
+
+os16_bind_vconfig_pkg() {
+  staged="$1"
+  pkg="$2"
+  [ -f "$staged" ] || return 1
+  mkdir -p "$MODDIR/system/tr_product/etc/vconfig/$pkg"
+  cp -f "$staged" "$MODDIR/system/tr_product/etc/vconfig/$pkg/build.prop"
+  chmod 644 "$MODDIR/system/tr_product/etc/vconfig/$pkg/build.prop" 2>/dev/null
+  for dest in \
+    /tr_product/etc/vconfig/$pkg/build.prop \
+    /system/tr_product/etc/vconfig/$pkg/build.prop \
+    /product/etc/vconfig/$pkg/build.prop \
+    /system/product/etc/vconfig/$pkg/build.prop
+  do
+    os16_bind_file "$staged" "$dest"
+  done
+}
+
+os16_seed_vconfig_pkg() {
+  pkg="$1"
+  staged="$MODDIR/vconfig/$pkg/build.prop"
+  mkdir -p "$(dirname "$staged")"
+  if [ ! -s "$staged" ]; then
+    dest=""
+    for p in \
+      /tr_product/etc/vconfig/$pkg/build.prop \
+      /system/tr_product/etc/vconfig/$pkg/build.prop \
+      /product/etc/vconfig/$pkg/build.prop
+    do
+      if [ -f "$p" ]; then
+        dest="$p"
+        break
+      fi
+    done
+    if [ -n "$dest" ]; then
+      cat "$dest" > "$staged"
+    else
+      : > "$staged"
+    fi
+  fi
+  echo "$staged"
+}
+
+os16_apply_aod_vconfig() {
+  aod=$(os16_cfg_01 aod_os16 true)
+  staged=$(os16_seed_vconfig_pkg com.transsion.aod)
+  # GT X6858 dump: /tr_product/etc/vconfig/com.transsion.aod/build.prop
+  #   tr_aod.always.show.feature.support=1
+  #   tr_aod.horizontal.display.feature.support=1
+  # That is Always Show AOD. Magisk system.prop never reaches this file.
+  os16_vconfig_upsert "$staged" "tr_aod.always.show.feature.support" "$aod"
+  os16_vconfig_upsert "$staged" "tr_aod.horizontal.display.feature.support" "$aod"
+  os16_bind_vconfig_pkg "$staged" com.transsion.aod
+}
+
+os16_apply_launcher_vconfig() {
+  bar=$(os16_cfg_01 dynamicbar_os16 true)
+  staged=$(os16_seed_vconfig_pkg com.transsion.launcher3)
+  # Flagship 15 XOS 16 wrote this into launcher3 vconfig, not only system.prop.
+  os16_vconfig_upsert "$staged" "ro.os.tran_hide_status_bar_for_land_recent" "$bar"
+  os16_bind_vconfig_pkg "$staged" com.transsion.launcher3
+}
+
 os16_apply_aod_props() {
   aod=$(os16_cfg_01 aod_os16 true)
-  # V1.57: OS 16 keys stuck (stock already 1; half.screen 0→1). UI still hidden.
-  # This X6886 unhid AOD on OS 15 via ro.aod_alwaysshow_support — dump was EMPTY.
   os16_rp_overwrite ro.tr_aod.feature.support "$aod"
   os16_rp_overwrite ro.tr_aod.doze.brightness.feature.support "$aod"
   os16_rp_overwrite ro.tr_aod.half.screen.feature.support "$aod"
   os16_rp_overwrite tr_aod.horizontal.display.feature.support "$aod"
   os16_rp_overwrite ro.tr_aod.horizontal.display.feature.support "$aod"
+  os16_rp_overwrite tr_aod.always.show.feature.support "$aod"
+  os16_rp_overwrite ro.tr_aod.always.show.feature.support "$aod"
   os16_rp_overwrite ro.aod_alwaysshow_support "$aod"
   os16_rp_overwrite ro.tran_aod_v3_support "$aod"
   os16_rp_overwrite ro.tran_doze_brightness_support "$aod"
+  os16_apply_aod_vconfig
 }
 
 os16_apply_aod_settings() {
@@ -200,6 +309,7 @@ os16_apply_dynamicbar_props() {
   # Flagship 15 extra: hide the landscape-recents status-bar overlay (empty
   # pill / "bug not a feature" in recents). Same key as TransFlagship 15.
   os16_rp_overwrite ro.os.tran_hide_status_bar_for_land_recent "$bar"
+  os16_apply_launcher_vconfig
 }
 
 os16_apply_dynamicbar_runtime() {

@@ -1,5 +1,9 @@
 # Transsion Flagship 16
 
+## v1.62
+- **Always Show AOD is a vconfig file, not Magisk system.prop.** GT Note 50 dump (`X6858` `/tr_product/etc/vconfig/com.transsion.aod/build.prop`) is `tr_aod.always.show.feature.support=1` plus horizontal display. That is the Always Show AOD row. OS 15 `ro.aod_alwaysshow_support` is not in that dump. This build writes those keys then **per-file binds** that file onto `/tr_product` (Mountify never overlays `tr_product`).
+- **Dynamic bar recents pill.** Flagship 15 puts `ro.os.tran_hide_status_bar_for_land_recent` in **launcher3 vconfig**, not only `system.prop`. V1.61 only wrote Magisk prop. This build merges it into `/tr_product/etc/vconfig/com.transsion.launcher3/build.prop` the same way. Apply + reboot. Dump the two vconfig files.
+
 ## v1.61
 - **Landscape recents status-bar overlay.** Same Flagship 15 key the Telegram group uses for that empty-pill / recents bug: `ro.os.tran_hide_status_bar_for_land_recent=1`. Flagship 16 never shipped it. Apply + reboot, then open recents in landscape. Dump that flag — EMPTY means this G99 still does not expose it.
 

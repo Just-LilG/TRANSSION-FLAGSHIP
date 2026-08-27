@@ -333,7 +333,7 @@ if [ -f "$MODDIR/apply_blur.sh" ]; then
   os16_apply_aod_props
   os16_apply_dynamicbar_props
   log_pfd "blur props resetprop liquidglass=$(getprop ro.tr_display.liquidglass.support 2>/dev/null) sf_disable=$(getprop persist.sys.sf.disable_blurs 2>/dev/null)"
-  log_pfd "aod feature=$(getprop ro.tr_aod.feature.support 2>/dev/null) doze=$(getprop ro.tr_aod.doze.brightness.feature.support 2>/dev/null) half=$(getprop ro.tr_aod.half.screen.feature.support 2>/dev/null) bar=$(getprop ro.tr_dynamicbar.support 2>/dev/null)"
+  log_pfd "aod feature=$(getprop ro.tr_aod.feature.support 2>/dev/null) always_show=$(getprop tr_aod.always.show.feature.support 2>/dev/null) vconfig=$(cat /tr_product/etc/vconfig/com.transsion.aod/build.prop 2>/dev/null | tr '\n' ' ')"
 else
   log_pfd "apply_blur.sh missing"
 fi
