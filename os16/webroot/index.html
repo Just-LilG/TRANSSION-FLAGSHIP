@@ -318,7 +318,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
           <div class="setting-row">
             <div class="row-text">
               <div class="row-title">Force 120Hz</div>
-              <div class="row-sub">Patches Magellan’s refresh XML at boot (every app auto 120 / max 144). Off by default. Apply + reboot.</div>
+              <div class="row-sub">Writes Magellan XML into system/tr_product for Mountify (same as TranOS 16 custom refresh). Off by default. Apply + reboot. Disable the other refresh module.</div>
             </div>
             <label class="toggle"><input type="checkbox" id="feat-force120hz" onchange="cfg.force_120hz=this.checked"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
           </div>
@@ -798,7 +798,7 @@ async function dumpAi(){
   if(minr==='60'||minr==='60.0'||minr==='60.00') lines.push('WARN min_refresh_rate clamped back to 60');
   lines.push('last_tran_refresh_mode_in_refresh_setting  '+(lastt||'EMPTY'));
   lines.push('generated_package_count  '+(pkgc||'EMPTY'));
-  const mag=await g('ls -l /tr_product/etc/vconfig/magellan/refresh_rate_config.xml /mnt/vendor/mountify/tr_product/etc/vconfig/magellan/refresh_rate_config.xml /product/etc/vconfig/magellan/refresh_rate_config.xml /system_ext/etc/vconfig/magellan/refresh_rate_config.xml /data/magellan/refresh_rate_config.xml "'+MOD+'/magellan/refresh_rate_config.xml" 2>/dev/null');
+  const mag=await g('ls -l /tr_product/etc/vconfig/magellan/refresh_rate_config.xml /mnt/vendor/mountify/tr_product/etc/vconfig/magellan/refresh_rate_config.xml "'+MOD+'/system/tr_product/etc/vconfig/magellan/refresh_rate_config.xml" "'+MOD+'/magellan/refresh_rate_config.xml" 2>/dev/null');
   lines.push(mag||'no magellan refresh_rate_config.xml');
   const magn=await g('grep -c max=.144 /tr_product/etc/vconfig/magellan/refresh_rate_config.xml 2>/dev/null');
   lines.push('magellan_max144_items  '+(magn||'EMPTY'));
