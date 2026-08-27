@@ -143,7 +143,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
         </div>
         <div class="hero-card">
           <div class="hero-title">Transsion Flagship 16</div>
-          <div class="hero-sub" id="module-version-sub">V1.31 · OS 16</div>
+          <div class="hero-sub" id="module-version-sub">V1.32 · OS 16</div>
         </div>
         <div class="h8"></div>
         <div class="warn-card" id="old-mod-warn">Flagship 15 is still installed. This installer disables it. Remove it from Magisk/KSU so the two modules do not fight.</div>
@@ -301,6 +301,17 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
             </div>
             <label class="toggle"><input type="checkbox" id="feat-blur" checked onchange="setAnimBlur('blur_os16',this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
           </div>
+          <div class="setting-row">
+            <div class="row-text">
+              <div class="row-title">Blur level</div>
+              <div class="row-sub">1 light / 2 default / 3 stronger. Apply + reboot.</div>
+            </div>
+          </div>
+          <div class="segmented" id="blur-level">
+            <div class="segmented-opt" data-val="1" onclick="setBlurLevel(1)">1</div>
+            <div class="segmented-opt active" data-val="2" onclick="setBlurLevel(2)">2</div>
+            <div class="segmented-opt" data-val="3" onclick="setBlurLevel(3)">3</div>
+          </div>
         </div>
         <div class="section-label">Status bar</div>
         <div class="glass-card">
@@ -403,7 +414,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
 <script type="module">
 const MOD='/data/adb/modules/transsion-flagship-16';
 const CONFIG_PATH=MOD+'/config.json';
-let cfg={bootanim_style:'hios16',bootanim_file:'',rebootanim_style:'hios16',rebootanim_file:'',statusbar_style:'off',statusbarcustom_file:'',ai_master:true,ai_subtitles:true,ai_call_summary:true,ai_writing:true,ai_sound_rec:true,ai_notes:true,ai_gallery:true,ai_video:true,game_master:true,game_esports_touch:true,game_esports_level:3,game_bypass_charge:true,game_gt_triggers:true,anim_os16:true,blur_os16:true};
+let cfg={bootanim_style:'hios16',bootanim_file:'',rebootanim_style:'hios16',rebootanim_file:'',statusbar_style:'off',statusbarcustom_file:'',ai_master:true,ai_subtitles:true,ai_call_summary:true,ai_writing:true,ai_sound_rec:true,ai_notes:true,ai_gallery:true,ai_video:true,game_master:true,game_esports_touch:true,game_esports_level:3,game_bypass_charge:true,game_gt_triggers:true,anim_os16:true,blur_os16:true,blur_os16_level:2};
 let _exec=null;
 
 async function exec(cmd){
@@ -444,10 +455,16 @@ function setStatusbarStyle(val){
 }
 function setAi(key,el){ cfg[key]=el.checked; if(key==='ai_master') syncAiChildren(); }
 function setGame(key,el){ cfg[key]=el.checked; if(key==='game_master'||key==='game_esports_touch') syncGameChildren(); }
-function setAnimBlur(key,el){ cfg[key]=el.checked; }
+function setAnimBlur(key,el){ cfg[key]=el.checked; if(key==='blur_os16') syncBlurChildren(); }
 function setEsportsLevel(val){
   cfg.game_esports_level=val;
   document.querySelectorAll('#game-esports-level .segmented-opt').forEach(o=>{
+    o.classList.toggle('active', String(o.dataset.val)===String(val));
+  });
+}
+function setBlurLevel(val){
+  cfg.blur_os16_level=val;
+  document.querySelectorAll('#blur-level .segmented-opt').forEach(o=>{
     o.classList.toggle('active', String(o.dataset.val)===String(val));
   });
 }
@@ -470,6 +487,10 @@ function syncGameChildren(){
   const lvl=document.getElementById('game-esports-level');
   if(lvl) lvl.classList.toggle('disabled', !(on && cfg.game_esports_touch!==false));
 }
+function syncBlurChildren(){
+  const lvl=document.getElementById('blur-level');
+  if(lvl) lvl.classList.toggle('disabled', cfg.blur_os16===false);
+}
 function ai01(key){ return aiOn(key)?'1':'0'; }
 function aiTf(key){ return aiOn(key)?'true':'false'; }
 function game01(key){ return gameOn(key)?'1':'0'; }
@@ -487,7 +508,11 @@ function animOn(){ return cfg.anim_os16!==false; }
 function blurOn(){ return cfg.blur_os16!==false; }
 function animLvl(){ return animOn()?'3':'0'; }
 function anim01(){ return animOn()?'1':'0'; }
-function blurLvl(){ return blurOn()?'2':'0'; }
+function blurLevel(){
+  const n=parseInt(cfg.blur_os16_level,10);
+  return (n>=1 && n<=3)?n:2;
+}
+function blurLvl(){ return blurOn()?String(blurLevel()):'0'; }
 function blur01(){ return blurOn()?'1':'0'; }
 const GALLERY_KEYS=[
   'ro.tr_gallery.eraser.v2.support',
@@ -668,7 +693,8 @@ async function saveAll(){
     game_bypass_charge:cfg.game_bypass_charge!==false,
     game_gt_triggers:cfg.game_gt_triggers!==false,
     anim_os16:cfg.anim_os16!==false,
-    blur_os16:cfg.blur_os16!==false
+    blur_os16:cfg.blur_os16!==false,
+    blur_os16_level:blurLevel()
   };
   const json=JSON.stringify(slim,null,2).replace(/'/g,"'\\''");
   const r=await exec("echo '"+json+"' > \""+CONFIG_PATH+"\" && echo OK");
@@ -703,6 +729,12 @@ async function dumpAi(){
   lines.push('=== not written (ghosted recents on Flagship 15) ===');
   const ghost=await g('getprop ro.transsion_recent_animation_support');
   lines.push('ro.transsion_recent_animation_support  '+describeAiFlag(ghost));
+  lines.push('');
+  lines.push('=== launcher blur settings ===');
+  const ge=await g('settings get system transsion_launcher_gaussian_blur_enable');
+  const gr=await g('settings get system transsion_launcher_blur_radius');
+  lines.push('transsion_launcher_gaussian_blur_enable  '+(ge||'EMPTY'));
+  lines.push('transsion_launcher_blur_radius  '+(gr||'EMPTY'));
   lines.push('');
   lines.push('=== other live AI-like keys (first 80) ===');
   const live=await g("getprop | grep -iE 'ai_|aiphone|subtitle|soundrecorder|note_ai|aicore|aipower|ask_ai|tr_gallery|tr_video.vee|studio.lite|tr_game|os_game|esports|bypass_charg|shoulder|smartbutton|tr_animation|tr_perf|liquidglass|dynamicbar|dreamanimation|anim_arc|unionrender|async_anim|gaussian|dynamicblur|recent.blur|background_blur|xos16_blur' | head -80");
@@ -817,7 +849,7 @@ async function handleStatusbar(input){
 }
 async function loadDevice(){
   const prop=await g('cat "'+MOD+'/module.prop" 2>/dev/null');
-  const ver=(prop.match(/^version=(.+)$/m)||[])[1]||'V1.31';
+  const ver=(prop.match(/^version=(.+)$/m)||[])[1]||'V1.32';
   n('module-version-sub', ver+' · OS 16');
   let type=await g('getprop ro.tran.os.type');
   let verOs=await g('getprop ro.transsion.os.version');
@@ -866,6 +898,7 @@ async function loadCfg(){
   if(cfg.game_gt_triggers===undefined) cfg.game_gt_triggers=true;
   if(cfg.anim_os16===undefined) cfg.anim_os16=true;
   if(cfg.blur_os16===undefined) cfg.blur_os16=true;
+  if(cfg.blur_os16_level===undefined) cfg.blur_os16_level=2;
   setStyle(cfg.bootanim_style||'hios16');
   if(!cfg.rebootanim_style) cfg.rebootanim_style=cfg.shutdownanim_style||'hios16';
   setRebootStyle(cfg.rebootanim_style||'hios16');
@@ -898,8 +931,10 @@ async function loadCfg(){
   setT('feat-anim', cfg.anim_os16!==false);
   setT('feat-blur', cfg.blur_os16!==false);
   setEsportsLevel(esportsLevel());
+  setBlurLevel(blurLevel());
   syncAiChildren();
   syncGameChildren();
+  syncBlurChildren();
 }
 async function init(){
   try{
@@ -923,6 +958,7 @@ window.setAi=setAi;
 window.setGame=setGame;
 window.setAnimBlur=setAnimBlur;
 window.setEsportsLevel=setEsportsLevel;
+window.setBlurLevel=setBlurLevel;
 window.handleBootanim=handleBootanim;
 window.handleRebootanim=handleRebootanim;
 window.handleStatusbar=handleStatusbar;
