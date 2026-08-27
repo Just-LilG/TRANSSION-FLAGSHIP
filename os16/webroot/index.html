@@ -328,17 +328,10 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
           </div>
           <div class="setting-row">
             <div class="row-text">
-              <div class="row-title">Resolution scale-up</div>
-              <div class="row-sub">GT Settings vconfig tr_display.resolution.scalingup.support. Apply + reboot, then Settings → Display.</div>
+              <div class="row-title">Circle to Search</div>
+              <div class="row-sub">GT tr_product ro.tr_microIntelligence.circle_to_search (plus Flagship 15 os_ai key). Apply + reboot, then long-press home / nav handle.</div>
             </div>
-            <label class="toggle"><input type="checkbox" id="feat-scale" checked onchange="cfg.scale_os16=this.checked"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
-          </div>
-          <div class="setting-row">
-            <div class="row-text">
-              <div class="row-title">GT app extras</div>
-              <div class="row-sub">Same path as AOD: app vconfig + Magisk props. Smart Scan, Gallery extras, Recorder speech, Motions, PC Connect, Zero Screen, Smart Hub. Apply + reboot.</div>
-            </div>
-            <label class="toggle"><input type="checkbox" id="feat-gtapps" checked onchange="cfg.gt_apps_os16=this.checked"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+            <label class="toggle"><input type="checkbox" id="feat-circle" checked onchange="cfg.circle_os16=this.checked"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
           </div>
           <div class="setting-row">
             <div class="row-text">
@@ -456,7 +449,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
 <script type="module">
 const MOD='/data/adb/modules/transsion-flagship-16';
 const CONFIG_PATH=MOD+'/config.json';
-let cfg={bootanim_style:'hios16',bootanim_file:'',rebootanim_style:'hios16',rebootanim_file:'',statusbar_style:'off',statusbarcustom_file:'',ai_master:true,ai_subtitles:true,ai_call_summary:true,ai_writing:true,ai_sound_rec:true,ai_notes:true,ai_gallery:true,ai_video:true,game_master:true,game_esports_touch:true,game_esports_level:3,game_bypass_charge:true,game_gt_triggers:true,anim_os16:true,blur_os16:true,blur_os16_level:2,aod_os16:true,scale_os16:true,gt_apps_os16:true,dynamicbar_os16:true,force_120hz:false};
+let cfg={bootanim_style:'hios16',bootanim_file:'',rebootanim_style:'hios16',rebootanim_file:'',statusbar_style:'off',statusbarcustom_file:'',ai_master:true,ai_subtitles:true,ai_call_summary:true,ai_writing:true,ai_sound_rec:true,ai_notes:true,ai_gallery:true,ai_video:true,game_master:true,game_esports_touch:true,game_esports_level:3,game_bypass_charge:true,game_gt_triggers:true,anim_os16:true,blur_os16:true,blur_os16_level:2,aod_os16:true,circle_os16:true,dynamicbar_os16:true,force_120hz:false};
 let _exec=null;
 
 async function exec(cmd){
@@ -757,40 +750,9 @@ async function writeAiSystemProp(){
   lines.push('ro.os_dynamic_bar_resident_plane_support='+feat01('dynamicbar_os16'));
   lines.push('ro.os.tran_hide_status_bar_for_land_recent='+feat01('dynamicbar_os16'));
   lines.push('ro.tran_hios_dynamic_bar_support='+feat01('dynamicbar_os16'));
-  lines.push('tr_display.resolution.scalingup.support='+(cfg.scale_os16!==false?'true':'false'));
-  lines.push('ro.tr_display.resolution.scalingup.support='+(cfg.scale_os16!==false?'true':'false'));
-  const g1=(cfg.gt_apps_os16!==false)?'1':'0';
-  const gt=(cfg.gt_apps_os16!==false)?'true':'false';
-  lines.push('tr_gallery.custom.fliters.support='+g1);
-  lines.push('tr_gallery.drag.sort.support='+g1);
-  lines.push('tr_gallery.easypic.support='+g1);
-  lines.push('tr_gallery.matting.support='+g1);
-  lines.push('tr_gallery.photo.16grid.support='+g1);
-  lines.push('tr_gallery.photo.8grid.support='+g1);
-  lines.push('tr_gallery.photo.cover.support='+g1);
-  lines.push('tr_gallery.photo.feature.support='+g1);
-  lines.push('tr_gallery.search.support='+g1);
-  lines.push('tr_gallery.soft.player.support='+g1);
-  lines.push('tr_soundrecorder.speech.feature.support='+g1);
-  lines.push('tr_smartscan.ar_measure.support='+gt);
-  lines.push('tr_smartscan.document_scan.support='+gt);
-  lines.push('tr_smartscan.medicine_verification.support='+gt);
-  lines.push('tr_smartscan.recharge.support='+gt);
-  lines.push('tr_microIntelligence.gesture_functions.feature.support='+g1);
-  lines.push('ro.tr_microIntelligence.gesture_functions.feature.support='+g1);
-  lines.push('ro.tr_microIntelligence.microIntelligence.feature.support='+g1);
-  lines.push('tr_pcconnect.backup.feature.support='+g1);
-  lines.push('tr_pcconnect.gesture_file_transfer.feature.support='+g1);
-  lines.push('tr_pcconnect.network_sharing.feature.support='+g1);
-  lines.push('tr_pcconnect.pc_mouse_button.feature.support='+g1);
-  lines.push('ro.tr_pcconnect.feature.support='+g1);
-  lines.push('tr_zeroscreen.ai.card.support='+g1);
-  lines.push('tr_globalsearch.easypic.support='+g1);
-  lines.push('ro.tr_smartpanel.os_smartpanel.support='+g1);
-  lines.push('ro.tr_smartpanel.os_slider_panel.support='+g1);
-  lines.push('ro.tr_smartpanel.os_slider_panel_default_close.config=0');
-  lines.push('ro.tr_smartpanel.os_smart_hub_def_off.config=0');
-  lines.push('ro.tr_dialer.contact.carlcare.feature.support='+g1);
+  lines.push('ro.tr_microIntelligence.circle_to_search.feature.support='+feat01('circle_os16'));
+  lines.push('tr_microIntelligence.circle_to_search.feature.support='+feat01('circle_os16'));
+  lines.push('ro.os_ai_circle_to_search_support='+feat01('circle_os16'));
   lines.push('ro.surface_flinger.game_default_frame_rate_override=120');
   lines.push('debug.graphics.game_default_frame_rate.disabled=true');
   lines.push('persist.graphics.game_default_frame_rate.enabled=false');
@@ -827,8 +789,7 @@ async function saveAll(){
     blur_os16:cfg.blur_os16!==false,
     blur_os16_level:blurLevel(),
     aod_os16:cfg.aod_os16!==false,
-    scale_os16:cfg.scale_os16!==false,
-    gt_apps_os16:cfg.gt_apps_os16!==false,
+    circle_os16:cfg.circle_os16!==false,
     dynamicbar_os16:cfg.dynamicbar_os16!==false,
     force_120hz:cfg.force_120hz===true
   };
@@ -919,26 +880,13 @@ async function dumpAi(){
   lines.push('tr_aod.always.show.feature.support  '+describeAiFlag(alwaysShow));
   const aodvc=await g('cat /tr_product/etc/vconfig/com.transsion.aod/build.prop 2>/dev/null');
   lines.push('vconfig aod: '+(aodvc||'EMPTY'));
-  const svc=await g('cat /tr_product/etc/vconfig/com.android.settings/build.prop 2>/dev/null');
-  lines.push('vconfig settings: '+(svc||'EMPTY'));
-  const scale=await g('getprop tr_display.resolution.scalingup.support');
-  lines.push('tr_display.resolution.scalingup.support  '+describeAiFlag(scale));
-  lines.push('scale_os16  '+String(cfg.scale_os16!==false));
-  lines.push('gt_apps_os16  '+String(cfg.gt_apps_os16!==false));
-  const scanvc=await g('cat /tr_product/etc/vconfig/com.transsion.scanningrecharger/build.prop 2>/dev/null');
-  lines.push('vconfig scan: '+(scanvc||'EMPTY'));
-  const recvc=await g('cat /tr_product/etc/vconfig/com.transsion.soundrecorder/build.prop 2>/dev/null');
-  lines.push('vconfig recorder: '+(recvc||'EMPTY'));
-  const galvc=await g('cat /tr_product/etc/vconfig/com.gallery20/build.prop 2>/dev/null');
-  lines.push('vconfig gallery20: '+(galvc||'EMPTY'));
-  const mivc=await g('cat /tr_product/etc/vconfig/com.transsion.microintelligence/build.prop 2>/dev/null');
-  lines.push('vconfig motions: '+(mivc||'EMPTY'));
-  const pcvc=await g('cat /tr_product/etc/vconfig/com.transsion.pcconnect/build.prop 2>/dev/null');
-  lines.push('vconfig pcconnect: '+(pcvc||'EMPTY'));
-  const zvc=await g('cat /tr_product/etc/vconfig/com.transsion.personalizedService/build.prop 2>/dev/null');
-  lines.push('vconfig zeroscreen: '+(zvc||'EMPTY'));
-  const spvc=await g('cat /tr_product/etc/vconfig/com.transsion.smartpanel/build.prop 2>/dev/null');
-  lines.push('vconfig smartpanel: '+(spvc||'EMPTY'));
+  lines.push('circle_os16  '+String(cfg.circle_os16!==false));
+  const cts=await g('getprop ro.tr_microIntelligence.circle_to_search.feature.support');
+  lines.push('ro.tr_microIntelligence.circle_to_search.feature.support  '+describeAiFlag(cts));
+  const cts2=await g('getprop tr_microIntelligence.circle_to_search.feature.support');
+  lines.push('tr_microIntelligence.circle_to_search.feature.support  '+describeAiFlag(cts2));
+  const cts3=await g('getprop ro.os_ai_circle_to_search_support');
+  lines.push('ro.os_ai_circle_to_search_support  '+describeAiFlag(cts3));
   const lvc=await g('grep hide_status_bar /tr_product/etc/vconfig/com.transsion.launcher3/build.prop 2>/dev/null');
   lines.push('vconfig launcher hide_land  '+(lvc||'EMPTY'));
   const horiz=await g('getprop tr_aod.horizontal.display.feature.support');
@@ -1142,8 +1090,7 @@ async function loadCfg(){
   if(cfg.blur_os16===undefined) cfg.blur_os16=true;
   if(cfg.blur_os16_level===undefined) cfg.blur_os16_level=2;
   if(cfg.aod_os16===undefined) cfg.aod_os16=true;
-  if(cfg.scale_os16===undefined) cfg.scale_os16=true;
-  if(cfg.gt_apps_os16===undefined) cfg.gt_apps_os16=true;
+  if(cfg.circle_os16===undefined) cfg.circle_os16=true;
   if(cfg.dynamicbar_os16===undefined) cfg.dynamicbar_os16=true;
   if(cfg.force_120hz===undefined) cfg.force_120hz=false;
   if(cfg.force_refresh_hz===120||cfg.force_refresh_hz===144) cfg.force_120hz=true;
@@ -1182,8 +1129,7 @@ async function loadCfg(){
   setT('feat-anim', cfg.anim_os16!==false);
   setT('feat-blur', cfg.blur_os16!==false);
   setT('feat-aod', cfg.aod_os16!==false);
-  setT('feat-scale', cfg.scale_os16!==false);
-  setT('feat-gtapps', cfg.gt_apps_os16!==false);
+  setT('feat-circle', cfg.circle_os16!==false);
   setT('feat-dynamicbar', cfg.dynamicbar_os16!==false);
   setT('feat-force120hz', cfg.force_120hz===true);
   setEsportsLevel(esportsLevel());

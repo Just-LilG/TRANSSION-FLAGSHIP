@@ -98,13 +98,10 @@ write_os16_ai_prop() {
   fi
   aod=$(json_bool "$cfg" aod_os16 true)
   dbar=$(json_bool "$cfg" dynamicbar_os16 true)
-  scale=$(json_bool "$cfg" scale_os16 true)
+  cts=$(json_bool "$cfg" circle_os16 true)
   [ "$aod" = "false" ] && aod=0 || aod=1
   [ "$dbar" = "false" ] && dbar=0 || dbar=1
-  [ "$scale" = "false" ] && scale=false || scale=true
-  gt=$(json_bool "$cfg" gt_apps_os16 true)
-  [ "$gt" = "false" ] && gt01=0 || gt01=1
-  [ "$gt" = "false" ] && gttrue=false || gttrue=true
+  [ "$cts" = "false" ] && cts=0 || cts=1
   cat > "$dest" <<EOF
 # Flagship 16 — OS 16 keys. Magisk loads this file at boot.
 # Apply in WebUI rewrites this file from the Features toggles.
@@ -180,38 +177,9 @@ ro.os_dynamicbar_ai_translation_support=$dbar
 ro.os_dynamic_bar_resident_plane_support=$dbar
 ro.os.tran_hide_status_bar_for_land_recent=$dbar
 ro.tran_hios_dynamic_bar_support=$dbar
-tr_display.resolution.scalingup.support=$scale
-ro.tr_display.resolution.scalingup.support=$scale
-tr_gallery.custom.fliters.support=$gt01
-tr_gallery.drag.sort.support=$gt01
-tr_gallery.easypic.support=$gt01
-tr_gallery.matting.support=$gt01
-tr_gallery.photo.16grid.support=$gt01
-tr_gallery.photo.8grid.support=$gt01
-tr_gallery.photo.cover.support=$gt01
-tr_gallery.photo.feature.support=$gt01
-tr_gallery.search.support=$gt01
-tr_gallery.soft.player.support=$gt01
-tr_soundrecorder.speech.feature.support=$gt01
-tr_smartscan.ar_measure.support=$gttrue
-tr_smartscan.document_scan.support=$gttrue
-tr_smartscan.medicine_verification.support=$gttrue
-tr_smartscan.recharge.support=$gttrue
-tr_microIntelligence.gesture_functions.feature.support=$gt01
-ro.tr_microIntelligence.gesture_functions.feature.support=$gt01
-ro.tr_microIntelligence.microIntelligence.feature.support=$gt01
-tr_pcconnect.backup.feature.support=$gt01
-tr_pcconnect.gesture_file_transfer.feature.support=$gt01
-tr_pcconnect.network_sharing.feature.support=$gt01
-tr_pcconnect.pc_mouse_button.feature.support=$gt01
-ro.tr_pcconnect.feature.support=$gt01
-tr_zeroscreen.ai.card.support=$gt01
-tr_globalsearch.easypic.support=$gt01
-ro.tr_smartpanel.os_smartpanel.support=$gt01
-ro.tr_smartpanel.os_slider_panel.support=$gt01
-ro.tr_smartpanel.os_slider_panel_default_close.config=0
-ro.tr_smartpanel.os_smart_hub_def_off.config=0
-ro.tr_dialer.contact.carlcare.feature.support=$gt01
+ro.tr_microIntelligence.circle_to_search.feature.support=$cts
+tr_microIntelligence.circle_to_search.feature.support=$cts
+ro.os_ai_circle_to_search_support=$cts
 ro.surface_flinger.game_default_frame_rate_override=120
 debug.graphics.game_default_frame_rate.disabled=true
 persist.graphics.game_default_frame_rate.enabled=false
@@ -222,7 +190,7 @@ print_modname() {
   ui_print " "
   ui_print "  ╔══════════════════════════════════════════╗"
   ui_print "  ║    TRANSSION FLAGSHIP 16                 ║"
-  ui_print "  ║    XOS · HiOS · iTel OS 16  ·  V1.65     ║"
+  ui_print "  ║    XOS · HiOS · iTel OS 16  ·  V1.66     ║"
   ui_print "  ╚══════════════════════════════════════════╝"
   ui_print " "
 }
@@ -433,7 +401,7 @@ set_permissions() {
   done
   ui_print " "
   ui_div
-  ui_print "  ✨  FLAGSHIP 16  ·  V1.65"
+  ui_print "  ✨  FLAGSHIP 16  ·  V1.66"
   ui_info "OS     : $OS_TYPE $OS_VER"
   ui_info "Feature: boot + reboot + overlay + AI + gaming + anim/blur + AOD + Dynamic bar + Force 120Hz"
   ui_div

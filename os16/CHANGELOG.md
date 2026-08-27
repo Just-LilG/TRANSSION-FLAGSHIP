@@ -1,5 +1,9 @@
 # Transsion Flagship 16
 
+## v1.66
+- **Dropped failed GT extras and resolution scale-up.** Smart Scan, Gallery extras, Recorder speech, Motions, PC Connect, Zero Screen, Smart Hub, and Settings scale-up never unhid UI on this G99. Those vconfig binds and Magisk keys are gone.
+- **Circle to Search.** Next feature is a `tr_product` key (same class as Ella/VEE), not another app vconfig: `ro.tr_microIntelligence.circle_to_search.feature.support` plus Flagship 15 `ro.os_ai_circle_to_search_support`. Apply + reboot, then long-press home / the nav handle. Dump those flags — EMPTY means this G99 does not expose the key.
+
 ## v1.65
 - **GT extras use the same path as AOD.** V1.64 bound the app vconfigs but only resetprop'd a few keys and never wrote them to Magisk `system.prop`. AOD needed all three: vconfig bind, Magisk prop, resetprop. This build does that for Smart Scan, Gallery extras, Recorder speech, Motions, PC Connect, Zero Screen, and Smart Hub. Apply + reboot.
 
