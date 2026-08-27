@@ -94,11 +94,6 @@ write_os16_ai_prop() {
     b01=0
     sfdis=1
   fi
-  hz=$(json_int "$cfg" force_refresh_hz 0)
-  if [ "$hz" != "120" ] && [ "$hz" != "144" ]; then
-    fb=$(json_bool "$cfg" force_120hz false)
-    [ "$fb" = "true" ] && hz=120
-  fi
   cat > "$dest" <<EOF
 # Flagship 16 — OS 16 keys. Magisk loads this file at boot.
 # Apply in WebUI rewrites this file from the Features toggles.
@@ -161,28 +156,13 @@ persist.sysui.disableBlur=$sfdis
 persist.sysui.disable_blur=$sfdis
 ro.sf.blurs_are_expensive=$sfdis
 EOF
-  if [ "$hz" = "120" ] || [ "$hz" = "144" ]; then
-    hz144=0
-    [ "$hz" = "144" ] && hz144=1
-    cat >> "$dest" <<EOF
-ro.tran_90hz_refresh_rate.not_support=1
-ro.tr_display.90hz.not_support=1
-ro.tran_default_auto_refresh.support=0
-ro.tr_display.default_auto_refresh.support=0
-ro.tran_custom_refresh_rate_config.support=1
-ro.tran_144hz_refresh_rate.support=$hz144
-ro.tr_display.144hz.support=$hz144
-persist.sys.peak_refresh_rate=$hz
-persist.sys.min_refresh_rate=$hz
-EOF
-  fi
 }
 
 print_modname() {
   ui_print " "
   ui_print "  ╔══════════════════════════════════════════╗"
   ui_print "  ║    TRANSSION FLAGSHIP 16                 ║"
-  ui_print "  ║    XOS · HiOS · iTel OS 16  ·  V1.41     ║"
+  ui_print "  ║    XOS · HiOS · iTel OS 16  ·  V1.42     ║"
   ui_print "  ╚══════════════════════════════════════════╝"
   ui_print " "
 }
@@ -285,6 +265,7 @@ on_install() {
     unzip -oj "$ZIPFILE" 'common/apply_blur.sh' -d "$MODPATH" >&2
     unzip -oj "$ZIPFILE" 'common/apply_120hz.sh' -d "$MODPATH" >&2
     unzip -o "$ZIPFILE" 'apm_120hz_bypass/*' -d "$MODPATH" >&2
+    unzip -o "$ZIPFILE" 'system/product/apm/*' -d "$MODPATH" >&2
     unzip -o "$ZIPFILE" 'tr_product/*' -d "$MODPATH" >&2
   else
     ui_info "Extracting module files from zip"
@@ -297,6 +278,7 @@ on_install() {
     unzip -oj "$ZIPFILE" 'common/apply_blur.sh' -d "$MODPATH" >&2
     unzip -oj "$ZIPFILE" 'common/apply_120hz.sh' -d "$MODPATH" >&2
     unzip -o "$ZIPFILE" 'apm_120hz_bypass/*' -d "$MODPATH" >&2
+    unzip -o "$ZIPFILE" 'system/product/apm/*' -d "$MODPATH" >&2
   fi
 
   # Drop failed boot-sound / charging packs left by V1.02–V1.12.
@@ -370,7 +352,7 @@ set_permissions() {
   done
   ui_print " "
   ui_div
-  ui_print "  ✨  FLAGSHIP 16  ·  V1.41"
+  ui_print "  ✨  FLAGSHIP 16  ·  V1.42"
   ui_info "OS     : $OS_TYPE $OS_VER"
   ui_info "Feature: boot + reboot + overlay + AI + gaming + anim/blur"
   ui_div
