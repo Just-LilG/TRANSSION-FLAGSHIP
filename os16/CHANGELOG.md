@@ -1,5 +1,11 @@
 # Transsion Flagship 16
 
+## v1.73
+- **Apply & Save no longer freezes the WebUI.** KernelSU `ksu.exec` has no timeout. Apply was waiting on `apply_blur.sh all` (many `resetprop --delete` plus vconfig binds). The UI now writes `config.json` + `system.prop` first, toasts immediately, and runs apply in the background.
+- **Dynamic bar is off by default.** Existing installs get a one-time migrate to off (empty pill leftover). Turn it back on in Features if you want Always Show Background.
+- **Cute Pet did not unhide** on this G99. Magisk keys stay for other Trans OS 16 devices.
+- **Outdoor boost.** Next extra: GT dump `ro.tr_outdoorboost.feature.support`. Apply + reboot, then Display / outdoor. Dump that flag — EMPTY means this G99 does not expose the key.
+
 ## v1.72
 - **Apply & Save must not soft-reboot.** V1.71 stopped killing SurfaceFlinger at boot, but WebUI Apply still force-stopped the home launcher (and AOD/Settings). That is the flicker when you tap Apply. Apply now only writes config, Magisk props, and settings. Reboot yourself when you want Mountify / Magisk props.
 

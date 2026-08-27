@@ -271,7 +271,7 @@ os16_apply_aod_vconfig() {
 }
 
 os16_apply_launcher_vconfig() {
-  bar=$(os16_cfg_01 dynamicbar_os16 true)
+  bar=$(os16_cfg_01 dynamicbar_os16 false)
   staged=$(os16_seed_vconfig_pkg com.transsion.launcher3)
   # Flagship 15 XOS 16 wrote this into launcher3 vconfig, not only system.prop.
   os16_vconfig_upsert "$staged" "ro.os.tran_hide_status_bar_for_land_recent" "$bar"
@@ -320,11 +320,18 @@ os16_apply_cutepet_props() {
   os16_rp_overwrite ro.os_cutepet_support "$p"
 }
 
+os16_apply_outdoorboost_props() {
+  o=$(os16_cfg_01 outdoorboost_os16 true)
+  os16_rp_overwrite ro.tr_outdoorboost.feature.support "$o"
+  os16_rp_overwrite tr_outdoorboost.feature.support "$o"
+}
+
 os16_apply_os16_extras_props() {
   os16_apply_videosr_props
   os16_apply_supervol_props
   os16_apply_treasure_props
   os16_apply_cutepet_props
+  os16_apply_outdoorboost_props
 }
 
 os16_apply_aod_settings() {
@@ -340,7 +347,7 @@ os16_apply_aod_settings() {
 }
 
 os16_apply_dynamicbar_props() {
-  bar=$(os16_cfg_01 dynamicbar_os16 true)
+  bar=$(os16_cfg_01 dynamicbar_os16 false)
   os16_rp_overwrite ro.tr_dynamicbar.support "$bar"
   os16_rp_overwrite ro.os_dynamicbar_ai_translation_support "$bar"
   os16_rp_overwrite ro.tran_hios_dynamic_bar_support "$bar"

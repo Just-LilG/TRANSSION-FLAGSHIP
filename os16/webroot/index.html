@@ -167,7 +167,9 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
             <li class="on">Gaming — OS 16 GT triggers in XArena</li>
             <li class="on">Force 120Hz — 144 picker verified</li>
             <li class="next">AOD — second try still hid Lock screen AOD</li>
-            <li class="on">Dynamic bar — Settings page on; empty pill forced off</li>
+            <li>Dynamic bar — off by default (empty pill leftover)</li>
+            <li class="next">Cute Pet — Magisk keys stay; this G99 did not unhide</li>
+            <li class="next">Outdoor boost — next extra (GT dump ro.tr_outdoorboost)</li>
             <li>Social Turbo — removed (stock already had call tools)</li>
             <li>Display extras — removed (OS 16 Settings hid DC / HDR / reading)</li>
           </ul>
@@ -350,16 +352,23 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
           <div class="setting-row">
             <div class="row-text">
               <div class="row-title">Cute Pet</div>
-              <div class="row-sub">OS 16 ro.tr_cutepet plus Flagship 15 ro.os_cutepet_support. Themes / lockscreen pet. Apply + reboot.</div>
+              <div class="row-sub">Magisk keys stay for other OS 16 devices. This G99 did not unhide Themes pet. Apply + reboot.</div>
             </div>
             <label class="toggle"><input type="checkbox" id="feat-cutepet" checked onchange="cfg.cutepet_os16=this.checked"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
           </div>
           <div class="setting-row">
             <div class="row-text">
-              <div class="row-title">Dynamic bar</div>
-              <div class="row-sub">Always Show Background in Settings. Recents pill fix is launcher3 vconfig (same path Flagship 15 uses). Apply + reboot.</div>
+              <div class="row-title">Outdoor boost</div>
+              <div class="row-sub">OS 16 ro.tr_outdoorboost.feature.support (GT dump 1). Apply + reboot, then Display / outdoor. Dump that flag.</div>
             </div>
-            <label class="toggle"><input type="checkbox" id="feat-dynamicbar" checked onchange="cfg.dynamicbar_os16=this.checked"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+            <label class="toggle"><input type="checkbox" id="feat-outdoor" checked onchange="cfg.outdoorboost_os16=this.checked"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+          </div>
+          <div class="setting-row">
+            <div class="row-text">
+              <div class="row-title">Dynamic bar</div>
+              <div class="row-sub">Off by default. Always Show Background in Settings. Recents pill is leftover. Apply + reboot.</div>
+            </div>
+            <label class="toggle"><input type="checkbox" id="feat-dynamicbar" onchange="cfg.dynamicbar_os16=this.checked"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
           </div>
           <div class="setting-row">
             <div class="row-text">
@@ -470,8 +479,9 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
 <script type="module">
 const MOD='/data/adb/modules/transsion-flagship-16';
 const CONFIG_PATH=MOD+'/config.json';
-let cfg={bootanim_style:'hios16',bootanim_file:'',rebootanim_style:'hios16',rebootanim_file:'',statusbar_style:'off',statusbarcustom_file:'',ai_master:true,ai_subtitles:true,ai_call_summary:true,ai_writing:true,ai_sound_rec:true,ai_notes:true,ai_gallery:true,ai_video:true,game_master:true,game_esports_touch:true,game_esports_level:3,game_bypass_charge:true,game_gt_triggers:true,anim_os16:true,blur_os16:true,blur_os16_level:2,aod_os16:true,videosr_os16:true,supervol_os16:true,treasure_os16:true,cutepet_os16:true,dynamicbar_os16:true,force_120hz:false};
+let cfg={bootanim_style:'hios16',bootanim_file:'',rebootanim_style:'hios16',rebootanim_file:'',statusbar_style:'off',statusbarcustom_file:'',ai_master:true,ai_subtitles:true,ai_call_summary:true,ai_writing:true,ai_sound_rec:true,ai_notes:true,ai_gallery:true,ai_video:true,game_master:true,game_esports_touch:true,game_esports_level:3,game_bypass_charge:true,game_gt_triggers:true,anim_os16:true,blur_os16:true,blur_os16_level:2,aod_os16:true,videosr_os16:true,supervol_os16:true,treasure_os16:true,cutepet_os16:true,outdoorboost_os16:true,dynamicbar_os16:false,force_120hz:false};
 let _exec=null;
+let _saving=false;
 
 async function exec(cmd){
   if(!_exec) return {stdout:'',stderr:'no-bridge',returnCode:1};
@@ -644,6 +654,10 @@ const CUTEPET_KEYS=[
   'tr_cutepet.feature.support',
   'ro.os_cutepet_support'
 ];
+const OUTDOOR_KEYS=[
+  'ro.tr_outdoorboost.feature.support',
+  'tr_outdoorboost.feature.support'
+];
 const SUPERVOL_KEYS=[
   'ro.tr_audio.supervol.feature.support',
   'tr_audio.supervol.feature.support'
@@ -800,6 +814,8 @@ async function writeAiSystemProp(){
   lines.push('ro.tr_cutepet.feature.support='+feat01('cutepet_os16'));
   lines.push('tr_cutepet.feature.support='+feat01('cutepet_os16'));
   lines.push('ro.os_cutepet_support='+feat01('cutepet_os16'));
+  lines.push('ro.tr_outdoorboost.feature.support='+feat01('outdoorboost_os16'));
+  lines.push('tr_outdoorboost.feature.support='+feat01('outdoorboost_os16'));
   lines.push('ro.surface_flinger.game_default_frame_rate_override=120');
   lines.push('debug.graphics.game_default_frame_rate.disabled=true');
   lines.push('persist.graphics.game_default_frame_rate.enabled=false');
@@ -809,55 +825,65 @@ async function writeAiSystemProp(){
   return (r.stdout||'').includes('OK');
 }
 async function saveAll(){
-  if(cfg.ai_writing===undefined) cfg.ai_writing=cfg.ai_notif_summary!==false;
-  const hzEl=document.getElementById('feat-force120hz');
-  if(hzEl) cfg.force_120hz=hzEl.checked;
-  const slim={
-    bootanim_style:cfg.bootanim_style||'hios16',
-    bootanim_file:cfg.bootanim_file||'',
-    rebootanim_style:cfg.rebootanim_style||'hios16',
-    rebootanim_file:cfg.rebootanim_file||'',
-    statusbar_style:cfg.statusbar_style||'off',
-    statusbarcustom_file:cfg.statusbarcustom_file||'',
-    ai_master:cfg.ai_master===true,
-    ai_subtitles:cfg.ai_subtitles!==false,
-    ai_call_summary:cfg.ai_call_summary!==false,
-    ai_writing:cfg.ai_writing!==false,
-    ai_sound_rec:cfg.ai_sound_rec!==false,
-    ai_notes:cfg.ai_notes!==false,
-    ai_gallery:cfg.ai_gallery!==false,
-    ai_video:cfg.ai_video!==false,
-    game_master:cfg.game_master!==false,
-    game_esports_touch:cfg.game_esports_touch!==false,
-    game_esports_level:esportsLevel(),
-    game_bypass_charge:cfg.game_bypass_charge!==false,
-    game_gt_triggers:cfg.game_gt_triggers!==false,
-    anim_os16:cfg.anim_os16!==false,
-    blur_os16:cfg.blur_os16!==false,
-    blur_os16_level:blurLevel(),
-    aod_os16:cfg.aod_os16!==false,
-    videosr_os16:cfg.videosr_os16!==false,
-    supervol_os16:cfg.supervol_os16!==false,
-    treasure_os16:cfg.treasure_os16!==false,
-    cutepet_os16:cfg.cutepet_os16!==false,
-    dynamicbar_os16:cfg.dynamicbar_os16!==false,
-    force_120hz:cfg.force_120hz===true
-  };
-  const json=JSON.stringify(slim,null,2).replace(/'/g,"'\\''");
-  const hzFlag=cfg.force_120hz===true?'1':'0';
-  const r=await exec("printf '%s\\n' '"+json+"' > \""+CONFIG_PATH+"\" && printf '%s\\n' '"+hzFlag+"' > \""+MOD+"/.force_120hz\" && sync \""+CONFIG_PATH+"\" \""+MOD+"/.force_120hz\" && echo OK");
-  if(!(r.stdout||'').includes('OK')){ toast('Save failed — is the module installed?'); return; }
-  const props=await writeAiSystemProp();
-  if(!props){ toast('Saved config, but AI props failed to write'); return; }
-  await applyBlurRuntime();
-  await apply120HzRuntime();
-  toast('Saved — reboot for Magisk / Mountify changes');
+  if(_saving) return;
+  _saving=true;
+  toast('Saving...');
+  try{
+    if(cfg.ai_writing===undefined) cfg.ai_writing=cfg.ai_notif_summary!==false;
+    const hzEl=document.getElementById('feat-force120hz');
+    if(hzEl) cfg.force_120hz=hzEl.checked;
+    const slim={
+      bootanim_style:cfg.bootanim_style||'hios16',
+      bootanim_file:cfg.bootanim_file||'',
+      rebootanim_style:cfg.rebootanim_style||'hios16',
+      rebootanim_file:cfg.rebootanim_file||'',
+      statusbar_style:cfg.statusbar_style||'off',
+      statusbarcustom_file:cfg.statusbarcustom_file||'',
+      ai_master:cfg.ai_master===true,
+      ai_subtitles:cfg.ai_subtitles!==false,
+      ai_call_summary:cfg.ai_call_summary!==false,
+      ai_writing:cfg.ai_writing!==false,
+      ai_sound_rec:cfg.ai_sound_rec!==false,
+      ai_notes:cfg.ai_notes!==false,
+      ai_gallery:cfg.ai_gallery!==false,
+      ai_video:cfg.ai_video!==false,
+      game_master:cfg.game_master!==false,
+      game_esports_touch:cfg.game_esports_touch!==false,
+      game_esports_level:esportsLevel(),
+      game_bypass_charge:cfg.game_bypass_charge!==false,
+      game_gt_triggers:cfg.game_gt_triggers!==false,
+      anim_os16:cfg.anim_os16!==false,
+      blur_os16:cfg.blur_os16!==false,
+      blur_os16_level:blurLevel(),
+      aod_os16:cfg.aod_os16!==false,
+      videosr_os16:cfg.videosr_os16!==false,
+      supervol_os16:cfg.supervol_os16!==false,
+      treasure_os16:cfg.treasure_os16!==false,
+      cutepet_os16:cfg.cutepet_os16!==false,
+      outdoorboost_os16:cfg.outdoorboost_os16!==false,
+      dynamicbar_os16:cfg.dynamicbar_os16===true,
+      force_120hz:cfg.force_120hz===true
+    };
+    const json=JSON.stringify(slim,null,2).replace(/'/g,"'\\''");
+    const hzFlag=cfg.force_120hz===true?'1':'0';
+    const r=await exec("printf '%s\\n' '"+json+"' > \""+CONFIG_PATH+"\" && printf '%s\\n' '"+hzFlag+"' > \""+MOD+"/.force_120hz\" && sync \""+CONFIG_PATH+"\" \""+MOD+"/.force_120hz\" && echo OK");
+    if(!(r.stdout||'').includes('OK')){ toast('Save failed — is the module installed?'); _saving=false; return; }
+    const props=await writeAiSystemProp();
+    if(!props){ toast('Saved config, but AI props failed to write'); _saving=false; return; }
+    // ksu.exec has no timeout. apply_blur.sh all can hang on resetprop --delete
+    // / vconfig bind and freeze the WebUI. Detach so Apply always returns.
+    exec('nohup sh "'+MOD+'/apply_blur.sh" all >/dev/null 2>&1 & nohup sh "'+MOD+'/apply_120hz.sh" >/dev/null 2>&1 & echo OK').catch(function(){});
+    toast('Saved. Reboot if Settings did not update.');
+  }catch(e){
+    toast('Save failed. Try again.');
+  }
+  _saving=false;
 }
 async function applyBlurRuntime(){
-  await exec('sh "'+MOD+'/apply_blur.sh" all >/dev/null 2>&1; echo OK');
+  exec('nohup sh "'+MOD+'/apply_blur.sh" all >/dev/null 2>&1 & echo OK').catch(function(){});
 }
 async function apply120HzRuntime(){
-  await exec('sh "'+MOD+'/apply_120hz.sh" >/dev/null 2>&1; echo OK');
+  exec('nohup sh "'+MOD+'/apply_120hz.sh" >/dev/null 2>&1 & echo OK').catch(function(){});
 }
 async function dumpAi(){
   toast('Reading flags…', 8000);
@@ -879,6 +905,7 @@ async function dumpAi(){
     ...SUPERVOL_KEYS,
     ...TREASURE_KEYS,
     ...CUTEPET_KEYS,
+    ...OUTDOOR_KEYS,
     ...BLUR_KEYS
   ];
   const lines=['=== keys this module writes ==='];
@@ -913,7 +940,7 @@ async function dumpAi(){
   lines.push('');
   lines.push('=== aod / dynamic bar ===');
   lines.push('aod_os16  '+String(cfg.aod_os16!==false));
-  lines.push('dynamicbar_os16  '+String(cfg.dynamicbar_os16!==false));
+  lines.push('dynamicbar_os16  '+String(cfg.dynamicbar_os16===true));
   const plane=await g('getprop ro.os_dynamic_bar_resident_plane_support');
   lines.push('ro.os_dynamic_bar_resident_plane_support  '+describeAiFlag(plane));
   const hideLand=await g('getprop ro.os.tran_hide_status_bar_for_land_recent');
@@ -938,6 +965,7 @@ async function dumpAi(){
   lines.push('supervol_os16  '+String(cfg.supervol_os16!==false));
   lines.push('treasure_os16  '+String(cfg.treasure_os16!==false));
   lines.push('cutepet_os16  '+String(cfg.cutepet_os16!==false));
+  lines.push('outdoorboost_os16  '+String(cfg.outdoorboost_os16!==false));
   const vsr=await g('getprop persist.tr_video.ai_super_resolution.support');
   lines.push('persist.tr_video.ai_super_resolution.support  '+describeAiFlag(vsr));
   const vsr2=await g('getprop ro.tr_video.ai_super_resolution.support');
@@ -946,6 +974,8 @@ async function dumpAi(){
   lines.push('ro.tr_cutepet.feature.support  '+describeAiFlag(pet));
   const pet2=await g('getprop ro.os_cutepet_support');
   lines.push('ro.os_cutepet_support  '+describeAiFlag(pet2));
+  const outb=await g('getprop ro.tr_outdoorboost.feature.support');
+  lines.push('ro.tr_outdoorboost.feature.support  '+describeAiFlag(outb));
   const lvc=await g('grep hide_status_bar /tr_product/etc/vconfig/com.transsion.launcher3/build.prop 2>/dev/null');
   lines.push('vconfig launcher hide_land  '+(lvc||'EMPTY'));
   const horiz=await g('getprop tr_aod.horizontal.display.feature.support');
@@ -986,7 +1016,7 @@ async function dumpAi(){
   lines.push(head||'(no product APM json)');
   lines.push('');
   lines.push('=== other live AI-like keys (first 80) ===');
-  const live=await g("getprop | grep -iE 'ai_|aiphone|subtitle|soundrecorder|note_ai|aicore|aipower|ask_ai|tr_gallery|tr_video.vee|studio.lite|tr_game|os_game|esports|bypass_charg|shoulder|smartbutton|tr_aod|aod_|dynamicbar|tr_animation|tr_perf|liquidglass|dreamanimation|anim_arc|unionrender|async_anim|gaussian|dynamicblur|recent.blur|background_blur|xos16_blur|disable_blurs|disableBlur|disable_blur' | head -80");
+  const live=await g("getprop | grep -iE 'ai_|aiphone|subtitle|soundrecorder|note_ai|aicore|aipower|ask_ai|tr_gallery|tr_video.vee|studio.lite|tr_game|os_game|esports|bypass_charg|shoulder|smartbutton|tr_aod|aod_|dynamicbar|outdoorboost|cutepet|tr_animation|tr_perf|liquidglass|dreamanimation|anim_arc|unionrender|async_anim|gaussian|dynamicblur|recent.blur|background_blur|xos16_blur|disable_blurs|disableBlur|disable_blur' | head -80");
   lines.push(live||'(none)');
   lines.push('');
   lines.push('=== gallery / aicore packages ===');
@@ -1153,7 +1183,8 @@ async function loadCfg(){
   if(cfg.supervol_os16===undefined) cfg.supervol_os16=true;
   if(cfg.treasure_os16===undefined) cfg.treasure_os16=true;
   if(cfg.cutepet_os16===undefined) cfg.cutepet_os16=true;
-  if(cfg.dynamicbar_os16===undefined) cfg.dynamicbar_os16=true;
+  if(cfg.outdoorboost_os16===undefined) cfg.outdoorboost_os16=true;
+  if(cfg.dynamicbar_os16===undefined) cfg.dynamicbar_os16=false;
   if(cfg.force_120hz===undefined) cfg.force_120hz=false;
   if(cfg.force_refresh_hz===120||cfg.force_refresh_hz===144) cfg.force_120hz=true;
   const hzFlag=await g('cat "'+MOD+'/.force_120hz" 2>/dev/null');
@@ -1195,7 +1226,8 @@ async function loadCfg(){
   setT('feat-supervol', cfg.supervol_os16!==false);
   setT('feat-treasure', cfg.treasure_os16!==false);
   setT('feat-cutepet', cfg.cutepet_os16!==false);
-  setT('feat-dynamicbar', cfg.dynamicbar_os16!==false);
+  setT('feat-outdoor', cfg.outdoorboost_os16!==false);
+  setT('feat-dynamicbar', cfg.dynamicbar_os16===true);
   setT('feat-force120hz', cfg.force_120hz===true);
   setEsportsLevel(esportsLevel());
   setBlurLevel(blurLevel());
