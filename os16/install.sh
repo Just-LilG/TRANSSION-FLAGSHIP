@@ -84,9 +84,11 @@ write_os16_ai_prop() {
     [ "$blvl" -ge 1 ] 2>/dev/null || blvl=2
     [ "$blvl" -le 3 ] 2>/dev/null || blvl=2
     b01=1
+    sfdis=0
   else
     blvl=0
     b01=0
+    sfdis=1
   fi
   cat > "$dest" <<EOF
 # Flagship 16 — OS 16 keys. Magisk loads this file at boot.
@@ -128,7 +130,6 @@ ro.tr_perf.power_keyguard_animation.model=$alvl
 ro.tr_perf.recent_animation.model=$alvl
 ro.tr_perf.unlock_mode.model=$alvl
 ro.tr_dynamicbar.support=$a01
-ro.tr_display.liquidglass.support=$a01
 ro.tr_livewallpaper.dreamanimation.support=$a01
 ro.tr_multiwindow.anim_arc.support=$a01
 ro.transsion_async_animation_support=$a01
@@ -137,12 +138,14 @@ ro.transsion_launch_start_exit_support=$alvl
 ro.transsion_power_keyguard_animation_support=$alvl
 ro.transsion.recent_animation.model=$alvl
 ro.tran_display_unionrender.support=$a01
+ro.tr_display.liquidglass.support=$b01
 ro.surface_flinger.supports_background_blur=$b01
 ro.os.recent.blur=$b01
 ro.transsion_launcher_gaussian_blur_support=$blvl
 tr_launcher.gaussianblur.support=$blvl
 ro.tran.effectengine.dynamicblur.support=$b01
 ro.os_xos16_blur_v2_support=$b01
+persist.sys.sf.disable_blurs=$sfdis
 EOF
 }
 
@@ -150,7 +153,7 @@ print_modname() {
   ui_print " "
   ui_print "  ╔══════════════════════════════════════════╗"
   ui_print "  ║    TRANSSION FLAGSHIP 16                 ║"
-  ui_print "  ║    XOS · HiOS · iTel OS 16  ·  V1.32     ║"
+  ui_print "  ║    XOS · HiOS · iTel OS 16  ·  V1.33     ║"
   ui_print "  ╚══════════════════════════════════════════╝"
   ui_print " "
 }
@@ -332,7 +335,7 @@ set_permissions() {
   done
   ui_print " "
   ui_div
-  ui_print "  ✨  FLAGSHIP 16  ·  V1.32"
+  ui_print "  ✨  FLAGSHIP 16  ·  V1.33"
   ui_info "OS     : $OS_TYPE $OS_VER"
   ui_info "Feature: boot + reboot + overlay + AI + gaming + anim/blur"
   ui_div
