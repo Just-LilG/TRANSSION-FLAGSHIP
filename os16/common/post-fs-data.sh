@@ -361,3 +361,11 @@ if [ -f "$MODDIR/apply_120hz.sh" ]; then
 else
   log_pfd "apply_120hz.sh missing"
 fi
+
+if [ -f "$MODDIR/apply_sounds.sh" ]; then
+  . "$MODDIR/apply_sounds.sh"
+  os16_apply_sounds
+  log_pfd "ui sounds charge=$(ls -l /tr_product/media/audio/ui/ChargingStarted.ogg 2>/dev/null | awk '{print $5,$NF}') unlock=$(ls -l /tr_product/media/audio/ui/Unlock.ogg 2>/dev/null | awk '{print $5,$NF}')"
+else
+  log_pfd "apply_sounds.sh missing"
+fi
