@@ -1,9 +1,12 @@
 #!/system/bin/sh
-# Flagship 16 blur: notifications / QS / recents / dock, not launcher-only.
-# SystemUI BlurUtils reads ro.surface_flinger.supports_background_blur and
-# persist.sys.sf.disable_blurs once at process start. Changing those without
-# restarting SystemUI leaves flagship Gaussian on the shade (Smart-series
-# look is solid + slight transparency). Do not resetprop AI/game keys here.
+# Flagship 16 blur.
+# Dock gaussian is launcher-only (that toggle already works).
+# Notification/QS glass is SurfaceFlinger. persist.sys.sf.disable_blurs and
+# ro.surface_flinger.supports_background_blur are read when SF starts;
+# restarting SystemUI is not enough. Do not resetprop AI/game keys here.
+#
+# Level 1 = Smart-series compositor (solid + slight transparency).
+# Level 2/3 = flagship compositor glass. Off = Smart compositor + no dock blur.
 
 if [ -z "$MODDIR" ]; then
   MODDIR=${0%/*}
@@ -70,29 +73,37 @@ os16_blur_vals() {
   lvl=$(os16_cfg_int blur_os16_level 2)
   [ "$lvl" -ge 1 ] 2>/dev/null || lvl=2
   [ "$lvl" -le 3 ] 2>/dev/null || lvl=2
+  COMP=0
   if [ "$on" = "true" ] || [ "$on" = "1" ]; then
-    B01=1
     BLVL=$lvl
-    SFDIS=0
     EN=1
-    DIS=0
-    EXP=0
-    REDTRANS=0
     case "$lvl" in
       1) RAD=20 ;;
       3) RAD=80 ;;
       *) RAD=45 ;;
     esac
+    # Level 1 is Smart-series shade (no compositor glass). 2/3 are flagship glass.
+    if [ "$lvl" -ge 2 ]; then
+      COMP=1
+    fi
+  else
+    BLVL=0
+    EN=0
+    RAD=0
+    lvl=0
+  fi
+  if [ "$COMP" = "1" ]; then
+    B01=1
+    SFDIS=0
+    DIS=0
+    EXP=0
+    REDTRANS=0
   else
     B01=0
-    BLVL=0
     SFDIS=1
-    EN=0
     DIS=1
     EXP=1
     REDTRANS=1
-    RAD=0
-    lvl=0
   fi
   BLUR_ON=$on
   BLUR_LVL=$lvl
@@ -135,6 +146,15 @@ os16_restart_systemui() {
   killall com.android.systemui >/dev/null 2>&1
 }
 
+# SurfaceFlinger reads blur support at process start. SystemUI restart does not
+# recreate SF, so notification-shade Gaussian stays until SF is restarted.
+os16_restart_surfaceflinger() {
+  setprop ctl.restart surfaceflinger >/dev/null 2>&1
+  stop surfaceflinger >/dev/null 2>&1
+  start surfaceflinger >/dev/null 2>&1
+  killall surfaceflinger >/dev/null 2>&1
+}
+
 os16_apply_blur_runtime() {
   os16_blur_vals
   os16_settings_put global disable_window_blurs "$DIS"
@@ -150,18 +170,19 @@ os16_apply_blur_runtime() {
   os16_settings_put system transsion_launcher_gaussian_support "$BLVL"
   wm disable-blur "$DIS" >/dev/null 2>&1
   cmd window disable-blur "$DIS" >/dev/null 2>&1
+  device_config put systemui notification_shade_blur "$([ "$COMP" = "1" ] && echo true || echo false)" >/dev/null 2>&1
   os16_force_stop_launchers
-  os16_restart_systemui
 }
 
 if [ "${0##*/}" = "apply_blur.sh" ]; then
   mode="${1:-all}"
   case "$mode" in
     props) os16_apply_blur_props ;;
-    runtime) os16_apply_blur_runtime ;;
+    runtime) os16_apply_blur_runtime; os16_restart_systemui ;;
     *)
       os16_apply_blur_props
       os16_apply_blur_runtime
+      os16_restart_surfaceflinger
       ;;
   esac
 fi
