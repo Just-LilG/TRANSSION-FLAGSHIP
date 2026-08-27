@@ -322,14 +322,14 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
           <div class="setting-row">
             <div class="row-text">
               <div class="row-title">Always-On Display</div>
-              <div class="row-sub">Second try: also writes the OS 15 key that unhid AOD on this phone (ro.aod_alwaysshow_support was EMPTY). Apply + reboot, then Lock screen / AOD.</div>
+              <div class="row-sub">Two tries stuck flags but never unhid Lock screen / AOD (Settings-compiled on this G99). Toggle kept for later; no extra props this pass.</div>
             </div>
             <label class="toggle"><input type="checkbox" id="feat-aod" checked onchange="cfg.aod_os16=this.checked"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
           </div>
           <div class="setting-row">
             <div class="row-text">
               <div class="row-title">Dynamic bar</div>
-              <div class="row-sub">Verified on. Always Show Background is left off (resident_plane=0) so the empty pill does not stay. Apply + reboot.</div>
+              <div class="row-sub">Restores Always Show Background in Settings. That row is a toggle — use it to hide the empty pill. Apply + reboot.</div>
             </div>
             <label class="toggle"><input type="checkbox" id="feat-dynamicbar" checked onchange="cfg.dynamicbar_os16=this.checked"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
           </div>
@@ -735,7 +735,7 @@ async function writeAiSystemProp(){
   lines.push('ro.tran_doze_brightness_support='+feat01('aod_os16'));
   lines.push('ro.tr_dynamicbar.support='+feat01('dynamicbar_os16'));
   lines.push('ro.os_dynamicbar_ai_translation_support='+feat01('dynamicbar_os16'));
-  lines.push('ro.os_dynamic_bar_resident_plane_support=0');
+  lines.push('ro.os_dynamic_bar_resident_plane_support='+feat01('dynamicbar_os16'));
   lines.push('ro.tran_hios_dynamic_bar_support='+feat01('dynamicbar_os16'));
   lines.push('ro.surface_flinger.game_default_frame_rate_override=120');
   lines.push('debug.graphics.game_default_frame_rate.disabled=true');

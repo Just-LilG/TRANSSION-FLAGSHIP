@@ -1,5 +1,8 @@
 # Transsion Flagship 16
 
+## v1.60
+- **Always Show Dynamic Bar is back, and the boot reboot is gone.** V1.59 set `ro.os_dynamic_bar_resident_plane_support=0`, which hid the Always Show Background row, then crashed SystemUI at boot and 8s later — the phone came up for a few seconds and cold-rebooted. This build restores resident_plane **1** (that is the Settings option, not a forced-on pill) and does **not** crash SystemUI. Leftover V1.59 fake settings are deleted. AOD Lock screen is still missing after two prop tries (Settings-compiled, same class as Display extras) — no more AOD guesses this pass. Apply + reboot, then check Dynamic Bar → Always Show Background and that boot stays up.
+
 ## v1.59
 - **Dynamic bar empty pill.** V1.58 unhid Dynamic Bar Settings, but forced `ro.os_dynamic_bar_resident_plane_support=1`. That is Always Show Background — the black capsule stayed even with the Settings toggle off. This build sets resident_plane to **0** and restarts SystemUI. AOD is unchanged (still no Lock screen row after two tries). Apply + reboot, then check the status bar with Always Show Background off.
 

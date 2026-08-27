@@ -193,21 +193,20 @@ os16_apply_dynamicbar_props() {
   os16_rp_overwrite ro.tr_dynamicbar.support "$bar"
   os16_rp_overwrite ro.os_dynamicbar_ai_translation_support "$bar"
   os16_rp_overwrite ro.tran_hios_dynamic_bar_support "$bar"
-  # V1.58 forced resident_plane=1. That is "Always Show Background" — the empty
-  # black pill stays even when the Settings toggle is off. Keep it 0.
-  os16_rp_overwrite ro.os_dynamic_bar_resident_plane_support 0
+  # This support flag unhides Settings → Dynamic Bar → Always Show Background.
+  # V1.59 set it to 0 and hid the row. The Settings toggle (not this prop)
+  # is what should turn the empty pill off.
+  os16_rp_overwrite ro.os_dynamic_bar_resident_plane_support "$bar"
 }
 
 os16_apply_dynamicbar_runtime() {
-  os16_settings_put system os_dynamic_bar_resident_plane 0
-  os16_settings_put global os_dynamic_bar_resident_plane 0
-  os16_settings_put secure os_dynamic_bar_resident_plane 0
-  os16_settings_put system island_always_show_background 0
-  os16_settings_put global island_always_show_background 0
-  os16_settings_put system tran_dynamic_bar_always_show 0
-  os16_settings_put global tran_dynamic_bar_always_show 0
-  am force-stop com.transsion.dynamicbar >/dev/null 2>&1
-  os16_restart_systemui
+  # V1.59 wrote fake always-show=0 settings and crashed SystemUI (boot reboot +
+  # hid Always Show). Drop those leftovers. Do not crash SystemUI.
+  for ns in system global secure; do
+    settings delete "$ns" os_dynamic_bar_resident_plane >/dev/null 2>&1
+    settings delete "$ns" island_always_show_background >/dev/null 2>&1
+    settings delete "$ns" tran_dynamic_bar_always_show >/dev/null 2>&1
+  done
 }
 
 os16_clear_failed_feature_leftovers() {
@@ -240,8 +239,9 @@ os16_force_stop_launchers() {
 }
 
 os16_restart_systemui() {
-  am crash com.android.systemui >/dev/null 2>&1
-  killall com.android.systemui >/dev/null 2>&1
+  # Do not am crash / killall SystemUI. V1.59 did that at boot and the phone
+  # came up then cold-rebooted.
+  :
 }
 
 os16_restart_surfaceflinger() {
