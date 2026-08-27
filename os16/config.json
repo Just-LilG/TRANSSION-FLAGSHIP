@@ -19,5 +19,6 @@
   "game_bypass_charge": true,
   "game_gt_triggers": true,
   "anim_os16": true,
-  "blur_os16": true
+  "blur_os16": true,
+  "blur_os16_level": 2
 }

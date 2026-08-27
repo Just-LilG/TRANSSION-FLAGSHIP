@@ -1,5 +1,8 @@
 # Transsion Flagship 16
 
+## v1.32
+- **Blur level picker.** Dynamic blur stays a toggle; Features now has 1 / 2 / 3 like eSports. Writes `ro.transsion_launcher_gaussian_blur_support` and `tr_launcher.gaussianblur.support` to that level (0 when blur is off). Default **2** (same as V1.31). SurfaceFlinger / recents / dynamic-blur engine stay on/off with the toggle. Apply + reboot.
+
 ## v1.31
 - **Parallel / system animations + dynamic blur.** Same Magisk `system.prop` path as AI and Gaming. Writes OS 16 `ro.tr_animation.platform_level` and `ro.tr_perf.*` models at **3** (GT dump stock is 2; 3 is the Flagship 15 higher-tier), plus async / unlock / launch / keyguard, liquid glass, dynamic bar, dream wallpaper, and multi-window arc. Blur writes SurfaceFlinger background blur early (live `resetprop` does not apply), recents blur, and launcher gaussian / dynamic blur. Does **not** write `ro.transsion_recent_animation_support=3` — that doubled recents on Flagship 15. Features tab: two toggles, default on. Apply + reboot, then check app open/close, recents, dock blur. Dump flags — EMPTY means the key is not on this phone.
 

@@ -57,7 +57,8 @@ ro.transsion_power_keyguard_animation_support=3
 ro.transsion.recent_animation.model=3
 ro.tran_display_unionrender.support=1
 # Blur — SurfaceFlinger must be in this file (early boot). Launcher gaussian
-# names are Flagship 15; dump them if EMPTY on this phone.
+# names are Flagship 15; dump them if EMPTY on this phone. gaussian =2 is
+# default WebUI level; Apply can set 1 or 3.
 ro.surface_flinger.supports_background_blur=1
 ro.os.recent.blur=1
 ro.transsion_launcher_gaussian_blur_support=2

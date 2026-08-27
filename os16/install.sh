@@ -80,7 +80,9 @@ write_os16_ai_prop() {
     a01=0
   fi
   if [ "$blur" = "true" ]; then
-    blvl=2
+    blvl=$(json_int "$cfg" blur_os16_level 2)
+    [ "$blvl" -ge 1 ] 2>/dev/null || blvl=2
+    [ "$blvl" -le 3 ] 2>/dev/null || blvl=2
     b01=1
   else
     blvl=0
@@ -148,7 +150,7 @@ print_modname() {
   ui_print " "
   ui_print "  ╔══════════════════════════════════════════╗"
   ui_print "  ║    TRANSSION FLAGSHIP 16                 ║"
-  ui_print "  ║    XOS · HiOS · iTel OS 16  ·  V1.31     ║"
+  ui_print "  ║    XOS · HiOS · iTel OS 16  ·  V1.32     ║"
   ui_print "  ╚══════════════════════════════════════════╝"
   ui_print " "
 }
@@ -330,7 +332,7 @@ set_permissions() {
   done
   ui_print " "
   ui_div
-  ui_print "  ✨  FLAGSHIP 16  ·  V1.31"
+  ui_print "  ✨  FLAGSHIP 16  ·  V1.32"
   ui_info "OS     : $OS_TYPE $OS_VER"
   ui_info "Feature: boot + reboot + overlay + AI + gaming + anim/blur"
   ui_div
