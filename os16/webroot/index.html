@@ -318,7 +318,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
           <div class="setting-row">
             <div class="row-text">
               <div class="row-title">Force 120Hz</div>
-              <div class="row-sub">Binds Magellan XML onto /tr_product like bootanim (Mountify cannot overlay that partition). Off by default. Apply, then reboot. Disable the other refresh module.</div>
+              <div class="row-sub">144 in the picker. IME / control center stay high (not 60). Apply, then reboot. Disable the other refresh module.</div>
             </div>
             <label class="toggle"><input type="checkbox" id="feat-force120hz" onchange="cfg.force_120hz=this.checked"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
           </div>
@@ -692,6 +692,9 @@ async function writeAiSystemProp(){
   lines.push('persist.sysui.disableBlur='+blurDisable());
   lines.push('persist.sysui.disable_blur='+blurDisable());
   lines.push('ro.sf.blurs_are_expensive='+blurDisable());
+  lines.push('ro.surface_flinger.game_default_frame_rate_override=120');
+  lines.push('debug.graphics.game_default_frame_rate.disabled=true');
+  lines.push('persist.graphics.game_default_frame_rate.enabled=false');
   const body=lines.join('\n')+'\n';
   const esc=body.replace(/'/g,"'\\''");
   const r=await exec("printf '%s' '"+esc+"' > \""+MOD+"/system.prop\" && echo OK");
@@ -792,6 +795,10 @@ async function dumpAi(){
   lines.push('force_120hz  '+String(cfg.force_120hz===true));
   const hzf=await g('cat "'+MOD+'/.force_120hz" 2>/dev/null');
   lines.push('force_120hz_flag  '+(hzf||'EMPTY'));
+  const gfps=await g('getprop ro.surface_flinger.game_default_frame_rate_override');
+  const gdis=await g('getprop debug.graphics.game_default_frame_rate.disabled');
+  lines.push('game_default_frame_rate_override  '+(gfps||'EMPTY'));
+  lines.push('game_default_frame_rate.disabled  '+(gdis||'EMPTY'));
   const trm=await g('settings get system tran_refresh_mode');
   const peak=await g('settings get system peak_refresh_rate');
   const minr=await g('settings get system min_refresh_rate');

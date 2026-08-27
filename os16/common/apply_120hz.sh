@@ -38,6 +38,26 @@ os16_hz_on() {
   [ "$on" = "true" ] || [ "$on" = "1" ]
 }
 
+os16_apply_game_fps_props() {
+  # Developer options: "Disable limiting the maximum frame rate for games at 120 Hz"
+  # Same keys as Flagship 15. resetprop so OEM 60 in tr_product build.prop does not win.
+  resetprop ro.surface_flinger.game_default_frame_rate_override 120 >/dev/null 2>&1
+  resetprop persist.sys.surface_flinger.game_default_frame_rate_override 120 >/dev/null 2>&1
+  resetprop debug.graphics.game_default_frame_rate.disabled true >/dev/null 2>&1
+  resetprop persist.graphics.game_default_frame_rate.enabled false >/dev/null 2>&1
+}
+
+os16_patch_magellan_ui_hz() {
+  f="$1"
+  [ -f "$f" ] || f="$MAGELLAN_XML"
+  [ -f "$f" ] || return 0
+  sed -i \
+    -e 's/<input_method_switch>false</<input_method_switch>true</' \
+    -e 's/<navigation_switch>false</<navigation_switch>true</' \
+    -e 's/<video_switch>false</<video_switch>true</' \
+    "$f"
+}
+
 os16_120hz_nsenter() {
   if [ -x /system/bin/nsenter ]; then
     echo "/system/bin/nsenter -t 1 -m --"
@@ -139,6 +159,8 @@ os16_write_pkg_array() {
     echo com.transsion.hilauncher
     echo com.transsion.launcher3
     echo com.transsion.itel.launcher
+    echo com.google.android.inputmethod.latin
+    echo com.android.inputmethod.latin
     if [ -f /data/system/packages.list ]; then
       awk '{print $1}' /data/system/packages.list
     fi
@@ -243,6 +265,7 @@ os16_generate_magellan_xml() {
     { print }
   ' "$MAGELLAN_TEMPLATE" > "$out"
   [ -s "$out" ] || cp -f "$MAGELLAN_TEMPLATE" "$out"
+  os16_patch_magellan_ui_hz "$out"
   chmod 644 "$out" 2>/dev/null
 }
 
@@ -376,5 +399,6 @@ os16_webui_apply_120hz() {
 }
 
 if [ "${0##*/}" = "apply_120hz.sh" ]; then
+  os16_apply_game_fps_props
   os16_webui_apply_120hz
 fi

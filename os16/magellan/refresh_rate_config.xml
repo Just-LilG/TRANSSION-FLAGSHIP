@@ -1,9 +1,9 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <refresh_rate_config version="20250423">
 <switch>
-    <input_method_switch>false</input_method_switch>
-    <navigation_switch>false</navigation_switch>
-    <video_switch>false</video_switch>
+    <input_method_switch>true</input_method_switch>
+    <navigation_switch>true</navigation_switch>
+    <video_switch>true</video_switch>
     <audio_switch>true</audio_switch>
     <high_temperature_threshold>0</high_temperature_threshold>
     <high_temperature_refresh_rate>120</high_temperature_refresh_rate>
@@ -1168,12 +1168,16 @@
     <item package="com.transsion.tranfacmode" auto="120" high="120" touch="0" app_request="0"/>
     <item package="tech.palm.id" auto="120" high="120" touch="1" app_request="0"/>
     <item package="com.transsion.globalsearch" auto="120" high="120" touch="1" app_request="0"/>
-    <item package="com.transsion.hilauncher" auto="120" high="120" touch="1" app_request="0"/>
-    <item package="com.transsion.XOSLauncher" auto="120" high="120" touch="1" app_request="0"/>
-    <item package="com.transsion.itel.launcher" auto="120" high="120" touch="1" app_request="0"/>
-    <item package="com.transsion.overlaysuw" auto="120" high="120" touch="1" app_request="0"/>
-    <item package="com.android.systemui" auto="120" high="120" touch="1" app_request="0"/>
-    <item package="com.transsion.launcher3" auto="120" high="120" touch="1" app_request="0"/>
+    <item package="com.transsion.hilauncher" auto="120" high="120" touch="1" app_request="0" max="144"/>
+    <item package="com.transsion.XOSLauncher" auto="120" high="120" touch="1" app_request="0" max="144"/>
+    <item package="com.transsion.itel.launcher" auto="120" high="120" touch="1" app_request="0" max="144"/>
+    <item package="com.transsion.overlaysuw" auto="120" high="120" touch="1" app_request="0" max="144"/>
+    <item package="com.android.systemui" auto="120" high="120" touch="1" app_request="0" max="144"/>
+    <item package="com.transsion.launcher3" auto="120" high="120" touch="1" app_request="0" max="144"/>
+    <item package="com.google.android.inputmethod.latin" auto="120" high="120" touch="1" app_request="0" max="144"/>
+    <item package="com.android.inputmethod.latin" auto="120" high="120" touch="1" app_request="0" max="144"/>
+    <item package="com.touchtype.swiftkey" auto="120" high="120" touch="1" app_request="0" max="144"/>
+    <item package="com.transsion.iType" auto="120" high="120" touch="1" app_request="0" max="144"/>
 <!-- game -->
     <item package="com.mobile.legends" auto="144" high="120" max="144" touch="0" sbeslide="0"/>
     <item package="com.garena.game.codm" auto="144" high="120" max="144" touch="0" sbeslide="0" app_request="1"/>
