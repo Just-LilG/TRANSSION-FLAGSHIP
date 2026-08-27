@@ -337,6 +337,11 @@ os16_apply_aod_settings() {
   os16_settings_put global tran_aod_enable "$aod"
   os16_settings_put system tr_aod_enable "$aod"
   os16_settings_put global tr_aod_enable "$aod"
+  # Boot must not force-stop apps — that plus SurfaceFlinger kill is the
+  # post-boot soft reboot. WebUI Apply can still bounce AOD/Settings.
+  if [ "$OS16_BOOT" = "1" ]; then
+    return 0
+  fi
   am force-stop com.transsion.aod >/dev/null 2>&1
   am force-stop com.android.settings >/dev/null 2>&1
 }
@@ -402,10 +407,10 @@ os16_restart_systemui() {
 }
 
 os16_restart_surfaceflinger() {
-  setprop ctl.restart surfaceflinger >/dev/null 2>&1
-  stop surfaceflinger >/dev/null 2>&1
-  start surfaceflinger >/dev/null 2>&1
-  killall surfaceflinger >/dev/null 2>&1
+  # Killing SurfaceFlinger after the UI is up is a soft reboot (screen goes
+  # black, SystemUI comes back). Blur keys are resetprop'd at post-fs before
+  # zygote — a real reboot is the apply path. Do not stop/kill SF.
+  :
 }
 
 os16_apply_blur_runtime() {
@@ -431,6 +436,9 @@ os16_apply_blur_runtime() {
   wm disable-blur "$DIS" >/dev/null 2>&1
   cmd window disable-blur "$DIS" >/dev/null 2>&1
   device_config put systemui notification_shade_blur "$([ "$GLASS" = "1" ] && echo true || echo false)" >/dev/null 2>&1
+  if [ "$OS16_BOOT" = "1" ]; then
+    return 0
+  fi
   os16_force_stop_launchers
 }
 
@@ -448,7 +456,6 @@ if [ "${0##*/}" = "apply_blur.sh" ]; then
       os16_apply_aod_settings
       os16_apply_dynamicbar_runtime
       os16_apply_blur_runtime
-      os16_restart_surfaceflinger
       ;;
   esac
 fi

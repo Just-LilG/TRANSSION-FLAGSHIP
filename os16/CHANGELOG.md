@@ -1,5 +1,8 @@
 # Transsion Flagship 16
 
+## v1.71
+- **No more post-boot soft reboot.** Late_start was killing SurfaceFlinger (`ctl.restart` / `stop` / `killall`) and force-stopping the home launcher plus AOD/Settings after the UI was already up. That is the flicker/soft reboot. Boot now only `resetprop`s and writes settings. Cute Pet keys stay for other Trans OS 16 devices.
+
 ## v1.70
 - **All Trans OS 16 devices, not only one G99.** Magisk extras that stick stay in the module even if this X6886 Settings row is compiled. Video Super Resolution, Super volume, and AI Treasure Box stay on. Next extra is **Cute Pet**: `ro.tr_cutepet.feature.support` plus Flagship 15 `ro.os_cutepet_support`. Apply + reboot, then Themes / lockscreen pet.
 
