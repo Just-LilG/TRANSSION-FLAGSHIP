@@ -25,5 +25,9 @@
   "anim_os16": true,
   "blur_os16": true,
   "blur_os16_level": 2,
+  "display_dc": true,
+  "display_color": true,
+  "display_hdr": true,
+  "display_reading": false,
   "force_120hz": false
 }

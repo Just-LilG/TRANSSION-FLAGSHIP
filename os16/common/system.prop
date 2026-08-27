@@ -49,6 +49,14 @@ ro.tr_social.sound_change.support=1
 ro.tr_socialturbo.makeup.support=1
 ro.tr_social.beauty_disable.support=0
 ro.tr_social.default_off.support=0
+# Display extras — OS 16 keys from GT dump. sdr2hdr / xdr stock is 0.
+# DC dimming and reading mode are Settings keys (no tr_ prop in the dump).
+ro.tr_display.sdr2hdr.support=1
+ro.tr_light.xdr.support=1
+ro.tr_light.xdr.v2.support=1
+ro.tr_display.colormode.feature.support=1
+ro.tr_display.color.temperature.feature.support=1
+persist.tr_display.color.temperature.aosp.support=1
 # Animations — OS 16 keys from GT 30 Pro dump (X6858). Dump stock is
 # model/level 2; this module writes 3 like Flagship 15 experimental.
 # Do not write ro.transsion_recent_animation_support — that doubled recents.

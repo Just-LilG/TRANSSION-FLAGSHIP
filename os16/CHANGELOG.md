@@ -1,5 +1,8 @@
 # Transsion Flagship 16
 
+## v1.53
+- **Display extras (first try).** Same Features card as Flagship 15: DC dimming, color enhancement, HDR, reading mode. HDR uses OS 16 keys from the GT dump (`ro.tr_display.sdr2hdr.support`, `ro.tr_light.xdr.support` / `xdr.v2` — stock is 0). Color uses `ro.tr_display.colormode` / `color.temperature`. DC and reading have no `ro.tr_*` in that dump, so they write the same Settings keys as Flagship 15 (`tran_dc_dimming_enable`, `tran_reading_mode_enable`). Reading stays off by default. Apply + reboot, then check Display / eye-comfort / HDR rows. Dump flags — EMPTY means this G99 still does not expose that key.
+
 ## v1.52
 - **Social Turbo (first try).** Same Features card as Flagship 15, but OS 16 keys from the GT dump: `ro.tr_social.turbo_mode.support`, call record / translator / summary, sound change, makeup, and `beauty_disable` (0 = beauty on). Stock already has these in `/tr_product/etc/build.prop`, so Magisk `system.prop` is not enough — this build also `resetprop`s them at post-fs, late_start, and Apply. Defaults on. Apply + reboot, then check Phone / video-call tools. Dump flags — EMPTY means this G99 still does not expose that key.
 
