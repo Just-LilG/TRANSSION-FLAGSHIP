@@ -246,6 +246,13 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
             </div>
             <label class="toggle"><input type="checkbox" id="feat-ai-video" checked onchange="setAi('ai_video',this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
           </div>
+          <div class="setting-row">
+            <div class="row-text">
+              <div class="row-title">AI Treasure Box</div>
+              <div class="row-sub">GT tr_product ro.tr_ai_treasure_box.feature.support (stock 0 on GT, same class as Ella / VEE). Apply + reboot, then AI / Ella / Settings for Treasure Box.</div>
+            </div>
+            <label class="toggle"><input type="checkbox" id="feat-treasure" checked onchange="cfg.treasure_os16=this.checked"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+          </div>
         </div>
         <div class="section-label">Gaming</div>
         <div class="glass-card">
@@ -325,13 +332,6 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
               <div class="row-sub">Binds GT vconfig tr_aod.always.show.feature.support (Always Show AOD). Apply + reboot, then Lock screen / AOD.</div>
             </div>
             <label class="toggle"><input type="checkbox" id="feat-aod" checked onchange="cfg.aod_os16=this.checked"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
-          </div>
-          <div class="setting-row">
-            <div class="row-text">
-              <div class="row-title">Circle to Search</div>
-              <div class="row-sub">GT tr_product ro.tr_microIntelligence.circle_to_search (plus Flagship 15 os_ai key). Apply + reboot, then long-press home / nav handle.</div>
-            </div>
-            <label class="toggle"><input type="checkbox" id="feat-circle" checked onchange="cfg.circle_os16=this.checked"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
           </div>
           <div class="setting-row">
             <div class="row-text">
@@ -449,7 +449,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
 <script type="module">
 const MOD='/data/adb/modules/transsion-flagship-16';
 const CONFIG_PATH=MOD+'/config.json';
-let cfg={bootanim_style:'hios16',bootanim_file:'',rebootanim_style:'hios16',rebootanim_file:'',statusbar_style:'off',statusbarcustom_file:'',ai_master:true,ai_subtitles:true,ai_call_summary:true,ai_writing:true,ai_sound_rec:true,ai_notes:true,ai_gallery:true,ai_video:true,game_master:true,game_esports_touch:true,game_esports_level:3,game_bypass_charge:true,game_gt_triggers:true,anim_os16:true,blur_os16:true,blur_os16_level:2,aod_os16:true,circle_os16:true,dynamicbar_os16:true,force_120hz:false};
+let cfg={bootanim_style:'hios16',bootanim_file:'',rebootanim_style:'hios16',rebootanim_file:'',statusbar_style:'off',statusbarcustom_file:'',ai_master:true,ai_subtitles:true,ai_call_summary:true,ai_writing:true,ai_sound_rec:true,ai_notes:true,ai_gallery:true,ai_video:true,game_master:true,game_esports_touch:true,game_esports_level:3,game_bypass_charge:true,game_gt_triggers:true,anim_os16:true,blur_os16:true,blur_os16_level:2,aod_os16:true,treasure_os16:true,dynamicbar_os16:true,force_120hz:false};
 let _exec=null;
 
 async function exec(cmd){
@@ -750,9 +750,8 @@ async function writeAiSystemProp(){
   lines.push('ro.os_dynamic_bar_resident_plane_support='+feat01('dynamicbar_os16'));
   lines.push('ro.os.tran_hide_status_bar_for_land_recent='+feat01('dynamicbar_os16'));
   lines.push('ro.tran_hios_dynamic_bar_support='+feat01('dynamicbar_os16'));
-  lines.push('ro.tr_microIntelligence.circle_to_search.feature.support='+feat01('circle_os16'));
-  lines.push('tr_microIntelligence.circle_to_search.feature.support='+feat01('circle_os16'));
-  lines.push('ro.os_ai_circle_to_search_support='+feat01('circle_os16'));
+  lines.push('ro.tr_ai_treasure_box.feature.support='+feat01('treasure_os16'));
+  lines.push('tr_ai_treasure_box.feature.support='+feat01('treasure_os16'));
   lines.push('ro.surface_flinger.game_default_frame_rate_override=120');
   lines.push('debug.graphics.game_default_frame_rate.disabled=true');
   lines.push('persist.graphics.game_default_frame_rate.enabled=false');
@@ -789,7 +788,7 @@ async function saveAll(){
     blur_os16:cfg.blur_os16!==false,
     blur_os16_level:blurLevel(),
     aod_os16:cfg.aod_os16!==false,
-    circle_os16:cfg.circle_os16!==false,
+    treasure_os16:cfg.treasure_os16!==false,
     dynamicbar_os16:cfg.dynamicbar_os16!==false,
     force_120hz:cfg.force_120hz===true
   };
@@ -880,13 +879,11 @@ async function dumpAi(){
   lines.push('tr_aod.always.show.feature.support  '+describeAiFlag(alwaysShow));
   const aodvc=await g('cat /tr_product/etc/vconfig/com.transsion.aod/build.prop 2>/dev/null');
   lines.push('vconfig aod: '+(aodvc||'EMPTY'));
-  lines.push('circle_os16  '+String(cfg.circle_os16!==false));
-  const cts=await g('getprop ro.tr_microIntelligence.circle_to_search.feature.support');
-  lines.push('ro.tr_microIntelligence.circle_to_search.feature.support  '+describeAiFlag(cts));
-  const cts2=await g('getprop tr_microIntelligence.circle_to_search.feature.support');
-  lines.push('tr_microIntelligence.circle_to_search.feature.support  '+describeAiFlag(cts2));
-  const cts3=await g('getprop ro.os_ai_circle_to_search_support');
-  lines.push('ro.os_ai_circle_to_search_support  '+describeAiFlag(cts3));
+  lines.push('treasure_os16  '+String(cfg.treasure_os16!==false));
+  const tbox=await g('getprop ro.tr_ai_treasure_box.feature.support');
+  lines.push('ro.tr_ai_treasure_box.feature.support  '+describeAiFlag(tbox));
+  const tbox2=await g('getprop tr_ai_treasure_box.feature.support');
+  lines.push('tr_ai_treasure_box.feature.support  '+describeAiFlag(tbox2));
   const lvc=await g('grep hide_status_bar /tr_product/etc/vconfig/com.transsion.launcher3/build.prop 2>/dev/null');
   lines.push('vconfig launcher hide_land  '+(lvc||'EMPTY'));
   const horiz=await g('getprop tr_aod.horizontal.display.feature.support');
@@ -1090,7 +1087,7 @@ async function loadCfg(){
   if(cfg.blur_os16===undefined) cfg.blur_os16=true;
   if(cfg.blur_os16_level===undefined) cfg.blur_os16_level=2;
   if(cfg.aod_os16===undefined) cfg.aod_os16=true;
-  if(cfg.circle_os16===undefined) cfg.circle_os16=true;
+  if(cfg.treasure_os16===undefined) cfg.treasure_os16=true;
   if(cfg.dynamicbar_os16===undefined) cfg.dynamicbar_os16=true;
   if(cfg.force_120hz===undefined) cfg.force_120hz=false;
   if(cfg.force_refresh_hz===120||cfg.force_refresh_hz===144) cfg.force_120hz=true;
@@ -1129,7 +1126,7 @@ async function loadCfg(){
   setT('feat-anim', cfg.anim_os16!==false);
   setT('feat-blur', cfg.blur_os16!==false);
   setT('feat-aod', cfg.aod_os16!==false);
-  setT('feat-circle', cfg.circle_os16!==false);
+  setT('feat-treasure', cfg.treasure_os16!==false);
   setT('feat-dynamicbar', cfg.dynamicbar_os16!==false);
   setT('feat-force120hz', cfg.force_120hz===true);
   setEsportsLevel(esportsLevel());

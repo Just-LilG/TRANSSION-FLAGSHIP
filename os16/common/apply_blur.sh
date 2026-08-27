@@ -283,12 +283,11 @@ os16_apply_aod_props() {
   os16_apply_aod_vconfig
 }
 
-os16_apply_circle_props() {
-  c=$(os16_cfg_01 circle_os16 true)
-  # GT X6858 tr_product. Flagship 15 XOS 16 also wrote os_ai_circle_to_search.
-  os16_rp_overwrite ro.tr_microIntelligence.circle_to_search.feature.support "$c"
-  os16_rp_overwrite tr_microIntelligence.circle_to_search.feature.support "$c"
-  os16_rp_overwrite ro.os_ai_circle_to_search_support "$c"
+os16_apply_treasure_props() {
+  t=$(os16_cfg_01 treasure_os16 true)
+  # GT X6858 tr_product stock is 0 (same class as Ella / VEE).
+  os16_rp_overwrite ro.tr_ai_treasure_box.feature.support "$t"
+  os16_rp_overwrite tr_ai_treasure_box.feature.support "$t"
 }
 
 os16_apply_aod_settings() {
@@ -401,12 +400,12 @@ os16_apply_blur_runtime() {
 if [ "${0##*/}" = "apply_blur.sh" ]; then
   mode="${1:-all}"
   case "$mode" in
-    props) os16_apply_blur_props; os16_apply_aod_props; os16_apply_circle_props; os16_apply_dynamicbar_props ;;
+    props) os16_apply_blur_props; os16_apply_aod_props; os16_apply_treasure_props; os16_apply_dynamicbar_props ;;
     runtime) os16_apply_blur_runtime; os16_apply_aod_settings; os16_apply_dynamicbar_runtime ;;
     *)
       os16_apply_blur_props
       os16_apply_aod_props
-      os16_apply_circle_props
+      os16_apply_treasure_props
       os16_apply_dynamicbar_props
       os16_clear_failed_feature_leftovers
       os16_apply_aod_settings
