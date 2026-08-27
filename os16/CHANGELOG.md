@@ -1,5 +1,8 @@
 # Transsion Flagship 16
 
+## v1.74
+- **Gallery Live Photos.** Next extra: GT dump `tr_gallery.live.support` is **0** (Flagship 15 already shipped this). Also writes `tr_gallery.live.slow.support`. Outdoor boost Magisk keys stay. Apply + reboot, then Gallery for live photos. Dump those flags — EMPTY means this G99 does not expose the key.
+
 ## v1.73
 - **Apply & Save no longer freezes the WebUI.** KernelSU `ksu.exec` has no timeout. Apply was waiting on `apply_blur.sh all` (many `resetprop --delete` plus vconfig binds). The UI now writes `config.json` + `system.prop` first, toasts immediately, and runs apply in the background.
 - **Dynamic bar is off by default.** Existing installs get a one-time migrate to off (empty pill leftover). Turn it back on in Features if you want Always Show Background.

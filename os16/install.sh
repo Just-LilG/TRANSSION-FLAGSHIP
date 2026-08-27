@@ -103,6 +103,7 @@ write_os16_ai_prop() {
   box=$(json_bool "$cfg" treasure_os16 true)
   pet=$(json_bool "$cfg" cutepet_os16 true)
   outdoor=$(json_bool "$cfg" outdoorboost_os16 true)
+  glive=$(json_bool "$cfg" gallerylive_os16 true)
   [ "$aod" = "false" ] && aod=0 || aod=1
   [ "$dbar" = "false" ] && dbar=0 || dbar=1
   [ "$sr" = "false" ] && sr=0 || sr=1
@@ -110,6 +111,7 @@ write_os16_ai_prop() {
   [ "$box" = "false" ] && box=0 || box=1
   [ "$pet" = "false" ] && pet=0 || pet=1
   [ "$outdoor" = "false" ] && outdoor=0 || outdoor=1
+  [ "$glive" = "false" ] && glive=0 || glive=1
   cat > "$dest" <<EOF
 # Flagship 16 — OS 16 keys. Magisk loads this file at boot.
 # Apply in WebUI rewrites this file from the Features toggles.
@@ -197,6 +199,10 @@ tr_cutepet.feature.support=$pet
 ro.os_cutepet_support=$pet
 ro.tr_outdoorboost.feature.support=$outdoor
 tr_outdoorboost.feature.support=$outdoor
+tr_gallery.live.support=$glive
+tr_gallery.live.slow.support=$glive
+ro.tr_gallery.live.support=$glive
+ro.tr_gallery.live.slow.support=$glive
 ro.surface_flinger.game_default_frame_rate_override=120
 debug.graphics.game_default_frame_rate.disabled=true
 persist.graphics.game_default_frame_rate.enabled=false
@@ -207,7 +213,7 @@ print_modname() {
   ui_print " "
   ui_print "  ╔══════════════════════════════════════════╗"
   ui_print "  ║    TRANSSION FLAGSHIP 16                 ║"
-  ui_print "  ║    XOS · HiOS · iTel OS 16  ·  V1.73     ║"
+  ui_print "  ║    XOS · HiOS · iTel OS 16  ·  V1.74     ║"
   ui_print "  ╚══════════════════════════════════════════╝"
   ui_print " "
 }
@@ -429,7 +435,7 @@ set_permissions() {
   done
   ui_print " "
   ui_div
-  ui_print "  ✨  FLAGSHIP 16  ·  V1.73"
+  ui_print "  ✨  FLAGSHIP 16  ·  V1.74"
   ui_info "OS     : $OS_TYPE $OS_VER"
   ui_info "Feature: boot + reboot + overlay + AI + gaming + anim/blur + AOD + Dynamic bar + Force 120Hz"
   ui_div
