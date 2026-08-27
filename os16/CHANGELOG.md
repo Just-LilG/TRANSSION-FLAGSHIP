@@ -1,5 +1,8 @@
 # Transsion Flagship 16
 
+## v1.58
+- **AOD + Dynamic bar (second try).** V1.57 flags all stuck, but stock already had `ro.tr_aod.feature.support=1` and `ro.tr_dynamicbar.support=1`. Only half-screen AOD was stock 0→1, and Settings still hid both. This same X6886 unhid AOD on OS 15 with `ro.aod_alwaysshow_support` — that row was EMPTY on 16. This build writes that key plus `ro.tran_aod_v3_support`, product `tr_aod.horizontal.display`, AOSP `doze_always_on`, and Flagship 15 Dynamic bar extras (`os_dynamicbar_ai_translation`, resident plane, HiOS). Apply + reboot, then Lock screen / AOD and the pill. Dump — if `ro.aod_alwaysshow_support` is still EMPTY, this phone does not have that gate.
+
 ## v1.57
 - **AOD + Dynamic bar (first try).** OS 16 keys from the GT dump: `ro.tr_aod.feature.support`, `ro.tr_aod.doze.brightness.feature.support`, and `ro.tr_aod.half.screen.feature.support` (stock 0 on GT — that is the extra). Dynamic bar is `ro.tr_dynamicbar.support` as its own Features toggle (no longer tied to Parallel). Keys live in `/tr_product/etc/build.prop`, so this build also `resetprop`s them. Apply + reboot, then check Lock screen / AOD and the pill. Dump flags — EMPTY means this G99 still does not expose that key.
 

@@ -162,16 +162,40 @@ os16_cfg_01() {
 
 os16_apply_aod_props() {
   aod=$(os16_cfg_01 aod_os16 true)
-  # GT dump: feature + doze brightness already 1; half.screen is 0.
-  # Keys live in /tr_product/etc/build.prop so Magisk system.prop can lose.
+  # V1.57: OS 16 keys stuck (stock already 1; half.screen 0→1). UI still hidden.
+  # This X6886 unhid AOD on OS 15 via ro.aod_alwaysshow_support — dump was EMPTY.
   os16_rp_overwrite ro.tr_aod.feature.support "$aod"
   os16_rp_overwrite ro.tr_aod.doze.brightness.feature.support "$aod"
   os16_rp_overwrite ro.tr_aod.half.screen.feature.support "$aod"
+  os16_rp_overwrite tr_aod.horizontal.display.feature.support "$aod"
+  os16_rp_overwrite ro.tr_aod.horizontal.display.feature.support "$aod"
+  os16_rp_overwrite ro.aod_alwaysshow_support "$aod"
+  os16_rp_overwrite ro.tran_aod_v3_support "$aod"
+  os16_rp_overwrite ro.tran_doze_brightness_support "$aod"
+}
+
+os16_apply_aod_settings() {
+  aod=$(os16_cfg_01 aod_os16 true)
+  os16_settings_put secure doze_always_on "$aod"
+  os16_settings_put secure doze_enabled 1
+  os16_settings_put system doze_always_on "$aod"
+  os16_settings_put global doze_always_on "$aod"
+  os16_settings_put system tran_aod_enable "$aod"
+  os16_settings_put global tran_aod_enable "$aod"
+  os16_settings_put system tr_aod_enable "$aod"
+  os16_settings_put global tr_aod_enable "$aod"
+  am force-stop com.transsion.aod >/dev/null 2>&1
+  am force-stop com.android.settings >/dev/null 2>&1
 }
 
 os16_apply_dynamicbar_props() {
   bar=$(os16_cfg_01 dynamicbar_os16 true)
+  # V1.57: ro.tr_dynamicbar.support already 1 in stock tr_product. Flagship 15
+  # extras that unhid extra Dynamic bar tools on OS 15.
   os16_rp_overwrite ro.tr_dynamicbar.support "$bar"
+  os16_rp_overwrite ro.os_dynamicbar_ai_translation_support "$bar"
+  os16_rp_overwrite ro.os_dynamic_bar_resident_plane_support "$bar"
+  os16_rp_overwrite ro.tran_hios_dynamic_bar_support "$bar"
 }
 
 os16_clear_failed_feature_leftovers() {
@@ -245,12 +269,13 @@ if [ "${0##*/}" = "apply_blur.sh" ]; then
   mode="${1:-all}"
   case "$mode" in
     props) os16_apply_blur_props; os16_apply_aod_props; os16_apply_dynamicbar_props ;;
-    runtime) os16_apply_blur_runtime; os16_restart_systemui ;;
+    runtime) os16_apply_blur_runtime; os16_apply_aod_settings; os16_restart_systemui ;;
     *)
       os16_apply_blur_props
       os16_apply_aod_props
       os16_apply_dynamicbar_props
       os16_clear_failed_feature_leftovers
+      os16_apply_aod_settings
       os16_apply_blur_runtime
       os16_restart_surfaceflinger
       ;;
