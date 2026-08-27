@@ -337,13 +337,6 @@ os16_apply_aod_settings() {
   os16_settings_put global tran_aod_enable "$aod"
   os16_settings_put system tr_aod_enable "$aod"
   os16_settings_put global tr_aod_enable "$aod"
-  # Boot must not force-stop apps — that plus SurfaceFlinger kill is the
-  # post-boot soft reboot. WebUI Apply can still bounce AOD/Settings.
-  if [ "$OS16_BOOT" = "1" ]; then
-    return 0
-  fi
-  am force-stop com.transsion.aod >/dev/null 2>&1
-  am force-stop com.android.settings >/dev/null 2>&1
 }
 
 os16_apply_dynamicbar_props() {
@@ -384,22 +377,6 @@ os16_clear_failed_feature_leftovers() {
   done
 }
 
-os16_force_stop_launchers() {
-  home=$(cmd package resolve-activity --brief -a android.intent.action.MAIN -c android.intent.category.HOME 2>/dev/null | tail -n 1)
-  home_pkg=$(echo "$home" | cut -d/ -f1)
-  for pkg in \
-      "$home_pkg" \
-      com.transsion.launcher3 \
-      com.transsion.XOSLauncher \
-      com.transsion.hilauncher \
-      com.transsion.launcher \
-      com.android.launcher3
-  do
-    [ -n "$pkg" ] || continue
-    am force-stop "$pkg" >/dev/null 2>&1
-  done
-}
-
 os16_restart_systemui() {
   # Do not am crash / killall SystemUI. V1.59 did that at boot and the phone
   # came up then cold-rebooted.
@@ -436,10 +413,6 @@ os16_apply_blur_runtime() {
   wm disable-blur "$DIS" >/dev/null 2>&1
   cmd window disable-blur "$DIS" >/dev/null 2>&1
   device_config put systemui notification_shade_blur "$([ "$GLASS" = "1" ] && echo true || echo false)" >/dev/null 2>&1
-  if [ "$OS16_BOOT" = "1" ]; then
-    return 0
-  fi
-  os16_force_stop_launchers
 }
 
 if [ "${0##*/}" = "apply_blur.sh" ]; then
