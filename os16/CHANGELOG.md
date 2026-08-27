@@ -1,5 +1,8 @@
 # Transsion Flagship 16
 
+## v1.31
+- **Parallel / system animations + dynamic blur.** Same Magisk `system.prop` path as AI and Gaming. Writes OS 16 `ro.tr_animation.platform_level` and `ro.tr_perf.*` models at **3** (GT dump stock is 2; 3 is the Flagship 15 higher-tier), plus async / unlock / launch / keyguard, liquid glass, dynamic bar, dream wallpaper, and multi-window arc. Blur writes SurfaceFlinger background blur early (live `resetprop` does not apply), recents blur, and launcher gaussian / dynamic blur. Does **not** write `ro.transsion_recent_animation_support=3` — that doubled recents on Flagship 15. Features tab: two toggles, default on. Apply + reboot, then check app open/close, recents, dock blur. Dump flags — EMPTY means the key is not on this phone.
+
 ## v1.30
 - **XArena GT Triggers use OS 16 keys.** V1.29 wrote Flagship 15 names (`ro.os_game_*`) — those are EMPTY here. This build writes `ro.tr_game.shoulder_key.support`, `ro.tr_game.ai_picture_triggers.support`, virtual ctrl / screen buttons / magic button, and `ro.tr_smartbutton.shoulderbutton20`. eSports and bypass also switch to `ro.tr_game.*`. Apply + reboot, then look in XArena for **add GT triggers**. This phone still has no physical trigger hardware.
 

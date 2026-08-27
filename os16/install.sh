@@ -70,6 +70,22 @@ write_os16_ai_prop() {
       [ "$glvl" -ge 3 ] && g30=1
     fi
   fi
+  anim=$(json_bool "$cfg" anim_os16 true)
+  blur=$(json_bool "$cfg" blur_os16 true)
+  if [ "$anim" = "true" ]; then
+    alvl=3
+    a01=1
+  else
+    alvl=0
+    a01=0
+  fi
+  if [ "$blur" = "true" ]; then
+    blvl=2
+    b01=1
+  else
+    blvl=0
+    b01=0
+  fi
   cat > "$dest" <<EOF
 # Flagship 16 — OS 16 keys. Magisk loads this file at boot.
 # Apply in WebUI rewrites this file from the Features toggles. Reboot to take effect.
@@ -104,6 +120,27 @@ ro.tr_game.esportsvirtualctrl.support=$gtrig
 ro.tr_game.screen_buttons.support=$gtrig
 ro.tr_game.magic_button.support=$gtrig
 ro.tr_smartbutton.shoulderbutton20.feature.support=$gtrig_tf
+ro.tr_animation.platform_level=$alvl
+ro.tr_perf.launch_start_exit.model=$alvl
+ro.tr_perf.power_keyguard_animation.model=$alvl
+ro.tr_perf.recent_animation.model=$alvl
+ro.tr_perf.unlock_mode.model=$alvl
+ro.tr_dynamicbar.support=$a01
+ro.tr_display.liquidglass.support=$a01
+ro.tr_livewallpaper.dreamanimation.support=$a01
+ro.tr_multiwindow.anim_arc.support=$a01
+ro.transsion_async_animation_support=$a01
+ro.transsion_unlock_mode_support=$alvl
+ro.transsion_launch_start_exit_support=$alvl
+ro.transsion_power_keyguard_animation_support=$alvl
+ro.transsion.recent_animation.model=$alvl
+ro.tran_display_unionrender.support=$a01
+ro.surface_flinger.supports_background_blur=$b01
+ro.os.recent.blur=$b01
+ro.transsion_launcher_gaussian_blur_support=$blvl
+tr_launcher.gaussianblur.support=$blvl
+ro.tran.effectengine.dynamicblur.support=$b01
+ro.os_xos16_blur_v2_support=$b01
 EOF
 }
 
@@ -111,7 +148,7 @@ print_modname() {
   ui_print " "
   ui_print "  ╔══════════════════════════════════════════╗"
   ui_print "  ║    TRANSSION FLAGSHIP 16                 ║"
-  ui_print "  ║    XOS · HiOS · iTel OS 16  ·  V1.30     ║"
+  ui_print "  ║    XOS · HiOS · iTel OS 16  ·  V1.31     ║"
   ui_print "  ╚══════════════════════════════════════════╝"
   ui_print " "
 }
@@ -272,7 +309,7 @@ on_install() {
            -e 's/"ai_call_summary": false/"ai_call_summary": true/' \
            "$MODPATH/config.json"
   else
-    ui_ok "Default config: HiOS 16 boot + reboot, AI + gaming on, status bar stock"
+    ui_ok "Default config: HiOS 16 boot + reboot, AI + gaming + anim/blur on, status bar stock"
   fi
   write_os16_ai_prop "$MODPATH/config.json" "$MODPATH/system.prop"
   ui_ok "OS 16 keys written from config (reboot to apply)"
@@ -280,7 +317,7 @@ on_install() {
   ui_ok "Boot animation"
   ui_ok "Reboot animation"
   ui_ok "Status bar: upload your own overlay, or leave stock"
-  ui_ok "OS 16 AI Suite + Gaming — Features tab, Apply, then reboot"
+  ui_ok "OS 16 AI + Gaming + Animations/Blur — Features tab, Apply, then reboot"
 }
 
 set_permissions() {
@@ -293,9 +330,9 @@ set_permissions() {
   done
   ui_print " "
   ui_div
-  ui_print "  ✨  FLAGSHIP 16  ·  V1.30"
+  ui_print "  ✨  FLAGSHIP 16  ·  V1.31"
   ui_info "OS     : $OS_TYPE $OS_VER"
-  ui_info "Feature: boot + reboot + overlay + OS 16 AI Suite"
+  ui_info "Feature: boot + reboot + overlay + AI + gaming + anim/blur"
   ui_div
   ui_print "  Reboot, then open WebUI in Magisk/KSU."
   ui_print " "

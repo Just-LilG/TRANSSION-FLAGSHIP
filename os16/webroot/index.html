@@ -143,7 +143,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
         </div>
         <div class="hero-card">
           <div class="hero-title">Transsion Flagship 16</div>
-          <div class="hero-sub" id="module-version-sub">V1.30 · OS 16</div>
+          <div class="hero-sub" id="module-version-sub">V1.31 · OS 16</div>
         </div>
         <div class="h8"></div>
         <div class="warn-card" id="old-mod-warn">Flagship 15 is still installed. This installer disables it. Remove it from Magisk/KSU so the two modules do not fight.</div>
@@ -164,7 +164,8 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
             <li class="on">AI Call Summary — Ella briefing</li>
             <li class="next">AI Gallery — all menus for show; some tools may crash when tapped</li>
             <li class="on">AI Video Enhancement — VEE flag on</li>
-            <li class="next">Gaming — OS 16 GT triggers in XArena; dump if still missing</li>
+            <li class="on">Gaming — OS 16 GT triggers in XArena</li>
+            <li class="next">Animations &amp; blur — Features tab; dump if EMPTY</li>
           </ul>
         </div>
         <div class="h8"></div>
@@ -181,7 +182,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
         <div class="page-header">
           <div class="eyebrow">System</div>
           <h1>Features</h1>
-          <div class="sub">AI, gaming, status bar</div>
+          <div class="sub">AI, gaming, animations, status bar</div>
         </div>
         <div class="section-label">AI Suite</div>
         <div class="glass-card">
@@ -282,6 +283,23 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
               <div class="row-sub">Play while charging without battery-health throttle</div>
             </div>
             <label class="toggle"><input type="checkbox" id="feat-game-bypass" checked onchange="setGame('game_bypass_charge',this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+          </div>
+        </div>
+        <div class="section-label">Animations &amp; blur</div>
+        <div class="glass-card">
+          <div class="setting-row">
+            <div class="row-text">
+              <div class="row-title">Parallel animations</div>
+              <div class="row-sub">OS 16 keys at flagship level 3. Apply, reboot, then check app open/close, recents, unlock.</div>
+            </div>
+            <label class="toggle"><input type="checkbox" id="feat-anim" checked onchange="setAnimBlur('anim_os16',this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+          </div>
+          <div class="setting-row">
+            <div class="row-text">
+              <div class="row-title">Dynamic blur</div>
+              <div class="row-sub">Dock, recents, and app-drawer blur. SurfaceFlinger needs a reboot.</div>
+            </div>
+            <label class="toggle"><input type="checkbox" id="feat-blur" checked onchange="setAnimBlur('blur_os16',this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
           </div>
         </div>
         <div class="section-label">Status bar</div>
@@ -385,7 +403,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
 <script type="module">
 const MOD='/data/adb/modules/transsion-flagship-16';
 const CONFIG_PATH=MOD+'/config.json';
-let cfg={bootanim_style:'hios16',bootanim_file:'',rebootanim_style:'hios16',rebootanim_file:'',statusbar_style:'off',statusbarcustom_file:'',ai_master:true,ai_subtitles:true,ai_call_summary:true,ai_writing:true,ai_sound_rec:true,ai_notes:true,ai_gallery:true,ai_video:true,game_master:true,game_esports_touch:true,game_esports_level:3,game_bypass_charge:true,game_gt_triggers:true};
+let cfg={bootanim_style:'hios16',bootanim_file:'',rebootanim_style:'hios16',rebootanim_file:'',statusbar_style:'off',statusbarcustom_file:'',ai_master:true,ai_subtitles:true,ai_call_summary:true,ai_writing:true,ai_sound_rec:true,ai_notes:true,ai_gallery:true,ai_video:true,game_master:true,game_esports_touch:true,game_esports_level:3,game_bypass_charge:true,game_gt_triggers:true,anim_os16:true,blur_os16:true};
 let _exec=null;
 
 async function exec(cmd){
@@ -426,6 +444,7 @@ function setStatusbarStyle(val){
 }
 function setAi(key,el){ cfg[key]=el.checked; if(key==='ai_master') syncAiChildren(); }
 function setGame(key,el){ cfg[key]=el.checked; if(key==='game_master'||key==='game_esports_touch') syncGameChildren(); }
+function setAnimBlur(key,el){ cfg[key]=el.checked; }
 function setEsportsLevel(val){
   cfg.game_esports_level=val;
   document.querySelectorAll('#game-esports-level .segmented-opt').forEach(o=>{
@@ -461,9 +480,15 @@ function esportsLevel(){
 function describeAiFlag(v){
   if(!v) return 'EMPTY — not on this phone, or Magisk did not apply it';
   if(v==='0' || v==='false') return '='+v+' — Magisk set off';
-  if(v==='1' || v==='true') return '='+v+' — Magisk set on';
+  if(v==='1' || v==='true' || v==='2' || v==='3') return '='+v+' — Magisk set on';
   return '='+v;
 }
+function animOn(){ return cfg.anim_os16!==false; }
+function blurOn(){ return cfg.blur_os16!==false; }
+function animLvl(){ return animOn()?'3':'0'; }
+function anim01(){ return animOn()?'1':'0'; }
+function blurLvl(){ return blurOn()?'2':'0'; }
+function blur01(){ return blurOn()?'1':'0'; }
 const GALLERY_KEYS=[
   'ro.tr_gallery.eraser.v2.support',
   'ro.tr_gallery.ext.image.support',
@@ -489,6 +514,31 @@ const GAME_KEYS=[
   'ro.tr_game.screen_buttons.support',
   'ro.tr_game.magic_button.support',
   'ro.tr_smartbutton.shoulderbutton20.feature.support'
+];
+const ANIM_KEYS=[
+  'ro.tr_animation.platform_level',
+  'ro.tr_perf.launch_start_exit.model',
+  'ro.tr_perf.power_keyguard_animation.model',
+  'ro.tr_perf.recent_animation.model',
+  'ro.tr_perf.unlock_mode.model',
+  'ro.tr_dynamicbar.support',
+  'ro.tr_display.liquidglass.support',
+  'ro.tr_livewallpaper.dreamanimation.support',
+  'ro.tr_multiwindow.anim_arc.support',
+  'ro.transsion_async_animation_support',
+  'ro.transsion_unlock_mode_support',
+  'ro.transsion_launch_start_exit_support',
+  'ro.transsion_power_keyguard_animation_support',
+  'ro.transsion.recent_animation.model',
+  'ro.tran_display_unionrender.support'
+];
+const BLUR_KEYS=[
+  'ro.surface_flinger.supports_background_blur',
+  'ro.os.recent.blur',
+  'ro.transsion_launcher_gaussian_blur_support',
+  'tr_launcher.gaussianblur.support',
+  'ro.tran.effectengine.dynamicblur.support',
+  'ro.os_xos16_blur_v2_support'
 ];
 function showConfirm(title,msg,opts={}){
   return new Promise(resolve=>{
@@ -565,6 +615,31 @@ async function writeAiSystemProp(){
   lines.push('ro.tr_game.screen_buttons.support='+(trig?'1':'0'));
   lines.push('ro.tr_game.magic_button.support='+(trig?'1':'0'));
   lines.push('ro.tr_smartbutton.shoulderbutton20.feature.support='+(trig?'true':'false'));
+  const alvl=animLvl();
+  const a01=anim01();
+  lines.push('ro.tr_animation.platform_level='+alvl);
+  lines.push('ro.tr_perf.launch_start_exit.model='+alvl);
+  lines.push('ro.tr_perf.power_keyguard_animation.model='+alvl);
+  lines.push('ro.tr_perf.recent_animation.model='+alvl);
+  lines.push('ro.tr_perf.unlock_mode.model='+alvl);
+  lines.push('ro.tr_dynamicbar.support='+a01);
+  lines.push('ro.tr_display.liquidglass.support='+a01);
+  lines.push('ro.tr_livewallpaper.dreamanimation.support='+a01);
+  lines.push('ro.tr_multiwindow.anim_arc.support='+a01);
+  lines.push('ro.transsion_async_animation_support='+a01);
+  lines.push('ro.transsion_unlock_mode_support='+alvl);
+  lines.push('ro.transsion_launch_start_exit_support='+alvl);
+  lines.push('ro.transsion_power_keyguard_animation_support='+alvl);
+  lines.push('ro.transsion.recent_animation.model='+alvl);
+  lines.push('ro.tran_display_unionrender.support='+a01);
+  const blvl=blurLvl();
+  const b01=blur01();
+  lines.push('ro.surface_flinger.supports_background_blur='+b01);
+  lines.push('ro.os.recent.blur='+b01);
+  lines.push('ro.transsion_launcher_gaussian_blur_support='+blvl);
+  lines.push('tr_launcher.gaussianblur.support='+blvl);
+  lines.push('ro.tran.effectengine.dynamicblur.support='+b01);
+  lines.push('ro.os_xos16_blur_v2_support='+b01);
   const body=lines.join('\n')+'\n';
   const esc=body.replace(/'/g,"'\\''");
   const r=await exec("printf '%s' '"+esc+"' > \""+MOD+"/system.prop\" && echo OK");
@@ -591,13 +666,16 @@ async function saveAll(){
     game_esports_touch:cfg.game_esports_touch!==false,
     game_esports_level:esportsLevel(),
     game_bypass_charge:cfg.game_bypass_charge!==false,
-    game_gt_triggers:cfg.game_gt_triggers!==false
+    game_gt_triggers:cfg.game_gt_triggers!==false,
+    anim_os16:cfg.anim_os16!==false,
+    blur_os16:cfg.blur_os16!==false
   };
   const json=JSON.stringify(slim,null,2).replace(/'/g,"'\\''");
   const r=await exec("echo '"+json+"' > \""+CONFIG_PATH+"\" && echo OK");
   if(!(r.stdout||'').includes('OK')){ toast('Save failed — is the module installed?'); return; }
   const props=await writeAiSystemProp();
   if(!props){ toast('Saved config, but AI props failed to write'); return; }
+  await exec('settings put system transsion_launcher_gaussian_blur_enable '+(blurOn()?'1':'0')+' 2>/dev/null');
   toast('Saved — reboot to apply flags');
 }
 async function dumpAi(){
@@ -612,7 +690,9 @@ async function dumpAi(){
     'ro.tr_aiassistant.aiphone_summany.feature.support',
     ...GALLERY_KEYS,
     'ro.tr_video.vee.support',
-    ...GAME_KEYS
+    ...GAME_KEYS,
+    ...ANIM_KEYS,
+    ...BLUR_KEYS
   ];
   const lines=['=== keys this module writes ==='];
   for(const k of keys){
@@ -620,8 +700,12 @@ async function dumpAi(){
     lines.push(k+'  '+describeAiFlag(v));
   }
   lines.push('');
+  lines.push('=== not written (ghosted recents on Flagship 15) ===');
+  const ghost=await g('getprop ro.transsion_recent_animation_support');
+  lines.push('ro.transsion_recent_animation_support  '+describeAiFlag(ghost));
+  lines.push('');
   lines.push('=== other live AI-like keys (first 80) ===');
-  const live=await g("getprop | grep -iE 'ai_|aiphone|subtitle|soundrecorder|note_ai|aicore|aipower|ask_ai|tr_gallery|tr_video.vee|studio.lite|tr_game|os_game|esports|bypass_charg|shoulder|smartbutton' | head -80");
+  const live=await g("getprop | grep -iE 'ai_|aiphone|subtitle|soundrecorder|note_ai|aicore|aipower|ask_ai|tr_gallery|tr_video.vee|studio.lite|tr_game|os_game|esports|bypass_charg|shoulder|smartbutton|tr_animation|tr_perf|liquidglass|dynamicbar|dreamanimation|anim_arc|unionrender|async_anim|gaussian|dynamicblur|recent.blur|background_blur|xos16_blur' | head -80");
   lines.push(live||'(none)');
   lines.push('');
   lines.push('=== gallery / aicore packages ===');
@@ -629,7 +713,7 @@ async function dumpAi(){
   lines.push(pkgs||'(none)');
   lines.push('');
   lines.push('=== stock build files (do these keys exist without the module?) ===');
-  const stock=await g("for f in /system/build.prop /system/system/build.prop /product/build.prop /system/product/build.prop /system/product/etc/build.prop /vendor/build.prop /odm/etc/build.prop /tr_product/build.prop /tr_product/etc/build.prop; do [ -f \"$f\" ] || continue; hits=$(grep -E 'aicorespeech_subtitle|aicorespeech_livecaption|tr_soundrecorder.summary|tr_note.ai_draw|os_ai_writing|aiphone.feature|aiphone_summany|tr_gallery|tr_video.vee|tr_game.|tr_smartbutton.shoulder' \"$f\" 2>/dev/null); [ -n \"$hits\" ] && echo \"$f\" && echo \"$hits\"; done");
+  const stock=await g("for f in /system/build.prop /system/system/build.prop /product/build.prop /system/product/build.prop /system/product/etc/build.prop /vendor/build.prop /odm/etc/build.prop /tr_product/build.prop /tr_product/etc/build.prop; do [ -f \"$f\" ] || continue; hits=$(grep -E 'aicorespeech_subtitle|aicorespeech_livecaption|tr_soundrecorder.summary|tr_note.ai_draw|os_ai_writing|aiphone.feature|aiphone_summany|tr_gallery|tr_video.vee|tr_game.|tr_smartbutton.shoulder|tr_animation|tr_perf.|liquidglass|dynamicbar|dreamanimation|anim_arc|unionrender|async_anim|gaussian|dynamicblur|recent.blur|background_blur|xos16_blur' \"$f\" 2>/dev/null); [ -n \"$hits\" ] && echo \"$f\" && echo \"$hits\"; done");
   lines.push(stock||'(none of those keys in readable stock build files)');
   const text=lines.join('\n');
   document.getElementById('pfd-log').textContent=text;
@@ -733,7 +817,7 @@ async function handleStatusbar(input){
 }
 async function loadDevice(){
   const prop=await g('cat "'+MOD+'/module.prop" 2>/dev/null');
-  const ver=(prop.match(/^version=(.+)$/m)||[])[1]||'V1.30';
+  const ver=(prop.match(/^version=(.+)$/m)||[])[1]||'V1.31';
   n('module-version-sub', ver+' · OS 16');
   let type=await g('getprop ro.tran.os.type');
   let verOs=await g('getprop ro.transsion.os.version');
@@ -780,6 +864,8 @@ async function loadCfg(){
   if(cfg.game_esports_level===undefined) cfg.game_esports_level=3;
   if(cfg.game_bypass_charge===undefined) cfg.game_bypass_charge=true;
   if(cfg.game_gt_triggers===undefined) cfg.game_gt_triggers=true;
+  if(cfg.anim_os16===undefined) cfg.anim_os16=true;
+  if(cfg.blur_os16===undefined) cfg.blur_os16=true;
   setStyle(cfg.bootanim_style||'hios16');
   if(!cfg.rebootanim_style) cfg.rebootanim_style=cfg.shutdownanim_style||'hios16';
   setRebootStyle(cfg.rebootanim_style||'hios16');
@@ -809,6 +895,8 @@ async function loadCfg(){
   setT('feat-game-touch', cfg.game_esports_touch!==false);
   setT('feat-game-bypass', cfg.game_bypass_charge!==false);
   setT('feat-game-triggers', cfg.game_gt_triggers!==false);
+  setT('feat-anim', cfg.anim_os16!==false);
+  setT('feat-blur', cfg.blur_os16!==false);
   setEsportsLevel(esportsLevel());
   syncAiChildren();
   syncGameChildren();
@@ -833,6 +921,7 @@ window.confirmReboot=confirmReboot;
 window.setStatusbarStyle=setStatusbarStyle;
 window.setAi=setAi;
 window.setGame=setGame;
+window.setAnimBlur=setAnimBlur;
 window.setEsportsLevel=setEsportsLevel;
 window.handleBootanim=handleBootanim;
 window.handleRebootanim=handleRebootanim;

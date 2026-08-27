@@ -38,3 +38,29 @@ ro.tr_game.esportsvirtualctrl.support=1
 ro.tr_game.screen_buttons.support=1
 ro.tr_game.magic_button.support=1
 ro.tr_smartbutton.shoulderbutton20.feature.support=true
+# Animations — OS 16 keys from GT 30 Pro dump (X6858). Dump stock is
+# model/level 2; this module writes 3 like Flagship 15 experimental.
+# Do not write ro.transsion_recent_animation_support — that doubled recents.
+ro.tr_animation.platform_level=3
+ro.tr_perf.launch_start_exit.model=3
+ro.tr_perf.power_keyguard_animation.model=3
+ro.tr_perf.recent_animation.model=3
+ro.tr_perf.unlock_mode.model=3
+ro.tr_dynamicbar.support=1
+ro.tr_display.liquidglass.support=1
+ro.tr_livewallpaper.dreamanimation.support=1
+ro.tr_multiwindow.anim_arc.support=1
+ro.transsion_async_animation_support=1
+ro.transsion_unlock_mode_support=3
+ro.transsion_launch_start_exit_support=3
+ro.transsion_power_keyguard_animation_support=3
+ro.transsion.recent_animation.model=3
+ro.tran_display_unionrender.support=1
+# Blur — SurfaceFlinger must be in this file (early boot). Launcher gaussian
+# names are Flagship 15; dump them if EMPTY on this phone.
+ro.surface_flinger.supports_background_blur=1
+ro.os.recent.blur=1
+ro.transsion_launcher_gaussian_blur_support=2
+tr_launcher.gaussianblur.support=2
+ro.tran.effectengine.dynamicblur.support=1
+ro.os_xos16_blur_v2_support=1
