@@ -143,7 +143,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
         </div>
         <div class="hero-card">
           <div class="hero-title">Transsion Flagship 16</div>
-          <div class="hero-sub" id="module-version-sub">V1.34 · OS 16</div>
+          <div class="hero-sub" id="module-version-sub">V1.35 · OS 16</div>
         </div>
         <div class="h8"></div>
         <div class="warn-card" id="old-mod-warn">Flagship 15 is still installed. This installer disables it. Remove it from Magisk/KSU so the two modules do not fight.</div>
@@ -297,14 +297,14 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
           <div class="setting-row">
             <div class="row-text">
               <div class="row-title">Dynamic blur</div>
-              <div class="row-sub">Off resetprops stock liquid glass. Apply restarts home; reboot for SurfaceFlinger.</div>
+              <div class="row-sub">Notifications, QS, recents, dock. Off = Smart-series solid panels. Apply restarts System UI.</div>
             </div>
             <label class="toggle"><input type="checkbox" id="feat-blur" checked onchange="setAnimBlur('blur_os16',this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
           </div>
           <div class="setting-row">
             <div class="row-text">
               <div class="row-title">Blur level</div>
-              <div class="row-sub">Gaussian 1/2/3 and radius 20/45/80. Apply restarts home.</div>
+              <div class="row-sub">1 light / 2 default / 3 flagship. Compositor on/off is the toggle. Apply restarts System UI.</div>
             </div>
           </div>
           <div class="segmented" id="blur-level">
@@ -573,6 +573,8 @@ const BLUR_KEYS=[
   'ro.os_xos16_blur_v2_support',
   'persist.sys.sf.disable_blurs',
   'persist.sys.disable_blur',
+  'persist.sysui.disableBlur',
+  'persist.sysui.disable_blur',
   'ro.sf.blurs_are_expensive'
 ];
 function showConfirm(title,msg,opts={}){
@@ -677,6 +679,8 @@ async function writeAiSystemProp(){
   lines.push('ro.os_xos16_blur_v2_support='+b01);
   lines.push('persist.sys.sf.disable_blurs='+blurDisable());
   lines.push('persist.sys.disable_blur='+blurDisable());
+  lines.push('persist.sysui.disableBlur='+blurDisable());
+  lines.push('persist.sysui.disable_blur='+blurDisable());
   lines.push('ro.sf.blurs_are_expensive='+blurDisable());
   const body=lines.join('\n')+'\n';
   const esc=body.replace(/'/g,"'\\''");
@@ -715,7 +719,7 @@ async function saveAll(){
   const props=await writeAiSystemProp();
   if(!props){ toast('Saved config, but AI props failed to write'); return; }
   await applyBlurRuntime();
-  toast('Saved — home restarted; reboot so SurfaceFlinger sees blur off');
+  toast('Saved — System UI restarted; reboot if the shade still has glass');
 }
 async function applyBlurRuntime(){
   await exec('sh "'+MOD+'/apply_blur.sh" all >/dev/null 2>&1; echo OK');
@@ -756,16 +760,18 @@ async function dumpAi(){
   const gs=await g('settings get system transsion_launcher_gaussian_blur_support');
   const gr=await g('settings get system transsion_launcher_blur_radius');
   const dw=await g('settings get global disable_window_blurs');
+  const rt=await g('settings get secure accessibility_reduce_transparency');
   const wm=await g('wm disable-blur 2>/dev/null');
   lines.push('transsion_launcher_gaussian_blur_enable system  '+(ge||'EMPTY'));
   lines.push('transsion_launcher_gaussian_blur_enable global  '+(geg||'EMPTY'));
   lines.push('transsion_launcher_gaussian_blur_support  '+(gs||'EMPTY'));
   lines.push('transsion_launcher_blur_radius  '+(gr||'EMPTY'));
   lines.push('disable_window_blurs  '+(dw||'EMPTY'));
+  lines.push('accessibility_reduce_transparency  '+(rt||'EMPTY'));
   lines.push('wm disable-blur  '+(wm||'EMPTY'));
   lines.push('');
   lines.push('=== other live AI-like keys (first 80) ===');
-  const live=await g("getprop | grep -iE 'ai_|aiphone|subtitle|soundrecorder|note_ai|aicore|aipower|ask_ai|tr_gallery|tr_video.vee|studio.lite|tr_game|os_game|esports|bypass_charg|shoulder|smartbutton|tr_animation|tr_perf|liquidglass|dynamicbar|dreamanimation|anim_arc|unionrender|async_anim|gaussian|dynamicblur|recent.blur|background_blur|xos16_blur|disable_blurs' | head -80");
+  const live=await g("getprop | grep -iE 'ai_|aiphone|subtitle|soundrecorder|note_ai|aicore|aipower|ask_ai|tr_gallery|tr_video.vee|studio.lite|tr_game|os_game|esports|bypass_charg|shoulder|smartbutton|tr_animation|tr_perf|liquidglass|dynamicbar|dreamanimation|anim_arc|unionrender|async_anim|gaussian|dynamicblur|recent.blur|background_blur|xos16_blur|disable_blurs|disableBlur|disable_blur' | head -80");
   lines.push(live||'(none)');
   lines.push('');
   lines.push('=== gallery / aicore packages ===');
@@ -877,7 +883,7 @@ async function handleStatusbar(input){
 }
 async function loadDevice(){
   const prop=await g('cat "'+MOD+'/module.prop" 2>/dev/null');
-  const ver=(prop.match(/^version=(.+)$/m)||[])[1]||'V1.34';
+  const ver=(prop.match(/^version=(.+)$/m)||[])[1]||'V1.35';
   n('module-version-sub', ver+' · OS 16');
   let type=await g('getprop ro.tran.os.type');
   let verOs=await g('getprop ro.transsion.os.version');

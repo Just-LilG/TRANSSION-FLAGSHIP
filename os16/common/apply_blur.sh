@@ -1,8 +1,9 @@
 #!/system/bin/sh
-# Flagship 16 blur apply. Stock OS 16 sets ro.tr_display.liquidglass.support=1
-# in /tr_product/etc/build.prop. Magisk system.prop loses to that overlay for
-# keys that already exist. resetprop after overlay (and again at late_start)
-# is what actually changes live getprop. Do not resetprop AI/game keys here.
+# Flagship 16 blur: notifications / QS / recents / dock, not launcher-only.
+# SystemUI BlurUtils reads ro.surface_flinger.supports_background_blur and
+# persist.sys.sf.disable_blurs once at process start. Changing those without
+# restarting SystemUI leaves flagship Gaussian on the shade (Smart-series
+# look is solid + slight transparency). Do not resetprop AI/game keys here.
 
 if [ -z "$MODDIR" ]; then
   MODDIR=${0%/*}
@@ -27,6 +28,13 @@ os16_cfg_int() {
 
 os16_rp() {
   k="$1"; v="$2"
+  if [ -x /data/adb/ksud ]; then
+    /data/adb/ksud resetprop "$k" "$v" >/dev/null 2>&1 && return 0
+  fi
+  if [ -x /data/adb/ksu/bin/resetprop ]; then
+    /data/adb/ksu/bin/resetprop -n "$k" "$v" >/dev/null 2>&1 && return 0
+    /data/adb/ksu/bin/resetprop "$k" "$v" >/dev/null 2>&1 && return 0
+  fi
   if [ -x /data/adb/magisk/resetprop ]; then
     /data/adb/magisk/resetprop -n "$k" "$v" >/dev/null 2>&1 && return 0
     /data/adb/magisk/resetprop "$k" "$v" >/dev/null 2>&1 && return 0
@@ -36,6 +44,20 @@ os16_rp() {
     resetprop "$k" "$v" >/dev/null 2>&1 && return 0
   fi
   setprop "$k" "$v" >/dev/null 2>&1
+}
+
+os16_rp_overwrite() {
+  k="$1"; v="$2"
+  if [ -x /data/adb/magisk/resetprop ]; then
+    /data/adb/magisk/resetprop --delete "$k" >/dev/null 2>&1
+  fi
+  if command -v resetprop >/dev/null 2>&1; then
+    resetprop --delete "$k" >/dev/null 2>&1
+  fi
+  if [ -x /data/adb/ksud ]; then
+    /data/adb/ksud resetprop --delete "$k" >/dev/null 2>&1
+  fi
+  os16_rp "$k" "$v"
 }
 
 os16_settings_put() {
@@ -55,6 +77,7 @@ os16_blur_vals() {
     EN=1
     DIS=0
     EXP=0
+    REDTRANS=0
     case "$lvl" in
       1) RAD=20 ;;
       3) RAD=80 ;;
@@ -67,6 +90,7 @@ os16_blur_vals() {
     EN=0
     DIS=1
     EXP=1
+    REDTRANS=1
     RAD=0
     lvl=0
   fi
@@ -76,15 +100,17 @@ os16_blur_vals() {
 
 os16_apply_blur_props() {
   os16_blur_vals
-  os16_rp ro.tr_display.liquidglass.support "$B01"
-  os16_rp ro.surface_flinger.supports_background_blur "$B01"
-  os16_rp ro.os.recent.blur "$B01"
+  os16_rp_overwrite ro.tr_display.liquidglass.support "$B01"
+  os16_rp_overwrite ro.surface_flinger.supports_background_blur "$B01"
+  os16_rp_overwrite ro.os.recent.blur "$B01"
   os16_rp ro.transsion_launcher_gaussian_blur_support "$BLVL"
   os16_rp tr_launcher.gaussianblur.support "$BLVL"
   os16_rp ro.tran.effectengine.dynamicblur.support "$B01"
   os16_rp ro.os_xos16_blur_v2_support "$B01"
   os16_rp persist.sys.sf.disable_blurs "$SFDIS"
   os16_rp persist.sys.disable_blur "$DIS"
+  os16_rp persist.sysui.disableBlur "$SFDIS"
+  os16_rp persist.sysui.disable_blur "$SFDIS"
   os16_rp ro.sf.blurs_are_expensive "$EXP"
 }
 
@@ -104,10 +130,16 @@ os16_force_stop_launchers() {
   done
 }
 
+os16_restart_systemui() {
+  am crash com.android.systemui >/dev/null 2>&1
+  killall com.android.systemui >/dev/null 2>&1
+}
+
 os16_apply_blur_runtime() {
   os16_blur_vals
   os16_settings_put global disable_window_blurs "$DIS"
   os16_settings_put system disable_window_blurs "$DIS"
+  os16_settings_put secure accessibility_reduce_transparency "$REDTRANS"
   os16_settings_put global transsion_launcher_gaussian_blur_enable "$EN"
   os16_settings_put system transsion_launcher_gaussian_blur_enable "$EN"
   os16_settings_put global transsion_launcher_gaussian_blur_support "$BLVL"
@@ -119,9 +151,9 @@ os16_apply_blur_runtime() {
   wm disable-blur "$DIS" >/dev/null 2>&1
   cmd window disable-blur "$DIS" >/dev/null 2>&1
   os16_force_stop_launchers
+  os16_restart_systemui
 }
 
-# When this file is executed (WebUI Apply), not when sourced.
 if [ "${0##*/}" = "apply_blur.sh" ]; then
   mode="${1:-all}"
   case "$mode" in

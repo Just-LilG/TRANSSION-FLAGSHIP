@@ -5,7 +5,7 @@ LOG="$MODDIR/transflagship16_service.log"
 rm -f "$LOG"
 log_p() { echo "[$(date '+%H:%M:%S')] $1" >> "$LOG"; }
 
-log_p "=== TransFlagship 16 V1.34 ==="
+log_p "=== TransFlagship 16 V1.35 ==="
 log_p "Device : $(getprop ro.product.model 2>/dev/null)"
 log_p "Brand  : $(getprop ro.product.brand 2>/dev/null)"
 log_p "Android: $(getprop ro.build.version.release 2>/dev/null)"
@@ -53,6 +53,7 @@ log_p "  sf_blur=$(getprop ro.surface_flinger.supports_background_blur 2>/dev/nu
 log_p "  recent_blur=$(getprop ro.os.recent.blur 2>/dev/null)"
 log_p "  gaussian=$(getprop ro.transsion_launcher_gaussian_blur_support 2>/dev/null)"
 log_p "  sf_disable_blurs=$(getprop persist.sys.sf.disable_blurs 2>/dev/null)"
+log_p "  sysui_disableBlur=$(getprop persist.sysui.disableBlur 2>/dev/null)"
 log_p "  home=$(cmd package resolve-activity --brief -a android.intent.action.MAIN -c android.intent.category.HOME 2>/dev/null | tail -n 1)"
 
 # Mountify / tr_product overlay can rewrite liquidglass after post-fs-data.

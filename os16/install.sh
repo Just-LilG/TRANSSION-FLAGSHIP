@@ -148,6 +148,8 @@ ro.tran.effectengine.dynamicblur.support=$b01
 ro.os_xos16_blur_v2_support=$b01
 persist.sys.sf.disable_blurs=$sfdis
 persist.sys.disable_blur=$sfdis
+persist.sysui.disableBlur=$sfdis
+persist.sysui.disable_blur=$sfdis
 ro.sf.blurs_are_expensive=$sfdis
 EOF
 }
@@ -156,7 +158,7 @@ print_modname() {
   ui_print " "
   ui_print "  ╔══════════════════════════════════════════╗"
   ui_print "  ║    TRANSSION FLAGSHIP 16                 ║"
-  ui_print "  ║    XOS · HiOS · iTel OS 16  ·  V1.34     ║"
+  ui_print "  ║    XOS · HiOS · iTel OS 16  ·  V1.35     ║"
   ui_print "  ╚══════════════════════════════════════════╝"
   ui_print " "
 }
@@ -340,7 +342,7 @@ set_permissions() {
   done
   ui_print " "
   ui_div
-  ui_print "  ✨  FLAGSHIP 16  ·  V1.34"
+  ui_print "  ✨  FLAGSHIP 16  ·  V1.35"
   ui_info "OS     : $OS_TYPE $OS_VER"
   ui_info "Feature: boot + reboot + overlay + AI + gaming + anim/blur"
   ui_div
