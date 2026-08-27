@@ -128,12 +128,14 @@ os16_bind_120hz_files() {
   os16_magellan_dests | awk 'NF && !seen[$0]++' | while IFS= read -r dest; do
     os16_120hz_umount "$dest"
     if [ -f "$dest" ] && [ ! -f "$stockbak" ]; then
-      if ! grep -q 'version="20260827"' "$dest" 2>/dev/null; then
+      if ! grep -q 'transsion-flagship-16' "$dest" 2>/dev/null; then
         cp "$dest" "$stockbak"
       fi
     fi
     if os16_hz_on; then
-      os16_try_bind_file "$MAGELLAN_XML" "$dest"
+      if ! os16_try_bind_file "$MAGELLAN_XML" "$dest"; then
+        cp -f "$MAGELLAN_XML" "$dest" 2>/dev/null
+      fi
     fi
   done
 }
@@ -154,6 +156,12 @@ os16_write_pkg_array() {
     echo com.transsion.hilauncher
     echo com.transsion.launcher3
     echo com.transsion.itel.launcher
+    if [ -f /data/system/packages.list ]; then
+      awk '{print $1}' /data/system/packages.list
+    fi
+    if [ -f /data/system/packages.xml ]; then
+      grep -oE 'name="[A-Za-z0-9._]+"' /data/system/packages.xml | sed 's/name="//;s/"$//'
+    fi
     pm list packages 2>/dev/null | sed 's/^package://'
     pm list packages -s 2>/dev/null | sed 's/^package://'
     pm list packages -3 2>/dev/null | sed 's/^package://'
@@ -223,40 +231,63 @@ os16_generate_magellan_xml() {
   for cand in \
     "$MAGELLAN_DIR/refresh_rate_config.xml.stock" \
     /tr_product/etc/vconfig/magellan/refresh_rate_config.xml \
-    /mnt/vendor/mountify/tr_product/etc/vconfig/magellan/refresh_rate_config.xml \
     /product/etc/vconfig/magellan/refresh_rate_config.xml \
     /system_ext/etc/vconfig/magellan/refresh_rate_config.xml
   do
     if [ -f "$cand" ] && grep -q '<WHITELIST>' "$cand" 2>/dev/null; then
-      if ! grep -q 'version="20260827"' "$cand" 2>/dev/null; then
+      if ! grep -q 'transsion-flagship-16' "$cand" 2>/dev/null; then
         stock="$cand"
         break
       fi
     fi
   done
-  switchf="$MAGELLAN_DIR/.switch.xml"
-  actf="$MAGELLAN_DIR/.activity.xml"
+  out="$MAGELLAN_XML"
   if [ -n "$stock" ]; then
-    awk '
-      /<WHITELIST>/ { skip=1; next }
-      /<\/WHITELIST>/ { skip=0; next }
-      skip { next }
+    awk -v pkgfile="$tmp" '
+      BEGIN {
+        while ((getline p < pkgfile) > 0) {
+          if (p != "") need[p] = 1
+        }
+        close(pkgfile)
+      }
+      /<item/ && /package="/ {
+        pkg = ""
+        if (match($0, /package="[^"]+"/)) {
+          pkg = substr($0, RSTART + 9, RLENGTH - 10)
+        }
+        if (pkg != "") {
+          seen[pkg] = 1
+          if ($0 ~ /auto="/) gsub(/auto="[0-9]+"/, "auto=\"120\"")
+          else sub(/<item /, "<item auto=\"120\" ")
+          if ($0 ~ /high="/) gsub(/high="[0-9]+"/, "high=\"120\"")
+          else sub(/\/>/, " high=\"120\"/>")
+          if ($0 ~ /max="/) gsub(/max="[0-9]+"/, "max=\"144\"")
+          else sub(/\/>/, " max=\"144\"/>")
+        }
+        print
+        next
+      }
+      /<WHITELIST>/ {
+        print
+        print "        <!-- transsion-flagship-16 -->"
+        next
+      }
+      /<\/WHITELIST>/ {
+        for (p in need) {
+          if (!seen[p]) {
+            printf "        <item package=\"%s\" auto=\"120\" high=\"120\" max=\"144\" touch=\"1\" app_request=\"0\"/>\n", p
+          }
+        }
+        print
+        next
+      }
       { print }
-    ' "$stock" > "$MAGELLAN_DIR/.stock_stripped.xml"
-    awk '
-      BEGIN { keep=0 }
-      /<switch>/ { keep=1 }
-      keep { print }
-      /<\/switch>/ { keep=0 }
-    ' "$MAGELLAN_DIR/.stock_stripped.xml" > "$switchf"
-    awk '
-      BEGIN { keep=0 }
-      /<activity>/ { keep=1 }
-      keep { print }
-      /<\/activity>/ { keep=0 }
-    ' "$MAGELLAN_DIR/.stock_stripped.xml" > "$actf"
-  fi
-  [ -s "$switchf" ] || cat > "$switchf" <<'EOF'
+    ' "$stock" > "$out"
+  else
+    {
+      echo '<?xml version="1.0" encoding="UTF-8" ?>'
+      echo '<refresh_rate_config version="20250423">'
+      cat <<'EOF'
     <switch>
         <input_method_switch>true</input_method_switch>
         <navigation_switch>true</navigation_switch>
@@ -269,28 +300,22 @@ os16_generate_magellan_xml() {
         <multi_window_refresh_rate>120</multi_window_refresh_rate>
         <screen_record>60</screen_record>
     </switch>
+    <WHITELIST>
+        <!-- transsion-flagship-16 -->
 EOF
-  [ -s "$actf" ] || cat > "$actf" <<'EOF'
-    <activity>
-    </activity>
-EOF
-  # Same as TranOS 16 custom refresh (Mountify): 120Hz split-screen, not stock 60.
-  if [ -s "$switchf" ]; then
-    sed 's/<multi_window_refresh_rate>[0-9][0-9]*<\/multi_window_refresh_rate>/<multi_window_refresh_rate>120<\/multi_window_refresh_rate>/' "$switchf" > "$switchf.new" && mv "$switchf.new" "$switchf"
+      awk '{
+        printf "        <item package=\"%s\" auto=\"120\" high=\"120\" max=\"144\" touch=\"1\" app_request=\"0\"/>\n", $0
+      }' "$tmp"
+      echo '    </WHITELIST>'
+      echo '    <activity>'
+      echo '    </activity>'
+      echo '</refresh_rate_config>'
+    } > "$out"
   fi
-  {
-    echo '<?xml version="1.0" encoding="UTF-8" ?>'
-    echo '<refresh_rate_config version="20260827">'
-    cat "$switchf"
-    echo '    <WHITELIST>'
-    awk '{
-      printf "        <item package=\"%s\" auto=\"120\" high=\"120\" max=\"144\" touch=\"1\" app_request=\"0\"/>\n", $0
-    }' "$tmp"
-    echo '    </WHITELIST>'
-    cat "$actf"
-    echo '</refresh_rate_config>'
-  } > "$MAGELLAN_XML"
-  chmod 644 "$MAGELLAN_XML" 2>/dev/null
+  if [ -s "$out" ]; then
+    sed 's/<multi_window_refresh_rate>[0-9][0-9]*<\/multi_window_refresh_rate>/<multi_window_refresh_rate>120<\/multi_window_refresh_rate>/' "$out" > "$out.new" && mv "$out.new" "$out"
+  fi
+  chmod 644 "$out" 2>/dev/null
 }
 
 os16_copy_magellan_mountify() {
@@ -374,6 +399,7 @@ os16_apply_120hz_settings() {
   os16_put_hz system other_apps_refresh_rate 120
   os16_put_hz system default_app_refresh_rate 120
   os16_put_hz system tran_other_app_refresh_rate 120
+  resetprop ro.tr_display.refreshrate.default_refreshmode.config 120 >/dev/null 2>&1
   am force-stop com.android.settings >/dev/null 2>&1
   am force-stop com.transsion.ossettingsext >/dev/null 2>&1
 }

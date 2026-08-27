@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<refresh_rate_config version="20260827">
+<refresh_rate_config version="20250423">
     <switch>
         <input_method_switch>true</input_method_switch>
         <navigation_switch>true</navigation_switch>
@@ -13,6 +13,7 @@
         <screen_record>60</screen_record>
     </switch>
     <WHITELIST>
+        <!-- transsion-flagship-16 -->
         <item package="android" auto="120" high="120" max="144" touch="1" app_request="0"/>
         <item package="com.android.systemui" auto="120" high="120" max="144" touch="1" app_request="0" no_limit_max_rate="1"/>
         <item package="com.android.settings" auto="120" high="120" max="144" touch="1" app_request="0"/>
