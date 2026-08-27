@@ -335,14 +335,13 @@ else
   log_pfd "apply_blur.sh missing"
 fi
 
-# Refresh: Magisk overlay of /product/apm/config (same path XOS 15 used).
-# Policy reads Environment.getProductDirectory()/apm/config/, not /tr_product.
-# Swap bypass JSON into the module tree, then bind if the live dest exists
-# or can be created. Do not run pm here.
+# Refresh: XOS 16 Magellan XML under /tr_product/etc/vconfig/magellan/
+# (per-file bind, not bind-dir). APM JSON is extra for Policy120 ROMs.
+# Do not run pm here — late_start fills every installed package.
 if [ -f "$MODDIR/apply_120hz.sh" ]; then
   . "$MODDIR/apply_120hz.sh"
   os16_bind_120hz_files
-  log_pfd "refresh force_120hz=$(os16_cfg_bool force_120hz false) product=$(ls -l /product/apm/config/refresh_rate_config.json 2>/dev/null | awk '{print $1,$5,$9}')"
+  log_pfd "refresh force_120hz=$(os16_cfg_bool force_120hz false) magellan=$(ls -l /tr_product/etc/vconfig/magellan/refresh_rate_config.xml 2>/dev/null | awk '{print $1,$5,$9}') product=$(ls -l /product/apm/config/refresh_rate_config.json 2>/dev/null | awk '{print $1,$5,$9}')"
 else
   log_pfd "apply_120hz.sh missing"
 fi

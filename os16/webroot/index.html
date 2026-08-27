@@ -165,7 +165,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
             <li class="next">AI Gallery — all menus for show; some tools may crash when tapped</li>
             <li class="on">AI Video Enhancement — VEE flag on</li>
             <li class="on">Gaming — OS 16 GT triggers in XArena</li>
-            <li class="next">Force 120Hz — Magisk /product/apm overlay like XOS 15; 144 is a Settings choice</li>
+            <li class="next">Force 120Hz — XOS 16 Magellan XML (144 on every app)</li>
           </ul>
         </div>
         <div class="h8"></div>
@@ -318,7 +318,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
           <div class="setting-row">
             <div class="row-text">
               <div class="row-title">Force 120Hz</div>
-              <div class="row-sub">Same as XOS 15: writes into Settings and overlays /product/apm/config so every app can pick 144Hz. Off by default. Apply + reboot, then tap an app in Customize App Refresh.</div>
+              <div class="row-sub">Overlays XOS 16 Magellan refresh XML so every app lists 120 by default and can pick 144Hz. Off by default. Apply + reboot, then open Customize App Refresh.</div>
             </div>
             <label class="toggle"><input type="checkbox" id="feat-force120hz" onchange="cfg.force_120hz=this.checked"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
           </div>
@@ -791,17 +791,25 @@ async function dumpAi(){
   const peak=await g('settings get system peak_refresh_rate');
   const minr=await g('settings get system min_refresh_rate');
   const lastt=await g('settings get system last_tran_refresh_mode_in_refresh_setting');
-  const pkgc=await g('cat "'+MOD+'/system/product/apm/config_120hz_bypass/.pkg_count" 2>/dev/null');
+  const pkgc=await g('cat "'+MOD+'/magellan/.pkg_count" 2>/dev/null; cat "'+MOD+'/system/product/apm/config_120hz_bypass/.pkg_count" 2>/dev/null | head -1');
   lines.push('tran_refresh_mode  '+(trm||'EMPTY'));
   lines.push('peak_refresh_rate  '+(peak||'EMPTY'));
   lines.push('min_refresh_rate  '+(minr||'EMPTY'));
   if(minr==='60'||minr==='60.0'||minr==='60.00') lines.push('WARN min_refresh_rate clamped back to 60');
   lines.push('last_tran_refresh_mode_in_refresh_setting  '+(lastt||'EMPTY'));
   lines.push('generated_package_count  '+(pkgc||'EMPTY'));
+  const mag=await g('ls -l /tr_product/etc/vconfig/magellan/refresh_rate_config.xml /product/etc/vconfig/magellan/refresh_rate_config.xml /system_ext/etc/vconfig/magellan/refresh_rate_config.xml /data/magellan/refresh_rate_config.xml "'+MOD+'/magellan/refresh_rate_config.xml" 2>/dev/null');
+  lines.push(mag||'no magellan refresh_rate_config.xml');
+  const magn=await g('grep -c max=.144 /tr_product/etc/vconfig/magellan/refresh_rate_config.xml 2>/dev/null');
+  lines.push('magellan_max144_items  '+(magn||'EMPTY'));
+  const maghead=await g('grep -E "package=.(com.android.settings|android)" /tr_product/etc/vconfig/magellan/refresh_rate_config.xml 2>/dev/null | head -5');
+  lines.push(maghead||'(could not read magellan xml)');
+  const magprop=await g("getprop | grep -iE 'tr_display.refreshrate|magellan' | head -20");
+  lines.push(magprop||'(no magellan refresh props)');
   const apm=await g('ls -l /product/apm/config/refresh_rate_config.json /system/product/apm/config/refresh_rate_config.json /tr_product/etc/apm/config/refresh_rate_config.json 2>/dev/null; ls -l "'+MOD+'/system/product/apm/config/refresh_rate_config.json" 2>/dev/null');
-  lines.push(apm||'no live /product/apm/config/refresh_rate_config.json — policy will stay at 90');
+  lines.push(apm||'no live /product/apm/config/refresh_rate_config.json (OS 16 uses Magellan, this is optional)');
   const head=await g('head -c 180 /product/apm/config/refresh_rate_config.json 2>/dev/null');
-  lines.push(head||'(could not read /product/apm/config/refresh_rate_config.json)');
+  lines.push(head||'(no product APM json)');
   lines.push('');
   lines.push('=== other live AI-like keys (first 80) ===');
   const live=await g("getprop | grep -iE 'ai_|aiphone|subtitle|soundrecorder|note_ai|aicore|aipower|ask_ai|tr_gallery|tr_video.vee|studio.lite|tr_game|os_game|esports|bypass_charg|shoulder|smartbutton|tr_animation|tr_perf|liquidglass|dynamicbar|dreamanimation|anim_arc|unionrender|async_anim|gaussian|dynamicblur|recent.blur|background_blur|xos16_blur|disable_blurs|disableBlur|disable_blur' | head -80");

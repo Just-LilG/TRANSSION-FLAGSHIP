@@ -5,7 +5,7 @@ LOG="$MODDIR/transflagship16_service.log"
 rm -f "$LOG"
 log_p() { echo "[$(date '+%H:%M:%S')] $1" >> "$LOG"; }
 
-log_p "=== TransFlagship 16 V1.42 ==="
+log_p "=== TransFlagship 16 V1.43 ==="
 log_p "Device : $(getprop ro.product.model 2>/dev/null)"
 log_p "Brand  : $(getprop ro.product.brand 2>/dev/null)"
 log_p "Android: $(getprop ro.build.version.release 2>/dev/null)"
@@ -30,7 +30,7 @@ fi
 if [ -f "$MODDIR/apply_120hz.sh" ]; then
   . "$MODDIR/apply_120hz.sh"
   os16_apply_120hz_all
-  log_p "force_120hz=$(os16_cfg_bool force_120hz false) peak=$(settings get system peak_refresh_rate 2>/dev/null) tran_mode=$(settings get system tran_refresh_mode 2>/dev/null) product_apm=$(ls /product/apm/config/refresh_rate_config.json 2>/dev/null && echo yes || echo missing) pkgs=$(cat "$MODDIR/system/product/apm/config_120hz_bypass/.pkg_count" 2>/dev/null)"
+  log_p "force_120hz=$(os16_cfg_bool force_120hz false) peak=$(settings get system peak_refresh_rate 2>/dev/null) tran_mode=$(settings get system tran_refresh_mode 2>/dev/null) magellan=$(ls /tr_product/etc/vconfig/magellan/refresh_rate_config.xml 2>/dev/null && echo yes || echo missing) max144=$(grep -c 'max=\"144\"' /tr_product/etc/vconfig/magellan/refresh_rate_config.xml 2>/dev/null) pkgs=$(cat "$MODDIR/magellan/.pkg_count" 2>/dev/null)"
 else
   log_p "apply_120hz.sh missing"
 fi
@@ -76,7 +76,7 @@ log_p "  home=$(cmd package resolve-activity --brief -a android.intent.action.MA
   if [ -f "$MODDIR/apply_120hz.sh" ]; then
     . "$MODDIR/apply_120hz.sh"
     os16_apply_120hz_all
-    echo "[$(date '+%H:%M:%S')] refresh after settle force=$(os16_cfg_bool force_120hz false) product=$(ls /product/apm/config/refresh_rate_config.json 2>/dev/null && echo yes || echo missing)" >> "$LOG"
+    echo "[$(date '+%H:%M:%S')] refresh after settle force=$(os16_cfg_bool force_120hz false) magellan=$(ls /tr_product/etc/vconfig/magellan/refresh_rate_config.xml 2>/dev/null && echo yes || echo missing) max144=$(grep -c 'max=\"144\"' /tr_product/etc/vconfig/magellan/refresh_rate_config.xml 2>/dev/null)" >> "$LOG"
   fi
 ) &
 

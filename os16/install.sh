@@ -265,6 +265,7 @@ on_install() {
     unzip -oj "$ZIPFILE" 'common/apply_blur.sh' -d "$MODPATH" >&2
     unzip -oj "$ZIPFILE" 'common/apply_120hz.sh' -d "$MODPATH" >&2
     unzip -o "$ZIPFILE" 'apm_120hz_bypass/*' -d "$MODPATH" >&2
+    unzip -o "$ZIPFILE" 'magellan/*' -d "$MODPATH" >&2
     unzip -o "$ZIPFILE" 'system/product/apm/*' -d "$MODPATH" >&2
     unzip -o "$ZIPFILE" 'tr_product/*' -d "$MODPATH" >&2
   else
@@ -278,6 +279,7 @@ on_install() {
     unzip -oj "$ZIPFILE" 'common/apply_blur.sh' -d "$MODPATH" >&2
     unzip -oj "$ZIPFILE" 'common/apply_120hz.sh' -d "$MODPATH" >&2
     unzip -o "$ZIPFILE" 'apm_120hz_bypass/*' -d "$MODPATH" >&2
+    unzip -o "$ZIPFILE" 'magellan/*' -d "$MODPATH" >&2
     unzip -o "$ZIPFILE" 'system/product/apm/*' -d "$MODPATH" >&2
   fi
 
