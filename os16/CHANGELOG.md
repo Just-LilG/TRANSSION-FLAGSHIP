@@ -1,5 +1,8 @@
 # Transsion Flagship 16
 
+## v1.65
+- **GT extras use the same path as AOD.** V1.64 bound the app vconfigs but only resetprop'd a few keys and never wrote them to Magisk `system.prop`. AOD needed all three: vconfig bind, Magisk prop, resetprop. This build does that for Smart Scan, Gallery extras, Recorder speech, Motions, PC Connect, Zero Screen, and Smart Hub. Apply + reboot.
+
 ## v1.64
 - **GT app vconfigs in one pass.** Settings resolution scale-up did not unhide Display. This build binds the remaining GT X6858 **app** vconfigs the same way AOD worked: Smart Scan, Gallery extras (search / EasyPic / matting / grids — not Art/Studio), Recorder speech, Motions gestures, PC Connect, Zero Screen AI cards, Smart Hub, global-search EasyPic. Skips dump 0s (3D photo, Camon-only, PC extend-screen). Apply + reboot, then check those apps. Dump the new vconfig files.
 

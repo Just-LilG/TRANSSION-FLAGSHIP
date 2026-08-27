@@ -336,7 +336,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
           <div class="setting-row">
             <div class="row-text">
               <div class="row-title">GT app extras</div>
-              <div class="row-sub">Binds GT vconfig for Smart Scan, Gallery extras, Recorder speech, Motions, PC Connect, Zero Screen, Smart Hub. Apply + reboot.</div>
+              <div class="row-sub">Same path as AOD: app vconfig + Magisk props. Smart Scan, Gallery extras, Recorder speech, Motions, PC Connect, Zero Screen, Smart Hub. Apply + reboot.</div>
             </div>
             <label class="toggle"><input type="checkbox" id="feat-gtapps" checked onchange="cfg.gt_apps_os16=this.checked"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
           </div>
@@ -759,6 +759,38 @@ async function writeAiSystemProp(){
   lines.push('ro.tran_hios_dynamic_bar_support='+feat01('dynamicbar_os16'));
   lines.push('tr_display.resolution.scalingup.support='+(cfg.scale_os16!==false?'true':'false'));
   lines.push('ro.tr_display.resolution.scalingup.support='+(cfg.scale_os16!==false?'true':'false'));
+  const g1=(cfg.gt_apps_os16!==false)?'1':'0';
+  const gt=(cfg.gt_apps_os16!==false)?'true':'false';
+  lines.push('tr_gallery.custom.fliters.support='+g1);
+  lines.push('tr_gallery.drag.sort.support='+g1);
+  lines.push('tr_gallery.easypic.support='+g1);
+  lines.push('tr_gallery.matting.support='+g1);
+  lines.push('tr_gallery.photo.16grid.support='+g1);
+  lines.push('tr_gallery.photo.8grid.support='+g1);
+  lines.push('tr_gallery.photo.cover.support='+g1);
+  lines.push('tr_gallery.photo.feature.support='+g1);
+  lines.push('tr_gallery.search.support='+g1);
+  lines.push('tr_gallery.soft.player.support='+g1);
+  lines.push('tr_soundrecorder.speech.feature.support='+g1);
+  lines.push('tr_smartscan.ar_measure.support='+gt);
+  lines.push('tr_smartscan.document_scan.support='+gt);
+  lines.push('tr_smartscan.medicine_verification.support='+gt);
+  lines.push('tr_smartscan.recharge.support='+gt);
+  lines.push('tr_microIntelligence.gesture_functions.feature.support='+g1);
+  lines.push('ro.tr_microIntelligence.gesture_functions.feature.support='+g1);
+  lines.push('ro.tr_microIntelligence.microIntelligence.feature.support='+g1);
+  lines.push('tr_pcconnect.backup.feature.support='+g1);
+  lines.push('tr_pcconnect.gesture_file_transfer.feature.support='+g1);
+  lines.push('tr_pcconnect.network_sharing.feature.support='+g1);
+  lines.push('tr_pcconnect.pc_mouse_button.feature.support='+g1);
+  lines.push('ro.tr_pcconnect.feature.support='+g1);
+  lines.push('tr_zeroscreen.ai.card.support='+g1);
+  lines.push('tr_globalsearch.easypic.support='+g1);
+  lines.push('ro.tr_smartpanel.os_smartpanel.support='+g1);
+  lines.push('ro.tr_smartpanel.os_slider_panel.support='+g1);
+  lines.push('ro.tr_smartpanel.os_slider_panel_default_close.config=0');
+  lines.push('ro.tr_smartpanel.os_smart_hub_def_off.config=0');
+  lines.push('ro.tr_dialer.contact.carlcare.feature.support='+g1);
   lines.push('ro.surface_flinger.game_default_frame_rate_override=120');
   lines.push('debug.graphics.game_default_frame_rate.disabled=true');
   lines.push('persist.graphics.game_default_frame_rate.enabled=false');
