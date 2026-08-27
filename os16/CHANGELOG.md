@@ -1,5 +1,8 @@
 # Transsion Flagship 16
 
+## v1.55
+- **Display extras (third try).** Same X6886 had DC / color / HDR / reading on Trans OS 15. V1.53–1.54 flags all stuck on 16 (`ro.tran.display_*`, `sdr2hdr`) but Settings still hid the rows. Dump showed `has_HDR_display=false` — OS 16 Settings likely ANDs that SurfaceFlinger bit. This build sets it to **true** when HDR is on, and writes Display settings the same way Flagship 15 did on this phone (`settings put` **and** `content update`). Apply + reboot, then Settings → Display. If HDR/DC still missing, dump and check `has_HDR_display` plus the new `dumpsys display` HDR lines.
+
 ## v1.54
 - **Display extras (second try).** V1.53 wrote OS 16 `sdr2hdr` / `xdr` (those did stick) and Flagship 15 Settings keys, but Display in Settings did not change. This build also writes the Flagship 15 **gating** props that unhid those rows on XOS 15: `ro.tran.display_hdr_support` and `ro.tran.display_dc_dimming_support`, plus `tr_*` Settings aliases, then force-stops Settings. Apply + reboot, then open Settings → Display again. Dump flags — if those two `ro.tran.display_*` rows are EMPTY, this phone does not have that gate.
 

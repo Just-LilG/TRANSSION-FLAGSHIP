@@ -164,6 +164,7 @@ ro.tr_light.xdr.support=$dhdr
 ro.tr_light.xdr.v2.support=$dhdr
 ro.tran.display_hdr_support=$dhdr
 ro.tran.display_dc_dimming_support=$ddc
+ro.surface_flinger.has_HDR_display=$([ "$dhdr" = "1" ] && echo true || echo false)
 ro.tr_display.colormode.feature.support=$dcol
 ro.tr_display.color.temperature.feature.support=$dcol
 persist.tr_display.color.temperature.aosp.support=$dcol
@@ -203,7 +204,7 @@ print_modname() {
   ui_print " "
   ui_print "  ╔══════════════════════════════════════════╗"
   ui_print "  ║    TRANSSION FLAGSHIP 16                 ║"
-  ui_print "  ║    XOS · HiOS · iTel OS 16  ·  V1.54     ║"
+  ui_print "  ║    XOS · HiOS · iTel OS 16  ·  V1.55     ║"
   ui_print "  ╚══════════════════════════════════════════╝"
   ui_print " "
 }
@@ -414,7 +415,7 @@ set_permissions() {
   done
   ui_print " "
   ui_div
-  ui_print "  ✨  FLAGSHIP 16  ·  V1.54"
+  ui_print "  ✨  FLAGSHIP 16  ·  V1.55"
   ui_info "OS     : $OS_TYPE $OS_VER"
   ui_info "Feature: boot + reboot + overlay + AI + gaming + social + display + anim/blur"
   ui_div
