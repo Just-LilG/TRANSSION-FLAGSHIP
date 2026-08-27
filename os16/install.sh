@@ -217,7 +217,7 @@ print_modname() {
   ui_print " "
   ui_print "  ╔══════════════════════════════════════════╗"
   ui_print "  ║    TRANSSION FLAGSHIP 16                 ║"
-  ui_print "  ║    XOS · HiOS · iTel OS 16  ·  V1.75     ║"
+  ui_print "  ║    XOS · HiOS · iTel OS 16  ·  V1.76     ║"
   ui_print "  ╚══════════════════════════════════════════╝"
   ui_print " "
 }
@@ -319,6 +319,7 @@ on_install() {
     unzip -oj "$ZIPFILE" 'common/system.prop' -d "$MODPATH" >&2
     unzip -oj "$ZIPFILE" 'common/apply_blur.sh' -d "$MODPATH" >&2
     unzip -oj "$ZIPFILE" 'common/apply_120hz.sh' -d "$MODPATH" >&2
+    unzip -oj "$ZIPFILE" 'common/apply_sounds.sh' -d "$MODPATH" >&2
     unzip -o "$ZIPFILE" 'apm_120hz_bypass/*' -d "$MODPATH" >&2
     unzip -o "$ZIPFILE" 'magellan/*' -d "$MODPATH" >&2
     unzip -o "$ZIPFILE" 'system/product/apm/*' -d "$MODPATH" >&2
@@ -334,25 +335,33 @@ on_install() {
     unzip -oj "$ZIPFILE" 'common/system.prop' -d "$MODPATH" >&2
     unzip -oj "$ZIPFILE" 'common/apply_blur.sh' -d "$MODPATH" >&2
     unzip -oj "$ZIPFILE" 'common/apply_120hz.sh' -d "$MODPATH" >&2
+    unzip -oj "$ZIPFILE" 'common/apply_sounds.sh' -d "$MODPATH" >&2
     unzip -o "$ZIPFILE" 'apm_120hz_bypass/*' -d "$MODPATH" >&2
     unzip -o "$ZIPFILE" 'magellan/*' -d "$MODPATH" >&2
     unzip -o "$ZIPFILE" 'system/product/apm/*' -d "$MODPATH" >&2
   fi
 
-  # Drop failed boot-sound / charging packs left by V1.02–V1.12.
+  # Drop failed charging-animation / boot-sound packs. Keep custom UI sounds.
   rm -rf "$MODPATH/system/product/theme/charge" \
          "$MODPATH/tr_product/theme/charge" \
          "$MODPATH/product/theme/charge" \
-         "$MODPATH/system/product/media/audio" \
-         "$MODPATH/tr_product/media/audio" \
-         "$MODPATH/product/media/audio" \
          "$MODPATH/.charge_tr" "$MODPATH/.charge_prod"
   rm -f "$MODPATH/.charge_pick.mp4" "$MODPATH/charge_custom.mp4"
+  rm -rf "$MODPATH/system/product/media/audio/bootsound" \
+         "$MODPATH/tr_product/media/audio/bootsound" \
+         "$MODPATH/product/media/audio/bootsound"
   rm -rf /mnt/vendor/mountify/tr_product/theme/charge \
          /mnt/vendor/mountify/product/theme/charge \
          /mnt/vendor/mountify/tr_product/media/audio/bootsound
   rm -f /data/local/bootaudio.mp3 /data/local/shutaudio.mp3
-  ui_ok "Removed unused charging and boot-sound files"
+  ui_ok "Removed unused charging-animation and boot-sound files"
+
+  OLD16=/data/adb/modules/transsion-flagship-16
+  if [ -d "$OLD16/system/product/media/audio/ui" ]; then
+    mkdir -p "$MODPATH/system/product/media/audio/ui"
+    cp -a "$OLD16/system/product/media/audio/ui/"*_custom.* "$MODPATH/system/product/media/audio/ui/" 2>/dev/null
+    ui_ok "Kept uploaded UI sounds"
+  fi
 
   # V1.14 shipped bundled iOS / XOS 16 overlay APKs. Drop them; keep a custom
   # upload if the user already wrote one.
@@ -411,7 +420,7 @@ on_install() {
   ui_ok "Boot animation"
   ui_ok "Reboot animation"
   ui_ok "Status bar: upload your own overlay, or leave stock"
-  ui_ok "OS 16 AI + Gaming + Animations/Blur + AOD + Dynamic bar + Force 120Hz — Features tab, Apply, then reboot"
+  ui_ok "Sounds: charging, unlock, and other UI sounds — Sounds tab, upload, Apply, reboot"
 }
 
 set_permissions() {
@@ -434,14 +443,14 @@ set_permissions() {
   fi
   touch "$MODPATH/skip_mount"
   set_perm_recursive "$MODPATH" 0 0 0755 0644
-  for sh in "$MODPATH/post-fs-data.sh" "$MODPATH/service.sh" "$MODPATH/uninstall.sh" "$MODPATH/apply_blur.sh" "$MODPATH/apply_120hz.sh"; do
+  for sh in "$MODPATH/post-fs-data.sh" "$MODPATH/service.sh" "$MODPATH/uninstall.sh" "$MODPATH/apply_blur.sh" "$MODPATH/apply_120hz.sh" "$MODPATH/apply_sounds.sh"; do
     [ -f "$sh" ] && set_perm "$sh" 0 0 0755
   done
   ui_print " "
   ui_div
-  ui_print "  ✨  FLAGSHIP 16  ·  V1.75"
+  ui_print "  ✨  FLAGSHIP 16  ·  V1.76"
   ui_info "OS     : $OS_TYPE $OS_VER"
-  ui_info "Feature: boot + reboot + overlay + AI + gaming + anim/blur + AOD + Dynamic bar + Force 120Hz"
+  ui_info "Feature: boot + reboot + overlay + AI + gaming + anim/blur + AOD + Dynamic bar + Force 120Hz + UI sounds"
   ui_div
   ui_print "  Reboot, then open WebUI in Magisk/KSU."
   ui_print " "

@@ -5,7 +5,7 @@ LOG="$MODDIR/transflagship16_service.log"
 rm -f "$LOG"
 log_p() { echo "[$(date '+%H:%M:%S')] $1" >> "$LOG"; }
 
-log_p "=== TransFlagship 16 V1.75 ==="
+log_p "=== TransFlagship 16 V1.76 ==="
 log_p "Device : $(getprop ro.product.model 2>/dev/null)"
 log_p "Brand  : $(getprop ro.product.brand 2>/dev/null)"
 log_p "Android: $(getprop ro.build.version.release 2>/dev/null)"
@@ -46,6 +46,14 @@ if [ -f "$MODDIR/apply_120hz.sh" ]; then
   log_p "force_120hz=$(os16_cfg_bool force_120hz false) peak=$(settings get system peak_refresh_rate 2>/dev/null) game_fps=$(getprop ro.surface_flinger.game_default_frame_rate_override 2>/dev/null) magellan=$(ls /tr_product/etc/vconfig/magellan/refresh_rate_config.xml 2>/dev/null && echo yes || echo missing) max144=$(grep -c 'max=\"144\"' /tr_product/etc/vconfig/magellan/refresh_rate_config.xml 2>/dev/null)"
 else
   log_p "apply_120hz.sh missing"
+fi
+
+if [ -f "$MODDIR/apply_sounds.sh" ]; then
+  . "$MODDIR/apply_sounds.sh"
+  os16_apply_sounds
+  log_p "ui sounds charge=$(ls -l /tr_product/media/audio/ui/ChargingStarted.ogg 2>/dev/null | awk '{print $5,$NF}') unlock=$(ls -l /tr_product/media/audio/ui/Unlock.ogg 2>/dev/null | awk '{print $5,$NF}')"
+else
+  log_p "apply_sounds.sh missing"
 fi
 
 log_p "OS 16 AI keys (read only):"
@@ -104,6 +112,11 @@ log_p "  home=$(cmd package resolve-activity --brief -a android.intent.action.MA
     os16_apply_game_fps_props
     os16_apply_120hz_settings
     echo "[$(date '+%H:%M:%S')] refresh after settle force=$(os16_cfg_bool force_120hz false) magellan=$(ls /tr_product/etc/vconfig/magellan/refresh_rate_config.xml 2>/dev/null && echo yes || echo missing) max144=$(grep -c 'max=\"144\"' /tr_product/etc/vconfig/magellan/refresh_rate_config.xml 2>/dev/null)" >> "$LOG"
+  fi
+  if [ -f "$MODDIR/apply_sounds.sh" ]; then
+    . "$MODDIR/apply_sounds.sh"
+    os16_apply_sounds
+    echo "[$(date '+%H:%M:%S')] ui sounds after settle charge=$(ls -l /tr_product/media/audio/ui/ChargingStarted.ogg 2>/dev/null | awk '{print $5}') unlock=$(ls -l /tr_product/media/audio/ui/Unlock.ogg 2>/dev/null | awk '{print $5}')" >> "$LOG"
   fi
 ) &
 

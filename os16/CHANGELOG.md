@@ -1,5 +1,8 @@
 # Transsion Flagship 16
 
+## v1.76
+- **Sounds tab.** Charging (wired + wireless), unlock, lock, screenshot, keypress, and the other GT UI files under `/tr_product/media/audio/ui`. Upload your own .ogg/.mp3/.wav. Stock leaves the ROM file. Per-file bind like bootanim (Mountify does not overlay `tr_product`). No Waltz, no boot sound, no charge animation pack. Apply + reboot, then plug in / unlock. Dump **=== ui sounds ===**.
+
 ## v1.75
 - **Dump 0 is off, dump 1 is on.** Gallery Live was GT dump **0** (stock off) — that is not a GT extra. Magisk keys stay. Next extra is **Air Transfer**: GT dump `ro.tr_airtransfer.feature.support=1`. Apply + reboot, then Share / Air Transfer. Dump that flag — EMPTY means this G99 does not expose the key.
 

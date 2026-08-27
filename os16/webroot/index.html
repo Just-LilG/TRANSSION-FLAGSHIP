@@ -84,7 +84,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
   display:flex;justify-content:center;pointer-events:none;}
 .tab-bar{pointer-events:auto;display:flex;align-items:center;gap:2px;background:rgba(14,14,24,0.85);
   border:1px solid rgba(255,255,255,0.08);border-radius:20px;padding:6px;}
-.tab-item{display:flex;align-items:center;gap:6px;padding:10px 14px;border-radius:14px;cursor:pointer;}
+.tab-item{display:flex;align-items:center;gap:4px;padding:10px 10px;border-radius:14px;cursor:pointer;}
 .tab-icon svg{width:19px;height:19px;fill:none;stroke:var(--text2);stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
 .tab-label{font-size:12.5px;font-weight:600;color:#fff;white-space:nowrap;max-width:0;overflow:hidden;opacity:0;}
 .tab-item.active{background:var(--accent);}
@@ -171,7 +171,8 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
             <li class="next">Cute Pet — Magisk keys stay; this G99 did not unhide</li>
             <li class="next">Outdoor boost — Magisk keys stay (GT dump 1 = on)</li>
             <li>Gallery Live — GT dump 0 = off; Magisk keys stay</li>
-            <li class="next">Air Transfer — next extra (GT dump ro.tr_airtransfer=1)</li>
+            <li class="next">Air Transfer — Magisk keys stay (GT dump 1)</li>
+            <li class="next">Sounds — charging, unlock, and other UI sounds (upload)</li>
             <li>Social Turbo — removed (stock already had call tools)</li>
             <li>Display extras — removed (OS 16 Settings hid DC / HDR / reading)</li>
           </ul>
@@ -472,6 +473,17 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
         <div class="h8"></div>
         <button class="action-btn btn-primary" onclick="saveAll()">Apply &amp; Save</button>
       </div>
+
+      <div class="page" id="page-sounds">
+        <div class="page-header">
+          <div class="eyebrow">Customise</div>
+          <h1>Sounds</h1>
+          <div class="sub">Upload replaces GT UI files under /tr_product/media/audio/ui. Stock leaves the ROM file. Apply + reboot. Boot sound is not in this build.</div>
+        </div>
+        <div id="sounds-root"></div>
+        <div class="h8"></div>
+        <button class="action-btn btn-primary" onclick="saveAll()">Apply &amp; Save</button>
+      </div>
     </div>
   </div>
   <nav class="tab-bar-wrap">
@@ -483,6 +495,10 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
       <div class="tab-item" onclick="switchTab('media',this)">
         <div class="tab-icon"><svg viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg></div>
         <div class="tab-label">Media</div>
+      </div>
+      <div class="tab-item" onclick="switchTab('sounds',this)">
+        <div class="tab-icon"><svg viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 010 14.14M15.54 8.46a5 5 0 010 7.07"/></svg></div>
+        <div class="tab-label">Sounds</div>
       </div>
       <div class="tab-item" onclick="switchTab('feat',this)">
         <div class="tab-icon"><svg viewBox="0 0 24 24"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg></div>
@@ -498,6 +514,93 @@ const CONFIG_PATH=MOD+'/config.json';
 let cfg={bootanim_style:'hios16',bootanim_file:'',rebootanim_style:'hios16',rebootanim_file:'',statusbar_style:'off',statusbarcustom_file:'',ai_master:true,ai_subtitles:true,ai_call_summary:true,ai_writing:true,ai_sound_rec:true,ai_notes:true,ai_gallery:true,ai_video:true,game_master:true,game_esports_touch:true,game_esports_level:3,game_bypass_charge:true,game_gt_triggers:true,anim_os16:true,blur_os16:true,blur_os16_level:2,aod_os16:true,videosr_os16:true,supervol_os16:true,treasure_os16:true,cutepet_os16:true,outdoorboost_os16:true,gallerylive_os16:true,airtransfer_os16:true,dynamicbar_os16:false,force_120hz:false};
 let _exec=null;
 let _saving=false;
+const SOUND_SLOTS=[
+  {id:'chargesound', dest:'ChargingStarted', title:'Wired charging', group:'Charging'},
+  {id:'wirelesschargesound', dest:'WirelessChargingStarted', title:'Wireless charging', group:'Charging'},
+  {id:'sound_Unlock', dest:'Unlock', title:'Unlock', group:'Lock screen'},
+  {id:'sound_Lock', dest:'Lock', title:'Lock', group:'Lock screen'},
+  {id:'sound_Screenshots', dest:'Screenshots', title:'Screenshot', group:'Feedback'},
+  {id:'sound_Effect_Tick', dest:'Effect_Tick', title:'Tick', group:'Feedback'},
+  {id:'sound_Fail', dest:'Fail', title:'Fail', group:'Feedback'},
+  {id:'sound_Success', dest:'Success', title:'Success', group:'Feedback'},
+  {id:'sound_Sent_Success', dest:'Sent_Success', title:'Sent', group:'Feedback'},
+  {id:'sound_sent_message_success', dest:'sent_message_success', title:'Message sent', group:'Feedback'},
+  {id:'sound_LowBattery', dest:'LowBattery', title:'Low battery', group:'Feedback'},
+  {id:'sound_KeypressStandard', dest:'KeypressStandard', title:'Keypress', group:'Keypress'},
+  {id:'sound_KeypressDelete', dest:'KeypressDelete', title:'Delete key', group:'Keypress'},
+  {id:'sound_KeypressReturn', dest:'KeypressReturn', title:'Return key', group:'Keypress'},
+  {id:'sound_KeypressSpacebar', dest:'KeypressSpacebar', title:'Spacebar', group:'Keypress'},
+  {id:'sound_KeypressInvalid', dest:'KeypressInvalid', title:'Invalid key', group:'Keypress'},
+  {id:'sound_delete', dest:'delete', title:'Delete', group:'Keypress'},
+  {id:'sound_Disconnect', dest:'Disconnect', title:'Disconnect', group:'Connection'},
+  {id:'sound_InCallNotification', dest:'InCallNotification', title:'In-call', group:'Connection'},
+  {id:'sound_Gear', dest:'Gear', title:'Gear', group:'Other'},
+  {id:'sound_Calculagraph', dest:'Calculagraph', title:'Timer tick', group:'Other'},
+  {id:'sound_beep_once', dest:'beep_once', title:'Beep once', group:'Other'},
+  {id:'sound_beep_twice', dest:'beep_twice', title:'Beep twice', group:'Other'},
+  {id:'sound_Second_Hand', dest:'Second_Hand', title:'Second hand', group:'Other'},
+  {id:'sound_Cobalt', dest:'Cobalt', title:'Cobalt', group:'Other'},
+  {id:'sound_Dock', dest:'Dock', title:'Dock', group:'Other'},
+  {id:'sound_Trusted', dest:'Trusted', title:'Trusted', group:'Other'},
+  {id:'sound_Undock', dest:'Undock', title:'Undock', group:'Other'}
+];
+function soundStyleOf(id){ return cfg[id+'_style']||'stock'; }
+function soundFileOf(id){ return cfg[id+'_file']||''; }
+function setSoundStyle(id,val){
+  cfg[id+'_style']=val;
+  document.querySelectorAll('#'+id+'-style-picker .segmented-opt').forEach(o=>{
+    o.classList.toggle('active', o.dataset.val===val);
+  });
+}
+function renderSounds(){
+  const root=document.getElementById('sounds-root');
+  if(!root) return;
+  let html='';
+  let group='';
+  SOUND_SLOTS.forEach(s=>{
+    if(s.group!==group){
+      if(group) html+='</div>';
+      group=s.group;
+      html+='<div class="section-label">'+s.group+'</div><div class="glass-card">';
+    }else{
+      html+='<div style="border-top:1px solid var(--glass-b)"></div>';
+    }
+    const st=soundStyleOf(s.id);
+    const fn=soundFileOf(s.id);
+    html+='<div class="setting-row"><div class="row-text" style="margin-left:0"><div class="row-title">'+s.title+'</div><div class="row-sub">'+s.dest+'.ogg</div></div></div>';
+    html+='<div class="segmented" id="'+s.id+'-style-picker">';
+    html+='<div class="segmented-opt'+(st==='stock'?' active':'')+'" data-val="stock" onclick="setSoundStyle(\''+s.id+'\',\'stock\')">Stock</div>';
+    html+='<div class="segmented-opt'+(st==='custom'?' active':'')+'" data-val="custom" onclick="setSoundStyle(\''+s.id+'\',\'custom\')" id="'+s.id+'-custom-opt"'+(fn?'':' style="display:none"')+'>Custom</div>';
+    html+='</div>';
+    html+='<div class="file-row"><label class="file-btn">Upload .ogg / .mp3 / .wav<input type="file" accept=".ogg,.mp3,.wav,.m4a,audio/*" onchange="handleSoundUpload(\''+s.id+'\',\''+s.dest+'\',this)"></label>';
+    html+='<div class="file-name" id="media-'+s.id+'-name">'+(fn?('Custom: '+fn):'No custom sound uploaded')+'</div></div>';
+  });
+  if(group) html+='</div>';
+  root.innerHTML=html;
+}
+async function handleSoundUpload(id, dest, input){
+  if(!input.files.length) return;
+  const file=input.files[0];
+  if(file.size>8*1024*1024){ toast('File too large (max 8MB)'); input.value=''; return; }
+  toast('Writing '+file.name+'…', 20000);
+  const ext=(file.name.match(/\.[a-zA-Z0-9]+$/)||['.ogg'])[0].toLowerCase();
+  const bytes=new Uint8Array(await file.arrayBuffer());
+  const dests=[
+    MOD+'/system/product/media/audio/ui/'+dest+'_custom'+ext,
+    MOD+'/tr_product/media/audio/ui/'+dest+'_custom'+ext
+  ];
+  const ok=await writeB64File(bytes, dests, '/data/local/tmp/tf16_'+dest+'.b64');
+  if(!ok){ toast('Write failed'); return; }
+  cfg[id+'_style']='custom';
+  cfg[id+'_file']=file.name;
+  const opt=document.getElementById(id+'-custom-opt');
+  if(opt) opt.style.display='';
+  setSoundStyle(id,'custom');
+  n('media-'+id+'-name','Custom: '+file.name);
+  await saveAll();
+  toast('Saved. Reboot so the sound binds.');
+  input.value='';
+}
 
 async function exec(cmd){
   if(!_exec) return {stdout:'',stderr:'no-bridge',returnCode:1};
@@ -898,6 +1001,10 @@ async function saveAll(){
       dynamicbar_os16:cfg.dynamicbar_os16===true,
       force_120hz:cfg.force_120hz===true
     };
+    SOUND_SLOTS.forEach(s=>{
+      slim[s.id+'_style']=soundStyleOf(s.id);
+      slim[s.id+'_file']=soundFileOf(s.id);
+    });
     const json=JSON.stringify(slim,null,2).replace(/'/g,"'\\''");
     const hzFlag=cfg.force_120hz===true?'1':'0';
     const r=await exec("printf '%s\\n' '"+json+"' > \""+CONFIG_PATH+"\" && printf '%s\\n' '"+hzFlag+"' > \""+MOD+"/.force_120hz\" && sync \""+CONFIG_PATH+"\" \""+MOD+"/.force_120hz\" && echo OK");
@@ -906,7 +1013,7 @@ async function saveAll(){
     if(!props){ toast('Saved config, but AI props failed to write'); _saving=false; return; }
     // ksu.exec has no timeout. apply_blur.sh all can hang on resetprop --delete
     // / vconfig bind and freeze the WebUI. Detach so Apply always returns.
-    exec('nohup sh "'+MOD+'/apply_blur.sh" all >/dev/null 2>&1 & nohup sh "'+MOD+'/apply_120hz.sh" >/dev/null 2>&1 & echo OK').catch(function(){});
+    exec('nohup sh "'+MOD+'/apply_blur.sh" all >/dev/null 2>&1 & nohup sh "'+MOD+'/apply_120hz.sh" >/dev/null 2>&1 & nohup sh "'+MOD+'/apply_sounds.sh" >/dev/null 2>&1 & echo OK').catch(function(){});
     toast('Saved. Reboot if Settings did not update.');
   }catch(e){
     toast('Save failed. Try again.');
@@ -1054,6 +1161,16 @@ async function dumpAi(){
   lines.push(maghead||'(could not read magellan xml)');
   const magprop=await g("getprop | grep -iE 'tr_display.refreshrate|magellan' | head -20");
   lines.push(magprop||'(no magellan refresh props)');
+  lines.push('');
+  lines.push('=== ui sounds ===');
+  SOUND_SLOTS.forEach(s=>{
+    lines.push(s.id+'  style='+soundStyleOf(s.id)+'  file='+(soundFileOf(s.id)||'EMPTY'));
+  });
+  const uilive=await g('ls -l /tr_product/media/audio/ui/ChargingStarted.ogg /tr_product/media/audio/ui/Unlock.ogg /tr_product/media/audio/ui/Lock.ogg /tr_product/media/audio/ui/Screenshots.ogg 2>/dev/null');
+  lines.push(uilive||'no live ui oggs');
+  const uimount=await g('mount 2>/dev/null | grep "audio/ui" | head -20');
+  lines.push(uimount||'(no audio/ui binds)');
+  lines.push('');
   const apm=await g('ls -l /product/apm/config/refresh_rate_config.json /system/product/apm/config/refresh_rate_config.json /tr_product/etc/apm/config/refresh_rate_config.json 2>/dev/null; ls -l "'+MOD+'/system/product/apm/config/refresh_rate_config.json" 2>/dev/null');
   lines.push(apm||'no live /product/apm/config/refresh_rate_config.json (OS 16 uses Magellan, this is optional)');
   const head=await g('head -c 180 /product/apm/config/refresh_rate_config.json 2>/dev/null');
@@ -1232,6 +1349,10 @@ async function loadCfg(){
   if(cfg.airtransfer_os16===undefined) cfg.airtransfer_os16=true;
   if(cfg.dynamicbar_os16===undefined) cfg.dynamicbar_os16=false;
   if(cfg.force_120hz===undefined) cfg.force_120hz=false;
+  SOUND_SLOTS.forEach(s=>{
+    if(cfg[s.id+'_style']===undefined) cfg[s.id+'_style']='stock';
+    if(cfg[s.id+'_file']===undefined) cfg[s.id+'_file']='';
+  });
   if(cfg.force_refresh_hz===120||cfg.force_refresh_hz===144) cfg.force_120hz=true;
   const hzFlag=await g('cat "'+MOD+'/.force_120hz" 2>/dev/null');
   if(hzFlag==='1'||hzFlag==='true') cfg.force_120hz=true;
@@ -1282,6 +1403,7 @@ async function loadCfg(){
   syncAiChildren();
   syncGameChildren();
   syncBlurChildren();
+  renderSounds();
 }
 async function init(){
   try{
@@ -1311,6 +1433,8 @@ window.handleRebootanim=handleRebootanim;
 window.handleStatusbar=handleStatusbar;
 window.dumpAi=dumpAi;
 window.copyLog=copyLog;
+window.setSoundStyle=setSoundStyle;
+window.handleSoundUpload=handleSoundUpload;
 </script>
 </body>
 </html>
