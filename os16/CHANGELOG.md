@@ -1,5 +1,8 @@
 # Transsion Flagship 16
 
+## v1.39
+- **Force 120Hz (first try).** Same Transsion settings as Flagship 15 on this X6886: `tran_refresh_mode` / recovery keys, `peak_refresh_rate` / `min_refresh_rate`. Off by default (battery). Off does not force 60Hz. If a live APM `refresh_rate_config.json` exists, a per-file bind applies the 120Hz bypass (not a bind-dir of `/tr_product`). Features tab, Apply, reboot. Some apps may still sit below 120. Dump flags for the refresh keys.
+
 ## v1.38
 - **Parallel animations stay on without flagship glass.** V1.37 dropped `platform_level` to 2 at blur level 1, so Parallel became basic motion. Device tests: glass followed Parallel/platform 3, but unionrender was also tied to Parallel. This build keeps **platform_level=3 whenever Parallel is on** (app open/close, recents). Blur off or **level 1** only turns off glass: unionrender, liquid glass, SurfaceFlinger blur. **Level 2/3** turns glass back on. Apply + reboot. Check Parallel at blur 1, then glass at blur 3.
 
