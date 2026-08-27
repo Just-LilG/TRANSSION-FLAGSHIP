@@ -295,11 +295,36 @@ os16_apply_aod_props() {
 
 os16_apply_videosr_props() {
   v=$(os16_cfg_01 videosr_os16 true)
-  # Live on this G99: persist.tr_video.ai_super_resolution.support=0.
-  # Same video stack as VEE (that flag unhid UI).
   os16_rp_overwrite persist.tr_video.ai_super_resolution.support "$v"
   os16_rp_overwrite ro.tr_video.ai_super_resolution.support "$v"
   os16_rp_overwrite tr_video.ai_super_resolution.support "$v"
+}
+
+os16_apply_supervol_props() {
+  v=$(os16_cfg_tf supervol_os16 true)
+  os16_rp_overwrite ro.tr_audio.supervol.feature.support "$v"
+  os16_rp_overwrite tr_audio.supervol.feature.support "$v"
+}
+
+os16_apply_treasure_props() {
+  t=$(os16_cfg_01 treasure_os16 true)
+  os16_rp_overwrite ro.tr_ai_treasure_box.feature.support "$t"
+  os16_rp_overwrite tr_ai_treasure_box.feature.support "$t"
+}
+
+os16_apply_cutepet_props() {
+  p=$(os16_cfg_01 cutepet_os16 true)
+  # OS 16 GT dump + Flagship 15 alias. For every Trans OS 16 device.
+  os16_rp_overwrite ro.tr_cutepet.feature.support "$p"
+  os16_rp_overwrite tr_cutepet.feature.support "$p"
+  os16_rp_overwrite ro.os_cutepet_support "$p"
+}
+
+os16_apply_os16_extras_props() {
+  os16_apply_videosr_props
+  os16_apply_supervol_props
+  os16_apply_treasure_props
+  os16_apply_cutepet_props
 }
 
 os16_apply_aod_settings() {
@@ -412,12 +437,12 @@ os16_apply_blur_runtime() {
 if [ "${0##*/}" = "apply_blur.sh" ]; then
   mode="${1:-all}"
   case "$mode" in
-    props) os16_apply_blur_props; os16_apply_aod_props; os16_apply_videosr_props; os16_apply_dynamicbar_props ;;
+    props) os16_apply_blur_props; os16_apply_aod_props; os16_apply_os16_extras_props; os16_apply_dynamicbar_props ;;
     runtime) os16_apply_blur_runtime; os16_apply_aod_settings; os16_apply_dynamicbar_runtime ;;
     *)
       os16_apply_blur_props
       os16_apply_aod_props
-      os16_apply_videosr_props
+      os16_apply_os16_extras_props
       os16_apply_dynamicbar_props
       os16_clear_failed_feature_leftovers
       os16_apply_aod_settings
