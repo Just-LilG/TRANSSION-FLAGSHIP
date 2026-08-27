@@ -1,12 +1,9 @@
 #!/system/bin/sh
-# Flagship 16 blur.
-# Dock gaussian is launcher-only (that toggle already works).
-# Notification/QS glass is SurfaceFlinger. persist.sys.sf.disable_blurs and
-# ro.surface_flinger.supports_background_blur are read when SF starts;
-# restarting SystemUI is not enough. Do not resetprop AI/game keys here.
-#
-# Level 1 = Smart-series compositor (solid + slight transparency).
-# Level 2/3 = flagship compositor glass. Off = Smart compositor + no dock blur.
+# Device tests: 1/2/3 only changed the dock while Parallel animations
+# stayed on (platform_level 3 + unionrender). Turning Parallel off is what
+# killed system glass. Flagship glass needs Parallel ON *and* blur level 2/3.
+# Level 1 with compositor forced off painted a solid scrim over the lock clock.
+# Do not resetprop AI/game keys here.
 
 if [ -z "$MODDIR" ]; then
   MODDIR=${0%/*}
@@ -69,11 +66,12 @@ os16_settings_put() {
 }
 
 os16_blur_vals() {
+  anim=$(os16_cfg_bool anim_os16 true)
   on=$(os16_cfg_bool blur_os16 true)
   lvl=$(os16_cfg_int blur_os16_level 2)
   [ "$lvl" -ge 1 ] 2>/dev/null || lvl=2
   [ "$lvl" -le 3 ] 2>/dev/null || lvl=2
-  COMP=0
+
   if [ "$on" = "true" ] || [ "$on" = "1" ]; then
     BLVL=$lvl
     EN=1
@@ -82,35 +80,64 @@ os16_blur_vals() {
       3) RAD=80 ;;
       *) RAD=45 ;;
     esac
-    # Level 1 is Smart-series shade (no compositor glass). 2/3 are flagship glass.
-    if [ "$lvl" -ge 2 ]; then
-      COMP=1
-    fi
   else
     BLVL=0
     EN=0
     RAD=0
     lvl=0
   fi
-  if [ "$COMP" = "1" ]; then
+
+  # Flagship glass: Parallel on AND blur on AND level 2/3.
+  GLASS=0
+  if [ "$anim" = "true" ] || [ "$anim" = "1" ]; then
+    A01=1
+    if [ "$on" = "true" ] || [ "$on" = "1" ]; then
+      if [ "$lvl" -ge 2 ]; then
+        GLASS=1
+      fi
+    fi
+    if [ "$GLASS" = "1" ]; then
+      ALVL=3
+    else
+      ALVL=2
+    fi
+  else
+    A01=0
+    ALVL=0
+  fi
+
+  if [ "$GLASS" = "1" ]; then
     B01=1
     SFDIS=0
     DIS=0
     EXP=0
-    REDTRANS=0
   else
     B01=0
     SFDIS=1
     DIS=1
     EXP=1
-    REDTRANS=1
   fi
   BLUR_ON=$on
   BLUR_LVL=$lvl
+  ANIM_ON=$anim
 }
 
 os16_apply_blur_props() {
   os16_blur_vals
+  os16_rp_overwrite ro.tr_animation.platform_level "$ALVL"
+  os16_rp_overwrite ro.tr_perf.launch_start_exit.model "$ALVL"
+  os16_rp_overwrite ro.tr_perf.power_keyguard_animation.model "$ALVL"
+  os16_rp_overwrite ro.tr_perf.recent_animation.model "$ALVL"
+  os16_rp_overwrite ro.tr_perf.unlock_mode.model "$ALVL"
+  os16_rp ro.tr_dynamicbar.support "$A01"
+  os16_rp ro.tr_livewallpaper.dreamanimation.support "$A01"
+  os16_rp ro.tr_multiwindow.anim_arc.support "$A01"
+  os16_rp ro.transsion_async_animation_support "$A01"
+  os16_rp ro.transsion_unlock_mode_support "$ALVL"
+  os16_rp ro.transsion_launch_start_exit_support "$ALVL"
+  os16_rp ro.transsion_power_keyguard_animation_support "$ALVL"
+  os16_rp ro.transsion.recent_animation.model "$ALVL"
+  os16_rp_overwrite ro.tran_display_unionrender.support "$B01"
   os16_rp_overwrite ro.tr_display.liquidglass.support "$B01"
   os16_rp_overwrite ro.surface_flinger.supports_background_blur "$B01"
   os16_rp_overwrite ro.os.recent.blur "$B01"
@@ -146,8 +173,6 @@ os16_restart_systemui() {
   killall com.android.systemui >/dev/null 2>&1
 }
 
-# SurfaceFlinger reads blur support at process start. SystemUI restart does not
-# recreate SF, so notification-shade Gaussian stays until SF is restarted.
 os16_restart_surfaceflinger() {
   setprop ctl.restart surfaceflinger >/dev/null 2>&1
   stop surfaceflinger >/dev/null 2>&1
@@ -159,18 +184,25 @@ os16_apply_blur_runtime() {
   os16_blur_vals
   os16_settings_put global disable_window_blurs "$DIS"
   os16_settings_put system disable_window_blurs "$DIS"
-  os16_settings_put secure accessibility_reduce_transparency "$REDTRANS"
-  os16_settings_put global transsion_launcher_gaussian_blur_enable "$EN"
-  os16_settings_put system transsion_launcher_gaussian_blur_enable "$EN"
+  settings delete secure accessibility_reduce_transparency >/dev/null 2>&1
   os16_settings_put global transsion_launcher_gaussian_blur_support "$BLVL"
   os16_settings_put system transsion_launcher_gaussian_blur_support "$BLVL"
-  os16_settings_put global transsion_launcher_blur_radius "$RAD"
-  os16_settings_put system transsion_launcher_blur_radius "$RAD"
   os16_settings_put global transsion_launcher_gaussian_support "$BLVL"
   os16_settings_put system transsion_launcher_gaussian_support "$BLVL"
+  if [ "$GLASS" = "1" ]; then
+    os16_settings_put global transsion_launcher_gaussian_blur_enable "$EN"
+    os16_settings_put system transsion_launcher_gaussian_blur_enable "$EN"
+    os16_settings_put global transsion_launcher_blur_radius "$RAD"
+    os16_settings_put system transsion_launcher_blur_radius "$RAD"
+  else
+    os16_settings_put global transsion_launcher_gaussian_blur_enable 0
+    os16_settings_put system transsion_launcher_gaussian_blur_enable 0
+    settings delete system transsion_launcher_blur_radius >/dev/null 2>&1
+    settings delete global transsion_launcher_blur_radius >/dev/null 2>&1
+  fi
   wm disable-blur "$DIS" >/dev/null 2>&1
   cmd window disable-blur "$DIS" >/dev/null 2>&1
-  device_config put systemui notification_shade_blur "$([ "$COMP" = "1" ] && echo true || echo false)" >/dev/null 2>&1
+  device_config put systemui notification_shade_blur "$([ "$GLASS" = "1" ] && echo true || echo false)" >/dev/null 2>&1
   os16_force_stop_launchers
 }
 
