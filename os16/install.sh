@@ -96,6 +96,10 @@ write_os16_ai_prop() {
     b01=0
     sfdis=1
   fi
+  aod=$(json_bool "$cfg" aod_os16 true)
+  dbar=$(json_bool "$cfg" dynamicbar_os16 true)
+  [ "$aod" = "false" ] && aod=0 || aod=1
+  [ "$dbar" = "false" ] && dbar=0 || dbar=1
   cat > "$dest" <<EOF
 # Flagship 16 — OS 16 keys. Magisk loads this file at boot.
 # Apply in WebUI rewrites this file from the Features toggles.
@@ -136,7 +140,6 @@ ro.tr_perf.launch_start_exit.model=$alvl
 ro.tr_perf.power_keyguard_animation.model=$alvl
 ro.tr_perf.recent_animation.model=$alvl
 ro.tr_perf.unlock_mode.model=$alvl
-ro.tr_dynamicbar.support=$a01
 ro.tr_livewallpaper.dreamanimation.support=$a01
 ro.tr_multiwindow.anim_arc.support=$a01
 ro.transsion_async_animation_support=$a01
@@ -157,6 +160,10 @@ persist.sys.disable_blur=$sfdis
 persist.sysui.disableBlur=$sfdis
 persist.sysui.disable_blur=$sfdis
 ro.sf.blurs_are_expensive=$sfdis
+ro.tr_aod.feature.support=$aod
+ro.tr_aod.doze.brightness.feature.support=$aod
+ro.tr_aod.half.screen.feature.support=$aod
+ro.tr_dynamicbar.support=$dbar
 ro.surface_flinger.game_default_frame_rate_override=120
 debug.graphics.game_default_frame_rate.disabled=true
 persist.graphics.game_default_frame_rate.enabled=false
@@ -167,7 +174,7 @@ print_modname() {
   ui_print " "
   ui_print "  ╔══════════════════════════════════════════╗"
   ui_print "  ║    TRANSSION FLAGSHIP 16                 ║"
-  ui_print "  ║    XOS · HiOS · iTel OS 16  ·  V1.56     ║"
+  ui_print "  ║    XOS · HiOS · iTel OS 16  ·  V1.57     ║"
   ui_print "  ╚══════════════════════════════════════════╝"
   ui_print " "
 }
@@ -350,7 +357,7 @@ on_install() {
   ui_ok "Boot animation"
   ui_ok "Reboot animation"
   ui_ok "Status bar: upload your own overlay, or leave stock"
-  ui_ok "OS 16 AI + Gaming + Animations/Blur + Force 120Hz — Features tab, Apply, then reboot"
+  ui_ok "OS 16 AI + Gaming + Animations/Blur + AOD + Dynamic bar + Force 120Hz — Features tab, Apply, then reboot"
 }
 
 set_permissions() {
@@ -378,9 +385,9 @@ set_permissions() {
   done
   ui_print " "
   ui_div
-  ui_print "  ✨  FLAGSHIP 16  ·  V1.56"
+  ui_print "  ✨  FLAGSHIP 16  ·  V1.57"
   ui_info "OS     : $OS_TYPE $OS_VER"
-  ui_info "Feature: boot + reboot + overlay + AI + gaming + anim/blur + Force 120Hz"
+  ui_info "Feature: boot + reboot + overlay + AI + gaming + anim/blur + AOD + Dynamic bar + Force 120Hz"
   ui_div
   ui_print "  Reboot, then open WebUI in Magisk/KSU."
   ui_print " "

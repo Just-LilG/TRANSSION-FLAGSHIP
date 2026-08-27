@@ -128,7 +128,6 @@ os16_apply_blur_props() {
   os16_rp_overwrite ro.tr_perf.power_keyguard_animation.model "$ALVL"
   os16_rp_overwrite ro.tr_perf.recent_animation.model "$ALVL"
   os16_rp_overwrite ro.tr_perf.unlock_mode.model "$ALVL"
-  os16_rp ro.tr_dynamicbar.support "$A01"
   os16_rp ro.tr_livewallpaper.dreamanimation.support "$A01"
   os16_rp ro.tr_multiwindow.anim_arc.support "$A01"
   os16_rp ro.transsion_async_animation_support "$A01"
@@ -149,6 +148,30 @@ os16_apply_blur_props() {
   os16_rp persist.sysui.disableBlur "$SFDIS"
   os16_rp persist.sysui.disable_blur "$SFDIS"
   os16_rp ro.sf.blurs_are_expensive "$EXP"
+}
+
+os16_cfg_01() {
+  k="$1"; d="$2"
+  v=$(os16_cfg_bool "$k" "$d")
+  if [ "$v" = "false" ] || [ "$v" = "0" ]; then
+    echo 0
+  else
+    echo 1
+  fi
+}
+
+os16_apply_aod_props() {
+  aod=$(os16_cfg_01 aod_os16 true)
+  # GT dump: feature + doze brightness already 1; half.screen is 0.
+  # Keys live in /tr_product/etc/build.prop so Magisk system.prop can lose.
+  os16_rp_overwrite ro.tr_aod.feature.support "$aod"
+  os16_rp_overwrite ro.tr_aod.doze.brightness.feature.support "$aod"
+  os16_rp_overwrite ro.tr_aod.half.screen.feature.support "$aod"
+}
+
+os16_apply_dynamicbar_props() {
+  bar=$(os16_cfg_01 dynamicbar_os16 true)
+  os16_rp_overwrite ro.tr_dynamicbar.support "$bar"
 }
 
 os16_clear_failed_feature_leftovers() {
@@ -221,10 +244,12 @@ os16_apply_blur_runtime() {
 if [ "${0##*/}" = "apply_blur.sh" ]; then
   mode="${1:-all}"
   case "$mode" in
-    props) os16_apply_blur_props ;;
+    props) os16_apply_blur_props; os16_apply_aod_props; os16_apply_dynamicbar_props ;;
     runtime) os16_apply_blur_runtime; os16_restart_systemui ;;
     *)
       os16_apply_blur_props
+      os16_apply_aod_props
+      os16_apply_dynamicbar_props
       os16_clear_failed_feature_leftovers
       os16_apply_blur_runtime
       os16_restart_surfaceflinger

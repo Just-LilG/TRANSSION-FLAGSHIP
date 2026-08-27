@@ -46,7 +46,6 @@ ro.tr_perf.launch_start_exit.model=3
 ro.tr_perf.power_keyguard_animation.model=3
 ro.tr_perf.recent_animation.model=3
 ro.tr_perf.unlock_mode.model=3
-ro.tr_dynamicbar.support=1
 ro.tr_livewallpaper.dreamanimation.support=1
 ro.tr_multiwindow.anim_arc.support=1
 ro.transsion_async_animation_support=1
@@ -69,6 +68,13 @@ persist.sys.disable_blur=0
 persist.sysui.disableBlur=0
 persist.sysui.disable_blur=0
 ro.sf.blurs_are_expensive=0
+# AOD — OS 16 keys from GT dump. half.screen is stock 0 on GT.
+# These live in /tr_product/etc/build.prop so apply_blur.sh overwrites.
+ro.tr_aod.feature.support=1
+ro.tr_aod.doze.brightness.feature.support=1
+ro.tr_aod.half.screen.feature.support=1
+# Dynamic bar — OS 16 key from GT dump. Own toggle, not Parallel.
+ro.tr_dynamicbar.support=1
 ro.surface_flinger.game_default_frame_rate_override=120
 debug.graphics.game_default_frame_rate.disabled=true
 persist.graphics.game_default_frame_rate.enabled=false
