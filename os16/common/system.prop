@@ -47,7 +47,6 @@ ro.tr_perf.power_keyguard_animation.model=3
 ro.tr_perf.recent_animation.model=3
 ro.tr_perf.unlock_mode.model=3
 ro.tr_dynamicbar.support=1
-ro.tr_display.liquidglass.support=1
 ro.tr_livewallpaper.dreamanimation.support=1
 ro.tr_multiwindow.anim_arc.support=1
 ro.transsion_async_animation_support=1
@@ -56,12 +55,15 @@ ro.transsion_launch_start_exit_support=3
 ro.transsion_power_keyguard_animation_support=3
 ro.transsion.recent_animation.model=3
 ro.tran_display_unionrender.support=1
-# Blur — SurfaceFlinger must be in this file (early boot). Launcher gaussian
-# names are Flagship 15; dump them if EMPTY on this phone. gaussian =2 is
-# default WebUI level; Apply can set 1 or 3.
+# Blur — liquid glass is the OS 16 glass/blur flag (was wrongly tied to
+# animations, so turning blur off did nothing). persist.sys.sf.disable_blurs
+# and disable_window_blurs kill compositor blur. gaussian 1/2/3 plus
+# transsion_launcher_blur_radius (px) are the level.
+ro.tr_display.liquidglass.support=1
 ro.surface_flinger.supports_background_blur=1
 ro.os.recent.blur=1
 ro.transsion_launcher_gaussian_blur_support=2
 tr_launcher.gaussianblur.support=2
 ro.tran.effectengine.dynamicblur.support=1
 ro.os_xos16_blur_v2_support=1
+persist.sys.sf.disable_blurs=0

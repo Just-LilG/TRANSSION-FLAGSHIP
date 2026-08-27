@@ -5,7 +5,50 @@ LOG="$MODDIR/transflagship16_service.log"
 rm -f "$LOG"
 log_p() { echo "[$(date '+%H:%M:%S')] $1" >> "$LOG"; }
 
-log_p "=== TransFlagship 16 V1.32 ==="
+cfg_bool() {
+  k="$1"; d="$2"
+  [ -f "$MODDIR/config.json" ] || { echo "$d"; return; }
+  val=$(grep -o "\"$k\"[[:space:]]*:[[:space:]]*[^,}]*" "$MODDIR/config.json" | head -1 | sed 's/.*:[[:space:]]*//' | tr -d '" ')
+  [ -n "$val" ] && echo "$val" || echo "$d"
+}
+
+cfg_int() {
+  k="$1"; d="$2"
+  v=$(cfg_bool "$k" "$d")
+  case "$v" in
+    ''|*[!0-9]*) echo "$d" ;;
+    *) echo "$v" ;;
+  esac
+}
+
+apply_blur_runtime() {
+  on=$(cfg_bool blur_os16 true)
+  lvl=$(cfg_int blur_os16_level 2)
+  [ "$lvl" -ge 1 ] 2>/dev/null || lvl=2
+  [ "$lvl" -le 3 ] 2>/dev/null || lvl=2
+  if [ "$on" = "true" ] || [ "$on" = "1" ]; then
+    dis=0
+    en=1
+    case "$lvl" in
+      1) rad=20 ;;
+      3) rad=80 ;;
+      *) rad=45 ;;
+    esac
+  else
+    dis=1
+    en=0
+    rad=0
+  fi
+  settings put global disable_window_blurs "$dis" 2>/dev/null
+  settings put system transsion_launcher_gaussian_blur_enable "$en" 2>/dev/null
+  settings put system transsion_launcher_blur_radius "$rad" 2>/dev/null
+  wm disable-blur "$dis" 2>/dev/null
+  cmd window disable-blur "$dis" 2>/dev/null
+  am force-stop com.transsion.launcher3 2>/dev/null
+  log_p "  blur_runtime on=$on lvl=$lvl disable_window_blurs=$dis radius=$rad"
+}
+
+log_p "=== TransFlagship 16 V1.33 ==="
 log_p "Device : $(getprop ro.product.model 2>/dev/null)"
 log_p "Brand  : $(getprop ro.product.brand 2>/dev/null)"
 log_p "Android: $(getprop ro.build.version.release 2>/dev/null)"
@@ -42,11 +85,6 @@ log_p "  liquidglass=$(getprop ro.tr_display.liquidglass.support 2>/dev/null)"
 log_p "  sf_blur=$(getprop ro.surface_flinger.supports_background_blur 2>/dev/null)"
 log_p "  recent_blur=$(getprop ro.os.recent.blur 2>/dev/null)"
 log_p "  gaussian=$(getprop ro.transsion_launcher_gaussian_blur_support 2>/dev/null)"
-# Launcher gaussian enable is a Settings key, not a Magisk prop.
-blur_cfg=1
-if [ -f "$MODDIR/config.json" ] && grep -q '"blur_os16"[[:space:]]*:[[:space:]]*false' "$MODDIR/config.json"; then
-    blur_cfg=0
-fi
-settings put system transsion_launcher_gaussian_blur_enable "$blur_cfg" 2>/dev/null
-log_p "  blur_settings_enable=$blur_cfg"
+log_p "  sf_disable_blurs=$(getprop persist.sys.sf.disable_blurs 2>/dev/null)"
+apply_blur_runtime
 log_p "=== service complete ==="

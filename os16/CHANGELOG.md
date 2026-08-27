@@ -1,5 +1,8 @@
 # Transsion Flagship 16
 
+## v1.33
+- **Blur off and blur level actually apply.** V1.32 left OS 16 liquid glass on with Parallel animations, so turning Dynamic blur off did nothing. The 1/2/3 picker only wrote Flagship 15 gaussian keys (often EMPTY here). This build: liquid glass follows Dynamic blur; Apply writes AOSP `disable_window_blurs` / `wm disable-blur`, `persist.sys.sf.disable_blurs`, and `transsion_launcher_blur_radius` (20 / 45 / 80 px for levels 1 / 2 / 3). Restarts the launcher. Apply, then check dock/recents. Reboot still needed for SurfaceFlinger.
+
 ## v1.32
 - **Blur level picker.** Dynamic blur stays a toggle; Features now has 1 / 2 / 3 like eSports. Writes `ro.transsion_launcher_gaussian_blur_support` and `tr_launcher.gaussianblur.support` to that level (0 when blur is off). Default **2** (same as V1.31). SurfaceFlinger / recents / dynamic-blur engine stay on/off with the toggle. Apply + reboot.
 
