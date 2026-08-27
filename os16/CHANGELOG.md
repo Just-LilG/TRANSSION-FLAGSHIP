@@ -1,5 +1,9 @@
 # Transsion Flagship 16
 
+## v1.68
+- **Dropped AI Treasure Box.** Flag stuck or UI still hidden on this G99 — same class as failed extras, not Ella/VEE. Gone from Features.
+- **Super volume.** Next `tr_product` extra: GT dump `ro.tr_audio.supervol.feature.support` is **false**. Apply + reboot, then Sound / volume. Dump that flag in **=== keys this module writes ===** — EMPTY means this G99 does not expose the key.
+
 ## v1.67
 - **Dropped Circle to Search.** This G99 already had it. No extra to keep shipping.
 - **AI Treasure Box.** Next `tr_product` extra: GT dump `ro.tr_ai_treasure_box.feature.support` is **0** (same class as Ella / VEE, not a dump-1 stock feature). Apply + reboot, then AI / Ella / Settings for Treasure Box. Dump that flag — EMPTY means this G99 does not expose the key.

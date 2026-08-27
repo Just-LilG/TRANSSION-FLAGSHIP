@@ -248,6 +248,16 @@ os16_seed_vconfig_pkg() {
   echo "$staged"
 }
 
+os16_cfg_tf() {
+  k="$1"; d="$2"
+  v=$(os16_cfg_bool "$k" "$d")
+  if [ "$v" = "false" ] || [ "$v" = "0" ]; then
+    echo false
+  else
+    echo true
+  fi
+}
+
 os16_apply_aod_vconfig() {
   aod=$(os16_cfg_01 aod_os16 true)
   staged=$(os16_seed_vconfig_pkg com.transsion.aod)
@@ -283,11 +293,11 @@ os16_apply_aod_props() {
   os16_apply_aod_vconfig
 }
 
-os16_apply_treasure_props() {
-  t=$(os16_cfg_01 treasure_os16 true)
-  # GT X6858 tr_product stock is 0 (same class as Ella / VEE).
-  os16_rp_overwrite ro.tr_ai_treasure_box.feature.support "$t"
-  os16_rp_overwrite tr_ai_treasure_box.feature.support "$t"
+os16_apply_supervol_props() {
+  v=$(os16_cfg_tf supervol_os16 true)
+  # GT X6858 tr_product stock is false (same 0→1 class as Ella / VEE).
+  os16_rp_overwrite ro.tr_audio.supervol.feature.support "$v"
+  os16_rp_overwrite tr_audio.supervol.feature.support "$v"
 }
 
 os16_apply_aod_settings() {
@@ -400,12 +410,12 @@ os16_apply_blur_runtime() {
 if [ "${0##*/}" = "apply_blur.sh" ]; then
   mode="${1:-all}"
   case "$mode" in
-    props) os16_apply_blur_props; os16_apply_aod_props; os16_apply_treasure_props; os16_apply_dynamicbar_props ;;
+    props) os16_apply_blur_props; os16_apply_aod_props; os16_apply_supervol_props; os16_apply_dynamicbar_props ;;
     runtime) os16_apply_blur_runtime; os16_apply_aod_settings; os16_apply_dynamicbar_runtime ;;
     *)
       os16_apply_blur_props
       os16_apply_aod_props
-      os16_apply_treasure_props
+      os16_apply_supervol_props
       os16_apply_dynamicbar_props
       os16_clear_failed_feature_leftovers
       os16_apply_aod_settings
