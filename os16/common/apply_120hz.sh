@@ -1,9 +1,10 @@
 #!/system/bin/sh
-# Flagship 16 Force 120Hz — same path that worked on XOS 15:
-# Magisk overlay of /product/apm/config/*.json (TranRefreshRatePolicy reads
-# Environment.getProductDirectory()/apm/config/, not /tr_product).
-# That unlocks 144Hz as a choice on Customize App Refresh for every app.
-# There is no separate 144 toggle. Off does not write a fake 60Hz default.
+# Flagship 16 Force 120Hz — XOS 16 Magellan, not the XOS 15 APM JSON.
+# Customize App Refresh reads /tr_product/etc/vconfig/magellan/refresh_rate_config.xml
+#   max="144"  → “Apps Supporting 144 Hz” and 144 in the picker
+#   auto="120" → listed default for that app
+# Packages missing from WHITELIST stay in Other Apps (picker max 120, default 90).
+# Per-file bind only. Never bind-dir /tr_product.
 
 if [ -z "$MODDIR" ]; then
   MODDIR=${0%/*}
@@ -11,11 +12,12 @@ fi
 [ -n "$CFG" ] || CFG="$MODDIR/config.json"
 APM_CONFIG="$MODDIR/system/product/apm/config"
 APM_BYPASS="$MODDIR/system/product/apm/config_120hz_bypass"
-# leftover from V1.39–1.41
 if [ ! -d "$APM_BYPASS" ] && [ -d "$MODDIR/apm_120hz_bypass" ]; then
   APM_BYPASS="$MODDIR/apm_120hz_bypass"
 fi
 HZDIR="$APM_BYPASS"
+MAGELLAN_DIR="$MODDIR/magellan"
+MAGELLAN_XML="$MAGELLAN_DIR/refresh_rate_config.xml"
 
 os16_cfg_bool() {
   k="$1"; d="$2"
@@ -78,6 +80,15 @@ os16_product_apm_dests() {
   echo "/tr_product/apm/config/$name"
 }
 
+os16_magellan_dests() {
+  echo "/tr_product/etc/vconfig/magellan/refresh_rate_config.xml"
+  echo "/mnt/vendor/mountify/tr_product/etc/vconfig/magellan/refresh_rate_config.xml"
+  echo "/product/etc/vconfig/magellan/refresh_rate_config.xml"
+  echo "/system/product/etc/vconfig/magellan/refresh_rate_config.xml"
+  echo "/system_ext/etc/vconfig/magellan/refresh_rate_config.xml"
+  echo "/vendor/etc/vconfig/magellan/refresh_rate_config.xml"
+}
+
 os16_swap_magisk_apm() {
   mkdir -p "$APM_CONFIG"
   for name in refresh_rate_config.json project_refresh_rate_config.json; do
@@ -111,14 +122,37 @@ os16_bind_120hz_files() {
       fi
     done
   done
+  mkdir -p "$MAGELLAN_DIR"
+  stockbak="$MAGELLAN_DIR/refresh_rate_config.xml.stock"
+  os16_magellan_dests | awk 'NF && !seen[$0]++' | while IFS= read -r dest; do
+    os16_120hz_umount "$dest"
+    if [ -f "$dest" ] && [ ! -f "$stockbak" ]; then
+      if ! grep -q 'version="20260827"' "$dest" 2>/dev/null; then
+        cp "$dest" "$stockbak"
+      fi
+    fi
+    if os16_hz_on; then
+      os16_try_bind_file "$MAGELLAN_XML" "$dest"
+    fi
+  done
 }
 
 os16_write_pkg_array() {
   tmp="$HZDIR/.pkgs.txt"
-  mkdir -p "$HZDIR"
+  mkdir -p "$HZDIR" "$MAGELLAN_DIR"
   {
     echo android
     echo com.android.systemui
+    echo com.android.settings
+    echo com.sh.smart.caller
+    echo com.google.android.apps.messaging
+    echo com.transsion.smartmessage
+    echo com.google.android.dialer
+    echo com.android.phone
+    echo com.transsion.XOSLauncher
+    echo com.transsion.hilauncher
+    echo com.transsion.launcher3
+    echo com.transsion.itel.launcher
     pm list packages 2>/dev/null | sed 's/^package://'
     pm list packages -s 2>/dev/null | sed 's/^package://'
     pm list packages -3 2>/dev/null | sed 's/^package://'
@@ -128,6 +162,7 @@ os16_write_pkg_array() {
   [ -z "$n" ] && n=0
   echo "$n" > "$HZDIR/.pkg_count"
   echo "$n" > "$APM_CONFIG/.pkg_count" 2>/dev/null
+  echo "$n" > "$MAGELLAN_DIR/.pkg_count" 2>/dev/null
   awk '
     BEGIN { print "[" }
     NF {
@@ -179,21 +214,111 @@ os16_json_replace_top_array() {
   ' "$json" > "$json.new" && mv "$json.new" "$json"
 }
 
+os16_generate_magellan_xml() {
+  mkdir -p "$MAGELLAN_DIR"
+  tmp="$HZDIR/.pkgs.txt"
+  [ -f "$tmp" ] || return 1
+  stock=""
+  for cand in \
+    "$MAGELLAN_DIR/refresh_rate_config.xml.stock" \
+    /tr_product/etc/vconfig/magellan/refresh_rate_config.xml \
+    /mnt/vendor/mountify/tr_product/etc/vconfig/magellan/refresh_rate_config.xml \
+    /product/etc/vconfig/magellan/refresh_rate_config.xml \
+    /system_ext/etc/vconfig/magellan/refresh_rate_config.xml
+  do
+    if [ -f "$cand" ] && grep -q '<WHITELIST>' "$cand" 2>/dev/null; then
+      if ! grep -q 'version="20260827"' "$cand" 2>/dev/null; then
+        stock="$cand"
+        break
+      fi
+    fi
+  done
+  switchf="$MAGELLAN_DIR/.switch.xml"
+  actf="$MAGELLAN_DIR/.activity.xml"
+  if [ -n "$stock" ]; then
+    awk '
+      /<WHITELIST>/ { skip=1; next }
+      /<\/WHITELIST>/ { skip=0; next }
+      skip { next }
+      { print }
+    ' "$stock" > "$MAGELLAN_DIR/.stock_stripped.xml"
+    awk '
+      BEGIN { keep=0 }
+      /<switch>/ { keep=1 }
+      keep { print }
+      /<\/switch>/ { keep=0 }
+    ' "$MAGELLAN_DIR/.stock_stripped.xml" > "$switchf"
+    awk '
+      BEGIN { keep=0 }
+      /<activity>/ { keep=1 }
+      keep { print }
+      /<\/activity>/ { keep=0 }
+    ' "$MAGELLAN_DIR/.stock_stripped.xml" > "$actf"
+  fi
+  [ -s "$switchf" ] || cat > "$switchf" <<'EOF'
+    <switch>
+        <input_method_switch>true</input_method_switch>
+        <navigation_switch>true</navigation_switch>
+        <video_switch>true</video_switch>
+        <audio_switch>true</audio_switch>
+        <high_temperature_threshold>0</high_temperature_threshold>
+        <high_temperature_refresh_rate>0</high_temperature_refresh_rate>
+        <camera_notification_high_temerature_switch>false</camera_notification_high_temerature_switch>
+        <high_temperature_white_list_switch>false</high_temperature_white_list_switch>
+        <multi_window_refresh_rate>60</multi_window_refresh_rate>
+        <screen_record>60</screen_record>
+    </switch>
+EOF
+  [ -s "$actf" ] || cat > "$actf" <<'EOF'
+    <activity>
+    </activity>
+EOF
+  {
+    echo '<?xml version="1.0" encoding="UTF-8" ?>'
+    echo '<refresh_rate_config version="20260827">'
+    cat "$switchf"
+    echo '    <WHITELIST>'
+    awk '{
+      printf "        <item package=\"%s\" auto=\"120\" high=\"120\" max=\"144\" touch=\"1\" app_request=\"0\"/>\n", $0
+    }' "$tmp"
+    echo '    </WHITELIST>'
+    cat "$actf"
+    echo '</refresh_rate_config>'
+  } > "$MAGELLAN_XML"
+  chmod 644 "$MAGELLAN_XML" 2>/dev/null
+}
+
+os16_copy_magellan_data() {
+  os16_hz_on || return 0
+  [ -f "$MAGELLAN_XML" ] || return 0
+  mkdir -p /data/magellan 2>/dev/null
+  cp -f "$MAGELLAN_XML" /data/magellan/refresh_rate_config.xml 2>/dev/null
+  chmod 644 /data/magellan/refresh_rate_config.xml 2>/dev/null
+  chown system:system /data/magellan/refresh_rate_config.xml 2>/dev/null
+  find /data/magellan -maxdepth 3 -type f \( -name '*refresh*' -o -name '*Refresh*' \) 2>/dev/null | while IFS= read -r f; do
+    [ "$f" = /data/magellan/refresh_rate_config.xml ] && continue
+    case "$f" in
+      *.xml|*.json) cp -f "$MAGELLAN_XML" "$f" 2>/dev/null ;;
+    esac
+  done
+}
+
 os16_generate_120hz_jsons() {
   os16_hz_on || return 0
-  mkdir -p "$APM_BYPASS" "$APM_CONFIG"
+  mkdir -p "$APM_BYPASS" "$APM_CONFIG" "$MAGELLAN_DIR"
   arr="$HZDIR/.all_pkgs.jsonarray"
   empty="$HZDIR/.empty.jsonarray"
   echo '[]' > "$empty"
   os16_write_pkg_array > "$arr"
+  os16_generate_magellan_xml
   n=$(cat "$HZDIR/.pkg_count" 2>/dev/null)
   [ -z "$n" ] && n=0
   if [ "$n" -lt 8 ]; then
     echo "pm-not-ready:$n" > "$HZDIR/.pkg_count"
-    return 0
   fi
   for json in "$APM_BYPASS/refresh_rate_config.json" "$APM_BYPASS/project_refresh_rate_config.json"; do
     [ -f "$json" ] || continue
+    [ "$n" -lt 8 ] && continue
     os16_json_replace_top_array "$json" auto_refresh_rate_whitelist "$arr"
     os16_json_replace_top_array "$json" slide_in_higher_setting_mode_120hz "$arr"
     os16_json_replace_top_array "$json" high_refresh_rate_gameList_in_120hz_mode "$arr"
@@ -214,18 +339,23 @@ os16_put_hz() {
 
 os16_apply_120hz_settings() {
   os16_hz_on || return 0
-  # Same six keys Flagship 15 wrote into Settings on this X6886.
   os16_put_hz system tran_refresh_mode 120
   os16_put_hz system tran_need_recovery_refresh_mode 120
   os16_put_hz system tran_need_recovery_refresh_rate 120
   os16_put_hz system last_tran_refresh_mode_in_refresh_setting 120
   os16_put_hz system peak_refresh_rate 120.0
   os16_put_hz system min_refresh_rate 120.0
+  os16_put_hz system other_apps_refresh_rate 120
+  os16_put_hz system default_app_refresh_rate 120
+  os16_put_hz system tran_other_app_refresh_rate 120
+  am force-stop com.android.settings >/dev/null 2>&1
+  am force-stop com.transsion.ossettingsext >/dev/null 2>&1
 }
 
 os16_apply_120hz_all() {
   os16_generate_120hz_jsons
   os16_bind_120hz_files
+  os16_copy_magellan_data
   os16_apply_120hz_settings
 }
 

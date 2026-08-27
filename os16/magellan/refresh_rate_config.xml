@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<refresh_rate_config version="20260827">
+    <switch>
+        <input_method_switch>true</input_method_switch>
+        <navigation_switch>true</navigation_switch>
+        <video_switch>true</video_switch>
+        <audio_switch>true</audio_switch>
+        <high_temperature_threshold>0</high_temperature_threshold>
+        <high_temperature_refresh_rate>0</high_temperature_refresh_rate>
+        <camera_notification_high_temerature_switch>false</camera_notification_high_temerature_switch>
+        <high_temperature_white_list_switch>false</high_temperature_white_list_switch>
+        <multi_window_refresh_rate>60</multi_window_refresh_rate>
+        <screen_record>60</screen_record>
+    </switch>
+    <WHITELIST>
+        <item package="android" auto="120" high="120" max="144" touch="1" app_request="0"/>
+        <item package="com.android.systemui" auto="120" high="120" max="144" touch="1" app_request="0" no_limit_max_rate="1"/>
+        <item package="com.android.settings" auto="120" high="120" max="144" touch="1" app_request="0"/>
+        <item package="com.sh.smart.caller" auto="120" high="120" max="144" touch="1" app_request="0"/>
+        <item package="com.google.android.apps.messaging" auto="120" high="120" max="144" touch="1" app_request="0"/>
+        <item package="com.transsion.smartmessage" auto="120" high="120" max="144" touch="1" app_request="0"/>
+        <item package="com.google.android.dialer" auto="120" high="120" max="144" touch="1" app_request="0"/>
+        <item package="com.android.phone" auto="120" high="120" max="144" touch="1" app_request="0"/>
+        <item package="com.transsion.XOSLauncher" auto="120" high="120" max="144" touch="1" app_request="0"/>
+        <item package="com.transsion.hilauncher" auto="120" high="120" max="144" touch="1" app_request="0"/>
+        <item package="com.transsion.launcher3" auto="120" high="120" max="144" touch="1" app_request="0"/>
+    </WHITELIST>
+    <activity>
+    </activity>
+</refresh_rate_config>

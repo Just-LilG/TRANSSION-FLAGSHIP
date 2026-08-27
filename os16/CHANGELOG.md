@@ -1,5 +1,8 @@
 # Transsion Flagship 16
 
+## v1.43
+- **Force 120Hz targets XOS 16 Magellan, not the old APM JSON.** V1.42 overlaid `/product/apm/config` like XOS 15. This phone’s Customize App Refresh does not use that file: “Apps Supporting 144 Hz” is Magellan `max="144"` in `/tr_product/etc/vconfig/magellan/refresh_rate_config.xml` (Settings / Phone / Messages). Other apps have no `max="144"`, so the picker stops at 120 and the list stays 90. This build per-file binds that XML (not bind-dir `/tr_product`), writes **every installed package** as `auto="120" high="120" max="144"`, and copies it into `/data/magellan` if Magellan cached a copy. Off by default. Apply + reboot, then open Customize App Refresh — Agent 2 should be in the 144 section with 120 selected and 144 in the picker.
+
 ## v1.42
 - **Force 120Hz uses the XOS 15 overlay path.** On 15 there was no 144 WebUI toggle — Force 120Hz wrote Settings and overlaid `/product/apm/config/*.json`. TranRefreshRatePolicy loads that path (`Environment.getProductDirectory()/apm/config/`), which is what put **144Hz as a choice on every app** in Customize App Refresh. V1.39–1.41 never shipped Magisk `system/product/apm/config/`, so the policy never saw the bypass and the list stayed 90 with no 144. This build overlays those files like Flagship 15, fills the whitelist with every installed package, and drops the Off/120/144 picker. Off by default. Apply + reboot, then **tap an app** in Customize App Refresh — 144 should be there. The list can still *show* 90 as the current value.
 
