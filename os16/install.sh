@@ -98,10 +98,10 @@ write_os16_ai_prop() {
   fi
   aod=$(json_bool "$cfg" aod_os16 true)
   dbar=$(json_bool "$cfg" dynamicbar_os16 true)
-  cts=$(json_bool "$cfg" circle_os16 true)
+  box=$(json_bool "$cfg" treasure_os16 true)
   [ "$aod" = "false" ] && aod=0 || aod=1
   [ "$dbar" = "false" ] && dbar=0 || dbar=1
-  [ "$cts" = "false" ] && cts=0 || cts=1
+  [ "$box" = "false" ] && box=0 || box=1
   cat > "$dest" <<EOF
 # Flagship 16 — OS 16 keys. Magisk loads this file at boot.
 # Apply in WebUI rewrites this file from the Features toggles.
@@ -177,9 +177,8 @@ ro.os_dynamicbar_ai_translation_support=$dbar
 ro.os_dynamic_bar_resident_plane_support=$dbar
 ro.os.tran_hide_status_bar_for_land_recent=$dbar
 ro.tran_hios_dynamic_bar_support=$dbar
-ro.tr_microIntelligence.circle_to_search.feature.support=$cts
-tr_microIntelligence.circle_to_search.feature.support=$cts
-ro.os_ai_circle_to_search_support=$cts
+ro.tr_ai_treasure_box.feature.support=$box
+tr_ai_treasure_box.feature.support=$box
 ro.surface_flinger.game_default_frame_rate_override=120
 debug.graphics.game_default_frame_rate.disabled=true
 persist.graphics.game_default_frame_rate.enabled=false
@@ -190,7 +189,7 @@ print_modname() {
   ui_print " "
   ui_print "  ╔══════════════════════════════════════════╗"
   ui_print "  ║    TRANSSION FLAGSHIP 16                 ║"
-  ui_print "  ║    XOS · HiOS · iTel OS 16  ·  V1.66     ║"
+  ui_print "  ║    XOS · HiOS · iTel OS 16  ·  V1.67     ║"
   ui_print "  ╚══════════════════════════════════════════╝"
   ui_print " "
 }
@@ -401,7 +400,7 @@ set_permissions() {
   done
   ui_print " "
   ui_div
-  ui_print "  ✨  FLAGSHIP 16  ·  V1.66"
+  ui_print "  ✨  FLAGSHIP 16  ·  V1.67"
   ui_info "OS     : $OS_TYPE $OS_VER"
   ui_info "Feature: boot + reboot + overlay + AI + gaming + anim/blur + AOD + Dynamic bar + Force 120Hz"
   ui_div

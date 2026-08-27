@@ -1,5 +1,9 @@
 # Transsion Flagship 16
 
+## v1.67
+- **Dropped Circle to Search.** This G99 already had it. No extra to keep shipping.
+- **AI Treasure Box.** Next `tr_product` extra: GT dump `ro.tr_ai_treasure_box.feature.support` is **0** (same class as Ella / VEE, not a dump-1 stock feature). Apply + reboot, then AI / Ella / Settings for Treasure Box. Dump that flag — EMPTY means this G99 does not expose the key.
+
 ## v1.66
 - **Dropped failed GT extras and resolution scale-up.** Smart Scan, Gallery extras, Recorder speech, Motions, PC Connect, Zero Screen, Smart Hub, and Settings scale-up never unhid UI on this G99. Those vconfig binds and Magisk keys are gone.
 - **Circle to Search.** Next feature is a `tr_product` key (same class as Ella/VEE), not another app vconfig: `ro.tr_microIntelligence.circle_to_search.feature.support` plus Flagship 15 `ro.os_ai_circle_to_search_support`. Apply + reboot, then long-press home / the nav handle. Dump those flags — EMPTY means this G99 does not expose the key.
