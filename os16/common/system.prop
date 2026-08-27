@@ -82,6 +82,7 @@ ro.tran_doze_brightness_support=1
 ro.tr_dynamicbar.support=1
 ro.os_dynamicbar_ai_translation_support=1
 ro.os_dynamic_bar_resident_plane_support=1
+ro.os.tran_hide_status_bar_for_land_recent=1
 ro.tran_hios_dynamic_bar_support=1
 ro.surface_flinger.game_default_frame_rate_override=120
 debug.graphics.game_default_frame_rate.disabled=true
