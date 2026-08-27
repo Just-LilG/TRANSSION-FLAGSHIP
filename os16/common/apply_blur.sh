@@ -280,12 +280,23 @@ os16_apply_settings_vconfig() {
   os16_rp_overwrite ro.tr_display.resolution.scalingup.support "$val"
 }
 
+os16_rp_pair() {
+  k="$1"
+  v="$2"
+  os16_rp_overwrite "$k" "$v"
+  case "$k" in
+    ro.*) ;;
+    *) os16_rp_overwrite "ro.$k" "$v" ;;
+  esac
+}
+
 os16_vconfig_pkg_keys() {
   pkg="$1"
   shift
   staged=$(os16_seed_vconfig_pkg "$pkg")
   while [ $# -ge 2 ]; do
     os16_vconfig_upsert "$staged" "$1" "$2"
+    os16_rp_pair "$1" "$2"
     shift 2
   done
   os16_bind_vconfig_pkg "$staged" "$pkg"
@@ -330,15 +341,13 @@ os16_apply_gt_apps_vconfig() {
     ro.tr_smartpanel.os_smart_hub_def_off.config 0
   os16_vconfig_pkg_keys com.sh.smart.caller \
     ro.tr_dialer.contact.carlcare.feature.support 1
-  os16_rp_overwrite tr_soundrecorder.speech.feature.support 1
-  os16_rp_overwrite tr_smartscan.ar_measure.support true
-  os16_rp_overwrite tr_smartscan.document_scan.support true
-  os16_rp_overwrite tr_zeroscreen.ai.card.support 1
-  os16_rp_overwrite tr_microIntelligence.gesture_functions.feature.support 1
-  os16_rp_overwrite tr_globalsearch.easypic.support 1
-  os16_rp_overwrite tr_gallery.search.support 1
-  os16_rp_overwrite tr_gallery.easypic.support 1
-  os16_rp_overwrite tr_gallery.matting.support 1
+  os16_rp_overwrite ro.tr_smartpanel.os_smartpanel.support 1
+  os16_rp_overwrite ro.tr_smartpanel.os_slider_panel.support 1
+  os16_rp_overwrite ro.tr_pcconnect.feature.support 1
+  os16_rp_overwrite ro.tr_pcconnect.backup.feature.support 1
+  os16_rp_overwrite ro.tr_microIntelligence.microIntelligence.feature.support 1
+  os16_rp_overwrite ro.tr_microIntelligence.gesture_functions.feature.support 1
+  os16_rp_overwrite ro.tr_soundrecorder.summary.feature.support 1
 }
 
 os16_apply_gt_apps_runtime() {
@@ -347,14 +356,20 @@ os16_apply_gt_apps_runtime() {
   for pkg in \
       com.gallery20 \
       com.transsion.gallery \
+      com.transsion.gallery3d \
       com.transsion.soundrecorder \
       com.transsion.scanningrecharger \
+      com.transsion.smartscan \
+      com.transsion.scanner \
       com.transsion.microintelligence \
       com.transsion.pcconnect \
+      com.transsion.connectx \
       com.transsion.personalizedService \
+      com.transsion.zeroscreen \
       com.transsion.globalsearch \
       com.transsion.smartpanel \
-      com.sh.smart.caller
+      com.sh.smart.caller \
+      com.transsion.phonemaster
   do
     am force-stop "$pkg" >/dev/null 2>&1
   done
