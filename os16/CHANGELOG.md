@@ -1,5 +1,8 @@
 # Transsion Flagship 16
 
+## v1.42
+- **Force 120Hz uses the XOS 15 overlay path.** On 15 there was no 144 WebUI toggle — Force 120Hz wrote Settings and overlaid `/product/apm/config/*.json`. TranRefreshRatePolicy loads that path (`Environment.getProductDirectory()/apm/config/`), which is what put **144Hz as a choice on every app** in Customize App Refresh. V1.39–1.41 never shipped Magisk `system/product/apm/config/`, so the policy never saw the bypass and the list stayed 90 with no 144. This build overlays those files like Flagship 15, fills the whitelist with every installed package, and drops the Off/120/144 picker. Off by default. Apply + reboot, then **tap an app** in Customize App Refresh — 144 should be there. The list can still *show* 90 as the current value.
+
 ## v1.41
 - **Force 120Hz still showed 90Hz on Customize App Refresh.** That list is Settings prefs / per-app keys, not the APM whitelist. V1.40 never wrote those, so “Other Apps” stayed at 90. This build writes a default for **every installed package**, clears the Policy120 90Hz-in-120-mode lists, and `resetprop`s `ro.tran_90hz_refresh_rate.not_support`.
 - **Unlock 144Hz.** Same Display picker: Off / 120 / 144. 144 is this panel’s peak (60/90/120/144). Off by default. Apply + reboot. Open Customize App Refresh — Other Apps should show 120 or 144, not 90. Dump flags if the list is still 90.

@@ -1,0 +1,383 @@
+{
+  "major_version": 2,
+  "version": 1003,
+  "update_time": 20260715,
+  "author": "LIL G TECH LABS - TransFlagship V3",
+
+  "auto_refresh_rate_whitelist": [
+    "android",
+    "com.transsion.phoenix",
+    "com.android.contacts",
+    "com.transsion.hilauncher",
+    "com.transsion.XOSLauncher",
+    "com.android.settings",
+    "com.transsion.hilauncher.upgrade",
+    "com.transsion.XOSLauncher.upgrade",
+    "com.sh.smart.caller",
+    "com.transsion.smartmessage",
+    "com.talpa.hibrowser",
+    "com.transsion.microintelligence",
+    "com.microsoft.office.outlook",
+    "com.google.android.gm",
+    "com.twitter.android",
+    "com.instagram.lite",
+    "com.facebook.lite",
+    "com.google.android.apps.messaging",
+    "com.zhiliaoapp.musically.go",
+    "com.transsion.demomode",
+    "tech.palm.id",
+    "com.rlk.weathers",
+    "com.transsion.filemanagerx",
+    "com.antutu.ABenchMark",
+    "com.antutu.benchmark.full",
+    "com.gallery20",
+    "com.android.settings.intelligence",
+    "com.google.android.permissioncontroller",
+    "com.transsion.iotservice",
+    "com.transsion.ossettingsext",
+    "com.transsion.aod",
+    "com.instagram.android",
+    "com.transsion.screencapture",
+    "com.transsion.calculator",
+    "com.ludashi.benchmark",
+    "com.ludashi.benchmark2",
+    "com.glbenchmark.glbenchmark27",
+    "com.google.android.calendar",
+    "com.linkedin.android",
+    "com.opera.app.news",
+    "com.google.android.apps.classroom",
+    "com.vuclip.viu",
+    "com.facebook.orca",
+    "com.transsion.resolver",
+    "com.traveloka.android",
+    "com.transsion.notebook",
+    "com.transsion.stylus",
+    "com.transsion.kolun.assistant",
+    "com.transsion.aiassistant",
+    "com.transsion.hyperengine",
+    "com.google.android.apps.photos",
+    "com.google.android.dialer",
+    "com.google.android.keep",
+    "com.microsoft.launcher",
+    "com.whatsapp",
+    "org.telegram.messenger",
+    "com.discord"
+  ],
+
+  "slide_in_higher_setting_mode_120hz": [
+    "in.mohalla.sharechat",
+    "com.shopee.id",
+    "com.shopee.sg",
+    "com.shopee.ph",
+    "com.mobile.legends",
+    "com.android.chrome",
+    "com.facebook.katana",
+    "com.google.android.youtube",
+    "com.google.android.googlequicksearchbox",
+    "com.instagram.android",
+    "com.transsion.smartmessage",
+    "com.twitter.android",
+    "com.android.vending",
+    "com.ss.android.ugc.trill",
+    "com.playit.videoplayer",
+    "com.netflix.mediaclient",
+    "com.mxtech.videoplayer.ad",
+    "com.transsion.magicshow",
+    "in.startv.hotstar.dplus",
+    "com.spotify.music",
+    "com.amazon.mShop.android.shopping",
+    "com.lazada.android",
+    "com.tokopedia.tkpd",
+    "com.grab.passenger",
+    "com.reddit.frontpage",
+    "com.snapchat.android",
+    "com.whatsapp",
+    "org.telegram.messenger",
+    "com.discord",
+    "com.linkedin.android",
+    "com.google.android.apps.photos",
+    "com.pinterest",
+    "com.canva.editor",
+    "com.capcut.app",
+    "com.zhiliaoapp.musically.go",
+    "com.ss.android.ugc.aweme"
+  ],
+
+  "high_refresh_rate_gameList_in_120hz_mode": [
+    "com.tencent.tmgp.pubgmhd",
+    "com.tencent.ig",
+    "com.rekoo.pubgm",
+    "com.pubg.krmobile",
+    "com.vng.pubgmobile",
+    "com.dts.freefireth",
+    "com.dts.freefiremax",
+    "com.mobile.legends",
+    "com.garena.game.codm",
+    "com.activision.callofduty.shooter",
+    "com.garena.game.kgid",
+    "com.garena.game.kgth",
+    "com.garena.game.kgvn",
+    "com.garena.game.kgtw",
+    "com.ngame.allstar.eu",
+    "com.tencent.tmgp.cod",
+    "com.miHoYo.GenshinImpact",
+    "com.miHoYo.Yuanshen",
+    "com.miHoYo.ys.bilibili",
+    "com.roblox.client",
+    "com.mojang.minecraftpe",
+    "com.ea.game.fifamobile",
+    "jp.konami.pesam",
+    "com.firsttouchgames.dls7",
+    "com.supercell.clashroyale",
+    "com.supercell.clashofclans",
+    "com.king.candycrushsaga",
+    "com.tencent.tmgp.sgame",
+    "com.innersloth.spacemafia",
+    "com.miniclip.eightballpool",
+    "com.epicgames.fortnite",
+    "com.gameloft.android.ANMP.GloftA8HM"
+  ],
+
+  "limit_60hz_in_all_setting_mode": [
+    "com.silead.factorytest",
+    "com.supercell.brawlstars"
+  ],
+
+  "limit_90hz_in_higher_setting_mode": [],
+  "limit_120hz_in_auto_mode": [],
+
+  "app_request_black_list": [
+    "com.tencent.mobileqq",
+    "com.eg.android.AlipayGphone"
+  ],
+
+  "fast_slow_slide_blacklist": [
+    "com.android.settings",
+    "com.transsion.aod",
+    "com.tokopedia.tkpd",
+    "com.google.android.apps.classroom",
+    "com.starmakerinteractive.starmaker",
+    "com.google.android.apps.youtube.music",
+    "com.grabtaxi.passenger",
+    "com.shopee.id",
+    "com.shopee.sg",
+    "com.shopee.ph",
+    "com.ss.android.ugc.trill",
+    "com.zhiliaoapp.musically.go",
+    "com.ss.android.ugc.aweme",
+    "com.ss.android.ugc.aweme.lite",
+    "com.duowan.kiwi",
+    "video.like",
+    "com.capcut.app"
+  ],
+
+  "video_45hz_whitelist": [
+    "com.ss.android.ugc.trill",
+    "com.zhiliaoapp.musically.go",
+    "com.ss.android.ugc.aweme",
+    "com.ss.android.ugc.aweme.lite",
+    "com.capcut.app"
+  ],
+
+  "video_call_45hz_whitelist": [
+    "org.telegram.messenger",
+    "com.discord",
+    "com.zoom.videomeetings"
+  ],
+
+  "detect_video_app_scope": [
+    "com.tencent.qqlive",
+    "video.player.videoplayer",
+    "video.like.lite",
+    "video.like",
+    "com.ss.android.ugc.aweme",
+    "com.ss.android.ugc.aweme.lite",
+    "com.ss.android.ugc.trill",
+    "com.ss.android.article.video",
+    "com.ss.android.article.news",
+    "com.smile.gifmaker",
+    "org.videolan.vlc",
+    "com.nemo.vidmate",
+    "com.playit.videoplayer",
+    "com.vuclip.viu",
+    "com.smule.singandroid",
+    "com.nexstreaming.app.kinemasterfree",
+    "com.picsart.studio.light",
+    "sg.bigo.live",
+    "com.photogrid.collage.videomaker",
+    "com.snapchat.android",
+    "com.zhiliaoapp.musically.go",
+    "com.instagram.android",
+    "com.twitter.android",
+    "com.google.android.googlequicksearchbox",
+    "com.google.android.youtube",
+    "com.netflix.mediaclient",
+    "com.capcut.app",
+    "com.transsion.phoenix"
+  ],
+
+  "detect_video_activity_scope": [
+    "com.gallery20/com.gallery20.app.photo.InternalPhotoPageActivity",
+    "com.gallery20/com.gallery20.app.photo.ExternalPhotoPageActivity",
+    "com.transsion.magicshow/com.transsion.magicmovie.activity.TRSplashActivity",
+    "com.transsion.magicshow/com.transsion.magicvideo.activities.VideoPlayerActivity",
+    "com.google.android.googlequicksearchbox/com.google.android.libraries.search.video.lightbox.VideoLightboxActivity",
+    "com.instagram.android/com.instagram.mainactivity.MainActivity",
+    "com.ss.android.ugc.trill/com.ss.android.ugc.aweme.main.MainActivity"
+  ],
+
+  "voice_and_video_call_whitelist": [
+    "com.sh.smart.caller/com.android.incallui.InCallActivity",
+    "com.tencent.mm/com.tencent.mm.plugin.voip.ui.VideoActivity",
+    "com.tencent.mm/.plugin.voip.ui.VideoActivity",
+    "com.whatsapp/.voipcalling.VoipActivityV2",
+    "com.whatsapp/com.whatsapp.voipcalling.VoipActivityV2",
+    "org.telegram.messenger/org.telegram.ui.VoIPActivity",
+    "com.discord/com.discord.rtcconnection.RtcActivity",
+    "com.zoom.videomeetings/us.zoom.videomeetings.MeetingActivity"
+  ],
+
+  "active_switch_package_list": [
+    "com.google.android.apps.nbu.files",
+    "com.google.android.apps.photos",
+    "com.gallery20",
+    "com.facebook.orca",
+    "com.tokopedia.tkpd",
+    "com.starmakerinteractive.starmaker",
+    "com.google.android.apps.docs.editors.sheets",
+    "com.canva.editor",
+    "com.capcut.app"
+  ],
+
+  "scroll_list_in_sbe": [
+    "com.google.android.googlequicksearchbox",
+    "com.eg.android.AlipayGphone",
+    "com.facebook.katana",
+    "com.android.vending",
+    "com.android.chrome",
+    "com.reddit.frontpage",
+    "com.linkedin.android",
+    "com.instagram.android"
+  ],
+
+  "high_refresh_activity_whitelist": [
+    "com.tencent.mm/com.tencent.mm.ui.LauncherUI",
+    "com.transsion.kolun.assistant/com.transsion.kolun.assistant.systemsettings.SystemSettingsActivity",
+    "com.transsion.thunderback/com.transsion.thunderback.activity.TBSettingActivity",
+    "com.transsion.videocallenhancer/com.transsion.whatsapputils.activity.FeatureSettingActivity",
+    "com.transsion.childmode/com.transsion.childmode.ChildSettingsActivity",
+    "com.transsion.dualapp/com.transsion.dualapp.MainActivity",
+    "com.transsion.zahooc/com.transsion.peekproof.PeekProofActivity",
+    "com.google.android.googlequicksearchbox/com.google.android.apps.lens.MainActivity",
+    "com.google.android.googlequicksearchbox/com.google.android.apps.search.lens.LensActivity",
+    "com.google.android.googlequicksearchbox/com.google.android.googlequicksearchbox.InternalGoogleAppActivityEntrypoint",
+    "com.google.android.googlequicksearchbox/com.google.android.googlequicksearchbox.SearchActivity",
+    "com.android.vending/com.android.vending.AssetBrowserActivity",
+    "com.transsion.aiassistant/com.transsion.aiassistant.MainActivity",
+    "com.transsion.hyperengine/com.transsion.hyperengine.ui.MainActivity",
+    "com.capcut.app/com.lemon.lv.ui.activity.SplashActivity"
+  ],
+
+  "high_cpu_temperature_whitelist": [
+    "com.miHoYo.ys.bilibili",
+    "com.miHoYo.GenshinImpact",
+    "com.miHoYo.Yuanshen",
+    "com.epicgames.fortnite",
+    "com.tencent.tmgp.pubgmhd",
+    "com.dts.freefiremax"
+  ],
+
+  "transition_animation_whitelist": [
+    "com.transsion.magicmovie.activity.TRSplashActivity",
+    "com.transsion.audio.activities.AudioPlayerActivityInner",
+    "com.transsion.aiassistant.MainActivity"
+  ],
+
+  "pubg_package_list": [
+    "com.tencent.ig",
+    "com.pubg.krmobile",
+    "com.vng.pubgmobile",
+    "com.rekoo.pubgm",
+    "com.tencent.igce",
+    "com.tencent.tmgp.pubgmhd"
+  ],
+
+  "platform_pkg_set_entrys": {
+    "G95": [
+      "com.tencent.mobileqq",
+      "com.youku.phone",
+      "com.gameloft.android.ANMP.GloftA8HM",
+      "com.gameloft.android.ANMP.GloftA8CN"
+    ],
+    "G80": [
+      "com.skype.raider",
+      "com.tencent.wework"
+    ],
+    "G85": [
+      "com.tencent.mobileqq",
+      "com.tencent.tmgp.sgame",
+      "com.youku.phone",
+      "com.gameloft.android.ANMP.GloftA8HM",
+      "com.gameloft.android.ANMP.GloftA8CN"
+    ],
+    "G200": [
+      "com.tencent.tmgp.pubgmhd",
+      "com.dts.freefiremax",
+      "com.mobile.legends",
+      "com.miHoYo.GenshinImpact",
+      "com.epicgames.fortnite"
+    ]
+  },
+
+  "project_pkg_set_entry_index": {
+    "TECNO-AC8":     "ac8_pkg_list",
+    "Infinix-X697":  "X697_pkg_list",
+    "Infinix-X698":  "X697_pkg_list",
+    "Infinix-X6886": "X6886_pkg_list",
+    "TECNO-CH7n":    "X697_pkg_list",
+    "TECNO-CH7":     "X697_pkg_list",
+    "TECNO-CH9":     "X697_pkg_list",
+    "TECNO-CH9n":    "X697_pkg_list"
+  },
+
+  "project_pkg_set_entrys": {
+    "ac8_pkg_list": {
+      "used_mode": "blacklist",
+      "values": [
+        "com.google.android.youtube",
+        "com.ss.android.ugc.trill"
+      ]
+    },
+    "X697_pkg_list": {
+      "used_mode": "blacklist",
+      "values": [
+        "com.play.rosea",
+        "com.garena.game.kgth",
+        "com.moonfrog.ludo.club",
+        "com.ludo.master.hippo",
+        "com.activision.callofduty.shooter",
+        "com.ludo.king",
+        "com.dts.freefireth",
+        "com.mojang.minecraftpe",
+        "org.ppsspp.ppsspp",
+        "com.innersloth.spacemafia",
+        "com.roblox.client",
+        "com.ea.game.pvzfree_row",
+        "jp.konami.pesam",
+        "com.firsttouchgames.dls7",
+        "com.maxgames.stickwarlegacy",
+        "com.miniclip.eightballpool",
+        "com.miHoYo.GenshinImpact"
+      ]
+    },
+    "X6886_pkg_list": {
+      "used_mode": "blacklist",
+      "values": [
+        "com.miHoYo.GenshinImpact",
+        "com.epicgames.fortnite",
+        "com.garena.game.codm",
+        "com.tencent.tmgp.pubgmhd"
+      ]
+    }
+  }
+}

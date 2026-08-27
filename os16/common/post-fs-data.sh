@@ -335,14 +335,14 @@ else
   log_pfd "apply_blur.sh missing"
 fi
 
-# Refresh: bind last generated / shipped APM json over a live file only.
-# Do not run pm here — package manager is not up. service.sh writes per-app
-# defaults at late_start and binds again.
+# Refresh: Magisk overlay of /product/apm/config (same path XOS 15 used).
+# Policy reads Environment.getProductDirectory()/apm/config/, not /tr_product.
+# Swap bypass JSON into the module tree, then bind if the live dest exists
+# or can be created. Do not run pm here.
 if [ -f "$MODDIR/apply_120hz.sh" ]; then
   . "$MODDIR/apply_120hz.sh"
-  os16_apply_120hz_props
   os16_bind_120hz_files
-  log_pfd "refresh hz=$(os16_hz_target) 90not=$(getprop ro.tran_90hz_refresh_rate.not_support 2>/dev/null) 144=$(getprop ro.tran_144hz_refresh_rate.support 2>/dev/null)"
+  log_pfd "refresh force_120hz=$(os16_cfg_bool force_120hz false) product=$(ls -l /product/apm/config/refresh_rate_config.json 2>/dev/null | awk '{print $1,$5,$9}')"
 else
   log_pfd "apply_120hz.sh missing"
 fi
