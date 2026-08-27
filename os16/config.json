@@ -21,5 +21,7 @@
   "anim_os16": true,
   "blur_os16": true,
   "blur_os16_level": 2,
+  "aod_os16": true,
+  "dynamicbar_os16": true,
   "force_120hz": false
 }

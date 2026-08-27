@@ -1,5 +1,8 @@
 # Transsion Flagship 16
 
+## v1.57
+- **AOD + Dynamic bar (first try).** OS 16 keys from the GT dump: `ro.tr_aod.feature.support`, `ro.tr_aod.doze.brightness.feature.support`, and `ro.tr_aod.half.screen.feature.support` (stock 0 on GT — that is the extra). Dynamic bar is `ro.tr_dynamicbar.support` as its own Features toggle (no longer tied to Parallel). Keys live in `/tr_product/etc/build.prop`, so this build also `resetprop`s them. Apply + reboot, then check Lock screen / AOD and the pill. Dump flags — EMPTY means this G99 still does not expose that key.
+
 ## v1.56
 - **Removed failed features.** Social Turbo did not add anything this X6886 did not already have in stock Phone (call record / translate / beauty). Display extras (DC / color / HDR / reading) stuck flags on OS 16 but never unhid Settings rows after three tries — OS 16 Display is overlay/Settings-compiled, not those props. Force 120Hz stays. Apply + reboot so leftover Display settings writes are dropped.
 
