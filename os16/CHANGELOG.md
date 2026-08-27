@@ -1,5 +1,8 @@
 # Transsion Flagship 16
 
+## v1.38
+- **Parallel animations stay on without flagship glass.** V1.37 dropped `platform_level` to 2 at blur level 1, so Parallel became basic motion. Device tests: glass followed Parallel/platform 3, but unionrender was also tied to Parallel. This build keeps **platform_level=3 whenever Parallel is on** (app open/close, recents). Blur off or **level 1** only turns off glass: unionrender, liquid glass, SurfaceFlinger blur. **Level 2/3** turns glass back on. Apply + reboot. Check Parallel at blur 1, then glass at blur 3.
+
 ## v1.37
 - **System glass is Parallel animations at platform 3, not the blur picker.** Device test: 1/2/3 only changed the dock while Parallel stayed on. Turning Parallel off is what made notifications/QS solid. Flagship glass now requires **Parallel on and blur level 2 or 3** (`platform_level=3`, unionrender, liquid glass). Parallel on + blur off or **level 1** uses platform **2** (motion without flagship glass). Parallel off keeps platform 0. Removed the level-1 lock-clock solid scrim (`accessibility_reduce_transparency` / blur radius while compositor off). Apply + reboot. Check shade with Parallel on and level 1 vs 3.
 

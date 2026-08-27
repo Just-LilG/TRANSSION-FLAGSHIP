@@ -1,9 +1,7 @@
 #!/system/bin/sh
-# Device tests: 1/2/3 only changed the dock while Parallel animations
-# stayed on (platform_level 3 + unionrender). Turning Parallel off is what
-# killed system glass. Flagship glass needs Parallel ON *and* blur level 2/3.
-# Level 1 with compositor forced off painted a solid scrim over the lock clock.
-# Do not resetprop AI/game keys here.
+# Parallel motion = platform_level 3 whenever Parallel is on.
+# Flagship glass = unionrender / liquid glass / compositor (blur 2/3).
+# Level 1 must not drop platform_level (that made Parallel become basic).
 
 if [ -z "$MODDIR" ]; then
   MODDIR=${0%/*}
@@ -87,23 +85,20 @@ os16_blur_vals() {
     lvl=0
   fi
 
-  # Flagship glass: Parallel on AND blur on AND level 2/3.
+  # Parallel motion always uses platform 3 when Parallel is on.
+  # Glass is unionrender / liquid glass / compositor, not platform_level.
   GLASS=0
   if [ "$anim" = "true" ] || [ "$anim" = "1" ]; then
     A01=1
-    if [ "$on" = "true" ] || [ "$on" = "1" ]; then
-      if [ "$lvl" -ge 2 ]; then
-        GLASS=1
-      fi
-    fi
-    if [ "$GLASS" = "1" ]; then
-      ALVL=3
-    else
-      ALVL=2
-    fi
+    ALVL=3
   else
     A01=0
     ALVL=0
+  fi
+  if [ "$on" = "true" ] || [ "$on" = "1" ]; then
+    if [ "$lvl" -ge 2 ]; then
+      GLASS=1
+    fi
   fi
 
   if [ "$GLASS" = "1" ]; then

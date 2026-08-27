@@ -143,7 +143,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
         </div>
         <div class="hero-card">
           <div class="hero-title">Transsion Flagship 16</div>
-          <div class="hero-sub" id="module-version-sub">V1.37 · OS 16</div>
+          <div class="hero-sub" id="module-version-sub">V1.38 · OS 16</div>
         </div>
         <div class="h8"></div>
         <div class="warn-card" id="old-mod-warn">Flagship 15 is still installed. This installer disables it. Remove it from Magisk/KSU so the two modules do not fight.</div>
@@ -290,21 +290,21 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
           <div class="setting-row">
             <div class="row-text">
               <div class="row-title">Parallel animations</div>
-              <div class="row-sub">Motion (app open/close, recents). Flagship glass is blur 2/3 with this on — not this toggle alone.</div>
+              <div class="row-sub">App open/close, recents, unlock. Stays on at blur level 1. Apply + reboot.</div>
             </div>
             <label class="toggle"><input type="checkbox" id="feat-anim" checked onchange="setAnimBlur('anim_os16',this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
           </div>
           <div class="setting-row">
             <div class="row-text">
               <div class="row-title">Dynamic blur</div>
-              <div class="row-sub">Needs Parallel on. Off or level 1 = Smart solid shade. 2/3 = flagship glass. Apply + reboot.</div>
+              <div class="row-sub">Off / 1 = Smart shade with Parallel still on. 2 / 3 = flagship glass. Apply + reboot.</div>
             </div>
             <label class="toggle"><input type="checkbox" id="feat-blur" checked onchange="setAnimBlur('blur_os16',this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
           </div>
           <div class="setting-row">
             <div class="row-text">
               <div class="row-title">Blur level</div>
-              <div class="row-sub">1 = Smart shade (animation platform 2). 2 / 3 = flagship glass. Apply + reboot.</div>
+              <div class="row-sub">1 = no system glass. 2 / 3 = flagship glass. Parallel motion stays if that toggle is on.</div>
             </div>
           </div>
           <div class="segmented" id="blur-level">
@@ -510,11 +510,8 @@ function blurLevel(){
   const n=parseInt(cfg.blur_os16_level,10);
   return (n>=1 && n<=3)?n:2;
 }
-function glassOn(){ return animOn() && blurOn() && blurLevel()>=2; }
-function animLvl(){
-  if(!animOn()) return '0';
-  return glassOn()?'3':'2';
-}
+function glassOn(){ return blurOn() && blurLevel()>=2; }
+function animLvl(){ return animOn()?'3':'0'; }
 function anim01(){ return animOn()?'1':'0'; }
 function blurLvl(){ return blurOn()?String(blurLevel()):'0'; }
 function blur01(){ return glassOn()?'1':'0'; }
@@ -886,7 +883,7 @@ async function handleStatusbar(input){
 }
 async function loadDevice(){
   const prop=await g('cat "'+MOD+'/module.prop" 2>/dev/null');
-  const ver=(prop.match(/^version=(.+)$/m)||[])[1]||'V1.37';
+  const ver=(prop.match(/^version=(.+)$/m)||[])[1]||'V1.38';
   n('module-version-sub', ver+' · OS 16');
   let type=await g('getprop ro.tran.os.type');
   let verOs=await g('getprop ro.transsion.os.version');
