@@ -78,22 +78,19 @@ write_os16_ai_prop() {
     [ "$blvl" -ge 1 ] 2>/dev/null || blvl=2
     [ "$blvl" -le 3 ] 2>/dev/null || blvl=2
   fi
-  # Flagship glass needs Parallel on and blur level 2/3. platform_level 3
-  # is what kept system blur on when only the blur toggle changed.
+  # Parallel motion stays at platform 3 whenever Parallel is on.
+  # Flagship glass is unionrender / liquid glass / compositor only.
   if [ "$anim" = "true" ]; then
     a01=1
-    if [ "$blur" = "true" ] && [ "$blvl" -ge 2 ]; then
-      alvl=3
-      b01=1
-      sfdis=0
-    else
-      alvl=2
-      b01=0
-      sfdis=1
-    fi
+    alvl=3
   else
     a01=0
     alvl=0
+  fi
+  if [ "$blur" = "true" ] && [ "$blvl" -ge 2 ]; then
+    b01=1
+    sfdis=0
+  else
     b01=0
     sfdis=1
   fi
@@ -165,7 +162,7 @@ print_modname() {
   ui_print " "
   ui_print "  ╔══════════════════════════════════════════╗"
   ui_print "  ║    TRANSSION FLAGSHIP 16                 ║"
-  ui_print "  ║    XOS · HiOS · iTel OS 16  ·  V1.37     ║"
+  ui_print "  ║    XOS · HiOS · iTel OS 16  ·  V1.38     ║"
   ui_print "  ╚══════════════════════════════════════════╝"
   ui_print " "
 }
@@ -349,7 +346,7 @@ set_permissions() {
   done
   ui_print " "
   ui_div
-  ui_print "  ✨  FLAGSHIP 16  ·  V1.37"
+  ui_print "  ✨  FLAGSHIP 16  ·  V1.38"
   ui_info "OS     : $OS_TYPE $OS_VER"
   ui_info "Feature: boot + reboot + overlay + AI + gaming + anim/blur"
   ui_div
