@@ -267,6 +267,7 @@ on_install() {
     unzip -o "$ZIPFILE" 'apm_120hz_bypass/*' -d "$MODPATH" >&2
     unzip -o "$ZIPFILE" 'magellan/*' -d "$MODPATH" >&2
     unzip -o "$ZIPFILE" 'system/product/apm/*' -d "$MODPATH" >&2
+    unzip -o "$ZIPFILE" 'system/tr_product/*' -d "$MODPATH" >&2
     unzip -o "$ZIPFILE" 'tr_product/*' -d "$MODPATH" >&2
   else
     ui_info "Extracting module files from zip"
@@ -348,9 +349,8 @@ set_permissions() {
   # Magisk copies zip system.prop after on_install. Rewrite from config so
   # WebUI toggles survive an upgrade.
   write_os16_ai_prop "$MODPATH/config.json" "$MODPATH/system.prop"
-  # TranOS 16 custom refresh works because the XML is in the module's
-  # system/tr_product/ tree before Mountify copies system/*. Generate here
-  # when Force 120Hz is already on so the first reboot overlays it.
+  # TranOS 16 custom refresh is only Magellan XML in system/tr_product.
+  # Copy that XML here when Force 120Hz is on so Mountify overlays it.
   if [ -f "$MODPATH/apply_120hz.sh" ]; then
     MODDIR="$MODPATH"
     CFG="$MODPATH/config.json"
@@ -358,6 +358,9 @@ set_permissions() {
     . "$MODPATH/apply_120hz.sh"
     if os16_hz_on; then
       os16_generate_120hz_jsons
+      os16_copy_magellan_mountify
+      rm -rf /data/system/package_cache/* 2>/dev/null
+    else
       os16_copy_magellan_mountify
     fi
   fi
@@ -367,7 +370,7 @@ set_permissions() {
   done
   ui_print " "
   ui_div
-  ui_print "  ✨  FLAGSHIP 16  ·  V1.46"
+  ui_print "  ✨  FLAGSHIP 16  ·  V1.47"
   ui_info "OS     : $OS_TYPE $OS_VER"
   ui_info "Feature: boot + reboot + overlay + AI + gaming + anim/blur"
   ui_div

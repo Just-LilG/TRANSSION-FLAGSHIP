@@ -1,5 +1,8 @@
 # Transsion Flagship 16
 
+## v1.47
+- **Force 120Hz uses the exact TranOS 16 custom refresh.xml.** That zip is only `system/tr_product/etc/vconfig/magellan/refresh_rate_config.xml` (Mountify overlay). V1.43–1.46 rewrote every item to `auto="120"` and `touch="0"`, then umount/bound `/tr_product` and fought Mountify. This build ships that XML unchanged (`auto="90"` + `max="144"` on the 144 list, including Chrome / Play / WhatsApp / Termux), appends any extra installed packages the same way, and does not bind Magellan. Disable the TranOS refresh zip. Force 120Hz on → Apply → reboot. The Customize App Refresh list can still show 90 until you pick 120/144.
+
 ## v1.46
 - **Same layout as TranOS 16 custom refresh.zip.** That module works with Mountify because the Magellan XML lives in the module’s `system/tr_product/etc/vconfig/magellan/` tree — Mountify only copies `system/*`, then overlays `/tr_product`. V1.43–1.45 wrote the XML next to the module scripts (`magellan/`) and Magisk-bound `/tr_product` after Mountify had already copied; Magellan never saw it. This build writes the patched XML to `system/tr_product/...` on Apply and at install if Force 120Hz is already on, then you reboot so Mountify overlays it. Keep the custom refresh module **disabled**. Force 120Hz on → Apply → reboot.
 
