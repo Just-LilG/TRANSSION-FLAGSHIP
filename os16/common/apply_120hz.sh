@@ -1,8 +1,9 @@
 #!/system/bin/sh
-# Flagship 16 Force 120Hz — same layout as TranOS 16 custom refresh.zip:
-# Magellan XML at $MODDIR/system/tr_product/etc/vconfig/magellan/refresh_rate_config.xml
-# Mountify copies module system/* then overlays /tr_product if that partition is a target.
-# Magisk bind of /tr_product is a fallback (bootanim-style) after Mountify runs.
+# Flagship 16 Force 120Hz = the working TranOS 16 custom refresh.zip:
+# ONLY Magellan XML at $MODDIR/system/tr_product/etc/vconfig/magellan/refresh_rate_config.xml
+# Mountify copies system/* then overlays /tr_product. Do not umount/bind that dest
+# (that fights Mountify). Do not rewrite auto/high/touch — listed 90 is the OEM
+# saved default; max="144" is what puts 144 in Customize App Refresh.
 
 if [ -z "$MODDIR" ]; then
   MODDIR=${0%/*}
@@ -110,32 +111,9 @@ os16_swap_magisk_apm() {
 }
 
 os16_bind_120hz_files() {
+  # Product APM JSON is leftover XOS 15 overlay. OS 16 Magellan does not use it
+  # for the 144 picker. Never umount /tr_product Magellan — that unmounts Mountify.
   os16_swap_magisk_apm
-  for name in refresh_rate_config.json project_refresh_rate_config.json; do
-    src="$APM_CONFIG/$name"
-    [ -f "$src" ] || src="$APM_BYPASS/$name"
-    os16_product_apm_dests "$name" | awk 'NF && !seen[$0]++' | while IFS= read -r dest; do
-      os16_120hz_umount "$dest"
-      if os16_hz_on; then
-        os16_try_bind_file "$src" "$dest"
-      fi
-    done
-  done
-  mkdir -p "$MAGELLAN_DIR"
-  stockbak="$MAGELLAN_DIR/refresh_rate_config.xml.stock"
-  os16_magellan_dests | awk 'NF && !seen[$0]++' | while IFS= read -r dest; do
-    os16_120hz_umount "$dest"
-    if [ -f "$dest" ] && [ ! -f "$stockbak" ]; then
-      if ! grep -q 'transsion-flagship-16' "$dest" 2>/dev/null; then
-        cp "$dest" "$stockbak"
-      fi
-    fi
-    if os16_hz_on; then
-      if ! os16_try_bind_file "$MAGELLAN_XML" "$dest"; then
-        cp -f "$MAGELLAN_XML" "$dest" 2>/dev/null
-      fi
-    fi
-  done
 }
 
 os16_write_pkg_array() {
@@ -222,98 +200,46 @@ os16_json_replace_top_array() {
 }
 
 os16_generate_magellan_xml() {
+  # Exact TranOS 16 custom refresh.xml. Do not rewrite existing items
+  # (V1.43–1.46 forced auto=120 and touch=0; Magellan then differed from the
+  # zip that actually unlocked 144). Append only packages not already listed.
   mkdir -p "$(dirname "$MAGELLAN_XML")" "$MAGELLAN_DIR"
+  [ -f "$MAGELLAN_TEMPLATE" ] || return 1
   tmp="$HZDIR/.pkgs.txt"
-  [ -f "$tmp" ] || return 1
-  stock=""
-  for cand in \
-    "$MAGELLAN_DIR/refresh_rate_config.xml.stock" \
-    /tr_product/etc/vconfig/magellan/refresh_rate_config.xml \
-    /product/etc/vconfig/magellan/refresh_rate_config.xml \
-    /system_ext/etc/vconfig/magellan/refresh_rate_config.xml \
-    "$MAGELLAN_TEMPLATE"
-  do
-    if [ -f "$cand" ] && grep -q '<WHITELIST>' "$cand" 2>/dev/null; then
-      if [ "$cand" = "$MAGELLAN_TEMPLATE" ] || ! grep -q 'transsion-flagship-16' "$cand" 2>/dev/null; then
-        stock="$cand"
-        break
-      fi
-    fi
-  done
   out="$MAGELLAN_XML"
-  if [ -n "$stock" ]; then
-    awk -v pkgfile="$tmp" '
-      BEGIN {
-        while ((getline p < pkgfile) > 0) {
-          if (p != "") need[p] = 1
-        }
-        close(pkgfile)
-      }
-      /<item/ && /package="/ {
-        pkg = ""
-        if (match($0, /package="[^"]+"/)) {
-          pkg = substr($0, RSTART + 9, RLENGTH - 10)
-        }
-        if (pkg != "") {
-          seen[pkg] = 1
-          if ($0 ~ /auto="/) gsub(/auto="[0-9]+"/, "auto=\"120\"")
-          else sub(/<item /, "<item auto=\"120\" ")
-          if ($0 ~ /high="/) gsub(/high="[0-9]+"/, "high=\"120\"")
-          else sub(/\/>/, " high=\"120\"/>")
-          if ($0 ~ /max="/) gsub(/max="[0-9]+"/, "max=\"144\"")
-          else sub(/\/>/, " max=\"144\"/>")
-        }
-        print
-        next
-      }
-      /<WHITELIST>/ {
-        print
-        print "        <!-- transsion-flagship-16 -->"
-        next
-      }
-      /<\/WHITELIST>/ {
-        for (p in need) {
-          if (!seen[p]) {
-            printf "        <item package=\"%s\" auto=\"120\" high=\"120\" max=\"144\" touch=\"1\" app_request=\"0\"/>\n", p
-          }
-        }
-        print
-        next
-      }
-      { print }
-    ' "$stock" > "$out"
-  else
-    {
-      echo '<?xml version="1.0" encoding="UTF-8" ?>'
-      echo '<refresh_rate_config version="20250423">'
-      cat <<'EOF'
-    <switch>
-        <input_method_switch>true</input_method_switch>
-        <navigation_switch>true</navigation_switch>
-        <video_switch>true</video_switch>
-        <audio_switch>true</audio_switch>
-        <high_temperature_threshold>0</high_temperature_threshold>
-        <high_temperature_refresh_rate>0</high_temperature_refresh_rate>
-        <camera_notification_high_temerature_switch>false</camera_notification_high_temerature_switch>
-        <high_temperature_white_list_switch>false</high_temperature_white_list_switch>
-        <multi_window_refresh_rate>120</multi_window_refresh_rate>
-        <screen_record>60</screen_record>
-    </switch>
-    <WHITELIST>
-        <!-- transsion-flagship-16 -->
-EOF
-      awk '{
-        printf "        <item package=\"%s\" auto=\"120\" high=\"120\" max=\"144\" touch=\"1\" app_request=\"0\"/>\n", $0
-      }' "$tmp"
-      echo '    </WHITELIST>'
-      echo '    <activity>'
-      echo '    </activity>'
-      echo '</refresh_rate_config>'
-    } > "$out"
+  if [ ! -f "$tmp" ]; then
+    cp -f "$MAGELLAN_TEMPLATE" "$out"
+    chmod 644 "$out" 2>/dev/null
+    return 0
   fi
-  if [ -s "$out" ]; then
-    sed 's/<multi_window_refresh_rate>[0-9][0-9]*<\/multi_window_refresh_rate>/<multi_window_refresh_rate>120<\/multi_window_refresh_rate>/' "$out" > "$out.new" && mv "$out.new" "$out"
-  fi
+  awk -v pkgfile="$tmp" '
+    BEGIN {
+      while ((getline p < pkgfile) > 0) {
+        if (p != "") need[p] = 1
+      }
+      close(pkgfile)
+    }
+    /<item/ && /package="/ {
+      pkg = ""
+      if (match($0, /package="[^"]+"/)) {
+        pkg = substr($0, RSTART + 9, RLENGTH - 10)
+      }
+      if (pkg != "") seen[pkg] = 1
+      print
+      next
+    }
+    /<\/WHITELIST>/ {
+      for (p in need) {
+        if (!seen[p]) {
+          printf "    <item package=\"%s\" auto=\"90\" high=\"120\" touch=\"1\" app_request=\"0\" max=\"144\"/>\n", p
+        }
+      }
+      print
+      next
+    }
+    { print }
+  ' "$MAGELLAN_TEMPLATE" > "$out"
+  [ -s "$out" ] || cp -f "$MAGELLAN_TEMPLATE" "$out"
   chmod 644 "$out" 2>/dev/null
 }
 
@@ -338,18 +264,8 @@ os16_copy_magellan_mountify() {
 }
 
 os16_copy_magellan_data() {
-  os16_hz_on || return 0
-  [ -f "$MAGELLAN_XML" ] || return 0
-  mkdir -p /data/magellan 2>/dev/null
-  cp -f "$MAGELLAN_XML" /data/magellan/refresh_rate_config.xml 2>/dev/null
-  chmod 644 /data/magellan/refresh_rate_config.xml 2>/dev/null
-  chown system:system /data/magellan/refresh_rate_config.xml 2>/dev/null
-  find /data/magellan -maxdepth 3 -type f \( -name '*refresh*' -o -name '*Refresh*' \) 2>/dev/null | while IFS= read -r f; do
-    [ "$f" = /data/magellan/refresh_rate_config.xml ] && continue
-    case "$f" in
-      *.xml|*.json) cp -f "$MAGELLAN_XML" "$f" 2>/dev/null ;;
-    esac
-  done
+  # Working zip never writes /data/magellan. Do not overwrite magellan.db json.
+  return 0
 }
 
 os16_generate_120hz_jsons() {
@@ -412,4 +328,6 @@ os16_apply_120hz_all() {
 
 if [ "${0##*/}" = "apply_120hz.sh" ]; then
   os16_apply_120hz_all
+  # Same as TranOS 16 custom refresh customize.sh — once on Apply, not every boot.
+  rm -rf /data/system/package_cache/* 2>/dev/null
 fi

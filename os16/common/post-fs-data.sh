@@ -335,20 +335,19 @@ else
   log_pfd "apply_blur.sh missing"
 fi
 
-# Refresh: Magellan loads XML at system_server start (before pm).
-# Build the full package list from packages.list at post-fs, patch stock XML,
-# then bind like bootanim. Mountify does not overlay /tr_product.
+# Refresh: Magellan loads XML at system_server start. The working TranOS zip
+# only overlays system/tr_product/.../refresh_rate_config.xml via Mountify.
+# Do not umount that dest (unmounts Mountify). Copy the TranOS XML into the
+# module system tree when Force 120Hz is on; extra packages get max=144
+# appended without rewriting OEM auto/touch.
 if [ -f "$MODDIR/apply_120hz.sh" ]; then
   . "$MODDIR/apply_120hz.sh"
   if os16_hz_on; then
-    os16_magellan_dests | awk 'NF && !seen[$0]++' | while IFS= read -r dest; do
-      os16_120hz_umount "$dest"
-    done
     os16_generate_120hz_jsons
   fi
   os16_copy_magellan_mountify
-  os16_bind_120hz_files
-  log_pfd "refresh force_120hz=$(os16_cfg_bool force_120hz false) magellan=$(ls -l /tr_product/etc/vconfig/magellan/refresh_rate_config.xml 2>/dev/null | awk '{print $1,$5,$9}') max144=$(grep -c 'max=\"144\"' /tr_product/etc/vconfig/magellan/refresh_rate_config.xml 2>/dev/null) pkgs=$(cat "$MODDIR/magellan/.pkg_count" 2>/dev/null)"
+  os16_swap_magisk_apm
+  log_pfd "refresh force_120hz=$(os16_cfg_bool force_120hz false) max144=$(grep -c 'max=\"144\"' /tr_product/etc/vconfig/magellan/refresh_rate_config.xml 2>/dev/null) switch=$(grep -o 'input_method_switch>[^<]*' /tr_product/etc/vconfig/magellan/refresh_rate_config.xml 2>/dev/null | head -1) module=$(ls -l $MODDIR/system/tr_product/etc/vconfig/magellan/refresh_rate_config.xml 2>/dev/null | awk '{print $5}')"
 else
   log_pfd "apply_120hz.sh missing"
 fi

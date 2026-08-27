@@ -165,7 +165,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
             <li class="next">AI Gallery — all menus for show; some tools may crash when tapped</li>
             <li class="on">AI Video Enhancement — VEE flag on</li>
             <li class="on">Gaming — OS 16 GT triggers in XArena</li>
-            <li class="next">Force 120Hz — XOS 16 Magellan XML (144 on every app)</li>
+            <li class="next">Force 120Hz — TranOS 16 custom refresh Magellan XML (144 picker)</li>
           </ul>
         </div>
         <div class="h8"></div>
@@ -318,7 +318,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
           <div class="setting-row">
             <div class="row-text">
               <div class="row-title">Force 120Hz</div>
-              <div class="row-sub">Writes Magellan XML into system/tr_product for Mountify (same as TranOS 16 custom refresh). Off by default. Apply + reboot. Disable the other refresh module.</div>
+              <div class="row-sub">Same Magellan XML as TranOS 16 custom refresh.zip (144 in the picker; list can still show 90). Off by default. Apply + reboot. Disable the other refresh module.</div>
             </div>
             <label class="toggle"><input type="checkbox" id="feat-force120hz" onchange="cfg.force_120hz=this.checked"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
           </div>
@@ -802,7 +802,9 @@ async function dumpAi(){
   lines.push(mag||'no magellan refresh_rate_config.xml');
   const magn=await g('grep -c max=.144 /tr_product/etc/vconfig/magellan/refresh_rate_config.xml 2>/dev/null');
   lines.push('magellan_max144_items  '+(magn||'EMPTY'));
-  const maghead=await g('grep -E "package=.(com.android.settings|android)" /tr_product/etc/vconfig/magellan/refresh_rate_config.xml 2>/dev/null | head -5');
+  const magsw=await g('grep -E "input_method_switch|multi_window_refresh_rate|screen_record" /tr_product/etc/vconfig/magellan/refresh_rate_config.xml 2>/dev/null | head -8');
+  lines.push(magsw||'(no magellan switch block)');
+  const maghead=await g('grep -E "package=.(com.android.settings|com.android.chrome|com.termux)" /tr_product/etc/vconfig/magellan/refresh_rate_config.xml 2>/dev/null | head -8');
   lines.push(maghead||'(could not read magellan xml)');
   const magprop=await g("getprop | grep -iE 'tr_display.refreshrate|magellan' | head -20");
   lines.push(magprop||'(no magellan refresh props)');
