@@ -182,6 +182,46 @@ os16_apply_social_props() {
   os16_rp_overwrite ro.tr_social.default_off.support "$sdefoff"
 }
 
+os16_cfg_01() {
+  k="$1"; d="$2"
+  v=$(os16_cfg_bool "$k" "$d")
+  if [ "$v" = "false" ] || [ "$v" = "0" ]; then
+    echo 0
+  else
+    echo 1
+  fi
+}
+
+os16_apply_display_props() {
+  hdr=$(os16_cfg_01 display_hdr true)
+  col=$(os16_cfg_01 display_color true)
+  # GT dump has sdr2hdr/xdr at 0 in /tr_product/etc/build.prop.
+  os16_rp_overwrite ro.tr_display.sdr2hdr.support "$hdr"
+  os16_rp_overwrite ro.tr_light.xdr.support "$hdr"
+  os16_rp_overwrite ro.tr_light.xdr.v2.support "$hdr"
+  os16_rp_overwrite ro.tr_display.colormode.feature.support "$col"
+  os16_rp_overwrite ro.tr_display.color.temperature.feature.support "$col"
+  os16_rp persist.tr_display.color.temperature.aosp.support "$col"
+}
+
+os16_apply_display_settings() {
+  dc=$(os16_cfg_01 display_dc true)
+  col=$(os16_cfg_01 display_color true)
+  # Reading default is off (same as Flagship 15).
+  rd=$(os16_cfg_bool display_reading false)
+  if [ "$rd" = "true" ] || [ "$rd" = "1" ]; then
+    rd=1
+  else
+    rd=0
+  fi
+  os16_settings_put system tran_dc_dimming_enable "$dc"
+  os16_settings_put global tran_dc_dimming_enable "$dc"
+  os16_settings_put system tran_display_color_enhance "$col"
+  os16_settings_put global tran_display_color_enhance "$col"
+  os16_settings_put system tran_reading_mode_enable "$rd"
+  os16_settings_put global tran_reading_mode_enable "$rd"
+}
+
 os16_force_stop_launchers() {
   home=$(cmd package resolve-activity --brief -a android.intent.action.MAIN -c android.intent.category.HOME 2>/dev/null | tail -n 1)
   home_pkg=$(echo "$home" | cut -d/ -f1)
@@ -239,12 +279,15 @@ os16_apply_blur_runtime() {
 if [ "${0##*/}" = "apply_blur.sh" ]; then
   mode="${1:-all}"
   case "$mode" in
-    props) os16_apply_blur_props; os16_apply_social_props ;;
-    runtime) os16_apply_blur_runtime; os16_restart_systemui ;;
+    props) os16_apply_blur_props; os16_apply_social_props; os16_apply_display_props ;;
+    runtime) os16_apply_blur_runtime; os16_apply_display_settings; os16_restart_systemui ;;
     social) os16_apply_social_props ;;
+    display) os16_apply_display_props; os16_apply_display_settings ;;
     *)
       os16_apply_blur_props
       os16_apply_social_props
+      os16_apply_display_props
+      os16_apply_display_settings
       os16_apply_blur_runtime
       os16_restart_surfaceflinger
       ;;

@@ -167,6 +167,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
             <li class="on">Gaming — OS 16 GT triggers in XArena</li>
             <li class="on">Force 120Hz — 144 picker verified</li>
             <li class="next">Social Turbo — call record / translate / beauty (OS 16 keys)</li>
+            <li class="next">Display extras — DC / color / HDR / reading (OS 16 keys)</li>
           </ul>
         </div>
         <div class="h8"></div>
@@ -183,7 +184,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
         <div class="page-header">
           <div class="eyebrow">System</div>
           <h1>Features</h1>
-          <div class="sub">AI, gaming, social, animations, display</div>
+          <div class="sub">AI, gaming, social, animations, display extras</div>
         </div>
         <div class="section-label">AI Suite</div>
         <div class="glass-card">
@@ -349,6 +350,34 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
         <div class="glass-card">
           <div class="setting-row">
             <div class="row-text">
+              <div class="row-title">DC Dimming</div>
+              <div class="row-sub">Flicker-free low brightness. Settings key; dump has no OS 16 prop.</div>
+            </div>
+            <label class="toggle"><input type="checkbox" id="feat-dc" checked onchange="setDisplay('display_dc',this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+          </div>
+          <div class="setting-row">
+            <div class="row-text">
+              <div class="row-title">Color Enhancement</div>
+              <div class="row-sub">Vivid / color mode. OS 16 colormode keys.</div>
+            </div>
+            <label class="toggle"><input type="checkbox" id="feat-color" checked onchange="setDisplay('display_color',this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+          </div>
+          <div class="setting-row">
+            <div class="row-text">
+              <div class="row-title">HDR Display</div>
+              <div class="row-sub">SDR→HDR and XDR. Stock is 0 on GT dump.</div>
+            </div>
+            <label class="toggle"><input type="checkbox" id="feat-hdr" checked onchange="setDisplay('display_hdr',this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+          </div>
+          <div class="setting-row">
+            <div class="row-text">
+              <div class="row-title">Reading Mode</div>
+              <div class="row-sub">Eye comfort filter. Off by default.</div>
+            </div>
+            <label class="toggle"><input type="checkbox" id="feat-reading" onchange="setDisplay('display_reading',this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+          </div>
+          <div class="setting-row">
+            <div class="row-text">
               <div class="row-title">Force 120Hz</div>
               <div class="row-sub">Default listed rate is 120 (picker still has 144). IME / control center stay high. Apply, then reboot.</div>
             </div>
@@ -456,7 +485,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
 <script type="module">
 const MOD='/data/adb/modules/transsion-flagship-16';
 const CONFIG_PATH=MOD+'/config.json';
-let cfg={bootanim_style:'hios16',bootanim_file:'',rebootanim_style:'hios16',rebootanim_file:'',statusbar_style:'off',statusbarcustom_file:'',ai_master:true,ai_subtitles:true,ai_call_summary:true,ai_writing:true,ai_sound_rec:true,ai_notes:true,ai_gallery:true,ai_video:true,game_master:true,game_esports_touch:true,game_esports_level:3,game_bypass_charge:true,game_gt_triggers:true,social_master:true,social_record:true,social_translate:true,social_beauty:true,anim_os16:true,blur_os16:true,blur_os16_level:2,force_120hz:false};
+let cfg={bootanim_style:'hios16',bootanim_file:'',rebootanim_style:'hios16',rebootanim_file:'',statusbar_style:'off',statusbarcustom_file:'',ai_master:true,ai_subtitles:true,ai_call_summary:true,ai_writing:true,ai_sound_rec:true,ai_notes:true,ai_gallery:true,ai_video:true,game_master:true,game_esports_touch:true,game_esports_level:3,game_bypass_charge:true,game_gt_triggers:true,social_master:true,social_record:true,social_translate:true,social_beauty:true,anim_os16:true,blur_os16:true,blur_os16_level:2,display_dc:true,display_color:true,display_hdr:true,display_reading:false,force_120hz:false};
 let _exec=null;
 
 async function exec(cmd){
@@ -498,6 +527,7 @@ function setStatusbarStyle(val){
 function setAi(key,el){ cfg[key]=el.checked; if(key==='ai_master') syncAiChildren(); }
 function setGame(key,el){ cfg[key]=el.checked; if(key==='game_master'||key==='game_esports_touch') syncGameChildren(); }
 function setSocial(key,el){ cfg[key]=el.checked; if(key==='social_master') syncSocialChildren(); }
+function setDisplay(key,el){ cfg[key]=el.checked; }
 function setAnimBlur(key,el){ cfg[key]=el.checked; if(key==='blur_os16') syncBlurChildren(); }
 function setEsportsLevel(val){
   cfg.game_esports_level=val;
@@ -547,6 +577,10 @@ function game01(key){ return gameOn(key)?'1':'0'; }
 function socialOn(key){ return cfg.social_master===true && cfg[key]!==false; }
 function social01(key){ return socialOn(key)?'1':'0'; }
 function socialMaster01(){ return cfg.social_master===true?'1':'0'; }
+function disp01(key,defOn){
+  if(defOn===false) return cfg[key]===true?'1':'0';
+  return cfg[key]!==false?'1':'0';
+}
 function esportsLevel(){
   const n=parseInt(cfg.game_esports_level,10);
   return (n>=1 && n<=3)?n:3;
@@ -609,6 +643,14 @@ const SOCIAL_KEYS=[
   'ro.tr_socialturbo.makeup.support',
   'ro.tr_social.beauty_disable.support',
   'ro.tr_social.default_off.support'
+];
+const DISPLAY_KEYS=[
+  'ro.tr_display.sdr2hdr.support',
+  'ro.tr_light.xdr.support',
+  'ro.tr_light.xdr.v2.support',
+  'ro.tr_display.colormode.feature.support',
+  'ro.tr_display.color.temperature.feature.support',
+  'persist.tr_display.color.temperature.aosp.support'
 ];
 const ANIM_KEYS=[
   'ro.tr_animation.platform_level',
@@ -757,6 +799,14 @@ async function writeAiSystemProp(){
   lines.push('persist.sysui.disableBlur='+blurDisable());
   lines.push('persist.sysui.disable_blur='+blurDisable());
   lines.push('ro.sf.blurs_are_expensive='+blurDisable());
+  const hdr=disp01('display_hdr',true);
+  const col=disp01('display_color',true);
+  lines.push('ro.tr_display.sdr2hdr.support='+hdr);
+  lines.push('ro.tr_light.xdr.support='+hdr);
+  lines.push('ro.tr_light.xdr.v2.support='+hdr);
+  lines.push('ro.tr_display.colormode.feature.support='+col);
+  lines.push('ro.tr_display.color.temperature.feature.support='+col);
+  lines.push('persist.tr_display.color.temperature.aosp.support='+col);
   lines.push('ro.surface_flinger.game_default_frame_rate_override=120');
   lines.push('debug.graphics.game_default_frame_rate.disabled=true');
   lines.push('persist.graphics.game_default_frame_rate.enabled=false');
@@ -796,6 +846,10 @@ async function saveAll(){
     anim_os16:cfg.anim_os16!==false,
     blur_os16:cfg.blur_os16!==false,
     blur_os16_level:blurLevel(),
+    display_dc:cfg.display_dc!==false,
+    display_color:cfg.display_color!==false,
+    display_hdr:cfg.display_hdr!==false,
+    display_reading:cfg.display_reading===true,
     force_120hz:cfg.force_120hz===true
   };
   const json=JSON.stringify(slim,null,2).replace(/'/g,"'\\''");
@@ -828,6 +882,7 @@ async function dumpAi(){
     'ro.tr_video.vee.support',
     ...GAME_KEYS,
     ...SOCIAL_KEYS,
+    ...DISPLAY_KEYS,
     ...ANIM_KEYS,
     ...BLUR_KEYS
   ];
@@ -860,6 +915,20 @@ async function dumpAi(){
   lines.push('disable_window_blurs  '+(dw||'EMPTY'));
   lines.push('accessibility_reduce_transparency  '+(rt||'EMPTY'));
   lines.push('wm disable-blur  '+(wm||'EMPTY'));
+  lines.push('');
+  lines.push('=== display extras ===');
+  lines.push('display_dc  '+String(cfg.display_dc!==false));
+  lines.push('display_color  '+String(cfg.display_color!==false));
+  lines.push('display_hdr  '+String(cfg.display_hdr!==false));
+  lines.push('display_reading  '+String(cfg.display_reading===true));
+  const dcs=await g('settings get system tran_dc_dimming_enable');
+  const dcg=await g('settings get global tran_dc_dimming_enable');
+  const ces=await g('settings get system tran_display_color_enhance');
+  const rds=await g('settings get system tran_reading_mode_enable');
+  lines.push('tran_dc_dimming_enable system  '+(dcs||'EMPTY'));
+  lines.push('tran_dc_dimming_enable global  '+(dcg||'EMPTY'));
+  lines.push('tran_display_color_enhance  '+(ces||'EMPTY'));
+  lines.push('tran_reading_mode_enable  '+(rds||'EMPTY'));
   lines.push('');
   lines.push('=== refresh rate ===');
   lines.push('force_120hz  '+String(cfg.force_120hz===true));
@@ -896,7 +965,7 @@ async function dumpAi(){
   lines.push(head||'(no product APM json)');
   lines.push('');
   lines.push('=== other live AI-like keys (first 80) ===');
-  const live=await g("getprop | grep -iE 'ai_|aiphone|subtitle|soundrecorder|note_ai|aicore|aipower|ask_ai|tr_gallery|tr_video.vee|studio.lite|tr_game|os_game|esports|bypass_charg|shoulder|smartbutton|tr_social|os_social_turbo|tr_animation|tr_perf|liquidglass|dynamicbar|dreamanimation|anim_arc|unionrender|async_anim|gaussian|dynamicblur|recent.blur|background_blur|xos16_blur|disable_blurs|disableBlur|disable_blur' | head -80");
+  const live=await g("getprop | grep -iE 'ai_|aiphone|subtitle|soundrecorder|note_ai|aicore|aipower|ask_ai|tr_gallery|tr_video.vee|studio.lite|tr_game|os_game|esports|bypass_charg|shoulder|smartbutton|tr_social|os_social_turbo|sdr2hdr|tr_light.xdr|colormode|color.temperature|tr_animation|tr_perf|liquidglass|dynamicbar|dreamanimation|anim_arc|unionrender|async_anim|gaussian|dynamicblur|recent.blur|background_blur|xos16_blur|disable_blurs|disableBlur|disable_blur' | head -80");
   lines.push(live||'(none)');
   lines.push('');
   lines.push('=== gallery / aicore packages ===');
@@ -904,7 +973,7 @@ async function dumpAi(){
   lines.push(pkgs||'(none)');
   lines.push('');
   lines.push('=== stock build files (do these keys exist without the module?) ===');
-  const stock=await g("for f in /system/build.prop /system/system/build.prop /product/build.prop /system/product/build.prop /system/product/etc/build.prop /vendor/build.prop /odm/etc/build.prop /tr_product/build.prop /tr_product/etc/build.prop; do [ -f \"$f\" ] || continue; hits=$(grep -E 'aicorespeech_subtitle|aicorespeech_livecaption|tr_soundrecorder.summary|tr_note.ai_draw|os_ai_writing|aiphone.feature|aiphone_summany|tr_gallery|tr_video.vee|tr_game.|tr_smartbutton.shoulder|tr_social|os_social_turbo|tr_animation|tr_perf.|liquidglass|dynamicbar|dreamanimation|anim_arc|unionrender|async_anim|gaussian|dynamicblur|recent.blur|background_blur|xos16_blur' \"$f\" 2>/dev/null); [ -n \"$hits\" ] && echo \"$f\" && echo \"$hits\"; done");
+  const stock=await g("for f in /system/build.prop /system/system/build.prop /product/build.prop /system/product/build.prop /system/product/etc/build.prop /vendor/build.prop /odm/etc/build.prop /tr_product/build.prop /tr_product/etc/build.prop; do [ -f \"$f\" ] || continue; hits=$(grep -E 'aicorespeech_subtitle|aicorespeech_livecaption|tr_soundrecorder.summary|tr_note.ai_draw|os_ai_writing|aiphone.feature|aiphone_summany|tr_gallery|tr_video.vee|tr_game.|tr_smartbutton.shoulder|tr_social|os_social_turbo|sdr2hdr|tr_light.xdr|colormode|color.temperature|tr_animation|tr_perf.|liquidglass|dynamicbar|dreamanimation|anim_arc|unionrender|async_anim|gaussian|dynamicblur|recent.blur|background_blur|xos16_blur' \"$f\" 2>/dev/null); [ -n \"$hits\" ] && echo \"$f\" && echo \"$hits\"; done");
   lines.push(stock||'(none of those keys in readable stock build files)');
   const text=lines.join('\n');
   document.getElementById('pfd-log').textContent=text;
@@ -1062,6 +1131,10 @@ async function loadCfg(){
   if(cfg.anim_os16===undefined) cfg.anim_os16=true;
   if(cfg.blur_os16===undefined) cfg.blur_os16=true;
   if(cfg.blur_os16_level===undefined) cfg.blur_os16_level=2;
+  if(cfg.display_dc===undefined) cfg.display_dc=true;
+  if(cfg.display_color===undefined) cfg.display_color=true;
+  if(cfg.display_hdr===undefined) cfg.display_hdr=true;
+  if(cfg.display_reading===undefined) cfg.display_reading=false;
   if(cfg.force_120hz===undefined) cfg.force_120hz=false;
   if(cfg.force_refresh_hz===120||cfg.force_refresh_hz===144) cfg.force_120hz=true;
   const hzFlag=await g('cat "'+MOD+'/.force_120hz" 2>/dev/null');
@@ -1102,6 +1175,10 @@ async function loadCfg(){
   setT('feat-social-beauty', cfg.social_beauty!==false);
   setT('feat-anim', cfg.anim_os16!==false);
   setT('feat-blur', cfg.blur_os16!==false);
+  setT('feat-dc', cfg.display_dc!==false);
+  setT('feat-color', cfg.display_color!==false);
+  setT('feat-hdr', cfg.display_hdr!==false);
+  setT('feat-reading', cfg.display_reading===true);
   setT('feat-force120hz', cfg.force_120hz===true);
   setEsportsLevel(esportsLevel());
   setBlurLevel(blurLevel());
@@ -1131,6 +1208,7 @@ window.setStatusbarStyle=setStatusbarStyle;
 window.setAi=setAi;
 window.setGame=setGame;
 window.setSocial=setSocial;
+window.setDisplay=setDisplay;
 window.setAnimBlur=setAnimBlur;
 window.setEsportsLevel=setEsportsLevel;
 window.setBlurLevel=setBlurLevel;
