@@ -22,8 +22,7 @@
   "blur_os16": true,
   "blur_os16_level": 2,
   "aod_os16": true,
+  "circle_os16": true,
   "dynamicbar_os16": true,
-  "scale_os16": true,
-  "gt_apps_os16": true,
   "force_120hz": false
 }
