@@ -202,11 +202,17 @@ os16_apply_display_props() {
   os16_rp_overwrite ro.tr_display.colormode.feature.support "$col"
   os16_rp_overwrite ro.tr_display.color.temperature.feature.support "$col"
   os16_rp persist.tr_display.color.temperature.aosp.support "$col"
+  # V1.53: OS 16 keys stuck, Settings unchanged. Flagship 15 gated
+  # Display rows on these names (not in the GT tr_product dump).
+  os16_rp_overwrite ro.tran.display_hdr_support "$hdr"
+  dc=$(os16_cfg_01 display_dc true)
+  os16_rp_overwrite ro.tran.display_dc_dimming_support "$dc"
 }
 
 os16_apply_display_settings() {
   dc=$(os16_cfg_01 display_dc true)
   col=$(os16_cfg_01 display_color true)
+  hdr=$(os16_cfg_01 display_hdr true)
   # Reading default is off (same as Flagship 15).
   rd=$(os16_cfg_bool display_reading false)
   if [ "$rd" = "true" ] || [ "$rd" = "1" ]; then
@@ -220,6 +226,15 @@ os16_apply_display_settings() {
   os16_settings_put global tran_display_color_enhance "$col"
   os16_settings_put system tran_reading_mode_enable "$rd"
   os16_settings_put global tran_reading_mode_enable "$rd"
+  os16_settings_put system tr_dc_dimming_enable "$dc"
+  os16_settings_put global tr_dc_dimming_enable "$dc"
+  os16_settings_put system tr_display_color_enhance "$col"
+  os16_settings_put global tr_display_color_enhance "$col"
+  os16_settings_put system tr_reading_mode_enable "$rd"
+  os16_settings_put global tr_reading_mode_enable "$rd"
+  os16_settings_put system tran_sdr2hdr_enable "$hdr"
+  os16_settings_put global tran_sdr2hdr_enable "$hdr"
+  am force-stop com.android.settings >/dev/null 2>&1
 }
 
 os16_force_stop_launchers() {

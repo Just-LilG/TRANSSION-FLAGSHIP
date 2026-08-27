@@ -1,7 +1,7 @@
 #!/system/bin/sh
 LOG=/data/adb/transflagship16_uninstall.log
 log_msg() { echo "[$(date '+%H:%M:%S')] $1" >> "$LOG"; }
-log_msg "=== TransFlagship 16 V1.53 uninstall start ==="
+log_msg "=== TransFlagship 16 V1.54 uninstall start ==="
 rm -f /data/adb/transflagship16_service.log
 rm -f /data/local/bootaudio.mp3 /data/local/shutaudio.mp3
 rm -rf /mnt/vendor/mountify/tr_product/theme/charge
@@ -23,6 +23,14 @@ settings delete system tran_display_color_enhance 2>/dev/null
 settings delete global tran_display_color_enhance 2>/dev/null
 settings delete system tran_reading_mode_enable 2>/dev/null
 settings delete global tran_reading_mode_enable 2>/dev/null
+settings delete system tr_dc_dimming_enable 2>/dev/null
+settings delete global tr_dc_dimming_enable 2>/dev/null
+settings delete system tr_display_color_enhance 2>/dev/null
+settings delete global tr_display_color_enhance 2>/dev/null
+settings delete system tr_reading_mode_enable 2>/dev/null
+settings delete global tr_reading_mode_enable 2>/dev/null
+settings delete system tran_sdr2hdr_enable 2>/dev/null
+settings delete global tran_sdr2hdr_enable 2>/dev/null
 settings delete secure accessibility_reduce_transparency 2>/dev/null
 for ns in system global; do
   settings delete "$ns" tran_refresh_mode 2>/dev/null
@@ -69,4 +77,4 @@ cmd window disable-blur 0 2>/dev/null
 rm -f /data/adb/modules/transsion-flagship-16/system/tr_product/etc/vconfig/magellan/refresh_rate_config.xml 2>/dev/null
 rm -f /data/magellan/refresh_rate_config.xml 2>/dev/null
 rm -f /mnt/vendor/mountify/tr_product/etc/vconfig/magellan/refresh_rate_config.xml 2>/dev/null
-log_msg "=== TransFlagship 16 V1.53 uninstall complete — reboot ==="
+log_msg "=== TransFlagship 16 V1.54 uninstall complete — reboot ==="

@@ -1,5 +1,8 @@
 # Transsion Flagship 16
 
+## v1.54
+- **Display extras (second try).** V1.53 wrote OS 16 `sdr2hdr` / `xdr` (those did stick) and Flagship 15 Settings keys, but Display in Settings did not change. This build also writes the Flagship 15 **gating** props that unhid those rows on XOS 15: `ro.tran.display_hdr_support` and `ro.tran.display_dc_dimming_support`, plus `tr_*` Settings aliases, then force-stops Settings. Apply + reboot, then open Settings → Display again. Dump flags — if those two `ro.tran.display_*` rows are EMPTY, this phone does not have that gate.
+
 ## v1.53
 - **Display extras (first try).** Same Features card as Flagship 15: DC dimming, color enhancement, HDR, reading mode. HDR uses OS 16 keys from the GT dump (`ro.tr_display.sdr2hdr.support`, `ro.tr_light.xdr.support` / `xdr.v2` — stock is 0). Color uses `ro.tr_display.colormode` / `color.temperature`. DC and reading have no `ro.tr_*` in that dump, so they write the same Settings keys as Flagship 15 (`tran_dc_dimming_enable`, `tran_reading_mode_enable`). Reading stays off by default. Apply + reboot, then check Display / eye-comfort / HDR rows. Dump flags — EMPTY means this G99 still does not expose that key.
 
