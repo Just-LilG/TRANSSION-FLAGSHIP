@@ -166,8 +166,8 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
             <li class="on">AI Video Enhancement — VEE flag on</li>
             <li class="on">Gaming — OS 16 GT triggers in XArena</li>
             <li class="on">Force 120Hz — 144 picker verified</li>
-            <li class="next">AOD — OS 16 keys (feature / doze / half-screen)</li>
-            <li class="next">Dynamic bar — OS 16 key (own toggle)</li>
+            <li class="next">AOD — second try (OS 15 always-show key)</li>
+            <li class="next">Dynamic bar — second try (Flagship 15 extras)</li>
             <li>Social Turbo — removed (stock already had call tools)</li>
             <li>Display extras — removed (OS 16 Settings hid DC / HDR / reading)</li>
           </ul>
@@ -322,14 +322,14 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
           <div class="setting-row">
             <div class="row-text">
               <div class="row-title">Always-On Display</div>
-              <div class="row-sub">OS 16 keys from GT dump (ro.tr_aod.*). Half-screen AOD is stock off on GT. Apply + reboot, then Settings → Lock screen / AOD.</div>
+              <div class="row-sub">Second try: also writes the OS 15 key that unhid AOD on this phone (ro.aod_alwaysshow_support was EMPTY). Apply + reboot, then Lock screen / AOD.</div>
             </div>
             <label class="toggle"><input type="checkbox" id="feat-aod" checked onchange="cfg.aod_os16=this.checked"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
           </div>
           <div class="setting-row">
             <div class="row-text">
               <div class="row-title">Dynamic bar</div>
-              <div class="row-sub">OS 16 key ro.tr_dynamicbar.support. Own toggle, not tied to Parallel. Apply + reboot, then check the pill / island.</div>
+              <div class="row-sub">Second try: stock already had ro.tr_dynamicbar=1. Also writes Flagship 15 extras (AI translation / resident plane / HiOS). Apply + reboot, then check the pill.</div>
             </div>
             <label class="toggle"><input type="checkbox" id="feat-dynamicbar" checked onchange="cfg.dynamicbar_os16=this.checked"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
           </div>
@@ -594,10 +594,18 @@ const ANIM_KEYS=[
 const AOD_KEYS=[
   'ro.tr_aod.feature.support',
   'ro.tr_aod.doze.brightness.feature.support',
-  'ro.tr_aod.half.screen.feature.support'
+  'ro.tr_aod.half.screen.feature.support',
+  'tr_aod.horizontal.display.feature.support',
+  'ro.tr_aod.horizontal.display.feature.support',
+  'ro.aod_alwaysshow_support',
+  'ro.tran_aod_v3_support',
+  'ro.tran_doze_brightness_support'
 ];
 const DYNBAR_KEYS=[
-  'ro.tr_dynamicbar.support'
+  'ro.tr_dynamicbar.support',
+  'ro.os_dynamicbar_ai_translation_support',
+  'ro.os_dynamic_bar_resident_plane_support',
+  'ro.tran_hios_dynamic_bar_support'
 ];
 const BLUR_KEYS=[
   'ro.tr_display.liquidglass.support',
@@ -720,7 +728,15 @@ async function writeAiSystemProp(){
   lines.push('ro.tr_aod.feature.support='+feat01('aod_os16'));
   lines.push('ro.tr_aod.doze.brightness.feature.support='+feat01('aod_os16'));
   lines.push('ro.tr_aod.half.screen.feature.support='+feat01('aod_os16'));
+  lines.push('tr_aod.horizontal.display.feature.support='+feat01('aod_os16'));
+  lines.push('ro.tr_aod.horizontal.display.feature.support='+feat01('aod_os16'));
+  lines.push('ro.aod_alwaysshow_support='+feat01('aod_os16'));
+  lines.push('ro.tran_aod_v3_support='+feat01('aod_os16'));
+  lines.push('ro.tran_doze_brightness_support='+feat01('aod_os16'));
   lines.push('ro.tr_dynamicbar.support='+feat01('dynamicbar_os16'));
+  lines.push('ro.os_dynamicbar_ai_translation_support='+feat01('dynamicbar_os16'));
+  lines.push('ro.os_dynamic_bar_resident_plane_support='+feat01('dynamicbar_os16'));
+  lines.push('ro.tran_hios_dynamic_bar_support='+feat01('dynamicbar_os16'));
   lines.push('ro.surface_flinger.game_default_frame_rate_override=120');
   lines.push('debug.graphics.game_default_frame_rate.disabled=true');
   lines.push('persist.graphics.game_default_frame_rate.enabled=false');
@@ -827,12 +843,20 @@ async function dumpAi(){
   lines.push('=== aod / dynamic bar ===');
   lines.push('aod_os16  '+String(cfg.aod_os16!==false));
   lines.push('dynamicbar_os16  '+String(cfg.dynamicbar_os16!==false));
-  const aodpkg=await g("pm list packages | grep -iE 'aod|alwayson|doze' | head -20");
+  const aodpkg=await g("pm list packages com.transsion.aod; pm list packages com.transsion.aod.overlay");
   lines.push(aodpkg||'(no aod packages)');
-  const setaod=await g("settings list system 2>/dev/null | grep -iE 'aod|doze|always_on|alwayson' | head -20");
-  lines.push(setaod||'(no matching AOD system settings names)');
-  const oldaod=await g('getprop ro.aod_alwaysshow_support');
-  lines.push('ro.aod_alwaysshow_support (not written)  '+describeAiFlag(oldaod));
+  const ovl=await g("cmd overlay list 2>/dev/null | grep -i aod | head -20");
+  lines.push(ovl||'(no aod overlays listed)');
+  const doze=await g('settings get secure doze_always_on');
+  const dozeen=await g('settings get secure doze_enabled');
+  const tena=await g('settings get system tran_aod_enable');
+  const trena=await g('settings get system tr_aod_enable');
+  lines.push('doze_always_on  '+(doze||'EMPTY'));
+  lines.push('doze_enabled  '+(dozeen||'EMPTY'));
+  lines.push('tran_aod_enable  '+(tena||'EMPTY'));
+  lines.push('tr_aod_enable  '+(trena||'EMPTY'));
+  const horiz=await g('getprop tr_aod.horizontal.display.feature.support');
+  lines.push('tr_aod.horizontal.display.feature.support  '+describeAiFlag(horiz));
   lines.push('');
   lines.push('=== refresh rate ===');
   lines.push('force_120hz  '+String(cfg.force_120hz===true));
