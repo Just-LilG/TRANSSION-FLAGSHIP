@@ -166,8 +166,8 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
             <li class="on">AI Video Enhancement — VEE flag on</li>
             <li class="on">Gaming — OS 16 GT triggers in XArena</li>
             <li class="on">Force 120Hz — 144 picker verified</li>
-            <li class="next">AOD — second try (OS 15 always-show key)</li>
-            <li class="next">Dynamic bar — second try (Flagship 15 extras)</li>
+            <li class="next">AOD — second try still hid Lock screen AOD</li>
+            <li class="on">Dynamic bar — Settings page on; empty pill forced off</li>
             <li>Social Turbo — removed (stock already had call tools)</li>
             <li>Display extras — removed (OS 16 Settings hid DC / HDR / reading)</li>
           </ul>
@@ -329,7 +329,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
           <div class="setting-row">
             <div class="row-text">
               <div class="row-title">Dynamic bar</div>
-              <div class="row-sub">Second try: stock already had ro.tr_dynamicbar=1. Also writes Flagship 15 extras (AI translation / resident plane / HiOS). Apply + reboot, then check the pill.</div>
+              <div class="row-sub">Verified on. Always Show Background is left off (resident_plane=0) so the empty pill does not stay. Apply + reboot.</div>
             </div>
             <label class="toggle"><input type="checkbox" id="feat-dynamicbar" checked onchange="cfg.dynamicbar_os16=this.checked"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
           </div>
@@ -735,7 +735,7 @@ async function writeAiSystemProp(){
   lines.push('ro.tran_doze_brightness_support='+feat01('aod_os16'));
   lines.push('ro.tr_dynamicbar.support='+feat01('dynamicbar_os16'));
   lines.push('ro.os_dynamicbar_ai_translation_support='+feat01('dynamicbar_os16'));
-  lines.push('ro.os_dynamic_bar_resident_plane_support='+feat01('dynamicbar_os16'));
+  lines.push('ro.os_dynamic_bar_resident_plane_support=0');
   lines.push('ro.tran_hios_dynamic_bar_support='+feat01('dynamicbar_os16'));
   lines.push('ro.surface_flinger.game_default_frame_rate_override=120');
   lines.push('debug.graphics.game_default_frame_rate.disabled=true');
@@ -843,6 +843,8 @@ async function dumpAi(){
   lines.push('=== aod / dynamic bar ===');
   lines.push('aod_os16  '+String(cfg.aod_os16!==false));
   lines.push('dynamicbar_os16  '+String(cfg.dynamicbar_os16!==false));
+  const plane=await g('getprop ro.os_dynamic_bar_resident_plane_support');
+  lines.push('ro.os_dynamic_bar_resident_plane_support  '+describeAiFlag(plane));
   const aodpkg=await g("pm list packages com.transsion.aod; pm list packages com.transsion.aod.overlay");
   lines.push(aodpkg||'(no aod packages)');
   const ovl=await g("cmd overlay list 2>/dev/null | grep -i aod | head -20");
