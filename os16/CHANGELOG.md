@@ -1,5 +1,8 @@
 # Transsion Flagship 16
 
+## v1.61
+- **Landscape recents status-bar overlay.** Same Flagship 15 key the Telegram group uses for that empty-pill / recents bug: `ro.os.tran_hide_status_bar_for_land_recent=1`. Flagship 16 never shipped it. Apply + reboot, then open recents in landscape. Dump that flag — EMPTY means this G99 still does not expose it.
+
 ## v1.60
 - **Always Show Dynamic Bar is back, and the boot reboot is gone.** V1.59 set `ro.os_dynamic_bar_resident_plane_support=0`, which hid the Always Show Background row, then crashed SystemUI at boot and 8s later — the phone came up for a few seconds and cold-rebooted. This build restores resident_plane **1** (that is the Settings option, not a forced-on pill) and does **not** crash SystemUI. Leftover V1.59 fake settings are deleted. AOD Lock screen is still missing after two prop tries (Settings-compiled, same class as Display extras) — no more AOD guesses this pass. Apply + reboot, then check Dynamic Bar → Always Show Background and that boot stays up.
 

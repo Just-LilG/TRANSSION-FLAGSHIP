@@ -171,6 +171,7 @@ ro.tran_doze_brightness_support=$aod
 ro.tr_dynamicbar.support=$dbar
 ro.os_dynamicbar_ai_translation_support=$dbar
 ro.os_dynamic_bar_resident_plane_support=$dbar
+ro.os.tran_hide_status_bar_for_land_recent=$dbar
 ro.tran_hios_dynamic_bar_support=$dbar
 ro.surface_flinger.game_default_frame_rate_override=120
 debug.graphics.game_default_frame_rate.disabled=true
@@ -182,7 +183,7 @@ print_modname() {
   ui_print " "
   ui_print "  ╔══════════════════════════════════════════╗"
   ui_print "  ║    TRANSSION FLAGSHIP 16                 ║"
-  ui_print "  ║    XOS · HiOS · iTel OS 16  ·  V1.60     ║"
+  ui_print "  ║    XOS · HiOS · iTel OS 16  ·  V1.61     ║"
   ui_print "  ╚══════════════════════════════════════════╝"
   ui_print " "
 }
@@ -393,7 +394,7 @@ set_permissions() {
   done
   ui_print " "
   ui_div
-  ui_print "  ✨  FLAGSHIP 16  ·  V1.60"
+  ui_print "  ✨  FLAGSHIP 16  ·  V1.61"
   ui_info "OS     : $OS_TYPE $OS_VER"
   ui_info "Feature: boot + reboot + overlay + AI + gaming + anim/blur + AOD + Dynamic bar + Force 120Hz"
   ui_div

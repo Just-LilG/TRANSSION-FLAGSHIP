@@ -329,7 +329,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
           <div class="setting-row">
             <div class="row-text">
               <div class="row-title">Dynamic bar</div>
-              <div class="row-sub">Restores Always Show Background in Settings. That row is a toggle — use it to hide the empty pill. Apply + reboot.</div>
+              <div class="row-sub">Always Show Background in Settings. Also hides the landscape-recents status-bar overlay (Flagship 15 key). Apply + reboot.</div>
             </div>
             <label class="toggle"><input type="checkbox" id="feat-dynamicbar" checked onchange="cfg.dynamicbar_os16=this.checked"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
           </div>
@@ -605,6 +605,7 @@ const DYNBAR_KEYS=[
   'ro.tr_dynamicbar.support',
   'ro.os_dynamicbar_ai_translation_support',
   'ro.os_dynamic_bar_resident_plane_support',
+  'ro.os.tran_hide_status_bar_for_land_recent',
   'ro.tran_hios_dynamic_bar_support'
 ];
 const BLUR_KEYS=[
@@ -736,6 +737,7 @@ async function writeAiSystemProp(){
   lines.push('ro.tr_dynamicbar.support='+feat01('dynamicbar_os16'));
   lines.push('ro.os_dynamicbar_ai_translation_support='+feat01('dynamicbar_os16'));
   lines.push('ro.os_dynamic_bar_resident_plane_support='+feat01('dynamicbar_os16'));
+  lines.push('ro.os.tran_hide_status_bar_for_land_recent='+feat01('dynamicbar_os16'));
   lines.push('ro.tran_hios_dynamic_bar_support='+feat01('dynamicbar_os16'));
   lines.push('ro.surface_flinger.game_default_frame_rate_override=120');
   lines.push('debug.graphics.game_default_frame_rate.disabled=true');
@@ -845,6 +847,8 @@ async function dumpAi(){
   lines.push('dynamicbar_os16  '+String(cfg.dynamicbar_os16!==false));
   const plane=await g('getprop ro.os_dynamic_bar_resident_plane_support');
   lines.push('ro.os_dynamic_bar_resident_plane_support  '+describeAiFlag(plane));
+  const hideLand=await g('getprop ro.os.tran_hide_status_bar_for_land_recent');
+  lines.push('ro.os.tran_hide_status_bar_for_land_recent  '+describeAiFlag(hideLand));
   const aodpkg=await g("pm list packages com.transsion.aod; pm list packages com.transsion.aod.overlay");
   lines.push(aodpkg||'(no aod packages)');
   const ovl=await g("cmd overlay list 2>/dev/null | grep -i aod | head -20");

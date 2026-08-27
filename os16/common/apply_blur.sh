@@ -197,6 +197,9 @@ os16_apply_dynamicbar_props() {
   # V1.59 set it to 0 and hid the row. The Settings toggle (not this prop)
   # is what should turn the empty pill off.
   os16_rp_overwrite ro.os_dynamic_bar_resident_plane_support "$bar"
+  # Flagship 15 extra: hide the landscape-recents status-bar overlay (empty
+  # pill / "bug not a feature" in recents). Same key as TransFlagship 15.
+  os16_rp_overwrite ro.os.tran_hide_status_bar_for_land_recent "$bar"
 }
 
 os16_apply_dynamicbar_runtime() {
