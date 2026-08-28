@@ -110,13 +110,19 @@ ns_umount /tr_product/theme/charge
 ns_umount /product/theme/charge
 ns_umount /system/product/theme/charge
 
-# Drop failed-feature leftovers from earlier Flagship 16 builds.
+# Drop failed charging-animation / boot-sound leftovers. Do NOT wipe
+# media/audio/ui — that is where uploaded UI sounds live (V1.76 deleted
+# them every boot, so custom charging/unlock never survived reboot).
 rm -rf "$MODDIR/system/product/theme/charge" \
        "$MODDIR/tr_product/theme/charge" \
-       "$MODDIR/product/theme/charge" \
-       "$MODDIR/system/product/media/audio" \
-       "$MODDIR/tr_product/media/audio" \
-       "$MODDIR/product/media/audio"
+       "$MODDIR/product/theme/charge"
+rm -rf "$MODDIR/system/product/media/audio/bootsound" \
+       "$MODDIR/tr_product/media/audio/bootsound" \
+       "$MODDIR/product/media/audio/bootsound"
+rm -f "$MODDIR/system/product/media/audio/ui/Waltz.ogg" \
+      "$MODDIR/system/product/media/audio/ui/PowerOn.ogg" \
+      "$MODDIR/system/media/audio/ui/Waltz.ogg" \
+      "$MODDIR/system/media/audio/ui/PowerOn.ogg"
 rm -rf /mnt/vendor/mountify/tr_product/theme/charge \
        /mnt/vendor/mountify/product/theme/charge \
        /mnt/vendor/mountify/tr_product/media/audio/bootsound

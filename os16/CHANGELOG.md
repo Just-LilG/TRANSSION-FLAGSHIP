@@ -1,5 +1,8 @@
 # Transsion Flagship 16
 
+## v1.77
+- **Sounds actually stick.** V1.76 uploaded custom files, then post-fs-data `rm -rf`’d the whole `media/audio` tree (old boot-sound cleanup) on every reboot — so charging/unlock never played. This build keeps `*_custom.*`, copies dest-named `.ogg` for Mountify `/product`, and still per-file binds `/tr_product`. Re-upload each sound (V1.76 already deleted them), Apply, reboot.
+
 ## v1.76
 - **Sounds tab.** Charging (wired + wireless), unlock, lock, screenshot, keypress, and the other GT UI files under `/tr_product/media/audio/ui`. Upload your own .ogg/.mp3/.wav. Stock leaves the ROM file. Per-file bind like bootanim (Mountify does not overlay `tr_product`). No Waltz, no boot sound, no charge animation pack. Apply + reboot, then plug in / unlock. Dump **=== ui sounds ===**.
 
