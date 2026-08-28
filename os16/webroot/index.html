@@ -807,7 +807,7 @@ function blurLevel(){
 }
 function glassOn(){ return blurOn() && blurLevel()>=2; }
 function gaussianLvl(){
-  if(solidShade()) return '2';
+  if(solidShade()) return '0';
   return String(blurLevel());
 }
 function animLvl(){

@@ -48,12 +48,12 @@ ro.tr_perf.recent_animation.model=3
 ro.tr_perf.unlock_mode.model=3
 ro.tr_livewallpaper.dreamanimation.support=1
 ro.tr_multiwindow.anim_arc.support=1
-ro.transsion_async_animation_support=1
+ro.transsion_async_animation_support=0
 ro.transsion_unlock_mode_support=3
 ro.transsion_launch_start_exit_support=3
 ro.transsion_power_keyguard_animation_support=3
 ro.transsion.recent_animation.model=3
-ro.tran_display_unionrender.support=1
+ro.tran_display_unionrender.support=0
 # Blur tier keys are written from config (Apply / install). Off or level 1 = solid, unionrender off.
 # Level 2 = partial glass. Level 3 = full glass + dynamic blur engine.
 # AOD — OS 16 keys from GT dump. half.screen is stock 0 on GT.

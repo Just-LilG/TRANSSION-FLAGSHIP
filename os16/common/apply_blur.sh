@@ -1,8 +1,8 @@
 #!/system/bin/sh
 # Parallel motion = platform_level 3 whenever Parallel is on.
-# Level 1 / blur off: solid shade without glass — unionrender 0, compositor off,
-# Disable-blur-XOS16 launcher vconfig (gaussian 2 / blurrecent 1). Do NOT drop
-# platform to 2 or Parallel animations die. Levels 2/3 add glass back.
+# Level 1 / blur off: solid shade — platform 3 + gaussian 0 + unionrender 0 +
+# compositor off. Disable-blur gaussian 2 only works with platform 2 (kills Parallel).
+# Levels 2/3 add glass back (unionrender 1, gaussian 2/3).
 
 if [ -z "$MODDIR" ]; then
   MODDIR=${0%/*}
@@ -144,10 +144,9 @@ os16_blur_vals() {
     case "$lvl" in
       1)
         SOLID=1
-        # Solid shade: compositor + unionrender off; launcher vconfig from Disable-blur-XOS16.
-        # Keep ALVL=3 when Parallel is on — platform 2 kills Parallel motion.
-        BLVL=2
-        BLUR_RECENT=1
+        # Platform 3 keeps Parallel; gaussian 0 + unionrender 0 removes glass.
+        BLVL=0
+        BLUR_RECENT=0
         ;;
       2)
         SOLID=0
@@ -180,8 +179,8 @@ os16_blur_vals() {
   else
     # Blur off — same solid profile as level 1.
     SOLID=1
-    BLVL=2
-    BLUR_RECENT=1
+    BLVL=0
+    BLUR_RECENT=0
   fi
 
   BLUR_ON=$on
@@ -434,7 +433,7 @@ os16_apply_launcher_vconfig_all() {
     os16_vconfig_upsert "$staged" "ro.transsion_async_animation_support" "$LAUNCHER_ASYNC"
     os16_vconfig_upsert "$staged" "ro.tran_display_unionrender.support" "$UNION"
   else
-    # Disable-blur-XOS16 reference: tr_launcher gaussian 2 + blurrecent 1, compositor off.
+    # Solid tier: gaussian 0, compositor off, unionrender 0. Keep spring keys only.
     os16_vconfig_upsert "$staged" "tr_launcher.gaussianblur.support" "$BLVL"
     os16_vconfig_upsert "$staged" "tr_launcher.blurrecent.support" "$BLUR_RECENT"
     os16_vconfig_upsert "$staged" "ro.os.tran_recent_dismiss_single_task_spring_support" "1"
