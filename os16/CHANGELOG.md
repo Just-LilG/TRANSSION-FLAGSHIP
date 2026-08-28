@@ -1,5 +1,8 @@
 # Transsion Flagship 16
 
+## v2.4
+- **Blur off writes no blur props.** No stock restore, no SystemUI `platform_level=2`, no `device_config` shade flags. The module deletes Magisk’s blur keys (including global `platform_level`) and unbinds SystemUI / tr_product blur overlays so it is as if those props were never applied. Parallel still uses motion keys only (`ro.tr_perf.*`, launch/unlock/recent, async). Apply + reboot.
+
 ## v2.3
 - **Parallel works again with Dynamic blur off.** V2.2 restored stock global `platform_level`, which made the shade look stock but broke app open/close — WindowManager reads that global key. V2.3 writes **global `platform_level=3` whenever Parallel is on**, and pins **SystemUI vconfig at stock/2** so the shade does not pick up flagship glass. Apply + reboot.
 

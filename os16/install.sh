@@ -293,6 +293,7 @@ persist.graphics.game_default_frame_rate.enabled=false
 EOF
   if [ "$blur" != "true" ]; then
     sed -i \
+      -e '/^ro.tr_animation.platform_level=/d' \
       -e '/^ro.tran_display_unionrender.support=/d' \
       -e '/^ro.tr_display.liquidglass.support=/d' \
       -e '/^ro.surface_flinger.supports_background_blur=/d' \
@@ -311,9 +312,6 @@ EOF
       -e '/^ro.tr_lighting.controlcenter.feature.support=/d' \
       -e '/^ro.tr_lighting.feature.support=/d' \
       "$dest"
-    if [ "$anim" != "true" ]; then
-      sed -i '/^ro.tr_animation.platform_level=/d' "$dest"
-    fi
   fi
   if [ "$dbar" = "true" ]; then
     cat >> "$dest" <<EOF
@@ -330,7 +328,7 @@ print_modname() {
   ui_print " "
   ui_print "  ╔══════════════════════════════════════════╗"
   ui_print "  ║    TRANSSION FLAGSHIP 16                 ║"
-    ui_print "  ║    XOS · HiOS · iTel OS 16  ·  V2.3      ║"
+    ui_print "  ║    XOS · HiOS · iTel OS 16  ·  V2.4      ║"
   ui_print "  ╚══════════════════════════════════════════╝"
   ui_print " "
 }
@@ -658,7 +656,7 @@ set_permissions() {
   done
   ui_print " "
   ui_div
-  ui_print "  ✨  FLAGSHIP 16  ·  V2.3"
+  ui_print "  ✨  FLAGSHIP 16  ·  V2.4"
   ui_info "OS     : $OS_TYPE $OS_VER"
   ui_info "Feature: boot + reboot + overlay + AI + gaming + anim/blur + AOD + Dynamic bar + Force 120Hz + UI sounds"
   ui_div

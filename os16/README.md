@@ -14,7 +14,7 @@ Optional: **Mountify** or similar if you use `/tr_product` overlays (not bundled
 
 ## Installation
 
-1. Download `TransFlagship16_V2.3.zip` from [Releases](https://github.com/Just-LilG/TRANSSION-FLAGSHIP/releases)
+1. Download `TransFlagship16_V2.4.zip` from [Releases](https://github.com/Just-LilG/TRANSSION-FLAGSHIP/releases)
 2. Flash in Magisk / KernelSU Manager
 3. Reboot
 4. Open the module **WebUI** → configure → **Apply & Save** → reboot when prompted
@@ -46,7 +46,7 @@ Features your phone already had from stock will not look “new” — keys are 
 
 ## Blur
 
-**Dynamic blur** is on by default and applies flagship glass (including the notification shade). Turning it **off** restores stock Transsion blur keys. **Parallel** still needs global `ro.tr_animation.platform_level=3` for app open/close; shade glass is kept at stock via SystemUI vconfig (`platform_level=2`) so blur-off does not strip Parallel.
+**Dynamic blur** is on by default and writes flagship glass props. Turning it **off** writes **nothing** — Magisk blur keys are deleted, SystemUI/tr_product overlays are unbound, and your ROM blur is whatever it already was. Parallel still uses motion keys (`ro.tr_perf.*`) only.
 
 ## WebUI tabs
 
