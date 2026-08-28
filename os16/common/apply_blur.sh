@@ -131,27 +131,25 @@ os16_blur_vals() {
   EXP=0
   LAUNCHER_ASYNC=0
   BLUR_RECENT=0
-  VCFG_BLUR=0
 
   if [ "$anim" = "true" ] || [ "$anim" = "1" ]; then
     A01=1
-    PERF_LVL=3
+    ALVL=3
   else
     A01=0
-    PERF_LVL=0
+    ALVL=0
   fi
   UNION=0
 
   if [ "$on" = "true" ] || [ "$on" = "1" ]; then
     case "$lvl" in
       1)
-        # Smart solid — platform 2 shade path + perf model 3 Parallel motion.
+        # Smart solid — platform 3 Parallel, compositor + dock off.
         SOLID_SHADE=1
         DOCK_BLUR=0
         GLASS=0
         BLVL=0
-        VCFG_BLUR=2
-        BLUR_RECENT=1
+        BLUR_RECENT=0
         ;;
       2)
         # G99 partial — dock blur, shade solid (Disable-blur vconfig).
@@ -159,7 +157,6 @@ os16_blur_vals() {
         DOCK_BLUR=1
         GLASS=0
         BLVL=2
-        VCFG_BLUR=2
         BLUR_RECENT=1
         EN=1
         RAD=25
@@ -171,7 +168,6 @@ os16_blur_vals() {
         DOCK_BLUR=1
         GLASS=1
         BLVL=3
-        VCFG_BLUR=3
         BLUR_RECENT=1
         EN=1
         RAD=80
@@ -191,18 +187,15 @@ os16_blur_vals() {
     DOCK_BLUR=0
     GLASS=0
     BLVL=0
-    VCFG_BLUR=2
-    BLUR_RECENT=1
+    BLUR_RECENT=0
   fi
 
-  # platform_level drives notification shade glass on X6886 (3 = glassy).
-  # ro.tr_perf.* models stay at 3 for Parallel when anim is on.
-  if [ "$GLASS" = "1" ]; then
-    ALVL=3
-  elif [ "$SOLID_SHADE" = "1" ]; then
-    ALVL=2
-  else
-    ALVL=0
+  # V1.96 wrote global platform_level=2 for solid shade — that fixed the
+  # notification panel but broke Parallel (blur under app, late icons). Keep
+  # platform 3 globally; push shade tier into SystemUI vconfig only.
+  SYSUI_PLAT=$ALVL
+  if [ "$SOLID_SHADE" = "1" ]; then
+    SYSUI_PLAT=2
   fi
 
   # Glow Space / notification shade solid panel (X6858 stock: CC lighting = 1).
@@ -228,17 +221,17 @@ os16_blur_vals() {
 os16_apply_blur_props() {
   os16_blur_vals
   os16_rp_overwrite ro.tr_animation.platform_level "$ALVL"
-  os16_rp_overwrite ro.tr_perf.launch_start_exit.model "$PERF_LVL"
-  os16_rp_overwrite ro.tr_perf.power_keyguard_animation.model "$PERF_LVL"
-  os16_rp_overwrite ro.tr_perf.recent_animation.model "$PERF_LVL"
-  os16_rp_overwrite ro.tr_perf.unlock_mode.model "$PERF_LVL"
+  os16_rp_overwrite ro.tr_perf.launch_start_exit.model "$ALVL"
+  os16_rp_overwrite ro.tr_perf.power_keyguard_animation.model "$ALVL"
+  os16_rp_overwrite ro.tr_perf.recent_animation.model "$ALVL"
+  os16_rp_overwrite ro.tr_perf.unlock_mode.model "$ALVL"
   os16_rp ro.tr_livewallpaper.dreamanimation.support "$A01"
   os16_rp ro.tr_multiwindow.anim_arc.support "$A01"
   os16_rp ro.transsion_async_animation_support "$LAUNCHER_ASYNC"
-  os16_rp ro.transsion_unlock_mode_support "$PERF_LVL"
-  os16_rp ro.transsion_launch_start_exit_support "$PERF_LVL"
-  os16_rp ro.transsion_power_keyguard_animation_support "$PERF_LVL"
-  os16_rp ro.transsion.recent_animation.model "$PERF_LVL"
+  os16_rp ro.transsion_unlock_mode_support "$ALVL"
+  os16_rp ro.transsion_launch_start_exit_support "$ALVL"
+  os16_rp ro.transsion_power_keyguard_animation_support "$ALVL"
+  os16_rp ro.transsion.recent_animation.model "$ALVL"
   os16_rp_overwrite ro.tran_display_unionrender.support "$UNION"
   os16_rp_overwrite ro.tr_display.liquidglass.support "$B01"
   os16_rp_overwrite ro.surface_flinger.supports_background_blur "$B01"
@@ -475,16 +468,22 @@ os16_apply_launcher_vconfig_all() {
     os16_vconfig_upsert "$staged" "ro.transsion_async_animation_support" "$LAUNCHER_ASYNC"
     os16_vconfig_upsert "$staged" "ro.tran_display_unionrender.support" "$UNION"
   else
-    # Disable-blur shade path: vconfig gaussian 2 + blurrecent 1, compositor off.
-    # VCFG_BLUR can be 2 while resetprop BLVL stays 0 at level 1 (dock solid).
-    os16_vconfig_upsert "$staged" "tr_launcher.gaussianblur.support" "$VCFG_BLUR"
-    os16_vconfig_upsert "$staged" "tr_launcher.blurrecent.support" "$BLUR_RECENT"
+    if [ "$DOCK_BLUR" = "1" ]; then
+      # Level 2 partial — dock blur, shade solid (Disable-blur vconfig path).
+      os16_vconfig_upsert "$staged" "tr_launcher.gaussianblur.support" "$BLVL"
+      os16_vconfig_upsert "$staged" "tr_launcher.blurrecent.support" "$BLUR_RECENT"
+      os16_vconfig_upsert "$staged" "ro.transsion_async_animation_support" "$LAUNCHER_ASYNC"
+    else
+      # Level 1 Smart solid — gaussian 0, no dock/recents blur.
+      os16_vconfig_upsert "$staged" "tr_launcher.gaussianblur.support" "0"
+      os16_vconfig_upsert "$staged" "tr_launcher.blurrecent.support" "0"
+      os16_vconfig_upsert "$staged" "ro.transsion_async_animation_support" "0"
+    fi
     os16_vconfig_upsert "$staged" "ro.os.tran_recent_dismiss_single_task_spring_support" "1"
     os16_vconfig_upsert "$staged" "ro.os.tran_recent_drag_down_single_task_spring_support" "1"
     os16_vconfig_upsert "$staged" "tr_launcher.hidefreezer.support" "1"
     os16_vconfig_upsert "$staged" "ro.os.recent.blur" "0"
-    os16_vconfig_upsert "$staged" "ro.transsion_launcher_gaussian_blur_support" "$VCFG_BLUR"
-    os16_vconfig_upsert "$staged" "ro.transsion_async_animation_support" "0"
+    os16_vconfig_upsert "$staged" "ro.transsion_launcher_gaussian_blur_support" "$BLVL"
     os16_vconfig_upsert "$staged" "ro.tran_display_unionrender.support" "0"
   fi
   bar=$(os16_cfg_01 dynamicbar_os16 false)
@@ -500,12 +499,35 @@ os16_apply_systemui_vconfig() {
   os16_blur_vals
   staged=$(os16_seed_vconfig_pkg com.android.systemui)
   stock="${staged}.stock"
+  if [ "$SOLID_SHADE" = "1" ]; then
+    # Shade-only tier: global platform stays 3 for Parallel; SystemUI reads vconfig.
+    os16_vconfig_upsert "$staged" "ro.tr_animation.platform_level" "$SYSUI_PLAT"
+    os16_vconfig_upsert "$staged" "ro.tr_lighting.controlcenter.feature.support" "$LIGHT_CC"
+    os16_vconfig_upsert "$staged" "ro.tr_lighting.feature.support" "$LIGHT_FEAT"
+    os16_vconfig_upsert "$staged" "ro.tr_display.liquidglass.support" "0"
+    os16_vconfig_upsert "$staged" "ro.tran_display_unionrender.support" "0"
+  elif [ -f "$stock" ]; then
+    for k in \
+      ro.tr_animation.platform_level \
+      ro.tr_lighting.controlcenter.feature.support \
+      ro.tr_lighting.feature.support \
+      ro.tr_display.liquidglass.support \
+      ro.tran_display_unionrender.support
+    do
+      os16_restore_vconfig_key_from_stock "$staged" "$k"
+    done
+  fi
   if [ -f "$stock" ]; then
     keys=$(grep -iE 'blur|glass|glow|lighting|transparen|liquid|shade' "$stock" 2>/dev/null)
     if [ -n "$keys" ]; then
       printf '%s\n' "$keys" | while IFS= read -r line; do
         k="${line%%=*}"
         [ -n "$k" ] || continue
+        case "$k" in
+          ro.tr_animation.platform_level|ro.tr_lighting.controlcenter.feature.support|ro.tr_lighting.feature.support|ro.tr_display.liquidglass.support|ro.tran_display_unionrender.support)
+            continue
+            ;;
+        esac
         if [ "$SOLID_SHADE" = "1" ]; then
           os16_vconfig_upsert "$staged" "$k" "0"
         else

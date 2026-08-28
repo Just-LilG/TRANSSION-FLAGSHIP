@@ -1,5 +1,8 @@
 # Transsion Flagship 16
 
+## v1.97
+- **Fix Parallel at blur 1/2 — shade tier moves to SystemUI vconfig only.** V1.96 global `platform_level=2` made the notification panel solid but broke Parallel (blur under closing app, icons a second late). Global **`platform_level=3`** is back for app open/close. Solid shade now writes **`platform_level=2` + lighting keys into `com.android.systemui` vconfig only** so SystemUI gets the Smart panel without downgrading launcher/wm animations. Level 1 launcher vconfig back to **gaussian 0** (not 2). Apply + reboot, test blur 1: Parallel should match level 3, shade should stay solid. Dump: `platform=3`, `sysui_platform=2`.
+
 ## v1.96
 - **Notification shade: split platform_level from Parallel perf models.** V1.95 lighting keys did not fix the panel — your tests showed **`ro.tr_animation.platform_level=3` keeps the notification shade glassy** even when every other blur flag is off. Level 1 / 2 / blur off now write **`platform_level=2`** (Disable-blur solid shade path) while **`ro.tr_perf.*` models stay at 3** so Parallel animations remain. Launcher vconfig uses **gaussian 2 + blurrecent 1** for the shade path at level 1 (resetprop gaussian stays **0** so the dock stays solid). SystemUI is **force-stopped after boot settle** and on Apply so cached glass clears. Apply + reboot, pull shade at level 1 — dump should show `shade_platform=2` and `perf_model=3`.
 
