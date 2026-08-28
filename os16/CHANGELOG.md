@@ -1,5 +1,8 @@
 # Transsion Flagship 16
 
+## v1.85
+- **Version string fix.** V1.84 shipped motion sickness but `module.prop` still read V1.83. This build reports V1.85 everywhere (same features as V1.84).
+
 ## v1.84
 - **Motion sickness relief.** GT Note dump has `ro.tr_microIntelligence.motion_sickness.feature.support=1`; G99 stock is **0**. New Features toggle (separate from **Motions gestures** inside GT app extras). Apply + reboot, then Settings → Special functions. Dump `motion_sick_os16` in **=== unlock extras (retest) ===**.
 - **GT app extras also bind 3D photo + PC extend screen** (were skipped in V1.64 as dump-0). Still under the GT app extras toggle.
