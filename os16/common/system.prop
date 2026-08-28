@@ -54,7 +54,7 @@ ro.transsion_launch_start_exit_support=3
 ro.transsion_power_keyguard_animation_support=3
 ro.transsion.recent_animation.model=3
 ro.tran_display_unionrender.support=1
-# Blur tier keys are written from config (Apply / install). Off or level 1 = solid.
+# Blur tier keys are written from config (Apply / install). Off or level 1 = solid, unionrender off.
 # Level 2 = partial glass. Level 3 = full glass + dynamic blur engine.
 # AOD — OS 16 keys from GT dump. half.screen is stock 0 on GT.
 # These live in /tr_product/etc/build.prop so apply_blur.sh overwrites.

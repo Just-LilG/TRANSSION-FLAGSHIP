@@ -110,16 +110,15 @@ write_os16_ai_prop() {
     [ "$blvl" -le 3 ] 2>/dev/null || blvl=2
   fi
   # Parallel motion stays at platform 3 whenever Parallel is on.
-  # Flagship glass is unionrender / liquid glass / compositor only.
+  # Unionrender only at blur level 2/3 (glass tier).
   if [ "$anim" = "true" ]; then
     a01=1
     alvl=3
-    union=1
   else
     a01=0
     alvl=0
-    union=0
   fi
+  union=0
   b01=0
   sfdis=1
   gblur=0
@@ -129,10 +128,10 @@ write_os16_ai_prop() {
   launcher_async=0
   if [ "$blur" = "true" ]; then
     case "$blvl" in
-      1) b01=0; sfdis=1; gblur=0; dynblur=0; blurv2=0; exp=0; launcher_async=0 ;;
-      2) b01=1; sfdis=0; gblur=2; dynblur=0; blurv2=0; exp=0; launcher_async=$a01 ;;
-      3) b01=1; sfdis=0; gblur=3; dynblur=1; blurv2=1; exp=1; launcher_async=$a01 ;;
-      *) b01=1; sfdis=0; gblur=2; dynblur=0; blurv2=0; exp=0; launcher_async=$a01 ;;
+      1) b01=0; sfdis=1; gblur=0; dynblur=0; blurv2=0; exp=0; launcher_async=0; union=0 ;;
+      2) b01=1; sfdis=0; gblur=2; dynblur=0; blurv2=0; exp=0; launcher_async=$a01; union=$a01 ;;
+      3) b01=1; sfdis=0; gblur=3; dynblur=1; blurv2=1; exp=1; launcher_async=$a01; union=$a01 ;;
+      *) b01=1; sfdis=0; gblur=2; dynblur=0; blurv2=0; exp=0; launcher_async=$a01; union=$a01 ;;
     esac
   fi
   aod=$(json_bool "$cfg" aod_os16 true)
