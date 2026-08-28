@@ -83,9 +83,11 @@ write_os16_ai_prop() {
   [ "$scale" = "false" ] && scale=false || scale=true
   gt=$(json_bool "$cfg" gt_apps_os16 true)
   circle=$(json_bool "$cfg" circle_os16 true)
+  motion=$(json_bool "$cfg" motion_sick_os16 true)
   [ "$gt" = "false" ] && gt01=0 || gt01=1
   [ "$gt" = "false" ] && gttrue=false || gttrue=true
   [ "$circle" = "false" ] && circle=0 || circle=1
+  [ "$motion" = "false" ] && motion=0 || motion=1
   glvl=$(json_int "$cfg" game_esports_level 3)
   [ "$glvl" -ge 1 ] 2>/dev/null || glvl=3
   [ "$glvl" -le 3 ] 2>/dev/null || glvl=3
@@ -254,6 +256,7 @@ ro.tr_airtransfer.feature.support=$airt
 tr_airtransfer.feature.support=$airt
 tr_display.resolution.scalingup.support=$scale
 ro.tr_display.resolution.scalingup.support=$scale
+tr_gallery.3dphoto.support=$gt01
 tr_gallery.custom.fliters.support=$gt01
 tr_gallery.drag.sort.support=$gt01
 tr_gallery.easypic.support=$gt01
@@ -272,6 +275,7 @@ tr_smartscan.recharge.support=$gttrue
 tr_microIntelligence.gesture_functions.feature.support=$gt01
 ro.tr_microIntelligence.gesture_functions.feature.support=$gt01
 ro.tr_microIntelligence.microIntelligence.feature.support=$gt01
+tr_pcconnect.extend_screen.feature.support=$gttrue
 tr_pcconnect.backup.feature.support=$gt01
 tr_pcconnect.gesture_file_transfer.feature.support=$gt01
 tr_pcconnect.network_sharing.feature.support=$gt01
@@ -287,6 +291,8 @@ ro.tr_dialer.contact.carlcare.feature.support=$gt01
 ro.tr_microIntelligence.circle_to_search.feature.support=$circle
 tr_microIntelligence.circle_to_search.feature.support=$circle
 ro.os_ai_circle_to_search_support=$circle
+ro.tr_microIntelligence.motion_sickness.feature.support=$motion
+tr_microIntelligence.motion_sickness.feature.support=$motion
 ro.surface_flinger.game_default_frame_rate_override=120
 debug.graphics.game_default_frame_rate.disabled=true
 persist.graphics.game_default_frame_rate.enabled=false
@@ -306,7 +312,7 @@ print_modname() {
   ui_print " "
   ui_print "  ╔══════════════════════════════════════════╗"
   ui_print "  ║    TRANSSION FLAGSHIP 16                 ║"
-    ui_print "  ║    XOS · HiOS · iTel OS 16  ·  V1.83     ║"
+    ui_print "  ║    XOS · HiOS · iTel OS 16  ·  V1.84     ║"
   ui_print "  ╚══════════════════════════════════════════╝"
   ui_print " "
 }

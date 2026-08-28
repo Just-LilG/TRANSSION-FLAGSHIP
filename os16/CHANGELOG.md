@@ -1,5 +1,9 @@
 # Transsion Flagship 16
 
+## v1.84
+- **Motion sickness relief.** GT Note dump has `ro.tr_microIntelligence.motion_sickness.feature.support=1`; G99 stock is **0**. New Features toggle (separate from **Motions gestures** inside GT app extras). Apply + reboot, then Settings → Special functions. Dump `motion_sick_os16` in **=== unlock extras (retest) ===**.
+- **GT app extras also bind 3D photo + PC extend screen** (were skipped in V1.64 as dump-0). Still under the GT app extras toggle.
+
 ## v1.83
 - **Unlock extras restored for retest.** After a clean uninstall + reinstall, Super volume worked on X6886 — so Social Turbo, Display extras (DC / color / HDR / reading), resolution scale-up, GT app vconfigs, and Circle to Search are back in Features. New `apply_unlock.sh` runs at boot and on Apply (no SystemUI kill). Defaults on. Apply + reboot, then check Settings / Social Turbo / long-press home for Circle. Dump **=== unlock extras (retest) ===** and paste if a row still hides.
 

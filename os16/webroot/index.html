@@ -387,7 +387,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
           <div class="setting-row">
             <div class="row-text">
               <div class="row-title">GT app extras</div>
-              <div class="row-sub">Smart Scan, Gallery extras, Recorder speech, Motions, PC Connect, Zero Screen, Smart Hub (vconfig + props).</div>
+              <div class="row-sub">Smart Scan, Gallery extras (incl. 3D photo), Recorder speech, Motions gestures, PC Connect (incl. extend screen), Zero Screen, Smart Hub.</div>
             </div>
             <label class="toggle"><input type="checkbox" id="feat-gtapps" checked onchange="cfg.gt_apps_os16=this.checked"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
           </div>
@@ -397,6 +397,13 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
               <div class="row-sub">ro.tr_microIntelligence.circle_to_search + Flagship 15 os_ai key. Long-press home / nav handle.</div>
             </div>
             <label class="toggle"><input type="checkbox" id="feat-circle" checked onchange="cfg.circle_os16=this.checked"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+          </div>
+          <div class="setting-row">
+            <div class="row-text">
+              <div class="row-title">Motion sickness relief</div>
+              <div class="row-sub">GT dump ro.tr_microIntelligence.motion_sickness (stock 0 on G99). Settings → Special functions. Not the same as Motions gestures in GT app extras.</div>
+            </div>
+            <label class="toggle"><input type="checkbox" id="feat-motion-sick" checked onchange="cfg.motion_sick_os16=this.checked"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
           </div>
         </div>
         <div class="section-label">Display</div>
@@ -605,7 +612,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
 <script type="module">
 const MOD='/data/adb/modules/transsion-flagship-16';
 const CONFIG_PATH=MOD+'/config.json';
-let cfg={bootanim_style:'hios16',bootanim_file:'',rebootanim_style:'hios16',rebootanim_file:'',statusbar_style:'off',statusbarcustom_file:'',ai_master:true,ai_subtitles:true,ai_call_summary:true,ai_writing:true,ai_sound_rec:true,ai_notes:true,ai_gallery:true,ai_video:true,game_master:true,game_esports_touch:true,game_esports_level:3,game_bypass_charge:true,game_gt_triggers:true,social_master:true,social_record:true,social_translate:true,social_beauty:true,anim_os16:true,blur_os16:true,blur_os16_level:2,display_dc:true,display_color:true,display_hdr:true,display_reading:false,aod_os16:true,scale_os16:true,gt_apps_os16:true,circle_os16:true,videosr_os16:true,supervol_os16:true,treasure_os16:true,cutepet_os16:true,outdoorboost_os16:true,gallerylive_os16:true,airtransfer_os16:true,dynamicbar_os16:false,force_120hz:false,emoji_font:true,emoji_file:''};
+let cfg={bootanim_style:'hios16',bootanim_file:'',rebootanim_style:'hios16',rebootanim_file:'',statusbar_style:'off',statusbarcustom_file:'',ai_master:true,ai_subtitles:true,ai_call_summary:true,ai_writing:true,ai_sound_rec:true,ai_notes:true,ai_gallery:true,ai_video:true,game_master:true,game_esports_touch:true,game_esports_level:3,game_bypass_charge:true,game_gt_triggers:true,social_master:true,social_record:true,social_translate:true,social_beauty:true,anim_os16:true,blur_os16:true,blur_os16_level:2,display_dc:true,display_color:true,display_hdr:true,display_reading:false,aod_os16:true,scale_os16:true,gt_apps_os16:true,circle_os16:true,motion_sick_os16:true,videosr_os16:true,supervol_os16:true,treasure_os16:true,cutepet_os16:true,outdoorboost_os16:true,gallerylive_os16:true,airtransfer_os16:true,dynamicbar_os16:false,force_120hz:false,emoji_font:true,emoji_file:''};
 let _exec=null;
 let _saving=false;
 const SOUND_SLOTS=[
@@ -962,6 +969,8 @@ const UNLOCK_KEYS=[
   'ro.tr_microIntelligence.circle_to_search.feature.support',
   'tr_microIntelligence.circle_to_search.feature.support',
   'ro.os_ai_circle_to_search_support',
+  'ro.tr_microIntelligence.motion_sickness.feature.support',
+  'tr_microIntelligence.motion_sickness.feature.support',
   'ro.tr_smartpanel.os_smartpanel.support',
   'ro.tr_pcconnect.feature.support',
   'ro.tr_microIntelligence.microIntelligence.feature.support'
@@ -1134,6 +1143,7 @@ async function writeAiSystemProp(){
   lines.push('ro.tr_display.resolution.scalingup.support='+scale);
   const gt=cfg.gt_apps_os16!==false?'1':'0';
   const gtt=cfg.gt_apps_os16!==false?'true':'false';
+  lines.push('tr_gallery.3dphoto.support='+gt);
   lines.push('tr_gallery.custom.fliters.support='+gt);
   lines.push('tr_gallery.drag.sort.support='+gt);
   lines.push('tr_gallery.easypic.support='+gt);
@@ -1152,6 +1162,7 @@ async function writeAiSystemProp(){
   lines.push('tr_microIntelligence.gesture_functions.feature.support='+gt);
   lines.push('ro.tr_microIntelligence.gesture_functions.feature.support='+gt);
   lines.push('ro.tr_microIntelligence.microIntelligence.feature.support='+gt);
+  lines.push('tr_pcconnect.extend_screen.feature.support='+gtt);
   lines.push('tr_pcconnect.backup.feature.support='+gt);
   lines.push('tr_pcconnect.gesture_file_transfer.feature.support='+gt);
   lines.push('tr_pcconnect.network_sharing.feature.support='+gt);
@@ -1168,6 +1179,8 @@ async function writeAiSystemProp(){
   lines.push('ro.tr_microIntelligence.circle_to_search.feature.support='+circle);
   lines.push('tr_microIntelligence.circle_to_search.feature.support='+circle);
   lines.push('ro.os_ai_circle_to_search_support='+circle);
+  lines.push('ro.tr_microIntelligence.motion_sickness.feature.support='+feat01('motion_sick_os16'));
+  lines.push('tr_microIntelligence.motion_sickness.feature.support='+feat01('motion_sick_os16'));
   lines.push('ro.surface_flinger.game_default_frame_rate_override=120');
   lines.push('debug.graphics.game_default_frame_rate.disabled=true');
   lines.push('persist.graphics.game_default_frame_rate.enabled=false');
@@ -1215,6 +1228,7 @@ async function saveAll(){
       scale_os16:cfg.scale_os16!==false,
       gt_apps_os16:cfg.gt_apps_os16!==false,
       circle_os16:cfg.circle_os16!==false,
+      motion_sick_os16:cfg.motion_sick_os16!==false,
       anim_os16:cfg.anim_os16!==false,
       blur_os16:cfg.blur_os16!==false,
       blur_os16_level:blurLevel(),
@@ -1355,6 +1369,7 @@ async function dumpAi(){
   lines.push('scale_os16  '+String(cfg.scale_os16!==false));
   lines.push('gt_apps_os16  '+String(cfg.gt_apps_os16!==false));
   lines.push('circle_os16  '+String(cfg.circle_os16!==false));
+  lines.push('motion_sick_os16  '+String(cfg.motion_sick_os16!==false));
   const dcSet=await g('settings get system tran_dc_dimming_enable');
   const colSet=await g('settings get system tran_display_color_enhance');
   const hdrSet=await g('settings get system tran_sdr2hdr_enable');
@@ -1630,6 +1645,7 @@ async function loadCfg(){
   if(cfg.scale_os16===undefined) cfg.scale_os16=true;
   if(cfg.gt_apps_os16===undefined) cfg.gt_apps_os16=true;
   if(cfg.circle_os16===undefined) cfg.circle_os16=true;
+  if(cfg.motion_sick_os16===undefined) cfg.motion_sick_os16=true;
   if(cfg.anim_os16===undefined) cfg.anim_os16=true;
   if(cfg.blur_os16===undefined) cfg.blur_os16=true;
   if(cfg.blur_os16_level===undefined) cfg.blur_os16_level=2;
@@ -1689,6 +1705,7 @@ async function loadCfg(){
   setT('feat-scale', cfg.scale_os16!==false);
   setT('feat-gtapps', cfg.gt_apps_os16!==false);
   setT('feat-circle', cfg.circle_os16!==false);
+  setT('feat-motion-sick', cfg.motion_sick_os16!==false);
   setT('feat-dc', cfg.display_dc!==false);
   setT('feat-color', cfg.display_color!==false);
   setT('feat-hdr', cfg.display_hdr!==false);

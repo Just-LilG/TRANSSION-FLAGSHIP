@@ -29,6 +29,7 @@
   "scale_os16": true,
   "gt_apps_os16": true,
   "circle_os16": true,
+  "motion_sick_os16": true,
   "anim_os16": true,
   "blur_os16": true,
   "blur_os16_level": 2,
