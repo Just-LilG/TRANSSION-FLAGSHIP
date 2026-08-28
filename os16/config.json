@@ -40,5 +40,7 @@
   "sound_LowBattery_style": "pixel",
   "sound_InCallNotification_style": "pixel",
   "sound_Dock_style": "pixel",
-  "sound_Undock_style": "pixel"
+  "sound_Undock_style": "pixel",
+  "emoji_font": true,
+  "emoji_file": ""
 }

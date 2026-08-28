@@ -217,7 +217,7 @@ print_modname() {
   ui_print " "
   ui_print "  ╔══════════════════════════════════════════╗"
   ui_print "  ║    TRANSSION FLAGSHIP 16                 ║"
-  ui_print "  ║    XOS · HiOS · iTel OS 16  ·  V1.79     ║"
+    ui_print "  ║    XOS · HiOS · iTel OS 16  ·  V1.80     ║"
   ui_print "  ╚══════════════════════════════════════════╝"
   ui_print " "
 }
@@ -320,6 +320,8 @@ on_install() {
     unzip -oj "$ZIPFILE" 'common/apply_blur.sh' -d "$MODPATH" >&2
     unzip -oj "$ZIPFILE" 'common/apply_120hz.sh' -d "$MODPATH" >&2
     unzip -oj "$ZIPFILE" 'common/apply_sounds.sh' -d "$MODPATH" >&2
+    unzip -oj "$ZIPFILE" 'common/apply_emoji.sh' -d "$MODPATH" >&2
+    unzip -o "$ZIPFILE" 'system/fonts/*' -d "$MODPATH" >&2
     unzip -o "$ZIPFILE" 'apm_120hz_bypass/*' -d "$MODPATH" >&2
     unzip -o "$ZIPFILE" 'magellan/*' -d "$MODPATH" >&2
     unzip -o "$ZIPFILE" 'system/product/apm/*' -d "$MODPATH" >&2
@@ -336,6 +338,7 @@ on_install() {
     unzip -oj "$ZIPFILE" 'common/apply_blur.sh' -d "$MODPATH" >&2
     unzip -oj "$ZIPFILE" 'common/apply_120hz.sh' -d "$MODPATH" >&2
     unzip -oj "$ZIPFILE" 'common/apply_sounds.sh' -d "$MODPATH" >&2
+    unzip -oj "$ZIPFILE" 'common/apply_emoji.sh' -d "$MODPATH" >&2
     unzip -o "$ZIPFILE" 'apm_120hz_bypass/*' -d "$MODPATH" >&2
     unzip -o "$ZIPFILE" 'magellan/*' -d "$MODPATH" >&2
     unzip -o "$ZIPFILE" 'system/product/apm/*' -d "$MODPATH" >&2
@@ -361,6 +364,11 @@ on_install() {
     mkdir -p "$MODPATH/system/product/media/audio/ui"
     cp -a "$OLD16/system/product/media/audio/ui/"*_custom.* "$MODPATH/system/product/media/audio/ui/" 2>/dev/null
     ui_ok "Kept uploaded UI sounds"
+  fi
+  if [ -f "$OLD16/system/fonts/NotoColorEmoji_custom.ttf" ]; then
+    mkdir -p "$MODPATH/system/fonts"
+    cp -a "$OLD16/system/fonts/NotoColorEmoji_custom.ttf" "$MODPATH/system/fonts/" 2>/dev/null
+    ui_ok "Kept uploaded emoji font"
   fi
 
   # V1.14 shipped bundled iOS / XOS 16 overlay APKs. Drop them; keep a custom
@@ -461,14 +469,14 @@ set_permissions() {
   fi
   touch "$MODPATH/skip_mount"
   set_perm_recursive "$MODPATH" 0 0 0755 0644
-  for sh in "$MODPATH/post-fs-data.sh" "$MODPATH/service.sh" "$MODPATH/uninstall.sh" "$MODPATH/apply_blur.sh" "$MODPATH/apply_120hz.sh" "$MODPATH/apply_sounds.sh"; do
+  for sh in "$MODPATH/post-fs-data.sh" "$MODPATH/service.sh" "$MODPATH/uninstall.sh" "$MODPATH/apply_blur.sh" "$MODPATH/apply_120hz.sh" "$MODPATH/apply_sounds.sh" "$MODPATH/apply_emoji.sh"; do
     [ -f "$sh" ] && set_perm "$sh" 0 0 0755
   done
   ui_print " "
   ui_div
-  ui_print "  ✨  FLAGSHIP 16  ·  V1.79"
+  ui_print "  ✨  FLAGSHIP 16  ·  V1.80"
   ui_info "OS     : $OS_TYPE $OS_VER"
-  ui_info "Feature: boot + reboot + overlay + AI + gaming + anim/blur + AOD + Dynamic bar + Force 120Hz + UI sounds"
+  ui_info "Feature: boot + reboot + overlay + AI + gaming + anim/blur + AOD + Dynamic bar + Force 120Hz + UI sounds + emoji"
   ui_div
   ui_print "  Reboot, then open WebUI in Magisk/KSU."
   ui_print " "

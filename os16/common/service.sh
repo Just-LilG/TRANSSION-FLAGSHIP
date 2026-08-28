@@ -5,7 +5,7 @@ LOG="$MODDIR/transflagship16_service.log"
 rm -f "$LOG"
 log_p() { echo "[$(date '+%H:%M:%S')] $1" >> "$LOG"; }
 
-log_p "=== TransFlagship 16 V1.79 ==="
+log_p "=== TransFlagship 16 V1.80 ==="
 log_p "Device : $(getprop ro.product.model 2>/dev/null)"
 log_p "Brand  : $(getprop ro.product.brand 2>/dev/null)"
 log_p "Android: $(getprop ro.build.version.release 2>/dev/null)"
@@ -54,6 +54,14 @@ if [ -f "$MODDIR/apply_sounds.sh" ]; then
   log_p "ui sounds charge=$(ls -l /tr_product/media/audio/ui/ChargingStarted.ogg 2>/dev/null | awk '{print $5,$NF}') unlock=$(ls -l /tr_product/media/audio/ui/Unlock.ogg 2>/dev/null | awk '{print $5,$NF}')"
 else
   log_p "apply_sounds.sh missing"
+fi
+
+if [ -f "$MODDIR/apply_emoji.sh" ]; then
+  . "$MODDIR/apply_emoji.sh"
+  os16_apply_emoji
+  log_p "emoji live=$(ls -l /system/fonts/NotoColorEmoji.ttf 2>/dev/null | awk '{print $5,$NF}')"
+else
+  log_p "apply_emoji.sh missing"
 fi
 
 log_p "OS 16 AI keys (read only):"
@@ -117,6 +125,11 @@ log_p "  home=$(cmd package resolve-activity --brief -a android.intent.action.MA
     . "$MODDIR/apply_sounds.sh"
     os16_apply_sounds
     echo "[$(date '+%H:%M:%S')] ui sounds after settle charge=$(ls -l /tr_product/media/audio/ui/ChargingStarted.ogg 2>/dev/null | awk '{print $5}') unlock=$(ls -l /tr_product/media/audio/ui/Unlock.ogg 2>/dev/null | awk '{print $5}')" >> "$LOG"
+  fi
+  if [ -f "$MODDIR/apply_emoji.sh" ]; then
+    . "$MODDIR/apply_emoji.sh"
+    os16_apply_emoji
+    echo "[$(date '+%H:%M:%S')] emoji after settle live=$(ls -l /system/fonts/NotoColorEmoji.ttf 2>/dev/null | awk '{print $5}')" >> "$LOG"
   fi
 ) &
 

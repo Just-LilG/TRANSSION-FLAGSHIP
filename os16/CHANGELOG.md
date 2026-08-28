@@ -1,5 +1,8 @@
 # Transsion Flagship 16
 
+## v1.80
+- **Custom emoji font (last feature).** Same Flagship 15 iOS-style `NotoColorEmoji.ttf` (one copy under `system/fonts`). GT dump dest is `/system/fonts/NotoColorEmoji.ttf`. Toggle on by default; upload your own `.ttf` if you want. Off leaves the ROM font. Per-file bind (and Mountify overlay). Does not touch `NotoColorEmojiFlags.ttf`. Apply + reboot, then open Messages / keyboard. Dump **=== emoji font ===**.
+
 ## v1.79
 - **Pixel sounds are the default** except keypress (those stay stock). Packed from the Pixel UI zip: charge, lock/unlock, tick, low battery, in-call, dock/undock, screenshot (`camera_click.ogg`).
 - **Charging picker:** Pixel / Huawei / iOS / S25 / Stock / Custom (same Huawei/iOS/S25 files as Flagship 15). Wireless Pixel uses the Pixel wireless clip.
