@@ -1,5 +1,8 @@
 # Transsion Flagship 16
 
+## v1.98
+- **Solid shade without killing Parallel — tr_product platform split.** V1.97 kept global `platform_level=3` (Parallel OK) but notification blur returned — SystemUI vconfig alone is not enough on X6886. V1.96 proved only **`platform_level=2`** makes the panel solid, but global 2 broke Parallel. This build keeps **global resetprop at 3** and writes **`platform_level=2` into the bound `/tr_product/etc/build.prop`** plus expanded **SystemUI vconfig** (platform 2, lighting off, Disable-blur gaussian 2). Glow-space settings aliases zeroed at runtime. Apply + reboot — Parallel should stay, shade should solid. Dump: global `platform=3`, tr_product `platform_level=2`, systemui vconfig platform 2.
+
 ## v1.97
 - **Fix Parallel at blur 1/2 — shade tier moves to SystemUI vconfig only.** V1.96 global `platform_level=2` made the notification panel solid but broke Parallel (blur under closing app, icons a second late). Global **`platform_level=3`** is back for app open/close. Solid shade now writes **`platform_level=2` + lighting keys into `com.android.systemui` vconfig only** so SystemUI gets the Smart panel without downgrading launcher/wm animations. Level 1 launcher vconfig back to **gaussian 0** (not 2). Apply + reboot, test blur 1: Parallel should match level 3, shade should stay solid. Dump: `platform=3`, `sysui_platform=2`.
 

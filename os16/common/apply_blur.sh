@@ -190,11 +190,12 @@ os16_blur_vals() {
     BLUR_RECENT=0
   fi
 
-  # V1.96 wrote global platform_level=2 for solid shade — that fixed the
-  # notification panel but broke Parallel (blur under app, late icons). Keep
-  # platform 3 globally; push shade tier into SystemUI vconfig only.
+  # Global platform 3 keeps Parallel. Shade tier goes to tr_product bind +
+  # SystemUI vconfig (V1.97 vconfig-only was not enough — blur came back).
+  SHADE_PLAT=$ALVL
   SYSUI_PLAT=$ALVL
   if [ "$SOLID_SHADE" = "1" ]; then
+    SHADE_PLAT=2
     SYSUI_PLAT=2
   fi
 
@@ -415,6 +416,7 @@ os16_apply_tr_product_blur_buildprop() {
   os16_vconfig_upsert "$staged" "ro.tran_display_unionrender.support" "$UNION"
   os16_vconfig_upsert "$staged" "ro.tr_lighting.controlcenter.feature.support" "$LIGHT_CC"
   os16_vconfig_upsert "$staged" "ro.tr_lighting.feature.support" "$LIGHT_FEAT"
+  os16_vconfig_upsert "$staged" "ro.tr_animation.platform_level" "$SHADE_PLAT"
   mkdir -p "$MODDIR/system/tr_product/etc"
   cp -f "$staged" "$MODDIR/system/tr_product/etc/build.prop"
   for dest in \
@@ -500,12 +502,15 @@ os16_apply_systemui_vconfig() {
   staged=$(os16_seed_vconfig_pkg com.android.systemui)
   stock="${staged}.stock"
   if [ "$SOLID_SHADE" = "1" ]; then
-    # Shade-only tier: global platform stays 3 for Parallel; SystemUI reads vconfig.
+    # Disable-blur shade path in SystemUI package vconfig (compositor stays off).
     os16_vconfig_upsert "$staged" "ro.tr_animation.platform_level" "$SYSUI_PLAT"
     os16_vconfig_upsert "$staged" "ro.tr_lighting.controlcenter.feature.support" "$LIGHT_CC"
     os16_vconfig_upsert "$staged" "ro.tr_lighting.feature.support" "$LIGHT_FEAT"
     os16_vconfig_upsert "$staged" "ro.tr_display.liquidglass.support" "0"
     os16_vconfig_upsert "$staged" "ro.tran_display_unionrender.support" "0"
+    os16_vconfig_upsert "$staged" "tr_launcher.gaussianblur.support" "2"
+    os16_vconfig_upsert "$staged" "tr_launcher.blurrecent.support" "1"
+    os16_vconfig_upsert "$staged" "ro.transsion_launcher_gaussian_blur_support" "2"
   elif [ -f "$stock" ]; then
     for k in \
       ro.tr_animation.platform_level \
@@ -524,7 +529,7 @@ os16_apply_systemui_vconfig() {
         k="${line%%=*}"
         [ -n "$k" ] || continue
         case "$k" in
-          ro.tr_animation.platform_level|ro.tr_lighting.controlcenter.feature.support|ro.tr_lighting.feature.support|ro.tr_display.liquidglass.support|ro.tran_display_unionrender.support)
+          ro.tr_animation.platform_level|ro.tr_lighting.controlcenter.feature.support|ro.tr_lighting.feature.support|ro.tr_display.liquidglass.support|ro.tran_display_unionrender.support|tr_launcher.gaussianblur.support|tr_launcher.blurrecent.support|ro.transsion_launcher_gaussian_blur_support)
             continue
             ;;
         esac
@@ -538,6 +543,7 @@ os16_apply_systemui_vconfig() {
     fi
   fi
   os16_bind_vconfig_pkg "$staged" com.android.systemui
+  os16_bind_vconfig_pkg "$staged" com.transsion.systemui
 }
 
 os16_apply_blur_stack() {
@@ -720,8 +726,19 @@ os16_apply_blur_runtime() {
   os16_settings_put system disable_window_blurs "$DIS"
   if [ "$SOLID_SHADE" = "1" ]; then
     os16_settings_put secure accessibility_reduce_transparency 1
+    os16_settings_put global tran_glow_space_enable 0
+    os16_settings_put system tran_glow_space_enable 0
+    os16_settings_put global tr_glow_space_enable 0
+    os16_settings_put system tr_glow_space_enable 0
+    os16_settings_put global tran_control_center_blur_enable 0
+    os16_settings_put system tran_control_center_blur_enable 0
   else
     settings delete secure accessibility_reduce_transparency >/dev/null 2>&1
+    for ns in system global; do
+      settings delete "$ns" tran_glow_space_enable >/dev/null 2>&1
+      settings delete "$ns" tr_glow_space_enable >/dev/null 2>&1
+      settings delete "$ns" tran_control_center_blur_enable >/dev/null 2>&1
+    done
   fi
   os16_settings_put global transsion_launcher_gaussian_blur_support "$BLVL"
   os16_settings_put system transsion_launcher_gaussian_blur_support "$BLVL"

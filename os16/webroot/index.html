@@ -1384,7 +1384,7 @@ async function dumpAi(){
   const svc=await g('grep -iE "blur|glass|glow|lighting|transparen|liquid|shade" /tr_product/etc/vconfig/com.android.systemui/build.prop 2>/dev/null');
   lines.push('systemui vconfig blur/glow keys');
   lines.push(svc||'EMPTY');
-  const tpb=await g('grep -E "liquidglass|background_blur|gaussian|dynamicblur|xos16_blur|lighting" /tr_product/etc/build.prop 2>/dev/null');
+  const tpb=await g('grep -E "liquidglass|background_blur|gaussian|dynamicblur|xos16_blur|lighting|platform_level" /tr_product/etc/build.prop 2>/dev/null');
   lines.push('tr_product build.prop blur keys');
   lines.push(tpb||'EMPTY');
   lines.push('');
