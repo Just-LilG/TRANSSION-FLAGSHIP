@@ -115,29 +115,20 @@ os16_blur_vals() {
   [ "$lvl" -ge 1 ] 2>/dev/null || lvl=2
   [ "$lvl" -le 3 ] 2>/dev/null || lvl=2
 
-  SOLID=0
+  # Default tier = level 1 solid (TranOS Anim Only lv3 reference).
+  SOLID=1
+  GLASS=0
   BLVL=0
   EN=0
   RAD=0
-  if [ "$on" = "true" ] || [ "$on" = "1" ]; then
-    if [ "$lvl" -ge 2 ]; then
-      BLVL=$lvl
-      EN=1
-      case "$lvl" in
-        3) RAD=80 ;;
-        *) RAD=45 ;;
-      esac
-    else
-      # Level 1 = Smart solid shade, not gaussian 1 (that half-blurs / see-through).
-      SOLID=1
-    fi
-  else
-    SOLID=1
-  fi
+  B01=0
+  DYNBLUR=0
+  BLURV2=0
+  SFDIS=1
+  DIS=1
+  EXP=0
+  LAUNCHER_ASYNC=0
 
-  # Parallel motion always uses platform 3 when Parallel is on.
-  # Unionrender stays on for anim (TranOS Anim Only lv3). Glass is separate.
-  GLASS=0
   if [ "$anim" = "true" ] || [ "$anim" = "1" ]; then
     A01=1
     ALVL=3
@@ -147,23 +138,40 @@ os16_blur_vals() {
     ALVL=0
     UNION=0
   fi
+
   if [ "$on" = "true" ] || [ "$on" = "1" ]; then
-    if [ "$lvl" -ge 2 ]; then
-      GLASS=1
-    fi
+    case "$lvl" in
+      1)
+        SOLID=1
+        ;;
+      2)
+        SOLID=0
+        GLASS=1
+        BLVL=2
+        EN=1
+        RAD=25
+        B01=1
+        SFDIS=0
+        DIS=0
+        LAUNCHER_ASYNC=1
+        ;;
+      3)
+        SOLID=0
+        GLASS=1
+        BLVL=3
+        EN=1
+        RAD=80
+        B01=1
+        DYNBLUR=1
+        BLURV2=1
+        SFDIS=0
+        DIS=0
+        EXP=1
+        LAUNCHER_ASYNC=1
+        ;;
+    esac
   fi
 
-  if [ "$GLASS" = "1" ]; then
-    B01=1
-    SFDIS=0
-    DIS=0
-    EXP=0
-  else
-    B01=0
-    SFDIS=1
-    DIS=1
-    EXP=1
-  fi
   BLUR_ON=$on
   BLUR_LVL=$lvl
   ANIM_ON=$anim
@@ -178,7 +186,8 @@ os16_apply_blur_props() {
   os16_rp_overwrite ro.tr_perf.unlock_mode.model "$ALVL"
   os16_rp ro.tr_livewallpaper.dreamanimation.support "$A01"
   os16_rp ro.tr_multiwindow.anim_arc.support "$A01"
-  os16_rp ro.transsion_async_animation_support "$A01"
+  # TranOS Anim Only lv3 keeps platform 3 but async 0 at solid tier.
+  os16_rp ro.transsion_async_animation_support "$LAUNCHER_ASYNC"
   os16_rp ro.transsion_unlock_mode_support "$ALVL"
   os16_rp ro.transsion_launch_start_exit_support "$ALVL"
   os16_rp ro.transsion_power_keyguard_animation_support "$ALVL"
@@ -187,10 +196,10 @@ os16_apply_blur_props() {
   os16_rp_overwrite ro.tr_display.liquidglass.support "$B01"
   os16_rp_overwrite ro.surface_flinger.supports_background_blur "$B01"
   os16_rp_overwrite ro.os.recent.blur "$B01"
-  os16_rp ro.transsion_launcher_gaussian_blur_support "$BLVL"
-  os16_rp tr_launcher.gaussianblur.support "$BLVL"
-  os16_rp ro.tran.effectengine.dynamicblur.support "$B01"
-  os16_rp ro.os_xos16_blur_v2_support "$B01"
+  os16_rp_overwrite ro.transsion_launcher_gaussian_blur_support "$BLVL"
+  os16_rp_overwrite tr_launcher.gaussianblur.support "$BLVL"
+  os16_rp_overwrite ro.tran.effectengine.dynamicblur.support "$DYNBLUR"
+  os16_rp_overwrite ro.os_xos16_blur_v2_support "$BLURV2"
   os16_apply_launcher_blur_vconfig
   os16_rp persist.sys.sf.disable_blurs "$SFDIS"
   os16_rp persist.sys.disable_blur "$DIS"
@@ -349,13 +358,14 @@ os16_apply_launcher_blur_vconfig() {
     os16_vconfig_upsert "$staged" "ro.os.recent.blur" "1"
     os16_vconfig_upsert "$staged" "ro.transsion_launcher_gaussian_blur_support" "$BLVL"
     os16_vconfig_upsert "$staged" "tr_launcher.gaussianblur.support" "$BLVL"
+    os16_vconfig_upsert "$staged" "ro.transsion_async_animation_support" "$LAUNCHER_ASYNC"
   else
-    # TranOS Anim Only lv3: gaussian 0 + recent blur 0 = solid, not see-through.
+    # TranOS Anim Only lv3: gaussian 0, recent blur 0, launcher async 0.
     os16_vconfig_upsert "$staged" "ro.os.recent.blur" "0"
     os16_vconfig_upsert "$staged" "ro.transsion_launcher_gaussian_blur_support" "0"
     os16_vconfig_upsert "$staged" "tr_launcher.gaussianblur.support" "0"
+    os16_vconfig_upsert "$staged" "ro.transsion_async_animation_support" "0"
   fi
-  os16_vconfig_upsert "$staged" "ro.transsion_async_animation_support" "$A01"
   os16_bind_vconfig_pkg "$staged" com.transsion.launcher3
 }
 
@@ -549,6 +559,13 @@ os16_apply_blur_runtime() {
   wm disable-blur "$DIS" >/dev/null 2>&1
   cmd window disable-blur "$DIS" >/dev/null 2>&1
   device_config put systemui notification_shade_blur "$([ "$GLASS" = "1" ] && echo true || echo false)" >/dev/null 2>&1
+  if [ "$GLASS" = "1" ] && [ "$BLVL" = "2" ]; then
+    device_config put systemui shade_blur_radius 25 >/dev/null 2>&1
+  elif [ "$GLASS" = "1" ] && [ "$BLVL" = "3" ]; then
+    device_config put systemui shade_blur_radius 80 >/dev/null 2>&1
+  else
+    device_config delete systemui shade_blur_radius >/dev/null 2>&1
+  fi
 }
 
 if [ "${0##*/}" = "apply_blur.sh" ]; then

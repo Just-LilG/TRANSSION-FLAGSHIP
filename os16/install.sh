@@ -114,23 +114,26 @@ write_os16_ai_prop() {
   if [ "$anim" = "true" ]; then
     a01=1
     alvl=3
+    union=1
   else
     a01=0
     alvl=0
-  fi
-  if [ "$blur" = "true" ] && [ "$blvl" -ge 2 ]; then
-    b01=1
-    sfdis=0
-    gblur=$blvl
-  else
-    b01=0
-    sfdis=1
-    gblur=0
-  fi
-  if [ "$anim" = "true" ]; then
-    union=1
-  else
     union=0
+  fi
+  b01=0
+  sfdis=1
+  gblur=0
+  dynblur=0
+  blurv2=0
+  exp=0
+  launcher_async=0
+  if [ "$blur" = "true" ]; then
+    case "$blvl" in
+      1) b01=0; sfdis=1; gblur=0; dynblur=0; blurv2=0; exp=0; launcher_async=0 ;;
+      2) b01=1; sfdis=0; gblur=2; dynblur=0; blurv2=0; exp=0; launcher_async=$a01 ;;
+      3) b01=1; sfdis=0; gblur=3; dynblur=1; blurv2=1; exp=1; launcher_async=$a01 ;;
+      *) b01=1; sfdis=0; gblur=2; dynblur=0; blurv2=0; exp=0; launcher_async=$a01 ;;
+    esac
   fi
   aod=$(json_bool "$cfg" aod_os16 true)
   dbar=$(json_bool "$cfg" dynamicbar_os16 false)
@@ -208,7 +211,7 @@ ro.tr_perf.recent_animation.model=$alvl
 ro.tr_perf.unlock_mode.model=$alvl
 ro.tr_livewallpaper.dreamanimation.support=$a01
 ro.tr_multiwindow.anim_arc.support=$a01
-ro.transsion_async_animation_support=$a01
+ro.transsion_async_animation_support=$launcher_async
 ro.transsion_unlock_mode_support=$alvl
 ro.transsion_launch_start_exit_support=$alvl
 ro.transsion_power_keyguard_animation_support=$alvl
@@ -219,13 +222,13 @@ ro.surface_flinger.supports_background_blur=$b01
 ro.os.recent.blur=$b01
 ro.transsion_launcher_gaussian_blur_support=$gblur
 tr_launcher.gaussianblur.support=$gblur
-ro.tran.effectengine.dynamicblur.support=$b01
-ro.os_xos16_blur_v2_support=$b01
+ro.tran.effectengine.dynamicblur.support=$dynblur
+ro.os_xos16_blur_v2_support=$blurv2
 persist.sys.sf.disable_blurs=$sfdis
 persist.sys.disable_blur=$sfdis
 persist.sysui.disableBlur=$sfdis
 persist.sysui.disable_blur=$sfdis
-ro.sf.blurs_are_expensive=$sfdis
+ro.sf.blurs_are_expensive=$exp
 ro.tr_aod.feature.support=$aod
 ro.tr_aod.doze.brightness.feature.support=$aod
 ro.tr_aod.half.screen.feature.support=$aod
@@ -312,7 +315,7 @@ print_modname() {
   ui_print " "
   ui_print "  ╔══════════════════════════════════════════╗"
   ui_print "  ║    TRANSSION FLAGSHIP 16                 ║"
-    ui_print "  ║    XOS · HiOS · iTel OS 16  ·  V1.86     ║"
+    ui_print "  ║    XOS · HiOS · iTel OS 16  ·  V1.87     ║"
   ui_print "  ╚══════════════════════════════════════════╝"
   ui_print " "
 }
@@ -586,7 +589,7 @@ set_permissions() {
   done
   ui_print " "
   ui_div
-  ui_print "  ✨  FLAGSHIP 16  ·  V1.86"
+  ui_print "  ✨  FLAGSHIP 16  ·  V1.87"
   ui_info "OS     : $OS_TYPE $OS_VER"
   ui_info "Feature: boot + reboot + overlay + AI + gaming + anim/blur + AOD + Dynamic bar + Force 120Hz + UI sounds + emoji"
   ui_div

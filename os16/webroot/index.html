@@ -359,14 +359,14 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
           <div class="setting-row">
             <div class="row-text">
               <div class="row-title">Dynamic blur</div>
-              <div class="row-sub">Off / level 1 = solid Smart shade (no glass). 2 / 3 = flagship glass. Apply + reboot.</div>
+              <div class="row-sub">Off / level 1 = solid Smart shade (no glass). Level 2 = lighter glass. Level 3 = full flagship glass.</div>
             </div>
             <label class="toggle"><input type="checkbox" id="feat-blur" checked onchange="setAnimBlur('blur_os16',this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
           </div>
           <div class="setting-row">
             <div class="row-text">
               <div class="row-title">Blur level</div>
-              <div class="row-sub">1 = solid panels (gaussian 0, not see-through). 2 / 3 = glass strength. Parallel stays if that toggle is on.</div>
+              <div class="row-sub">1 = solid (gaussian 0, compositor off). 2 = medium glass (gaussian 2, radius 25). 3 = full glass (gaussian 3, radius 80).</div>
             </div>
           </div>
           <div class="segmented" id="blur-level">
@@ -824,17 +824,28 @@ function blurLevel(){
   return (n>=1 && n<=3)?n:2;
 }
 function glassOn(){ return blurOn() && blurLevel()>=2; }
-function gaussianLvl(){ return glassOn()?String(blurLevel()):'0'; }
-function unionOn(){ return animOn()?'1':'0'; }
-function solidShade(){ return blurOn() && blurLevel()===1; }
-function animLvl(){ return animOn()?'3':'0'; }
-function anim01(){ return animOn()?'1':'0'; }
-function blurDisable(){ return glassOn()?'0':'1'; }
+function gaussianLvl(){
+  if(!blurOn() || blurLevel()===1) return '0';
+  return String(blurLevel());
+}
+function unionOn(){ return cfg.anim_os16!==false?'1':'0'; }
+function solidShade(){ return !blurOn() || blurLevel()===1; }
+function animLvl(){ return cfg.anim_os16!==false?'3':'0'; }
+function anim01(){ return cfg.anim_os16!==false?'1':'0'; }
+function launcherAsync(){
+  if(solidShade()) return '0';
+  return anim01();
+}
+function blurDisable(){ return solidShade()?'1':'0'; }
 function blur01(){ return glassOn()?'1':'0'; }
+function blurDyn(){ return (blurOn() && blurLevel()===3)?'1':'0'; }
+function blurV2(){ return (blurOn() && blurLevel()===3)?'1':'0'; }
+function blurExpensive(){ return (blurOn() && blurLevel()===3)?'1':'0'; }
 function blurRadius(){
   if(!glassOn()) return 0;
   if(blurLevel()===3) return 80;
-  return 45;
+  if(blurLevel()===2) return 25;
+  return 0;
 }
 const GALLERY_KEYS=[
   'ro.tr_gallery.eraser.v2.support',
@@ -1085,7 +1096,7 @@ async function writeAiSystemProp(){
   lines.push('ro.tr_perf.unlock_mode.model='+alvl);
   lines.push('ro.tr_livewallpaper.dreamanimation.support='+a01);
   lines.push('ro.tr_multiwindow.anim_arc.support='+a01);
-  lines.push('ro.transsion_async_animation_support='+a01);
+  lines.push('ro.transsion_async_animation_support='+launcherAsync());
   lines.push('ro.transsion_unlock_mode_support='+alvl);
   lines.push('ro.transsion_launch_start_exit_support='+alvl);
   lines.push('ro.transsion_power_keyguard_animation_support='+alvl);
@@ -1096,13 +1107,13 @@ async function writeAiSystemProp(){
   lines.push('ro.os.recent.blur='+b01);
   lines.push('ro.transsion_launcher_gaussian_blur_support='+blvl);
   lines.push('tr_launcher.gaussianblur.support='+blvl);
-  lines.push('ro.tran.effectengine.dynamicblur.support='+b01);
-  lines.push('ro.os_xos16_blur_v2_support='+b01);
+  lines.push('ro.tran.effectengine.dynamicblur.support='+blurDyn());
+  lines.push('ro.os_xos16_blur_v2_support='+blurV2());
   lines.push('persist.sys.sf.disable_blurs='+blurDisable());
   lines.push('persist.sys.disable_blur='+blurDisable());
   lines.push('persist.sysui.disableBlur='+blurDisable());
   lines.push('persist.sysui.disable_blur='+blurDisable());
-  lines.push('ro.sf.blurs_are_expensive='+blurDisable());
+  lines.push('ro.sf.blurs_are_expensive='+blurExpensive());
   lines.push('ro.tr_aod.feature.support='+feat01('aod_os16'));
   lines.push('ro.tr_aod.doze.brightness.feature.support='+feat01('aod_os16'));
   lines.push('ro.tr_aod.half.screen.feature.support='+feat01('aod_os16'));
@@ -1313,7 +1324,17 @@ async function dumpAi(){
   lines.push(home||'EMPTY');
   lines.push('');
   lines.push('=== launcher blur settings ===');
-  lines.push('blur_level  '+blurLevel()+'  glass='+String(glassOn())+'  solid='+String(solidShade()||!blurOn()));
+  lines.push('blur_level  '+blurLevel()+'  glass='+String(glassOn())+'  solid='+String(solidShade()));
+  const lg=await g('getprop ro.tr_display.liquidglass.support');
+  const sfb=await g('getprop ro.surface_flinger.supports_background_blur');
+  const dyn=await g('getprop ro.tran.effectengine.dynamicblur.support');
+  const bv2=await g('getprop ro.os_xos16_blur_v2_support');
+  const asyncp=await g('getprop ro.transsion_async_animation_support');
+  lines.push('liquidglass  '+describeAiFlag(lg));
+  lines.push('supports_background_blur  '+describeAiFlag(sfb));
+  lines.push('dynamicblur  '+describeAiFlag(dyn));
+  lines.push('xos16_blur_v2  '+describeAiFlag(bv2));
+  lines.push('async_animation  '+describeAiFlag(asyncp));
   const ge=await g('settings get system transsion_launcher_gaussian_blur_enable');
   const geg=await g('settings get global transsion_launcher_gaussian_blur_enable');
   const gs=await g('settings get system transsion_launcher_gaussian_blur_support');
