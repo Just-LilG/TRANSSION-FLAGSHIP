@@ -1,5 +1,8 @@
 # Transsion Flagship 16
 
+## v1.91
+- **Emoji font removed for testing.** The bundled `NotoColorEmoji.ttf` was ~34MB — module zip drops from ~55MB to ~21MB for faster downloads while we finish testing other features. WebUI toggle, upload, binds, and `apply_emoji.sh` are gone. Your ROM emoji font stays. Re-flash or update to strip any leftover font files from an older install.
+
 ## v1.90
 - **Level 1 matches Disable-blur-XOS16 (SenzaProject).** That module does **not** zero gaussian — it sets **`ro.tr_animation.platform_level=2`** and launcher vconfig **`tr_launcher.gaussianblur.support=2`** + **`tr_launcher.blurrecent.support=1`** (compositor stays off). We were keeping platform 3 + gaussian 0, which left the shade glassy on X6886. Level 1 / blur off now use platform **2** + the reference vconfig. Levels 2/3 stay platform **3** with glass. Apply + reboot. Dump should show `platform_level=2` and vconfig `gaussianblur.support=2` at level 1.
 

@@ -15,7 +15,6 @@ A Magisk/KernelSU module for Transsion devices (Infinix, Tecno, itel) running XO
 - Boot animation style (with custom upload support)
 - Shutdown animation style (with custom upload support)
 - Charging animation (with custom upload support)
-- Custom emoji font
 
 ### Visual Effects
 - Dynamic blur — dock, folders, recents & app drawer

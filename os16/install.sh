@@ -420,9 +420,7 @@ on_install() {
     unzip -oj "$ZIPFILE" 'common/apply_blur.sh' -d "$MODPATH" >&2
     unzip -oj "$ZIPFILE" 'common/apply_120hz.sh' -d "$MODPATH" >&2
     unzip -oj "$ZIPFILE" 'common/apply_sounds.sh' -d "$MODPATH" >&2
-    unzip -oj "$ZIPFILE" 'common/apply_emoji.sh' -d "$MODPATH" >&2
     unzip -oj "$ZIPFILE" 'common/apply_unlock.sh' -d "$MODPATH" >&2
-    unzip -o "$ZIPFILE" 'system/fonts/*' -d "$MODPATH" >&2
     unzip -o "$ZIPFILE" 'apm_120hz_bypass/*' -d "$MODPATH" >&2
     unzip -o "$ZIPFILE" 'magellan/*' -d "$MODPATH" >&2
     unzip -o "$ZIPFILE" 'system/product/apm/*' -d "$MODPATH" >&2
@@ -439,7 +437,6 @@ on_install() {
     unzip -oj "$ZIPFILE" 'common/apply_blur.sh' -d "$MODPATH" >&2
     unzip -oj "$ZIPFILE" 'common/apply_120hz.sh' -d "$MODPATH" >&2
     unzip -oj "$ZIPFILE" 'common/apply_sounds.sh' -d "$MODPATH" >&2
-    unzip -oj "$ZIPFILE" 'common/apply_emoji.sh' -d "$MODPATH" >&2
     unzip -oj "$ZIPFILE" 'common/apply_unlock.sh' -d "$MODPATH" >&2
     unzip -o "$ZIPFILE" 'apm_120hz_bypass/*' -d "$MODPATH" >&2
     unzip -o "$ZIPFILE" 'magellan/*' -d "$MODPATH" >&2
@@ -467,11 +464,6 @@ on_install() {
     cp -a "$OLD16/system/product/media/audio/ui/"*_custom.* "$MODPATH/system/product/media/audio/ui/" 2>/dev/null
     ui_ok "Kept uploaded UI sounds"
   fi
-  if [ -f "$OLD16/system/fonts/NotoColorEmoji_custom.ttf" ]; then
-    mkdir -p "$MODPATH/system/fonts"
-    cp -a "$OLD16/system/fonts/NotoColorEmoji_custom.ttf" "$MODPATH/system/fonts/" 2>/dev/null
-    ui_ok "Kept uploaded emoji font"
-  fi
 
   # V1.14 shipped bundled iOS / XOS 16 overlay APKs. Drop them; keep a custom
   # upload if the user already wrote one.
@@ -494,6 +486,13 @@ on_install() {
         /mnt/vendor/mountify/product/overlay/SystemUISignalOverlay.apk \
         /mnt/vendor/mountify/product/overlay/SystemUISignalOverlay.apk.disabled
   ui_ok "Removed bundled status-bar overlay APKs"
+
+  # V1.91 dropped the bundled emoji font (~34MB). Strip leftovers from older builds.
+  rm -rf "$MODPATH/system/fonts" \
+         /mnt/vendor/mountify/system/fonts/NotoColorEmoji.ttf \
+         /mnt/vendor/mountify/system/fonts/NotoColorEmoji_custom.ttf
+  rm -f "$MODPATH/apply_emoji.sh" "$MODPATH/emoji_custom.ttf"
+  ui_ok "Removed emoji font (testing build — smaller zip)"
 
   CFG=/data/adb/modules/transsion-flagship-16/config.json
   if [ -f "$CFG" ]; then
@@ -586,14 +585,14 @@ set_permissions() {
   fi
   touch "$MODPATH/skip_mount"
   set_perm_recursive "$MODPATH" 0 0 0755 0644
-  for sh in "$MODPATH/post-fs-data.sh" "$MODPATH/service.sh" "$MODPATH/uninstall.sh" "$MODPATH/apply_blur.sh" "$MODPATH/apply_120hz.sh" "$MODPATH/apply_sounds.sh" "$MODPATH/apply_emoji.sh" "$MODPATH/apply_unlock.sh"; do
+  for sh in "$MODPATH/post-fs-data.sh" "$MODPATH/service.sh" "$MODPATH/uninstall.sh" "$MODPATH/apply_blur.sh" "$MODPATH/apply_120hz.sh" "$MODPATH/apply_sounds.sh" "$MODPATH/apply_unlock.sh"; do
     [ -f "$sh" ] && set_perm "$sh" 0 0 0755
   done
   ui_print " "
   ui_div
   ui_print "  ✨  FLAGSHIP 16  ·  V1.87"
   ui_info "OS     : $OS_TYPE $OS_VER"
-  ui_info "Feature: boot + reboot + overlay + AI + gaming + anim/blur + AOD + Dynamic bar + Force 120Hz + UI sounds + emoji"
+  ui_info "Feature: boot + reboot + overlay + AI + gaming + anim/blur + AOD + Dynamic bar + Force 120Hz + UI sounds"
   ui_div
   ui_print "  Reboot, then open WebUI in Magisk/KSU."
   ui_print " "
