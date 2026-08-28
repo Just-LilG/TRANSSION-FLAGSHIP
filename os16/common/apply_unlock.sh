@@ -1,13 +1,10 @@
 #!/system/bin/sh
-# Restored unlock extras for retest: Social Turbo, Display, scale-up,
-# GT app vconfigs, Circle to Search. Same paths as pre-V1.56 / V1.65.
 
 if [ -z "$MODDIR" ]; then
   MODDIR=${0%/*}
 fi
 [ -n "$CFG" ] || CFG="$MODDIR/config.json"
 
-# Reuse resetprop + vconfig helpers from apply_blur.sh
 . "$MODDIR/apply_blur.sh"
 
 os16_apply_social_props() {

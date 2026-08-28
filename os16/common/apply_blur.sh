@@ -1,8 +1,5 @@
 #!/system/bin/sh
-# Blur tiers (X6886 / Trans OS 16):
-#   1 = Smart-series — no glass anywhere (solid lock clock + shade), Parallel platform 3
-#   2 = device default — dock/recents blur only, shade solid (Disable-blur partial)
-#   3 = flagship — glass everywhere (unionrender + compositor on)
+# Blur on = flagship glass. Blur off = do not touch stock blur props.
 
 if [ -z "$MODDIR" ]; then
   MODDIR=${0%/*}
@@ -103,7 +100,6 @@ os16_rp_overwrite() {
 os16_settings_put() {
   ns="$1"; k="$2"; v="$3"
   settings put "$ns" "$k" "$v" >/dev/null 2>&1
-  # Same path Flagship 15 used on this X6886 (content + settings).
   content update --uri content://settings/"$ns" \
     --bind value:s:"$v" \
     --where "name='$k'" >/dev/null 2>&1
@@ -112,12 +108,9 @@ os16_settings_put() {
 os16_blur_vals() {
   anim=$(os16_cfg_bool anim_os16 true)
   on=$(os16_cfg_bool blur_os16 true)
-  lvl=$(os16_cfg_int blur_os16_level 2)
-  [ "$lvl" -ge 1 ] 2>/dev/null || lvl=2
-  [ "$lvl" -le 3 ] 2>/dev/null || lvl=2
 
-  # Safe defaults = level 1 Smart solid.
-  SOLID_SHADE=1
+  SKIP_BLUR=0
+  SOLID_SHADE=0
   DOCK_BLUR=0
   GLASS=0
   BLVL=0
@@ -126,112 +119,101 @@ os16_blur_vals() {
   B01=0
   DYNBLUR=0
   BLURV2=0
-  SFDIS=1
-  DIS=1
+  SFDIS=0
+  DIS=0
   EXP=0
   LAUNCHER_ASYNC=0
   BLUR_RECENT=0
+  UNION=0
+  LIGHT_CC=0
+  LIGHT_FEAT=0
+  ALVL=0
+  PERF_LVL=0
+  MOTION_PLAT=0
+  A01=0
 
   if [ "$anim" = "true" ] || [ "$anim" = "1" ]; then
     A01=1
     PERF_LVL=3
-  else
-    A01=0
-    PERF_LVL=0
-  fi
-  UNION=0
-
-  if [ "$on" = "true" ] || [ "$on" = "1" ]; then
-    case "$lvl" in
-      1)
-        # Smart solid — global platform 2 for shade; gaussian 0 keeps dock solid.
-        SOLID_SHADE=1
-        DOCK_BLUR=0
-        GLASS=0
-        BLVL=0
-        BLUR_RECENT=0
-        [ "$anim" = "true" ] || [ "$anim" = "1" ] && LAUNCHER_ASYNC=1
-        ;;
-      2)
-        # G99 partial — dock blur, shade solid.
-        SOLID_SHADE=1
-        DOCK_BLUR=1
-        GLASS=0
-        BLVL=2
-        BLUR_RECENT=1
-        EN=1
-        RAD=25
-        LAUNCHER_ASYNC=1
-        ;;
-      3)
-        # Full flagship glass — shade + dock + unionrender.
-        SOLID_SHADE=0
-        DOCK_BLUR=1
-        GLASS=1
-        BLVL=3
-        BLUR_RECENT=1
-        EN=1
-        RAD=80
-        B01=1
-        SFDIS=0
-        DIS=0
-        DYNBLUR=1
-        BLURV2=1
-        EXP=1
-        LAUNCHER_ASYNC=1
-        [ "$anim" = "true" ] || [ "$anim" = "1" ] && UNION=1
-        ;;
-    esac
-  else
-    SOLID_SHADE=1
-    DOCK_BLUR=0
-    GLASS=0
-    BLVL=0
-    BLUR_RECENT=0
-    [ "$anim" = "true" ] || [ "$anim" = "1" ] && LAUNCHER_ASYNC=1
-  fi
-
-  # Global platform 2 solidifies the shade on X6886. WM may still read getprop, so
-  # launcher/wm package vconfig gets platform 3 while SystemUI stays at 2.
-  if [ "$GLASS" = "1" ]; then
     ALVL=3
     MOTION_PLAT=3
-  elif [ "$SOLID_SHADE" = "1" ]; then
-    ALVL=2
-    if [ "$anim" = "true" ] || [ "$anim" = "1" ]; then
-      MOTION_PLAT=3
-    else
-      MOTION_PLAT=2
-    fi
+    LAUNCHER_ASYNC=1
+  fi
+
+  if [ "$on" = "true" ] || [ "$on" = "1" ]; then
+    SOLID_SHADE=0
+    DOCK_BLUR=1
+    GLASS=1
+    BLVL=3
+    BLUR_RECENT=1
+    EN=1
+    RAD=80
+    B01=1
+    SFDIS=0
+    DIS=0
+    DYNBLUR=1
+    BLURV2=1
+    EXP=1
+    LIGHT_CC=1
+    LIGHT_FEAT=1
+    [ "$A01" = "1" ] && UNION=1
   else
-    ALVL=0
-    MOTION_PLAT=0
+    SKIP_BLUR=1
   fi
 
   SHADE_PLAT=$ALVL
   SYSUI_PLAT=$ALVL
-
-  # Glow Space / notification shade solid panel (X6858 stock: CC lighting = 1).
-  # Level 1 / blur off: both off. Level 2: CC off, main lighting on (dock blur).
-  # Level 3: both on (full glass shade).
-  if [ "$SOLID_SHADE" = "1" ]; then
-    LIGHT_CC=0
-    if [ "$DOCK_BLUR" = "1" ]; then
-      LIGHT_FEAT=1
-    else
-      LIGHT_FEAT=0
-    fi
-  else
-    LIGHT_CC=1
-    LIGHT_FEAT=1
-  fi
-
   BLUR_ON=$on
-  BLUR_LVL=$lvl
+  BLUR_LVL=3
   ANIM_ON=$anim
 }
 
-os16_apply_blur_props() {
+os16_restore_stock_blur_key() {
+  k="$1"
+  stock=$(os16_read_stock_prop "$k")
+  if [ -n "$stock" ]; then
+    os16_rp_overwrite "$k" "$stock"
+  else
+    os16_rp_delete "$k"
+  fi
+}
+
+os16_restore_stock_blur() {
+  os16_unbind_tr_product_blur_buildprop
+  os16_unbind_vconfig_pkg com.android.systemui
+  os16_unbind_vconfig_pkg com.transsion.systemui
+  staged=$(os16_seed_vconfig_pkg com.transsion.launcher3)
+  stock="${staged}.stock"
+  if [ -f "$stock" ]; then
+    cp -f "$stock" "$staged"
+    os16_bind_vconfig_pkg "$staged" com.transsion.launcher3
+  else
+    os16_unbind_vconfig_pkg com.transsion.launcher3
+  fi
+  for k in \
+    ro.tr_display.liquidglass.support \
+    ro.surface_flinger.supports_background_blur \
+    ro.os.recent.blur \
+    ro.transsion_launcher_gaussian_blur_support \
+    tr_launcher.gaussianblur.support \
+    ro.tran.effectengine.dynamicblur.support \
+    ro.os_xos16_blur_v2_support \
+    persist.sys.sf.disable_blurs \
+    persist.sys.disable_blur \
+    persist.sysui.disableBlur \
+    persist.sysui.disable_blur \
+    ro.sf.blurs_are_expensive \
+    persist.tr_lighting.controlcenter.feature.support \
+    persist.tr_lighting.feature.support \
+    ro.tr_lighting.controlcenter.feature.support \
+    ro.tr_lighting.feature.support \
+    ro.tran_display_unionrender.support
+  do
+    os16_restore_stock_blur_key "$k"
+  done
+}
+
+os16_apply_anim_props() {
   os16_blur_vals
   os16_rp_overwrite ro.tr_animation.platform_level "$ALVL"
   os16_rp_overwrite ro.tr_perf.launch_start_exit.model "$PERF_LVL"
@@ -245,6 +227,11 @@ os16_apply_blur_props() {
   os16_rp ro.transsion_launch_start_exit_support "$PERF_LVL"
   os16_rp ro.transsion_power_keyguard_animation_support "$PERF_LVL"
   os16_rp ro.transsion.recent_animation.model "$PERF_LVL"
+}
+
+os16_apply_blur_props() {
+  os16_apply_anim_props
+  [ "$SKIP_BLUR" = "1" ] && return 0
   os16_rp_overwrite ro.tran_display_unionrender.support "$UNION"
   os16_rp_overwrite ro.tr_display.liquidglass.support "$B01"
   os16_rp_overwrite ro.surface_flinger.supports_background_blur "$B01"
@@ -411,6 +398,7 @@ os16_seed_tr_product_buildprop() {
 
 os16_apply_tr_product_blur_buildprop() {
   os16_blur_vals
+  [ "$SKIP_BLUR" = "1" ] && { os16_unbind_tr_product_blur_buildprop; return 0; }
   stock=$(os16_tr_product_blur_stock)
   os16_seed_tr_product_buildprop || return 0
   staged="$MODDIR/tr_product/etc/build.prop"
@@ -463,10 +451,6 @@ os16_cfg_tf() {
 os16_apply_aod_vconfig() {
   aod=$(os16_cfg_01 aod_os16 true)
   staged=$(os16_seed_vconfig_pkg com.transsion.aod)
-  # GT X6858 dump: /tr_product/etc/vconfig/com.transsion.aod/build.prop
-  #   tr_aod.always.show.feature.support=1
-  #   tr_aod.horizontal.display.feature.support=1
-  # That is Always Show AOD. Magisk system.prop never reaches this file.
   os16_vconfig_upsert "$staged" "tr_aod.always.show.feature.support" "$aod"
   os16_vconfig_upsert "$staged" "tr_aod.horizontal.display.feature.support" "$aod"
   os16_bind_vconfig_pkg "$staged" com.transsion.aod
@@ -502,6 +486,15 @@ os16_apply_motion_pkg_vconfig() {
 
 os16_apply_launcher_vconfig_all() {
   os16_blur_vals
+  if [ "$SKIP_BLUR" = "1" ]; then
+    staged=$(os16_seed_vconfig_pkg com.transsion.launcher3)
+    stock="${staged}.stock"
+    if [ -f "$stock" ]; then
+      cp -f "$stock" "$staged"
+      os16_bind_vconfig_pkg "$staged" com.transsion.launcher3
+    fi
+    return 0
+  fi
   staged=$(os16_seed_vconfig_pkg com.transsion.launcher3)
   if [ "$GLASS" = "1" ]; then
     os16_vconfig_upsert "$staged" "ro.os.recent.blur" "1"
@@ -539,6 +532,11 @@ os16_apply_launcher_vconfig_all() {
 
 os16_apply_systemui_vconfig() {
   os16_blur_vals
+  if [ "$SKIP_BLUR" = "1" ]; then
+    os16_unbind_vconfig_pkg com.android.systemui
+    os16_unbind_vconfig_pkg com.transsion.systemui
+    return 0
+  fi
   staged=$(os16_seed_vconfig_pkg com.android.systemui)
   stock="${staged}.stock"
   if [ "$SOLID_SHADE" = "1" ]; then
@@ -583,12 +581,17 @@ os16_apply_systemui_vconfig() {
 }
 
 os16_apply_blur_stack() {
-  os16_apply_blur_props
-  os16_apply_tr_product_blur_buildprop
+  os16_blur_vals
+  os16_apply_anim_props
+  if [ "$SKIP_BLUR" = "1" ]; then
+    os16_restore_stock_blur
+  else
+    os16_apply_blur_props
+    os16_apply_tr_product_blur_buildprop
+    os16_apply_launcher_vconfig_all
+    os16_apply_systemui_vconfig
+  fi
   os16_apply_dynamicbar_props
-  os16_apply_launcher_vconfig_all
-  os16_apply_motion_pkg_vconfig
-  os16_apply_systemui_vconfig
 }
 
 os16_clear_dynamicbar_props() {
@@ -699,23 +702,17 @@ os16_apply_aod_settings() {
 os16_apply_dynamicbar_props() {
   bar=$(os16_cfg_bool dynamicbar_os16 false)
   if [ "$bar" != "true" ] && [ "$bar" != "1" ]; then
-    # Off must not write ro.tr_dynamicbar.support=0 — that kills the stock
-    # Dynamic Bar this phone already had. Drop module overrides only.
     os16_clear_dynamicbar_props
     return 0
   fi
   os16_rp_overwrite ro.tr_dynamicbar.support 1
   os16_rp_overwrite ro.os_dynamicbar_ai_translation_support 1
   os16_rp_overwrite ro.tran_hios_dynamic_bar_support 1
-  # Unhides Settings → Dynamic Bar → Always Show Background.
   os16_rp_overwrite ro.os_dynamic_bar_resident_plane_support 1
-  # Landscape-recents status-bar overlay (empty pill in recents).
   os16_rp_overwrite ro.os.tran_hide_status_bar_for_land_recent 1
 }
 
 os16_apply_dynamicbar_runtime() {
-  # V1.59 wrote fake always-show=0 settings and crashed SystemUI (boot reboot +
-  # hid Always Show). Drop those leftovers. Do not crash SystemUI.
   for ns in system global secure; do
     settings delete "$ns" os_dynamic_bar_resident_plane >/dev/null 2>&1
     settings delete "$ns" island_always_show_background >/dev/null 2>&1
@@ -724,7 +721,6 @@ os16_apply_dynamicbar_runtime() {
 }
 
 os16_clear_failed_feature_leftovers() {
-  # Legacy cleanup only when display extras are all off.
   dc=$(os16_cfg_01 display_dc true)
   col=$(os16_cfg_01 display_color true)
   hdr=$(os16_cfg_01 display_hdr true)
@@ -758,14 +754,32 @@ os16_restart_systemui() {
 }
 
 os16_restart_surfaceflinger() {
-  # Killing SurfaceFlinger after the UI is up is a soft reboot (screen goes
-  # black, SystemUI comes back). Blur keys are resetprop'd at post-fs before
-  # zygote — a real reboot is the apply path. Do not stop/kill SF.
   :
+}
+
+os16_clear_blur_runtime_settings() {
+  settings delete global disable_window_blurs >/dev/null 2>&1
+  settings delete system disable_window_blurs >/dev/null 2>&1
+  settings delete secure accessibility_reduce_transparency >/dev/null 2>&1
+  settings delete secure reduce_blur_effects >/dev/null 2>&1
+  for ns in system global; do
+    settings delete "$ns" reduce_blur_effects >/dev/null 2>&1
+    settings delete "$ns" tran_glow_space_enable >/dev/null 2>&1
+    settings delete "$ns" tr_glow_space_enable >/dev/null 2>&1
+    settings delete "$ns" tran_control_center_blur_enable >/dev/null 2>&1
+    settings delete "$ns" transsion_launcher_gaussian_blur_support >/dev/null 2>&1
+    settings delete "$ns" transsion_launcher_gaussian_support >/dev/null 2>&1
+    settings delete "$ns" transsion_launcher_gaussian_blur_enable >/dev/null 2>&1
+    settings delete "$ns" transsion_launcher_blur_radius >/dev/null 2>&1
+  done
 }
 
 os16_apply_blur_runtime() {
   os16_blur_vals
+  if [ "$SKIP_BLUR" = "1" ]; then
+    os16_clear_blur_runtime_settings
+    return 0
+  fi
   os16_settings_put global disable_window_blurs "$DIS"
   os16_settings_put system disable_window_blurs "$DIS"
   if [ "$SOLID_SHADE" = "1" ]; then
@@ -825,7 +839,8 @@ if [ "${0##*/}" = "apply_blur.sh" ]; then
       os16_apply_blur_runtime
       os16_apply_aod_settings
       os16_apply_dynamicbar_runtime
-      os16_refresh_systemui_on_apply
+      os16_blur_vals
+      [ "$SKIP_BLUR" = "1" ] || os16_refresh_systemui_on_apply
       ;;
     *)
       os16_apply_blur_stack
@@ -839,7 +854,8 @@ if [ "${0##*/}" = "apply_blur.sh" ]; then
         os16_apply_unlock
       fi
       os16_apply_blur_runtime
-      os16_refresh_systemui_on_apply
+      os16_blur_vals
+      [ "$SKIP_BLUR" = "1" ] || os16_refresh_systemui_on_apply
       ;;
   esac
 fi

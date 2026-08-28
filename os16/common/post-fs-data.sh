@@ -110,9 +110,7 @@ ns_umount /tr_product/theme/charge
 ns_umount /product/theme/charge
 ns_umount /system/product/theme/charge
 
-# Drop failed charging-animation / boot-sound leftovers. Do NOT wipe
-# media/audio/ui — that is where uploaded UI sounds live (V1.76 deleted
-# them every boot, so custom charging/unlock never survived reboot).
+# Drop leftover charging-animation / boot-sound files. Do not wipe media/audio/ui.
 rm -rf "$MODDIR/system/product/theme/charge" \
        "$MODDIR/tr_product/theme/charge" \
        "$MODDIR/product/theme/charge"
@@ -276,8 +274,7 @@ fi
 log_pfd "live /tr_product/media:"
 ls -la /tr_product/media >> "$PFD_LOG" 2>/dev/null
 
-# Status bar: only a user-uploaded overlay. Bundled iOS / XOS 16 APKs from
-# V1.14 are deleted so they cannot keep applying.
+# Status bar: user-uploaded overlay only.
 rm -rf "$MODDIR/system/overlay/Icons_Signal_wifi" \
        "$MODDIR/system/product/overlay/Icons_Signal_wifi" \
        "$MODDIR/product/overlay/Icons_Signal_wifi" \
@@ -330,9 +327,6 @@ for f in $CUSTOM_APKS; do
 done
 log_pfd "custom overlay: $have_custom"
 
-# Blur: stock liquid glass is already 1 in /tr_product/etc/build.prop.
-# Magisk system.prop does not win for those keys. resetprop here (before
-# zygote) and again from service.sh after overlay.
 if [ -f "$MODDIR/apply_blur.sh" ]; then
   . "$MODDIR/apply_blur.sh"
   os16_apply_blur_stack
@@ -349,24 +343,16 @@ else
   log_pfd "apply_blur.sh missing"
 fi
 
-# Refresh: Mountify does not overlay /tr_product. Bind Magellan like bootanim.
-# Game default FPS props always (developer option 120Hz, not only Force 120Hz).
 if [ -f "$MODDIR/apply_120hz.sh" ]; then
   . "$MODDIR/apply_120hz.sh"
   os16_apply_game_fps_props
   log_pfd "game_fps override=$(getprop ro.surface_flinger.game_default_frame_rate_override 2>/dev/null) disabled=$(getprop debug.graphics.game_default_frame_rate.disabled 2>/dev/null)"
-  if os16_hz_on; then
-    os16_generate_120hz_jsons
-    os16_copy_magellan_mountify
-    os16_bind_magellan_bootanim
-    log_pfd "magellan bind dests:"
-    ls -l /tr_product/etc/vconfig/magellan/refresh_rate_config.xml /product/etc/vconfig/magellan/refresh_rate_config.xml "$MAGELLAN_XML" >> "$PFD_LOG" 2>/dev/null
-    grep -c 'max="144"' /tr_product/etc/vconfig/magellan/refresh_rate_config.xml >> "$PFD_LOG" 2>/dev/null
-    grep -o 'input_method_switch>[^<]*' /tr_product/etc/vconfig/magellan/refresh_rate_config.xml >> "$PFD_LOG" 2>/dev/null
-  else
-    os16_copy_magellan_mountify
-    log_pfd "refresh force_120hz=false"
-  fi
+  os16_generate_120hz_jsons
+  os16_copy_magellan_mountify
+  os16_bind_magellan_bootanim
+  log_pfd "magellan bind dests:"
+  ls -l /tr_product/etc/vconfig/magellan/refresh_rate_config.xml /product/etc/vconfig/magellan/refresh_rate_config.xml "$MAGELLAN_XML" >> "$PFD_LOG" 2>/dev/null
+  grep -c 'max="144"' /tr_product/etc/vconfig/magellan/refresh_rate_config.xml >> "$PFD_LOG" 2>/dev/null
   os16_swap_magisk_apm
 else
   log_pfd "apply_120hz.sh missing"

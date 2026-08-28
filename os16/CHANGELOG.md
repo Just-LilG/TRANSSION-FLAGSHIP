@@ -1,7 +1,13 @@
 # Transsion Flagship 16
 
+## v2.1
+- **Blur is on/off only.** Removed the 1/2/3 level picker. On (default) applies flagship glass. Off does **not** strip stock blur — the module skips blur props so Transsion’s own blur stays. Parallel animations stay at platform 3 when enabled.
+- **144Hz Magellan no longer needs Force 120Hz.** Magellan XML is always staged and bound. Force 120Hz only locks 120Hz settings.
+- **Conflicting module detection** like Flagship 15: installer scan plus WebUI Support section (disable / remove).
+- **WebUI cleanup.** Removed the Home features roadmap and testing copy. Dump flags lives in Support. Scripts and UI no longer show test-phase notes.
+
 ## v2.0.1
-- **Pre-release debug fixes.** Display leftover cleanup had inverted shell logic (`display_reading false` was always truthy — stale DC/HDR settings never cleared). Force 120Hz Apply now runs full whitelist generation + refresh settings (not just file copy). Boot settle retries Magellan generation when PackageManager was not ready at post-fs. Installer/uninstall banners show V2.0.1. Removed duplicate `apply_unlock.sh` on WebUI Apply (already inside `apply_blur.sh all`). See `os16/TESTING.md` for final device checklist.
+- **Pre-release debug fixes.** Display leftover cleanup had inverted shell logic (`display_reading false` was always truthy — stale DC/HDR settings never cleared). Force 120Hz Apply now runs full whitelist generation + refresh settings (not just file copy). Boot settle retries Magellan generation when PackageManager was not ready at post-fs. Installer/uninstall banners show V2.0.1. Removed duplicate `apply_unlock.sh` on WebUI Apply (already inside `apply_blur.sh all`).
 
 ## v2.0 — Official release
 

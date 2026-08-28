@@ -32,7 +32,7 @@ imageless_magisk() {
 OUTFD=$2
 ZIPFILE=$3
 
-ui_print "- Flagship 16 V2.0.1 installer"
+ui_print "- Flagship 16 V2.1 installer"
 
 mount /data 2>/dev/null
 
@@ -98,9 +98,7 @@ ui_print "******************************"
 ##########################################################################################
 
 # Create mod paths.
-# KernelSU Manager extracts the zip into MODPATH *before* this script runs
-# ("Extracting module files"). Magisk does not. Deleting that tree and
-# unzipping bootanim_*.zip again is what printed "Killed" on V1.05.
+# KernelSU Manager extracts the zip into MODPATH before this script runs.
 mkdir -p $MODPATH
 if [ -f "$MODPATH/system/product/theme/animations/bootanim_hios16.zip" ] \
     && [ -f "$MODPATH/system/product/theme/animations/bootanim_default.zip" ]; then

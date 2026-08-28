@@ -103,48 +103,27 @@ write_os16_ai_prop() {
   fi
   anim=$(json_bool "$cfg" anim_os16 true)
   blur=$(json_bool "$cfg" blur_os16 true)
-  blvl=0
-  if [ "$blur" = "true" ]; then
-    blvl=$(json_int "$cfg" blur_os16_level 2)
-    [ "$blvl" -ge 1 ] 2>/dev/null || blvl=2
-    [ "$blvl" -le 3 ] 2>/dev/null || blvl=2
-  fi
-  # Parallel perf models stay at 3; platform_level 2 solidifies the shade.
   if [ "$anim" = "true" ]; then
     a01=1
     perf_lvl=3
+    alvl=3
   else
     a01=0
     perf_lvl=0
+    alvl=0
   fi
   union=0
-  alvl=0
   b01=0
-  sfdis=1
-  gblur=0
-  dynblur=0
-  blurv2=0
-  exp=0
-  launcher_async=0
-  light_cc=0
-  light_feat=0
-  # Blur tiers: 1=Smart solid, 2=partial (dock blur, solid shade), 3=full glass.
+  sfdis=
+  gblur=
+  dynblur=
+  blurv2=
+  exp=
+  launcher_async=$a01
+  light_cc=
+  light_feat=
   if [ "$blur" = "true" ]; then
-    case "$blvl" in
-      1) b01=0; sfdis=1; gblur=0; dynblur=0; blurv2=0; exp=0; launcher_async=$a01; union=0; light_cc=0; light_feat=0 ;;
-      2) b01=0; sfdis=1; gblur=2; dynblur=0; blurv2=0; exp=0; launcher_async=$a01; union=0; light_cc=0; light_feat=1 ;;
-      3) b01=1; sfdis=0; gblur=3; dynblur=1; blurv2=1; exp=1; launcher_async=$a01; union=$a01; light_cc=1; light_feat=1 ;;
-      *) b01=0; sfdis=1; gblur=2; dynblur=0; blurv2=0; exp=0; launcher_async=$a01; union=0; light_cc=0; light_feat=1 ;;
-    esac
-  else
-    b01=0; sfdis=1; gblur=0; dynblur=0; blurv2=0; exp=0; launcher_async=$a01; union=0; light_cc=0; light_feat=0
-  fi
-  if [ "$blur" = "true" ] && [ "$blvl" = "3" ]; then
-    alvl=3
-  elif [ "$anim" = "true" ]; then
-    alvl=2
-  else
-    alvl=0
+    b01=1; sfdis=0; gblur=3; dynblur=1; blurv2=1; exp=1; union=$a01; light_cc=1; light_feat=1
   fi
   aod=$(json_bool "$cfg" aod_os16 true)
   dbar=$(json_bool "$cfg" dynamicbar_os16 false)
@@ -164,10 +143,7 @@ write_os16_ai_prop() {
   [ "$glive" = "false" ] && glive=0 || glive=1
   [ "$airt" = "false" ] && airt=0 || airt=1
   cat > "$dest" <<EOF
-# Flagship 16 — OS 16 keys. Magisk loads this file at boot.
-# Apply in WebUI rewrites this file from the Features toggles.
-# Blur keys that already exist in /tr_product/etc/build.prop are also
-# resetprop'd from apply_blur.sh (post-fs-data + late_start + WebUI).
+# Flagship 16
 ro.tr_aiservice.aicorespeech_subtitle.feature.support=$sub
 ro.tr_aiservice.aicorespeech_livecaption.feature.support=$sub
 ro.tr_soundrecorder.summary.feature.support=$rec
@@ -315,6 +291,27 @@ ro.surface_flinger.game_default_frame_rate_override=120
 debug.graphics.game_default_frame_rate.disabled=true
 persist.graphics.game_default_frame_rate.enabled=false
 EOF
+  if [ "$blur" != "true" ]; then
+    sed -i \
+      -e '/^ro.tran_display_unionrender.support=/d' \
+      -e '/^ro.tr_display.liquidglass.support=/d' \
+      -e '/^ro.surface_flinger.supports_background_blur=/d' \
+      -e '/^ro.os.recent.blur=/d' \
+      -e '/^ro.transsion_launcher_gaussian_blur_support=/d' \
+      -e '/^tr_launcher.gaussianblur.support=/d' \
+      -e '/^ro.tran.effectengine.dynamicblur.support=/d' \
+      -e '/^ro.os_xos16_blur_v2_support=/d' \
+      -e '/^persist.sys.sf.disable_blurs=/d' \
+      -e '/^persist.sys.disable_blur=/d' \
+      -e '/^persist.sysui.disableBlur=/d' \
+      -e '/^persist.sysui.disable_blur=/d' \
+      -e '/^ro.sf.blurs_are_expensive=/d' \
+      -e '/^persist.tr_lighting.controlcenter.feature.support=/d' \
+      -e '/^persist.tr_lighting.feature.support=/d' \
+      -e '/^ro.tr_lighting.controlcenter.feature.support=/d' \
+      -e '/^ro.tr_lighting.feature.support=/d' \
+      "$dest"
+  fi
   if [ "$dbar" = "true" ]; then
     cat >> "$dest" <<EOF
 ro.tr_dynamicbar.support=1
@@ -330,7 +327,7 @@ print_modname() {
   ui_print " "
   ui_print "  ╔══════════════════════════════════════════╗"
   ui_print "  ║    TRANSSION FLAGSHIP 16                 ║"
-    ui_print "  ║    XOS · HiOS · iTel OS 16  ·  V2.0.1    ║"
+    ui_print "  ║    XOS · HiOS · iTel OS 16  ·  V2.1      ║"
   ui_print "  ╚══════════════════════════════════════════╝"
   ui_print " "
 }
@@ -360,6 +357,48 @@ detect_os16() {
   elif [ -z "$OS_VER" ]; then
     OS_VER="?"
   fi
+}
+
+check_module_conflicts() {
+  local self_id="transsion-flagship-16"
+  local conflict_paths="system/media/audio/ui system/product/media/audio/ui system/product/media/audio/bootsound system/overlay/Icons_Signal_wifi system/product/overlay/Icons_Signal_wifi system/product/apm/config system/product/theme/charge system/product/theme/animations system/product/theme/sounds system/tr_product/etc/vconfig/magellan"
+  local conflict_props="ro.surface_flinger.supports_background_blur ro.os.recent.blur ro.transsion_launcher_gaussian_blur_support tr_launcher.gaussianblur.support ro.tran.effectengine.dynamicblur.support ro.tr_display.liquidglass.support"
+  local found=""
+  local d m p k
+  for d in /data/adb/modules/*/; do
+    [ -d "$d" ] || continue
+    m=$(basename "$d")
+    [ "$m" = "$self_id" ] && continue
+    [ -f "${d}disable" ] && continue
+    for p in $conflict_paths; do
+      if [ -e "${d}${p}" ]; then
+        found="${found}${m}|${p}
+"
+      fi
+    done
+    if [ -f "${d}system.prop" ]; then
+      for k in $conflict_props; do
+        if grep -q "^${k}=" "${d}system.prop" 2>/dev/null; then
+          found="${found}${m}|prop:${k}
+"
+        fi
+      done
+    fi
+  done
+  mkdir -p /data/adb/transsion-flagship-16-staging
+  printf '%s' "$found" > /data/adb/transsion-flagship-16-staging/install_conflicts.txt
+  if [ -z "$found" ]; then
+    ui_ok "No conflicting modules detected"
+    return
+  fi
+  local mods
+  mods=$(printf '%s' "$found" | cut -d'|' -f1 | sort -u)
+  ui_warn "Possible conflicts with other installed modules:"
+  local mod
+  for mod in $mods; do
+    ui_warn "  - $mod"
+  done
+  ui_info "Open the Flagship 16 WebUI after reboot to review."
 }
 
 on_install() {
@@ -414,10 +453,15 @@ on_install() {
 
   ui_print " "
   ui_div
+  ui_step "Checking for module conflicts..."
+  ui_div
+  check_module_conflicts
+
+  ui_print " "
+  ui_div
   ui_step "Injecting files..."
   ui_div
-  # KernelSU already unpacked the zip. Re-unzipping system/* (two 6–13MB
-  # bootanim archives) is what got the V1.05 flash "Killed" (OOM).
+  # Do not re-unzip bootanim archives (OOM on KernelSU).
   have_zips=false
   if [ -f "$MODPATH/system/product/theme/animations/bootanim_hios16.zip" ] \
       && [ -f "$MODPATH/system/product/theme/animations/bootanim_default.zip" ]; then
@@ -478,8 +522,7 @@ on_install() {
     ui_ok "Kept uploaded UI sounds"
   fi
 
-  # V1.14 shipped bundled iOS / XOS 16 overlay APKs. Drop them; keep a custom
-  # upload if the user already wrote one.
+  # Drop bundled status-bar overlays; keep a custom upload.
   rm -rf "$MODPATH/system/overlay/Icons_Signal_wifi" \
          "$MODPATH/system/product/overlay/Icons_Signal_wifi" \
          "$MODPATH/product/overlay/Icons_Signal_wifi" \
@@ -500,30 +543,29 @@ on_install() {
         /mnt/vendor/mountify/product/overlay/SystemUISignalOverlay.apk.disabled
   ui_ok "Removed bundled status-bar overlay APKs"
 
-  # V1.91 dropped the bundled emoji font (~34MB). Strip leftovers from older builds.
+  # Strip leftover emoji font from older builds.
   rm -rf "$MODPATH/system/fonts" \
          /mnt/vendor/mountify/system/fonts/NotoColorEmoji.ttf \
          /mnt/vendor/mountify/system/fonts/NotoColorEmoji_custom.ttf
   rm -f "$MODPATH/apply_emoji.sh" "$MODPATH/emoji_custom.ttf"
-  ui_ok "Removed emoji font (testing build — smaller zip)"
+  ui_ok "Removed emoji font leftovers"
 
   CFG=/data/adb/modules/transsion-flagship-16/config.json
   if [ -f "$CFG" ]; then
     ui_ok "Existing Flagship 16 config preserved"
     cp "$CFG" "$MODPATH/config.json"
-    # Undo V1.24 gallery/video-off, V1.25 eraser-only, and stock-off call summary.
     sed -i -e 's/"statusbar_style": *"ios"/"statusbar_style": "off"/' \
            -e 's/"statusbar_style": *"xos16"/"statusbar_style": "off"/' \
            -e 's/"ai_notif_summary"/"ai_writing"/' \
            -e 's/"ai_gallery": false/"ai_gallery": true/' \
            -e 's/"ai_video": false/"ai_video": true/' \
            -e 's/"ai_call_summary": false/"ai_call_summary": true/' \
+           -e '/"blur_os16_level"/d' \
            "$MODPATH/config.json"
   else
     ui_ok "Default config: HiOS 16 boot + reboot, AI + gaming + anim/blur on, dynamic bar off, status bar stock"
   fi
-  # One-time: dynamic bar was default-on through V1.72. Force off once, then
-  # leave later user toggles alone.
+  # One-time: force Dynamic bar extras off for upgrades, then leave the toggle.
   if [ -f /data/adb/modules/transsion-flagship-16/.dynbar_off_v173 ]; then
     cp /data/adb/modules/transsion-flagship-16/.dynbar_off_v173 "$MODPATH/.dynbar_off_v173"
   else
@@ -552,10 +594,10 @@ on_install() {
       done
     fi
     : > "$MODPATH/.pixel_sounds_v179"
-    ui_info "Pixel sounds are now the default except keypress (one-time)"
+    ui_info "Pixel sounds set as default"
   fi
   write_os16_ai_prop "$MODPATH/config.json" "$MODPATH/system.prop"
-  ui_ok "OS 16 keys written from config (reboot to apply)"
+  ui_ok "Feature keys written"
 
   if [ ! -f "$MODPATH/.dynbar_fix_v186" ]; then
     if ! grep -q '"dynamicbar_os16"[[:space:]]*:[[:space:]]*true' "$MODPATH/config.json" 2>/dev/null; then
@@ -575,26 +617,19 @@ on_install() {
   ui_ok "Boot animation"
   ui_ok "Reboot animation"
   ui_ok "Status bar: upload your own overlay, or leave stock"
-  ui_ok "Sounds: Pixel default (not keypress); charging Huawei / iOS / S25"
+  ui_ok "Sounds"
 }
 
 set_permissions() {
-  # Magisk copies zip system.prop after on_install. Rewrite from config so
-  # WebUI toggles survive an upgrade.
+  # Magisk copies zip system.prop after on_install. Rewrite from config.
   write_os16_ai_prop "$MODPATH/config.json" "$MODPATH/system.prop"
-  # TranOS 16 custom refresh is only Magellan XML in system/tr_product.
-  # Copy that XML here when Force 120Hz is on so Mountify overlays it.
   if [ -f "$MODPATH/apply_120hz.sh" ]; then
     MODDIR="$MODPATH"
     CFG="$MODPATH/config.json"
     export MODDIR CFG
     . "$MODPATH/apply_120hz.sh"
-    if os16_hz_on; then
-      os16_generate_120hz_jsons
-      os16_copy_magellan_mountify
-    else
-      os16_copy_magellan_mountify
-    fi
+    os16_generate_120hz_jsons
+    os16_copy_magellan_mountify
   fi
   touch "$MODPATH/skip_mount"
   set_perm_recursive "$MODPATH" 0 0 0755 0644
@@ -603,7 +638,7 @@ set_permissions() {
   done
   ui_print " "
   ui_div
-  ui_print "  ✨  FLAGSHIP 16  ·  V2.0.1"
+  ui_print "  ✨  FLAGSHIP 16  ·  V2.1"
   ui_info "OS     : $OS_TYPE $OS_VER"
   ui_info "Feature: boot + reboot + overlay + AI + gaming + anim/blur + AOD + Dynamic bar + Force 120Hz + UI sounds"
   ui_div
