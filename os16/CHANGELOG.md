@@ -1,5 +1,8 @@
 # Transsion Flagship 16
 
+## v1.93
+- **Level 1: Parallel + solid shade together.** V1.92 kept platform 3 (Parallel back) but still wrote gaussian **2** from the Disable-blur reference — that combo only works with platform 2, so blur came back. Level 1 / blur off now use platform **3** + gaussian **0** + unionrender **0** + compositor off. Spring recents keys stay; glass is levels 2/3 only. Apply + reboot, then check Parallel at blur 1 and pull the shade — should be solid, not glassy.
+
 ## v1.92
 - **Level 1 keeps Parallel animations.** V1.90 matched Disable-blur-XOS16 by dropping `platform_level` to **2** at level 1 — that removed blur but killed Parallel motion. Level 1 / blur off now stay at **platform 3** when Parallel is on, and turn glass off via unionrender **0**, compositor blur off, and the Disable-blur launcher vconfig (`gaussianblur=2`, `blurrecent=1`). Apply + reboot, then check app open/close at blur 1 — Parallel should stay, shade should stay solid.
 
