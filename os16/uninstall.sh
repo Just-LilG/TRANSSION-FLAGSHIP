@@ -2,7 +2,7 @@
 LOG=/data/adb/transflagship16_uninstall.log
 log_msg() { echo "[$(date '+%H:%M:%S')] $1" >> "$LOG"; }
 MODDIR=/data/adb/modules/transsion-flagship-16
-log_msg "=== TransFlagship 16 V1.83 uninstall start ==="
+log_msg "=== TransFlagship 16 V1.84 uninstall start ==="
 if [ -f "$MODDIR/apply_sounds.sh" ]; then
   . "$MODDIR/apply_sounds.sh"
   os16_umount_sounds

@@ -125,6 +125,7 @@ os16_apply_gt_apps_vconfig() {
   on=$(os16_cfg_bool gt_apps_os16 true)
   [ "$on" = "true" ] || [ "$on" = "1" ] || return 0
   os16_vconfig_pkg_keys com.gallery20 \
+    tr_gallery.3dphoto.support 1 \
     tr_gallery.custom.fliters.support 1 \
     tr_gallery.drag.sort.support 1 \
     tr_gallery.easypic.support 1 \
@@ -145,6 +146,7 @@ os16_apply_gt_apps_vconfig() {
   os16_vconfig_pkg_keys com.transsion.microintelligence \
     tr_microIntelligence.gesture_functions.feature.support 1
   os16_vconfig_pkg_keys com.transsion.pcconnect \
+    tr_pcconnect.extend_screen.feature.support true \
     tr_pcconnect.backup.feature.support 1 \
     tr_pcconnect.gesture_file_transfer.feature.support 1 \
     tr_pcconnect.network_sharing.feature.support 1 \
@@ -173,6 +175,12 @@ os16_apply_circle_props() {
   os16_rp_overwrite ro.os_ai_circle_to_search_support "$c"
 }
 
+os16_apply_motion_sick_props() {
+  c=$(os16_cfg_01 motion_sick_os16 true)
+  os16_rp_overwrite ro.tr_microIntelligence.motion_sickness.feature.support "$c"
+  os16_rp_overwrite tr_microIntelligence.motion_sickness.feature.support "$c"
+}
+
 os16_apply_unlock() {
   os16_apply_social_props
   os16_apply_display_props
@@ -180,6 +188,7 @@ os16_apply_unlock() {
   os16_apply_settings_vconfig
   os16_apply_gt_apps_vconfig
   os16_apply_circle_props
+  os16_apply_motion_sick_props
 }
 
 if [ "${0##*/}" = "apply_unlock.sh" ]; then
