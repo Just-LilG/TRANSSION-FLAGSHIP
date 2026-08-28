@@ -379,11 +379,3 @@ if [ -f "$MODDIR/apply_sounds.sh" ]; then
 else
   log_pfd "apply_sounds.sh missing"
 fi
-
-if [ -f "$MODDIR/apply_emoji.sh" ]; then
-  . "$MODDIR/apply_emoji.sh"
-  os16_apply_emoji
-  log_pfd "emoji live=$(ls -l /system/fonts/NotoColorEmoji.ttf 2>/dev/null | awk '{print $5,$NF}') packed=$(ls -l $MODDIR/system/fonts/NotoColorEmoji.ttf $MODDIR/system/fonts/NotoColorEmoji_custom.ttf 2>/dev/null | awk '{print $5,$NF}')"
-else
-  log_pfd "apply_emoji.sh missing"
-fi
