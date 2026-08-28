@@ -5,7 +5,7 @@ LOG="$MODDIR/transflagship16_service.log"
 rm -f "$LOG"
 log_p() { echo "[$(date '+%H:%M:%S')] $1" >> "$LOG"; }
 
-log_p "=== TransFlagship 16 V1.98 ==="
+log_p "=== TransFlagship 16 V1.99 ==="
 log_p "Device : $(getprop ro.product.model 2>/dev/null)"
 log_p "Brand  : $(getprop ro.product.brand 2>/dev/null)"
 log_p "Android: $(getprop ro.build.version.release 2>/dev/null)"
@@ -35,7 +35,8 @@ if [ -f "$MODDIR/apply_blur.sh" ]; then
   os16_blur_vals
   if [ "$SOLID_SHADE" = "1" ]; then
     os16_refresh_systemui_on_apply
-    log_p "systemui force-stop for solid shade"
+    os16_refresh_launcher_on_apply
+    log_p "systemui+launcher force-stop for solid shade"
   fi
   # Do not restart SurfaceFlinger or force-stop home/AOD here. That is the
   # post-boot soft reboot.
@@ -123,9 +124,10 @@ log_p "  home=$(cmd package resolve-activity --brief -a android.intent.action.MA
   os16_blur_vals
   if [ "$SOLID_SHADE" = "1" ]; then
     os16_refresh_systemui_on_apply
-    echo "[$(date '+%H:%M:%S')] systemui force-stop solid shade" >> "$LOG"
+    os16_refresh_launcher_on_apply
+    echo "[$(date '+%H:%M:%S')] systemui+launcher force-stop solid shade" >> "$LOG"
   fi
-  echo "[$(date '+%H:%M:%S')] blur after settle lvl=$(os16_cfg_int blur_os16_level 2) platform=$(getprop ro.tr_animation.platform_level 2>/dev/null) perf=$(getprop ro.tr_perf.launch_start_exit.model 2>/dev/null) liquidglass=$(getprop ro.tr_display.liquidglass.support 2>/dev/null) gaussian=$(getprop ro.transsion_launcher_gaussian_blur_support 2>/dev/null) vconfig=$(grep gaussian_blur /tr_product/etc/vconfig/com.transsion.launcher3/build.prop 2>/dev/null | head -1) aod_always=$(getprop ro.aod_alwaysshow_support 2>/dev/null) bar=$(getprop ro.tr_dynamicbar.support 2>/dev/null)" >> "$LOG"
+  echo "[$(date '+%H:%M:%S')] blur after settle lvl=$(os16_cfg_int blur_os16_level 2) platform=$(getprop ro.tr_animation.platform_level 2>/dev/null) perf=$(getprop ro.tr_perf.launch_start_exit.model 2>/dev/null) union=$(getprop ro.tran_display_unionrender.support 2>/dev/null) async=$(getprop ro.transsion_async_animation_support 2>/dev/null) liquidglass=$(getprop ro.tr_display.liquidglass.support 2>/dev/null) gaussian=$(getprop ro.transsion_launcher_gaussian_blur_support 2>/dev/null) vconfig=$(grep gaussian_blur /tr_product/etc/vconfig/com.transsion.launcher3/build.prop 2>/dev/null | head -1) reduce_blur=$(settings get secure reduce_blur_effects 2>/dev/null) aod_always=$(getprop ro.aod_alwaysshow_support 2>/dev/null) bar=$(getprop ro.tr_dynamicbar.support 2>/dev/null)" >> "$LOG"
   if [ -f "$MODDIR/apply_120hz.sh" ]; then
     . "$MODDIR/apply_120hz.sh"
     os16_apply_game_fps_props
