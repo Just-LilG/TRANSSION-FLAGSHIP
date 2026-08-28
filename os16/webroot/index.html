@@ -650,7 +650,7 @@ function renderSounds(){
       html+='<div style="border-top:1px solid var(--glass-b)"></div>';
     }
     const fn=soundFileOf(s.id);
-    html+='<div class="setting-row"><div class="row-text" style="margin-left:0"><div class="row-title">'+s.title+'</div><div class="row-sub">'+(s.sub||(s.dest+'.ogg'))+'</div></div></div>';
+    html+='<div class="setting-row"><div class="row-text" style="margin-left:0"><div class="row-title">'+s.title+'</div></div></div>';
     html+=soundPickerHtml(s);
     html+='<div class="file-row"><label class="file-btn">Upload .ogg / .mp3 / .wav<input type="file" accept=".ogg,.mp3,.wav,.m4a,audio/*" onchange="handleSoundUpload(\''+s.id+'\',\''+s.dest+'\',this)"></label>';
     html+='<div class="file-name" id="media-'+s.id+'-name">'+(fn?('Custom: '+fn):'No custom sound uploaded')+'</div></div>';
@@ -1571,7 +1571,7 @@ async function handleStatusbar(input){
 }
 async function loadDevice(){
   const prop=await g('cat "'+MOD+'/module.prop" 2>/dev/null');
-  const ver=(prop.match(/^version=(.+)$/m)||[])[1]||'V2.0';
+  const ver=(prop.match(/^version=(.+)$/m)||[])[1]||'V2.1';
   n('module-version-sub', ver+' · OS 16');
   let type=await g('getprop ro.tran.os.type');
   let verOs=await g('getprop ro.transsion.os.version');
