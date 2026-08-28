@@ -335,14 +335,14 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
           <div class="setting-row">
             <div class="row-text">
               <div class="row-title">Dynamic blur</div>
-              <div class="row-sub">Off / 1 = Smart shade with Parallel still on. 2 / 3 = flagship glass. Apply + reboot.</div>
+              <div class="row-sub">Off / level 1 = solid Smart shade (no glass). 2 / 3 = flagship glass. Apply + reboot.</div>
             </div>
             <label class="toggle"><input type="checkbox" id="feat-blur" checked onchange="setAnimBlur('blur_os16',this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
           </div>
           <div class="setting-row">
             <div class="row-text">
               <div class="row-title">Blur level</div>
-              <div class="row-sub">1 = no system glass. 2 / 3 = flagship glass. Parallel motion stays if that toggle is on.</div>
+              <div class="row-sub">1 = solid panels (gaussian 0, not see-through). 2 / 3 = glass strength. Parallel stays if that toggle is on.</div>
             </div>
           </div>
           <div class="segmented" id="blur-level">
@@ -727,16 +727,18 @@ function blurLevel(){
   return (n>=1 && n<=3)?n:2;
 }
 function glassOn(){ return blurOn() && blurLevel()>=2; }
+function gaussianLvl(){ return glassOn()?String(blurLevel()):'0'; }
+function unionOn(){ return animOn()?'1':'0'; }
+function solidShade(){ return blurOn() && blurLevel()===1; }
 function animLvl(){ return animOn()?'3':'0'; }
 function anim01(){ return animOn()?'1':'0'; }
-function blurLvl(){ return blurOn()?String(blurLevel()):'0'; }
+function blurDisable(){ return glassOn()?'0':'1'; }
 function blur01(){ return glassOn()?'1':'0'; }
 function blurRadius(){
   if(!glassOn()) return 0;
   if(blurLevel()===3) return 80;
   return 45;
 }
-function blurDisable(){ return glassOn()?'0':'1'; }
 const GALLERY_KEYS=[
   'ro.tr_gallery.eraser.v2.support',
   'ro.tr_gallery.ext.image.support',
@@ -920,8 +922,9 @@ async function writeAiSystemProp(){
   lines.push('ro.tr_smartbutton.shoulderbutton20.feature.support='+(trig?'true':'false'));
   const alvl=animLvl();
   const a01=anim01();
-  const blvl=blurLvl();
+  const blvl=gaussianLvl();
   const b01=blur01();
+  const union=unionOn();
   lines.push('ro.tr_animation.platform_level='+alvl);
   lines.push('ro.tr_perf.launch_start_exit.model='+alvl);
   lines.push('ro.tr_perf.power_keyguard_animation.model='+alvl);
@@ -934,7 +937,7 @@ async function writeAiSystemProp(){
   lines.push('ro.transsion_launch_start_exit_support='+alvl);
   lines.push('ro.transsion_power_keyguard_animation_support='+alvl);
   lines.push('ro.transsion.recent_animation.model='+alvl);
-  lines.push('ro.tran_display_unionrender.support='+b01);
+  lines.push('ro.tran_display_unionrender.support='+union);
   lines.push('ro.tr_display.liquidglass.support='+b01);
   lines.push('ro.surface_flinger.supports_background_blur='+b01);
   lines.push('ro.os.recent.blur='+b01);
@@ -1099,6 +1102,7 @@ async function dumpAi(){
   lines.push(home||'EMPTY');
   lines.push('');
   lines.push('=== launcher blur settings ===');
+  lines.push('blur_level  '+blurLevel()+'  glass='+String(glassOn())+'  solid='+String(solidShade()||!blurOn()));
   const ge=await g('settings get system transsion_launcher_gaussian_blur_enable');
   const geg=await g('settings get global transsion_launcher_gaussian_blur_enable');
   const gs=await g('settings get system transsion_launcher_gaussian_blur_support');

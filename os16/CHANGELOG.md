@@ -1,5 +1,8 @@
 # Transsion Flagship 16
 
+## v1.82
+- **Blur level 1 is solid again, not see-through.** V1.81 wrote `gaussian_blur_support=1` at level 1, which half-blurred notifications/QS instead of a Smart-style solid panel. Level 1 now matches TranOS Anim Only lv3: gaussian **0**, compositor glass off, `accessibility_reduce_transparency=1`, launcher vconfig blur **0**. Parallel + unionrender stay on; glass is levels **2/3** only. Apply + reboot, then pull shade at level 1 vs 3.
+
 ## v1.81
 - **Dynamic bar off no longer kills your stock bar.** V1.80 and older wrote `ro.tr_dynamicbar.support=0` when the WebUI toggle was off. That disabled the Dynamic Bar your phone already had — Settings still looked on, but the pill stopped working. Off now **removes** module overrides only (stock ROM props stay). On still adds Flagship extras (Always Show Background row, landscape recents fix). Apply + reboot.
 
