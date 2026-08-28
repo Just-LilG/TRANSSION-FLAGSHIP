@@ -403,17 +403,19 @@ os16_apply_120hz_all() {
   os16_apply_120hz_settings
 }
 
-# WebUI Apply: copy the TranOS XML into the module tree for the next Mountify
-# boot. Do not wipe package_cache (that soft-reboots and can lose config.json),
-# do not force-stop Settings, do not call pm.
+# WebUI Apply: stage Magellan + refresh settings. Reboot still needed for Mountify overlay.
 os16_webui_apply_120hz() {
   if os16_hz_on && [ -f "$MAGELLAN_TEMPLATE" ]; then
     mkdir -p "$(dirname "$MAGELLAN_XML")"
     cp -f "$MAGELLAN_TEMPLATE" "$MAGELLAN_XML"
     chmod 644 "$MAGELLAN_XML" 2>/dev/null
   fi
+  os16_generate_120hz_jsons
   os16_copy_magellan_mountify
   os16_swap_magisk_apm
+  if os16_hz_on; then
+    os16_apply_120hz_settings
+  fi
 }
 
 if [ "${0##*/}" = "apply_120hz.sh" ]; then

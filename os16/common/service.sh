@@ -5,7 +5,7 @@ LOG="$MODDIR/transflagship16_service.log"
 rm -f "$LOG"
 log_p() { echo "[$(date '+%H:%M:%S')] $1" >> "$LOG"; }
 
-log_p "=== TransFlagship 16 V2.0 ==="
+log_p "=== TransFlagship 16 V2.0.1 ==="
 log_p "Device : $(getprop ro.product.model 2>/dev/null)"
 log_p "Brand  : $(getprop ro.product.brand 2>/dev/null)"
 log_p "Android: $(getprop ro.build.version.release 2>/dev/null)"
@@ -129,6 +129,22 @@ log_p "  home=$(cmd package resolve-activity --brief -a android.intent.action.MA
   if [ -f "$MODDIR/apply_120hz.sh" ]; then
     . "$MODDIR/apply_120hz.sh"
     os16_apply_game_fps_props
+    if os16_hz_on; then
+      pc=$(cat "$HZDIR/.pkg_count" 2>/dev/null)
+      case "$pc" in
+        pm-not-ready:*|'')
+          os16_generate_120hz_jsons
+          os16_copy_magellan_mountify
+          ;;
+        *[!0-9]*)
+          os16_generate_120hz_jsons
+          os16_copy_magellan_mountify
+          ;;
+        *)
+          [ "$pc" -lt 8 ] 2>/dev/null && os16_generate_120hz_jsons && os16_copy_magellan_mountify
+          ;;
+      esac
+    fi
     os16_apply_120hz_settings
     echo "[$(date '+%H:%M:%S')] refresh after settle force=$(os16_cfg_bool force_120hz false) magellan=$(ls /tr_product/etc/vconfig/magellan/refresh_rate_config.xml 2>/dev/null && echo yes || echo missing) max144=$(grep -c 'max=\"144\"' /tr_product/etc/vconfig/magellan/refresh_rate_config.xml 2>/dev/null)" >> "$LOG"
   fi

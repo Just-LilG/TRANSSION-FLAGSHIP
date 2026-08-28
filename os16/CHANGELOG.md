@@ -1,5 +1,8 @@
 # Transsion Flagship 16
 
+## v2.0.1
+- **Pre-release debug fixes.** Display leftover cleanup had inverted shell logic (`display_reading false` was always truthy — stale DC/HDR settings never cleared). Force 120Hz Apply now runs full whitelist generation + refresh settings (not just file copy). Boot settle retries Magellan generation when PackageManager was not ready at post-fs. Installer/uninstall banners show V2.0.1. Removed duplicate `apply_unlock.sh` on WebUI Apply (already inside `apply_blur.sh all`). See `os16/TESTING.md` for final device checklist.
+
 ## v2.0 — Official release
 
 First **official stable release** for Transsion OS 16 (XOS / HiOS / iTel). Tested on **Infinix X6886 (G99)**.

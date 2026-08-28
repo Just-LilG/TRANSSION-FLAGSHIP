@@ -1292,8 +1292,8 @@ async function saveAll(){
     if(!props){ toast('Saved config, but AI props failed to write'); _saving=false; return; }
     // ksu.exec has no timeout. apply_blur.sh all can hang on resetprop --delete
     // / vconfig bind and freeze the WebUI. Detach so Apply always returns.
-    exec('nohup sh -c "sh \"'+MOD+'/apply_blur.sh\" all; sleep 1; am force-stop com.android.systemui" >/dev/null 2>&1 & nohup sh "'+MOD+'/apply_120hz.sh" >/dev/null 2>&1 & nohup sh "'+MOD+'/apply_sounds.sh" >/dev/null 2>&1 & nohup sh "'+MOD+'/apply_unlock.sh" >/dev/null 2>&1 & echo OK').catch(function(){});
-    toast('Saved. SystemUI will restart for shade blur. Reboot if Settings did not update.');
+    exec('nohup sh -c "sh \"'+MOD+'/apply_blur.sh\" all; sleep 1; am force-stop com.android.systemui" >/dev/null 2>&1 & nohup sh "'+MOD+'/apply_120hz.sh" >/dev/null 2>&1 & nohup sh "'+MOD+'/apply_sounds.sh" >/dev/null 2>&1 & echo OK').catch(function(){});
+    toast('Saved. Blur/AOD/display apply live. AI/gaming need reboot. Force 120Hz: reboot for Magellan overlay.');
   }catch(e){
     toast('Save failed. Try again.');
   }

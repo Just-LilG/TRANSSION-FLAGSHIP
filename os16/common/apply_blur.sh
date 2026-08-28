@@ -725,8 +725,11 @@ os16_apply_dynamicbar_runtime() {
 
 os16_clear_failed_feature_leftovers() {
   # Legacy cleanup only when display extras are all off.
-  if os16_cfg_bool display_dc true || os16_cfg_bool display_color true \
-      || os16_cfg_bool display_hdr true || os16_cfg_bool display_reading false; then
+  dc=$(os16_cfg_01 display_dc true)
+  col=$(os16_cfg_01 display_color true)
+  hdr=$(os16_cfg_01 display_hdr true)
+  rd=$(os16_cfg_01 display_reading false)
+  if [ "$dc" = "1" ] || [ "$col" = "1" ] || [ "$hdr" = "1" ] || [ "$rd" = "1" ]; then
     return 0
   fi
   for ns in system global; do
