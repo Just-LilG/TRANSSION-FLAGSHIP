@@ -92,9 +92,16 @@ write_os16_ai_prop() {
   if [ "$blur" = "true" ] && [ "$blvl" -ge 2 ]; then
     b01=1
     sfdis=0
+    gblur=$blvl
   else
     b01=0
     sfdis=1
+    gblur=0
+  fi
+  if [ "$anim" = "true" ]; then
+    union=1
+  else
+    union=0
   fi
   aod=$(json_bool "$cfg" aod_os16 true)
   dbar=$(json_bool "$cfg" dynamicbar_os16 false)
@@ -160,12 +167,12 @@ ro.transsion_unlock_mode_support=$alvl
 ro.transsion_launch_start_exit_support=$alvl
 ro.transsion_power_keyguard_animation_support=$alvl
 ro.transsion.recent_animation.model=$alvl
-ro.tran_display_unionrender.support=$b01
+ro.tran_display_unionrender.support=$union
 ro.tr_display.liquidglass.support=$b01
 ro.surface_flinger.supports_background_blur=$b01
 ro.os.recent.blur=$b01
-ro.transsion_launcher_gaussian_blur_support=$blvl
-tr_launcher.gaussianblur.support=$blvl
+ro.transsion_launcher_gaussian_blur_support=$gblur
+tr_launcher.gaussianblur.support=$gblur
 ro.tran.effectengine.dynamicblur.support=$b01
 ro.os_xos16_blur_v2_support=$b01
 persist.sys.sf.disable_blurs=$sfdis
@@ -220,7 +227,7 @@ print_modname() {
   ui_print " "
   ui_print "  ╔══════════════════════════════════════════╗"
   ui_print "  ║    TRANSSION FLAGSHIP 16                 ║"
-    ui_print "  ║    XOS · HiOS · iTel OS 16  ·  V1.80     ║"
+    ui_print "  ║    XOS · HiOS · iTel OS 16  ·  V1.82     ║"
   ui_print "  ╚══════════════════════════════════════════╝"
   ui_print " "
 }
@@ -477,7 +484,7 @@ set_permissions() {
   done
   ui_print " "
   ui_div
-  ui_print "  ✨  FLAGSHIP 16  ·  V1.80"
+  ui_print "  ✨  FLAGSHIP 16  ·  V1.82"
   ui_info "OS     : $OS_TYPE $OS_VER"
   ui_info "Feature: boot + reboot + overlay + AI + gaming + anim/blur + AOD + Dynamic bar + Force 120Hz + UI sounds + emoji"
   ui_div
