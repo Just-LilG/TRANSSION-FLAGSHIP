@@ -1,7 +1,7 @@
 #!/system/bin/sh
 # Parallel motion = platform_level 3 whenever Parallel is on.
-# Flagship glass = unionrender / liquid glass / compositor (blur 2/3).
-# Level 1 / off: unionrender off on X6886 — platform 3 parallel stays, shade goes solid.
+# Blur tiers follow Disable-blur-XOS16 (SenzaProject) at level 1: platform 2 +
+# tr_launcher.gaussianblur=2 / blurrecent=1 — not gaussian 0. Levels 2/3 use platform 3 glass.
 
 if [ -z "$MODDIR" ]; then
   MODDIR=${0%/*}
@@ -128,6 +128,7 @@ os16_blur_vals() {
   DIS=1
   EXP=0
   LAUNCHER_ASYNC=0
+  BLUR_RECENT=0
 
   if [ "$anim" = "true" ] || [ "$anim" = "1" ]; then
     A01=1
@@ -142,6 +143,10 @@ os16_blur_vals() {
     case "$lvl" in
       1)
         SOLID=1
+        # Disable-blur-XOS16.zip: platform 2 + launcher vconfig gaussian 2 / blurrecent 1.
+        [ "$anim" = "true" ] || [ "$anim" = "1" ] && ALVL=2
+        BLVL=2
+        BLUR_RECENT=1
         ;;
       2)
         SOLID=0
@@ -171,6 +176,12 @@ os16_blur_vals() {
         [ "$anim" = "true" ] || [ "$anim" = "1" ] && UNION=1
         ;;
     esac
+  else
+    # Blur off — same solid profile as level 1 (Disable-blur-XOS16).
+    SOLID=1
+    [ "$anim" = "true" ] || [ "$anim" = "1" ] && ALVL=2
+    BLVL=2
+    BLUR_RECENT=1
   fi
 
   BLUR_ON=$on
@@ -423,10 +434,14 @@ os16_apply_launcher_vconfig_all() {
     os16_vconfig_upsert "$staged" "ro.transsion_async_animation_support" "$LAUNCHER_ASYNC"
     os16_vconfig_upsert "$staged" "ro.tran_display_unionrender.support" "$UNION"
   else
-    # TranOS Anim Only lv3: gaussian 0, recent blur 0, launcher async 0.
+    # Disable-blur-XOS16 reference: tr_launcher gaussian 2 + blurrecent 1, compositor off.
+    os16_vconfig_upsert "$staged" "tr_launcher.gaussianblur.support" "$BLVL"
+    os16_vconfig_upsert "$staged" "tr_launcher.blurrecent.support" "$BLUR_RECENT"
+    os16_vconfig_upsert "$staged" "ro.os.tran_recent_dismiss_single_task_spring_support" "1"
+    os16_vconfig_upsert "$staged" "ro.os.tran_recent_drag_down_single_task_spring_support" "1"
+    os16_vconfig_upsert "$staged" "tr_launcher.hidefreezer.support" "1"
     os16_vconfig_upsert "$staged" "ro.os.recent.blur" "0"
-    os16_vconfig_upsert "$staged" "ro.transsion_launcher_gaussian_blur_support" "0"
-    os16_vconfig_upsert "$staged" "tr_launcher.gaussianblur.support" "0"
+    os16_vconfig_upsert "$staged" "ro.transsion_launcher_gaussian_blur_support" "$BLVL"
     os16_vconfig_upsert "$staged" "ro.transsion_async_animation_support" "0"
     os16_vconfig_upsert "$staged" "ro.tran_display_unionrender.support" "0"
   fi
@@ -614,6 +629,10 @@ os16_apply_blur_runtime() {
   os16_settings_put system disable_window_blurs "$DIS"
   if [ "$SOLID" = "1" ]; then
     os16_settings_put secure accessibility_reduce_transparency 1
+    os16_settings_put global transsion_launcher_gaussian_blur_enable 0
+    os16_settings_put system transsion_launcher_gaussian_blur_enable 0
+    settings delete system transsion_launcher_blur_radius >/dev/null 2>&1
+    settings delete global transsion_launcher_blur_radius >/dev/null 2>&1
   else
     settings delete secure accessibility_reduce_transparency >/dev/null 2>&1
   fi
