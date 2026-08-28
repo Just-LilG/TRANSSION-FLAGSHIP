@@ -1349,6 +1349,12 @@ async function dumpAi(){
   lines.push('disable_window_blurs  '+(dw||'EMPTY'));
   lines.push('accessibility_reduce_transparency  '+(rt||'EMPTY'));
   lines.push('wm disable-blur  '+(wm||'EMPTY'));
+  const lvc=await g('grep -E "gaussian|recent.blur|async_animation" /tr_product/etc/vconfig/com.transsion.launcher3/build.prop 2>/dev/null');
+  lines.push('launcher3 vconfig');
+  lines.push(lvc||'EMPTY');
+  const tpb=await g('grep -E "liquidglass|background_blur|gaussian|dynamicblur|xos16_blur" /tr_product/etc/build.prop 2>/dev/null');
+  lines.push('tr_product build.prop blur keys');
+  lines.push(tpb||'EMPTY');
   lines.push('');
   lines.push('=== aod / dynamic bar ===');
   lines.push('aod_os16  '+String(cfg.aod_os16!==false));
@@ -1423,8 +1429,8 @@ async function dumpAi(){
   lines.push('tr_gallery.live.slow.support  '+describeAiFlag(glive2));
   const air=await g('getprop ro.tr_airtransfer.feature.support');
   lines.push('ro.tr_airtransfer.feature.support  '+describeAiFlag(air));
-  const lvc=await g('grep hide_status_bar /tr_product/etc/vconfig/com.transsion.launcher3/build.prop 2>/dev/null');
-  lines.push('vconfig launcher hide_land  '+(lvc||'EMPTY'));
+  const lvcHide=await g('grep hide_status_bar /tr_product/etc/vconfig/com.transsion.launcher3/build.prop 2>/dev/null');
+  lines.push('vconfig launcher hide_land  '+(lvcHide||'EMPTY'));
   const horiz=await g('getprop tr_aod.horizontal.display.feature.support');
   lines.push('tr_aod.horizontal.display.feature.support  '+describeAiFlag(horiz));
   lines.push('');
