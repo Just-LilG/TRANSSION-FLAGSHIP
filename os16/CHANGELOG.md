@@ -1,5 +1,8 @@
 # Transsion Flagship 16
 
+## v1.96
+- **Notification shade: split platform_level from Parallel perf models.** V1.95 lighting keys did not fix the panel — your tests showed **`ro.tr_animation.platform_level=3` keeps the notification shade glassy** even when every other blur flag is off. Level 1 / 2 / blur off now write **`platform_level=2`** (Disable-blur solid shade path) while **`ro.tr_perf.*` models stay at 3** so Parallel animations remain. Launcher vconfig uses **gaussian 2 + blurrecent 1** for the shade path at level 1 (resetprop gaussian stays **0** so the dock stays solid). SystemUI is **force-stopped after boot settle** and on Apply so cached glass clears. Apply + reboot, pull shade at level 1 — dump should show `shade_platform=2` and `perf_model=3`.
+
 ## v1.95
 - **Notification shade solid panel — Glow Space lighting keys.** V1.94 had every compositor blur flag correct at level 1 but the notification / QS panel stayed glassy. That path is Transsion **Glow Space**, not launcher gaussian. This build writes **`persist.tr_lighting.controlcenter.feature.support=0`** (and **`ro.tr_lighting.*`**) whenever the shade should stay solid (levels 1/2 + blur off), restores them at level 3, binds **`com.android.systemui` vconfig** blur/glass keys from your stock file when present, and **force-stops SystemUI on WebUI Apply only** (not at boot — V1.59 crash reboot). Apply + reboot, then pull the shade at **level 1** — should be solid colors like Smart series. Dump shows `lighting_cc`, `lighting_feat`, and systemui vconfig lines.
 

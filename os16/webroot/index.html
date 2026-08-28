@@ -812,8 +812,17 @@ function gaussianLvl(){
   return '3';
 }
 function animLvl(){
+  if(glassOn()) return '3';
+  if(solidShade()) return '2';
+  return '0';
+}
+function perfLvl(){
   if(cfg.anim_os16===false) return '0';
   return '3';
+}
+function vcfgGaussian(){
+  if(solidShade()) return '2';
+  return gaussianLvl();
 }
 function unionOn(){
   if(blurLevel()!==3 || cfg.anim_os16===false) return '0';
@@ -1084,22 +1093,23 @@ async function writeAiSystemProp(){
   lines.push('ro.tr_display.color.temperature.feature.support='+dcol);
   lines.push('persist.tr_display.color.temperature.aosp.support='+dcol);
   const alvl=animLvl();
+  const plvl=perfLvl();
   const a01=anim01();
   const blvl=gaussianLvl();
   const b01=blur01();
   const union=unionOn();
   lines.push('ro.tr_animation.platform_level='+alvl);
-  lines.push('ro.tr_perf.launch_start_exit.model='+alvl);
-  lines.push('ro.tr_perf.power_keyguard_animation.model='+alvl);
-  lines.push('ro.tr_perf.recent_animation.model='+alvl);
-  lines.push('ro.tr_perf.unlock_mode.model='+alvl);
+  lines.push('ro.tr_perf.launch_start_exit.model='+plvl);
+  lines.push('ro.tr_perf.power_keyguard_animation.model='+plvl);
+  lines.push('ro.tr_perf.recent_animation.model='+plvl);
+  lines.push('ro.tr_perf.unlock_mode.model='+plvl);
   lines.push('ro.tr_livewallpaper.dreamanimation.support='+a01);
   lines.push('ro.tr_multiwindow.anim_arc.support='+a01);
   lines.push('ro.transsion_async_animation_support='+launcherAsync());
-  lines.push('ro.transsion_unlock_mode_support='+alvl);
-  lines.push('ro.transsion_launch_start_exit_support='+alvl);
-  lines.push('ro.transsion_power_keyguard_animation_support='+alvl);
-  lines.push('ro.transsion.recent_animation.model='+alvl);
+  lines.push('ro.transsion_unlock_mode_support='+plvl);
+  lines.push('ro.transsion_launch_start_exit_support='+plvl);
+  lines.push('ro.transsion_power_keyguard_animation_support='+plvl);
+  lines.push('ro.transsion.recent_animation.model='+plvl);
   lines.push('ro.tran_display_unionrender.support='+union);
   lines.push('ro.tr_display.liquidglass.support='+b01);
   lines.push('ro.surface_flinger.supports_background_blur='+b01);
@@ -1269,7 +1279,7 @@ async function saveAll(){
     if(!props){ toast('Saved config, but AI props failed to write'); _saving=false; return; }
     // ksu.exec has no timeout. apply_blur.sh all can hang on resetprop --delete
     // / vconfig bind and freeze the WebUI. Detach so Apply always returns.
-    exec('nohup sh "'+MOD+'/apply_blur.sh" all >/dev/null 2>&1 & nohup sh "'+MOD+'/apply_120hz.sh" >/dev/null 2>&1 & nohup sh "'+MOD+'/apply_sounds.sh" >/dev/null 2>&1 & nohup sh "'+MOD+'/apply_unlock.sh" >/dev/null 2>&1 & echo OK').catch(function(){});
+    exec('nohup sh -c "sh \"'+MOD+'/apply_blur.sh\" all; sleep 1; am force-stop com.android.systemui" >/dev/null 2>&1 & nohup sh "'+MOD+'/apply_120hz.sh" >/dev/null 2>&1 & nohup sh "'+MOD+'/apply_sounds.sh" >/dev/null 2>&1 & nohup sh "'+MOD+'/apply_unlock.sh" >/dev/null 2>&1 & echo OK').catch(function(){});
     toast('Saved. SystemUI will restart for shade blur. Reboot if Settings did not update.');
   }catch(e){
     toast('Save failed. Try again.');
@@ -1325,13 +1335,15 @@ async function dumpAi(){
   lines.push(home||'EMPTY');
   lines.push('');
   lines.push('=== launcher blur settings ===');
-  lines.push('blur_level  '+blurLevel()+'  glass='+String(glassOn())+'  solid_shade='+String(solidShade())+'  dock_blur='+String(dockBlurOn())+'  platform='+animLvl()+'  lighting_cc='+lightingCc()+'  lighting_feat='+lightingFeat());
+  lines.push('blur_level  '+blurLevel()+'  glass='+String(glassOn())+'  solid_shade='+String(solidShade())+'  dock_blur='+String(dockBlurOn())+'  shade_platform='+animLvl()+'  perf_model='+perfLvl()+'  vconfig_gaussian='+vcfgGaussian()+'  lighting_cc='+lightingCc()+'  lighting_feat='+lightingFeat());
   const lg=await g('getprop ro.tr_display.liquidglass.support');
   const sfb=await g('getprop ro.surface_flinger.supports_background_blur');
   const dyn=await g('getprop ro.tran.effectengine.dynamicblur.support');
   const bv2=await g('getprop ro.os_xos16_blur_v2_support');
   const plat=await g('getprop ro.tr_animation.platform_level');
-  lines.push('platform_level  '+(plat||'EMPTY'));
+  const perf=await g('getprop ro.tr_perf.launch_start_exit.model');
+  lines.push('platform_level (shade)  '+(plat||'EMPTY'));
+  lines.push('perf_launch_model  '+(perf||'EMPTY'));
   const union=await g('getprop ro.tran_display_unionrender.support');
   const asyncp=await g('getprop ro.transsion_async_animation_support');
   lines.push('unionrender  '+describeAiFlag(union));

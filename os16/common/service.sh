@@ -5,7 +5,7 @@ LOG="$MODDIR/transflagship16_service.log"
 rm -f "$LOG"
 log_p() { echo "[$(date '+%H:%M:%S')] $1" >> "$LOG"; }
 
-log_p "=== TransFlagship 16 V1.95 ==="
+log_p "=== TransFlagship 16 V1.96 ==="
 log_p "Device : $(getprop ro.product.model 2>/dev/null)"
 log_p "Brand  : $(getprop ro.product.brand 2>/dev/null)"
 log_p "Android: $(getprop ro.build.version.release 2>/dev/null)"
@@ -32,6 +32,11 @@ if [ -f "$MODDIR/apply_blur.sh" ]; then
     os16_apply_unlock
   fi
   os16_apply_blur_runtime
+  os16_blur_vals
+  if [ "$SOLID_SHADE" = "1" ]; then
+    os16_refresh_systemui_on_apply
+    log_p "systemui force-stop for solid shade"
+  fi
   # Do not restart SurfaceFlinger or force-stop home/AOD here. That is the
   # post-boot soft reboot.
   log_p "blur apply: anim=$(os16_cfg_bool anim_os16 true) on=$(os16_cfg_bool blur_os16 true) lvl=$(os16_cfg_int blur_os16_level 2) liquidglass=$(getprop ro.tr_display.liquidglass.support 2>/dev/null) sf_blur=$(getprop ro.surface_flinger.supports_background_blur 2>/dev/null) gaussian=$(getprop ro.transsion_launcher_gaussian_blur_support 2>/dev/null) dynamicblur=$(getprop ro.tran.effectengine.dynamicblur.support 2>/dev/null) vconfig_gaussian=$(grep gaussian_blur /tr_product/etc/vconfig/com.transsion.launcher3/build.prop 2>/dev/null | head -1)"
@@ -115,7 +120,12 @@ log_p "  home=$(cmd package resolve-activity --brief -a android.intent.action.MA
     os16_apply_unlock
   fi
   os16_apply_blur_runtime
-  echo "[$(date '+%H:%M:%S')] blur after settle lvl=$(os16_cfg_int blur_os16_level 2) liquidglass=$(getprop ro.tr_display.liquidglass.support 2>/dev/null) gaussian=$(getprop ro.transsion_launcher_gaussian_blur_support 2>/dev/null) vconfig=$(grep gaussian_blur /tr_product/etc/vconfig/com.transsion.launcher3/build.prop 2>/dev/null | head -1) aod_always=$(getprop ro.aod_alwaysshow_support 2>/dev/null) bar=$(getprop ro.tr_dynamicbar.support 2>/dev/null)" >> "$LOG"
+  os16_blur_vals
+  if [ "$SOLID_SHADE" = "1" ]; then
+    os16_refresh_systemui_on_apply
+    echo "[$(date '+%H:%M:%S')] systemui force-stop solid shade" >> "$LOG"
+  fi
+  echo "[$(date '+%H:%M:%S')] blur after settle lvl=$(os16_cfg_int blur_os16_level 2) platform=$(getprop ro.tr_animation.platform_level 2>/dev/null) perf=$(getprop ro.tr_perf.launch_start_exit.model 2>/dev/null) liquidglass=$(getprop ro.tr_display.liquidglass.support 2>/dev/null) gaussian=$(getprop ro.transsion_launcher_gaussian_blur_support 2>/dev/null) vconfig=$(grep gaussian_blur /tr_product/etc/vconfig/com.transsion.launcher3/build.prop 2>/dev/null | head -1) aod_always=$(getprop ro.aod_alwaysshow_support 2>/dev/null) bar=$(getprop ro.tr_dynamicbar.support 2>/dev/null)" >> "$LOG"
   if [ -f "$MODDIR/apply_120hz.sh" ]; then
     . "$MODDIR/apply_120hz.sh"
     os16_apply_game_fps_props

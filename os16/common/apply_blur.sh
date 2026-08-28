@@ -131,32 +131,35 @@ os16_blur_vals() {
   EXP=0
   LAUNCHER_ASYNC=0
   BLUR_RECENT=0
+  VCFG_BLUR=0
 
   if [ "$anim" = "true" ] || [ "$anim" = "1" ]; then
     A01=1
-    ALVL=3
+    PERF_LVL=3
   else
     A01=0
-    ALVL=0
+    PERF_LVL=0
   fi
   UNION=0
 
   if [ "$on" = "true" ] || [ "$on" = "1" ]; then
     case "$lvl" in
       1)
-        # Smart 20 style — solid everywhere, no dock blur, Parallel stays.
+        # Smart solid — platform 2 shade path + perf model 3 Parallel motion.
         SOLID_SHADE=1
         DOCK_BLUR=0
         GLASS=0
         BLVL=0
-        BLUR_RECENT=0
+        VCFG_BLUR=2
+        BLUR_RECENT=1
         ;;
       2)
-        # G99 stock partial — gaussian 2 on dock/recents, shade stays solid.
+        # G99 partial — dock blur, shade solid (Disable-blur vconfig).
         SOLID_SHADE=1
         DOCK_BLUR=1
         GLASS=0
         BLVL=2
+        VCFG_BLUR=2
         BLUR_RECENT=1
         EN=1
         RAD=25
@@ -168,6 +171,7 @@ os16_blur_vals() {
         DOCK_BLUR=1
         GLASS=1
         BLVL=3
+        VCFG_BLUR=3
         BLUR_RECENT=1
         EN=1
         RAD=80
@@ -187,7 +191,18 @@ os16_blur_vals() {
     DOCK_BLUR=0
     GLASS=0
     BLVL=0
-    BLUR_RECENT=0
+    VCFG_BLUR=2
+    BLUR_RECENT=1
+  fi
+
+  # platform_level drives notification shade glass on X6886 (3 = glassy).
+  # ro.tr_perf.* models stay at 3 for Parallel when anim is on.
+  if [ "$GLASS" = "1" ]; then
+    ALVL=3
+  elif [ "$SOLID_SHADE" = "1" ]; then
+    ALVL=2
+  else
+    ALVL=0
   fi
 
   # Glow Space / notification shade solid panel (X6858 stock: CC lighting = 1).
@@ -213,18 +228,17 @@ os16_blur_vals() {
 os16_apply_blur_props() {
   os16_blur_vals
   os16_rp_overwrite ro.tr_animation.platform_level "$ALVL"
-  os16_rp_overwrite ro.tr_perf.launch_start_exit.model "$ALVL"
-  os16_rp_overwrite ro.tr_perf.power_keyguard_animation.model "$ALVL"
-  os16_rp_overwrite ro.tr_perf.recent_animation.model "$ALVL"
-  os16_rp_overwrite ro.tr_perf.unlock_mode.model "$ALVL"
+  os16_rp_overwrite ro.tr_perf.launch_start_exit.model "$PERF_LVL"
+  os16_rp_overwrite ro.tr_perf.power_keyguard_animation.model "$PERF_LVL"
+  os16_rp_overwrite ro.tr_perf.recent_animation.model "$PERF_LVL"
+  os16_rp_overwrite ro.tr_perf.unlock_mode.model "$PERF_LVL"
   os16_rp ro.tr_livewallpaper.dreamanimation.support "$A01"
   os16_rp ro.tr_multiwindow.anim_arc.support "$A01"
-  # TranOS Anim Only lv3 keeps platform 3 but async 0 at solid tier.
   os16_rp ro.transsion_async_animation_support "$LAUNCHER_ASYNC"
-  os16_rp ro.transsion_unlock_mode_support "$ALVL"
-  os16_rp ro.transsion_launch_start_exit_support "$ALVL"
-  os16_rp ro.transsion_power_keyguard_animation_support "$ALVL"
-  os16_rp ro.transsion.recent_animation.model "$ALVL"
+  os16_rp ro.transsion_unlock_mode_support "$PERF_LVL"
+  os16_rp ro.transsion_launch_start_exit_support "$PERF_LVL"
+  os16_rp ro.transsion_power_keyguard_animation_support "$PERF_LVL"
+  os16_rp ro.transsion.recent_animation.model "$PERF_LVL"
   os16_rp_overwrite ro.tran_display_unionrender.support "$UNION"
   os16_rp_overwrite ro.tr_display.liquidglass.support "$B01"
   os16_rp_overwrite ro.surface_flinger.supports_background_blur "$B01"
@@ -461,14 +475,15 @@ os16_apply_launcher_vconfig_all() {
     os16_vconfig_upsert "$staged" "ro.transsion_async_animation_support" "$LAUNCHER_ASYNC"
     os16_vconfig_upsert "$staged" "ro.tran_display_unionrender.support" "$UNION"
   else
-    # Level 2 partial = dock blur only; shade solid (Disable-blur vconfig path).
-    os16_vconfig_upsert "$staged" "tr_launcher.gaussianblur.support" "$BLVL"
+    # Disable-blur shade path: vconfig gaussian 2 + blurrecent 1, compositor off.
+    # VCFG_BLUR can be 2 while resetprop BLVL stays 0 at level 1 (dock solid).
+    os16_vconfig_upsert "$staged" "tr_launcher.gaussianblur.support" "$VCFG_BLUR"
     os16_vconfig_upsert "$staged" "tr_launcher.blurrecent.support" "$BLUR_RECENT"
     os16_vconfig_upsert "$staged" "ro.os.tran_recent_dismiss_single_task_spring_support" "1"
     os16_vconfig_upsert "$staged" "ro.os.tran_recent_drag_down_single_task_spring_support" "1"
     os16_vconfig_upsert "$staged" "tr_launcher.hidefreezer.support" "1"
     os16_vconfig_upsert "$staged" "ro.os.recent.blur" "0"
-    os16_vconfig_upsert "$staged" "ro.transsion_launcher_gaussian_blur_support" "$BLVL"
+    os16_vconfig_upsert "$staged" "ro.transsion_launcher_gaussian_blur_support" "$VCFG_BLUR"
     os16_vconfig_upsert "$staged" "ro.transsion_async_animation_support" "0"
     os16_vconfig_upsert "$staged" "ro.tran_display_unionrender.support" "0"
   fi
@@ -661,9 +676,8 @@ os16_clear_failed_feature_leftovers() {
 }
 
 os16_refresh_systemui_on_apply() {
-  # SystemUI caches shade blur until the process dies. Flagship 15 force-stops
-  # on Apply; V1.59 am crash at boot caused a cold reboot — never at boot.
-  [ "$OS16_BOOT" = "1" ] && return 0
+  # SystemUI caches shade blur until the process dies. force-stop is safe;
+  # V1.59 am crash at boot caused a cold reboot.
   am force-stop com.android.systemui >/dev/null 2>&1
 }
 

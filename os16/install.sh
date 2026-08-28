@@ -109,15 +109,15 @@ write_os16_ai_prop() {
     [ "$blvl" -ge 1 ] 2>/dev/null || blvl=2
     [ "$blvl" -le 3 ] 2>/dev/null || blvl=2
   fi
-  # Parallel motion stays at platform 3 whenever Parallel is on.
-  # Unionrender only at blur level 2/3 (glass tier).
+  # Perf models stay at 3 for Parallel; platform_level is the shade tier.
   if [ "$anim" = "true" ]; then
     a01=1
-    alvl=3
+    perf_lvl=3
   else
     a01=0
-    alvl=0
+    perf_lvl=0
   fi
+  alvl=2
   union=0
   b01=0
   sfdis=1
@@ -138,6 +138,11 @@ write_os16_ai_prop() {
     esac
   else
     b01=0; sfdis=1; gblur=0; dynblur=0; blurv2=0; exp=0; launcher_async=0; union=0; light_cc=0; light_feat=0
+  fi
+  if [ "$blur" = "true" ] && [ "$blvl" = "3" ]; then
+    alvl=3
+  else
+    alvl=2
   fi
   aod=$(json_bool "$cfg" aod_os16 true)
   dbar=$(json_bool "$cfg" dynamicbar_os16 false)
@@ -209,17 +214,17 @@ ro.tr_display.colormode.feature.support=$dcol
 ro.tr_display.color.temperature.feature.support=$dcol
 persist.tr_display.color.temperature.aosp.support=$dcol
 ro.tr_animation.platform_level=$alvl
-ro.tr_perf.launch_start_exit.model=$alvl
-ro.tr_perf.power_keyguard_animation.model=$alvl
-ro.tr_perf.recent_animation.model=$alvl
-ro.tr_perf.unlock_mode.model=$alvl
+ro.tr_perf.launch_start_exit.model=$perf_lvl
+ro.tr_perf.power_keyguard_animation.model=$perf_lvl
+ro.tr_perf.recent_animation.model=$perf_lvl
+ro.tr_perf.unlock_mode.model=$perf_lvl
 ro.tr_livewallpaper.dreamanimation.support=$a01
 ro.tr_multiwindow.anim_arc.support=$a01
 ro.transsion_async_animation_support=$launcher_async
-ro.transsion_unlock_mode_support=$alvl
-ro.transsion_launch_start_exit_support=$alvl
-ro.transsion_power_keyguard_animation_support=$alvl
-ro.transsion.recent_animation.model=$alvl
+ro.transsion_unlock_mode_support=$perf_lvl
+ro.transsion_launch_start_exit_support=$perf_lvl
+ro.transsion_power_keyguard_animation_support=$perf_lvl
+ro.transsion.recent_animation.model=$perf_lvl
 ro.tran_display_unionrender.support=$union
 ro.tr_display.liquidglass.support=$b01
 ro.surface_flinger.supports_background_blur=$b01
