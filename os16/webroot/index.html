@@ -173,6 +173,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
             <li>Gallery Live — GT dump 0 = off; Magisk keys stay</li>
             <li class="next">Air Transfer — Magisk keys stay (GT dump 1)</li>
             <li class="on">Sounds — Pixel default (not keypress); charging Huawei / iOS / S25</li>
+            <li class="on">Emoji font — last feature; packed NotoColorEmoji</li>
             <li>Social Turbo — removed (stock already had call tools)</li>
             <li>Display extras — removed (OS 16 Settings hid DC / HDR / reading)</li>
           </ul>
@@ -471,6 +472,23 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
           </div>
         </div>
         <div class="h8"></div>
+        <div class="glass-card">
+          <div class="setting-row">
+            <div class="row-text">
+              <div class="row-title">Custom emoji font</div>
+              <div class="row-sub">iOS-style NotoColorEmoji on /system/fonts. Off = stock. Upload a .ttf to replace the packed font. Apply + reboot.</div>
+            </div>
+            <label class="toggle"><input type="checkbox" id="media-emoji" checked onchange="cfg.emoji_font=this.checked"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+          </div>
+          <div class="file-row">
+            <label class="file-btn">
+              Upload custom .ttf
+              <input type="file" accept=".ttf,font/ttf" onchange="handleEmoji(this)">
+            </label>
+            <div class="file-name" id="media-emoji-name">Packed: NotoColorEmoji.ttf</div>
+          </div>
+        </div>
+        <div class="h8"></div>
         <button class="action-btn btn-primary" onclick="saveAll()">Apply &amp; Save</button>
       </div>
 
@@ -511,7 +529,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
 <script type="module">
 const MOD='/data/adb/modules/transsion-flagship-16';
 const CONFIG_PATH=MOD+'/config.json';
-let cfg={bootanim_style:'hios16',bootanim_file:'',rebootanim_style:'hios16',rebootanim_file:'',statusbar_style:'off',statusbarcustom_file:'',ai_master:true,ai_subtitles:true,ai_call_summary:true,ai_writing:true,ai_sound_rec:true,ai_notes:true,ai_gallery:true,ai_video:true,game_master:true,game_esports_touch:true,game_esports_level:3,game_bypass_charge:true,game_gt_triggers:true,anim_os16:true,blur_os16:true,blur_os16_level:2,aod_os16:true,videosr_os16:true,supervol_os16:true,treasure_os16:true,cutepet_os16:true,outdoorboost_os16:true,gallerylive_os16:true,airtransfer_os16:true,dynamicbar_os16:false,force_120hz:false};
+let cfg={bootanim_style:'hios16',bootanim_file:'',rebootanim_style:'hios16',rebootanim_file:'',statusbar_style:'off',statusbarcustom_file:'',ai_master:true,ai_subtitles:true,ai_call_summary:true,ai_writing:true,ai_sound_rec:true,ai_notes:true,ai_gallery:true,ai_video:true,game_master:true,game_esports_touch:true,game_esports_level:3,game_bypass_charge:true,game_gt_triggers:true,anim_os16:true,blur_os16:true,blur_os16_level:2,aod_os16:true,videosr_os16:true,supervol_os16:true,treasure_os16:true,cutepet_os16:true,outdoorboost_os16:true,gallerylive_os16:true,airtransfer_os16:true,dynamicbar_os16:false,force_120hz:false,emoji_font:true,emoji_file:''};
 let _exec=null;
 let _saving=false;
 const SOUND_SLOTS=[
@@ -1010,7 +1028,9 @@ async function saveAll(){
       gallerylive_os16:cfg.gallerylive_os16!==false,
       airtransfer_os16:cfg.airtransfer_os16!==false,
       dynamicbar_os16:cfg.dynamicbar_os16===true,
-      force_120hz:cfg.force_120hz===true
+      force_120hz:cfg.force_120hz===true,
+      emoji_font:cfg.emoji_font!==false,
+      emoji_file:cfg.emoji_file||''
     };
     SOUND_SLOTS.forEach(s=>{
       slim[s.id+'_style']=soundStyleOf(s.id);
@@ -1024,7 +1044,7 @@ async function saveAll(){
     if(!props){ toast('Saved config, but AI props failed to write'); _saving=false; return; }
     // ksu.exec has no timeout. apply_blur.sh all can hang on resetprop --delete
     // / vconfig bind and freeze the WebUI. Detach so Apply always returns.
-    exec('nohup sh "'+MOD+'/apply_blur.sh" all >/dev/null 2>&1 & nohup sh "'+MOD+'/apply_120hz.sh" >/dev/null 2>&1 & nohup sh "'+MOD+'/apply_sounds.sh" >/dev/null 2>&1 & echo OK').catch(function(){});
+    exec('nohup sh "'+MOD+'/apply_blur.sh" all >/dev/null 2>&1 & nohup sh "'+MOD+'/apply_120hz.sh" >/dev/null 2>&1 & nohup sh "'+MOD+'/apply_sounds.sh" >/dev/null 2>&1 & nohup sh "'+MOD+'/apply_emoji.sh" >/dev/null 2>&1 & echo OK').catch(function(){});
     toast('Saved. Reboot if Settings did not update.');
   }catch(e){
     toast('Save failed. Try again.');
@@ -1184,6 +1204,16 @@ async function dumpAi(){
   const uimount=await g('mount 2>/dev/null | grep "audio/ui" | head -20');
   lines.push(uimount||'(no audio/ui binds)');
   lines.push('');
+  lines.push('=== emoji font ===');
+  lines.push('emoji_font  '+String(cfg.emoji_font!==false));
+  lines.push('emoji_file  '+(cfg.emoji_file||'EMPTY'));
+  const emlive=await g('ls -l /system/fonts/NotoColorEmoji.ttf /system/system/fonts/NotoColorEmoji.ttf /product/fonts/NotoColorEmoji.ttf /system/product/fonts/NotoColorEmoji.ttf 2>/dev/null');
+  lines.push(emlive||'no live NotoColorEmoji.ttf dests');
+  const emmod=await g('ls -l "'+MOD+'/system/fonts" 2>/dev/null');
+  lines.push('module fonts: '+(emmod||'EMPTY'));
+  const emmount=await g('mount 2>/dev/null | grep NotoColorEmoji | grep -v Flags | head -10');
+  lines.push(emmount||'(no emoji binds)');
+  lines.push('');
   const apm=await g('ls -l /product/apm/config/refresh_rate_config.json /system/product/apm/config/refresh_rate_config.json /tr_product/etc/apm/config/refresh_rate_config.json 2>/dev/null; ls -l "'+MOD+'/system/product/apm/config/refresh_rate_config.json" 2>/dev/null');
   lines.push(apm||'no live /product/apm/config/refresh_rate_config.json (OS 16 uses Magellan, this is optional)');
   const head=await g('head -c 180 /product/apm/config/refresh_rate_config.json 2>/dev/null');
@@ -1300,6 +1330,23 @@ async function handleStatusbar(input){
   toast('Custom overlay saved — reboot to apply');
   input.value='';
 }
+async function handleEmoji(input){
+  if(!input.files.length) return;
+  const file=input.files[0];
+  if(file.size>40*1024*1024){ toast('File too large (max 40MB)'); input.value=''; return; }
+  toast('Writing emoji font…', 20000);
+  const bytes=new Uint8Array(await file.arrayBuffer());
+  const dests=[MOD+'/system/fonts/NotoColorEmoji_custom.ttf'];
+  const ok=await writeB64File(bytes, dests, '/data/local/tmp/tf16_emoji.b64');
+  if(!ok){ toast('Write failed'); return; }
+  cfg.emoji_font=true;
+  cfg.emoji_file=file.name;
+  setT('media-emoji', true);
+  n('media-emoji-name','Custom: '+file.name);
+  await saveAll();
+  toast('Custom emoji saved — reboot to apply');
+  input.value='';
+}
 async function loadDevice(){
   const prop=await g('cat "'+MOD+'/module.prop" 2>/dev/null');
   const ver=(prop.match(/^version=(.+)$/m)||[])[1]||'V1.42';
@@ -1362,6 +1409,8 @@ async function loadCfg(){
   if(cfg.airtransfer_os16===undefined) cfg.airtransfer_os16=true;
   if(cfg.dynamicbar_os16===undefined) cfg.dynamicbar_os16=false;
   if(cfg.force_120hz===undefined) cfg.force_120hz=false;
+  if(cfg.emoji_font===undefined) cfg.emoji_font=true;
+  if(cfg.emoji_file===undefined) cfg.emoji_file='';
   SOUND_SLOTS.forEach(s=>{
     if(cfg[s.id+'_style']===undefined) cfg[s.id+'_style']=soundDefaultOf(s);
     if(cfg[s.id+'_file']===undefined) cfg[s.id+'_file']='';
@@ -1411,6 +1460,8 @@ async function loadCfg(){
   setT('feat-airtransfer', cfg.airtransfer_os16!==false);
   setT('feat-dynamicbar', cfg.dynamicbar_os16===true);
   setT('feat-force120hz', cfg.force_120hz===true);
+  setT('media-emoji', cfg.emoji_font!==false);
+  if(cfg.emoji_file) n('media-emoji-name','Custom: '+cfg.emoji_file);
   setEsportsLevel(esportsLevel());
   setBlurLevel(blurLevel());
   syncAiChildren();
@@ -1444,6 +1495,7 @@ window.setBlurLevel=setBlurLevel;
 window.handleBootanim=handleBootanim;
 window.handleRebootanim=handleRebootanim;
 window.handleStatusbar=handleStatusbar;
+window.handleEmoji=handleEmoji;
 window.dumpAi=dumpAi;
 window.copyLog=copyLog;
 window.setSoundStyle=setSoundStyle;

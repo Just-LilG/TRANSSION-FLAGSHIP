@@ -32,7 +32,7 @@ imageless_magisk() {
 OUTFD=$2
 ZIPFILE=$3
 
-ui_print "- Flagship 16 V1.79 installer"
+ui_print "- Flagship 16 V1.80 installer"
 
 mount /data 2>/dev/null
 
@@ -64,7 +64,7 @@ $BOOTMODE && boot_actions || recovery_actions
 # on a 20MB zip can dump the bootanim zips into /dev/tmp (tmpfs) and OOM.
 ui_print "- Preparing Flagship 16 installer"
 for f in module.prop install.sh uninstall.sh \
-         common/post-fs-data.sh common/service.sh common/system.prop common/apply_blur.sh common/apply_120hz.sh common/apply_sounds.sh
+         common/post-fs-data.sh common/service.sh common/system.prop common/apply_blur.sh common/apply_120hz.sh common/apply_sounds.sh common/apply_emoji.sh
 do
   unzip -oj "$ZIPFILE" "$f" -d $TMPDIR >&2 || abort "! Missing $f in zip"
 done
@@ -152,6 +152,7 @@ $LATESTARTSERVICE && cp -af $TMPDIR/service.sh $MODPATH/service.sh
 [ -f $TMPDIR/apply_blur.sh ] && cp -af $TMPDIR/apply_blur.sh $MODPATH/apply_blur.sh
 [ -f $TMPDIR/apply_120hz.sh ] && cp -af $TMPDIR/apply_120hz.sh $MODPATH/apply_120hz.sh
 [ -f $TMPDIR/apply_sounds.sh ] && cp -af $TMPDIR/apply_sounds.sh $MODPATH/apply_sounds.sh
+[ -f $TMPDIR/apply_emoji.sh ] && cp -af $TMPDIR/apply_emoji.sh $MODPATH/apply_emoji.sh
 
 # Handle replace folders
 for TARGET in $REPLACE; do
