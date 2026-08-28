@@ -2,7 +2,7 @@
 LOG=/data/adb/transflagship16_uninstall.log
 log_msg() { echo "[$(date '+%H:%M:%S')] $1" >> "$LOG"; }
 MODDIR=/data/adb/modules/transsion-flagship-16
-log_msg "=== TransFlagship 16 V1.77 uninstall start ==="
+log_msg "=== TransFlagship 16 V1.78 uninstall start ==="
 if [ -f "$MODDIR/apply_sounds.sh" ]; then
   . "$MODDIR/apply_sounds.sh"
   os16_umount_sounds
@@ -90,4 +90,4 @@ cmd window disable-blur 0 2>/dev/null
 rm -f /data/adb/modules/transsion-flagship-16/system/tr_product/etc/vconfig/magellan/refresh_rate_config.xml 2>/dev/null
 rm -f /data/magellan/refresh_rate_config.xml 2>/dev/null
 rm -f /mnt/vendor/mountify/tr_product/etc/vconfig/magellan/refresh_rate_config.xml 2>/dev/null
-log_msg "=== TransFlagship 16 V1.77 uninstall complete — reboot ==="
+log_msg "=== TransFlagship 16 V1.78 uninstall complete — reboot ==="

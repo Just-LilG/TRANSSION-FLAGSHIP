@@ -1,5 +1,8 @@
 # Transsion Flagship 16
 
+## v1.78
+- **Screenshot sound.** Charging / lock / keypress already hit GT `/tr_product/media/audio/ui/*.ogg`. Screenshot does not — Android SystemUI plays AOSP `camera_click.ogg` from `/product/media/audio/ui` or `/system/media/audio/ui` (`config_cameraShutterSound` / MediaActionSound), not `Screenshots.ogg`. Custom screenshot now also replaces `camera_click.ogg` on those paths (and still binds `Screenshots.ogg` on `/tr_product`). Re-Apply screenshot, reboot, then capture.
+
 ## v1.77
 - **Sounds actually stick.** V1.76 uploaded custom files, then post-fs-data `rm -rf`’d the whole `media/audio` tree (old boot-sound cleanup) on every reboot — so charging/unlock never played. This build keeps `*_custom.*`, copies dest-named `.ogg` for Mountify `/product`, and still per-file binds `/tr_product`. Re-upload each sound (V1.76 already deleted them), Apply, reboot.
 
