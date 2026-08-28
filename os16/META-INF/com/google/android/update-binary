@@ -60,8 +60,7 @@ $BOOTMODE && boot_actions || recovery_actions
 # Preparation
 ##########################################################################################
 
-# Extract only the tiny Magisk-template files. Busybox unzip + glob 'common/*'
-# on a 20MB zip can dump the bootanim zips into /dev/tmp (tmpfs) and OOM.
+# Extract installer scripts only (avoid dumping bootanim zips into tmpfs).
 ui_print "- Preparing Flagship 16 installer"
 for f in module.prop install.sh uninstall.sh \
          common/post-fs-data.sh common/service.sh common/system.prop common/apply_blur.sh common/apply_120hz.sh common/apply_sounds.sh common/apply_unlock.sh
