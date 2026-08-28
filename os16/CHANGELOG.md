@@ -1,5 +1,9 @@
 # Transsion Flagship 16
 
+## v2.6
+- **Installer rewritten** for a stable release: no diagnostic path prints, no leftover test copy, quieter upgrades, Flagship 15-style complete banner.
+- **Emoji WebUI** no longer shows a filesystem path. Toggle + upload only: iOS-style high-res emoji, off = stock.
+
 ## v2.5
 - **KernelSU / Magisk in-app Update is back.** `module.prop` again includes `updateJson` (it was dropped after V1.80, which is why Manager never showed Update — even on an older zip). Flash V2.5 once; later builds appear as in-app updates.
 - **Installer cleaned up.** Removed the install diagnostic dump and the leftover “strip emoji” test path. Banner and `module.prop` match a stable release (`minMagisk=20400`, emoji in the description).

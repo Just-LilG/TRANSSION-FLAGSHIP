@@ -187,7 +187,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
         </div>
         <div class="hero-card">
           <div class="hero-title">Transsion Flagship 16</div>
-          <div class="hero-sub" id="module-version-sub">V2.5 · OS 16</div>
+          <div class="hero-sub" id="module-version-sub">V2.6 · OS 16</div>
         </div>
         <div class="h8"></div>
         <div class="author-card">
@@ -603,7 +603,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
           <div class="setting-row">
             <div class="row-text">
               <div class="row-title">Custom emoji font</div>
-              <div class="row-sub">iOS-style NotoColorEmoji on /system/fonts. Off = stock. Upload a .ttf to replace the packed font. Apply + reboot.</div>
+              <div class="row-sub">iOS-style high-res emoji. Off = stock. Upload a .ttf to replace the packed font.</div>
             </div>
             <label class="toggle"><input type="checkbox" id="media-emoji" checked onchange="cfg.emoji_font=this.checked"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
           </div>
@@ -1569,12 +1569,12 @@ async function dumpAi(){
   lines.push('=== emoji font ===');
   lines.push('emoji_font  '+String(cfg.emoji_font!==false));
   lines.push('emoji_file  '+(cfg.emoji_file||'EMPTY'));
-  const emlive=await g('ls -l /system/fonts/NotoColorEmoji.ttf /system/system/fonts/NotoColorEmoji.ttf /product/fonts/NotoColorEmoji.ttf /system/product/fonts/NotoColorEmoji.ttf 2>/dev/null');
-  lines.push(emlive||'no live NotoColorEmoji.ttf dests');
-  const emmod=await g('ls -l "'+MOD+'/system/fonts/NotoColorEmoji.ttf" "'+MOD+'/system/fonts/NotoColorEmoji_custom.ttf" 2>/dev/null');
-  lines.push('module fonts: '+(emmod||'EMPTY'));
-  const emmount=await g('mount 2>/dev/null | grep NotoColorEmoji | grep -v Flags | head -10');
-  lines.push(emmount||'(no emoji binds)');
+  const empack=await g('wc -c < "'+MOD+'/system/fonts/NotoColorEmoji.ttf" 2>/dev/null');
+  const emcustom=await g('[ -f "'+MOD+'/system/fonts/NotoColorEmoji_custom.ttf" ] && echo yes || echo no');
+  const embound=await g('mount 2>/dev/null | grep NotoColorEmoji | grep -v Flags | wc -l');
+  lines.push('packed  '+(empack||'EMPTY'));
+  lines.push('custom_upload  '+emcustom);
+  lines.push('binds  '+(embound||'0'));
   lines.push('');
   const apm=await g('ls -l /product/apm/config/refresh_rate_config.json /system/product/apm/config/refresh_rate_config.json /tr_product/etc/apm/config/refresh_rate_config.json 2>/dev/null; ls -l "'+MOD+'/system/product/apm/config/refresh_rate_config.json" 2>/dev/null');
   lines.push(apm||'no live /product/apm/config/refresh_rate_config.json (OS 16 uses Magellan, this is optional)');
@@ -1714,7 +1714,7 @@ async function handleEmoji(input){
 }
 async function loadDevice(){
   const prop=await g('cat "'+MOD+'/module.prop" 2>/dev/null');
-  const ver=(prop.match(/^version=(.+)$/m)||[])[1]||'V2.5';
+  const ver=(prop.match(/^version=(.+)$/m)||[])[1]||'V2.6';
   n('module-version-sub', ver+' · OS 16');
   let type=await g('getprop ro.tran.os.type');
   let verOs=await g('getprop ro.transsion.os.version');
@@ -1891,8 +1891,7 @@ const CONFLICT_PATHS=[
   'system/product/theme/charge',
   'system/product/theme/animations',
   'system/product/theme/sounds',
-  'system/tr_product/etc/vconfig/magellan',
-  'system/fonts/NotoColorEmoji.ttf'
+  'system/tr_product/etc/vconfig/magellan'
 ];
 async function checkInstallTimeConflicts(){
   const r=await exec('cat /data/adb/transsion-flagship-16-staging/install_conflicts.txt 2>/dev/null').catch(()=>({stdout:''}));

@@ -1,8 +1,6 @@
 #!/system/bin/sh
-# Custom emoji font. GT dump lives at /system/fonts/NotoColorEmoji.ttf.
-# Pack one copy under module system/fonts (Mountify overlays /system).
-# Per-file bind the same TTF onto live dests that already exist.
-# Do not replace NotoColorEmojiFlags.ttf. Do not bind-dir /tr_product.
+# Custom emoji font. Bind packed or uploaded TTF over the stock color-emoji file.
+# Do not replace NotoColorEmojiFlags.ttf.
 
 if [ -z "$MODDIR" ]; then
   MODDIR=${0%/*}

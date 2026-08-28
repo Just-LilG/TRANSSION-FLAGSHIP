@@ -324,11 +324,22 @@ EOF
   fi
 }
 
+unzip_mod_scripts() {
+  unzip -oj "$ZIPFILE" 'common/system.prop' -d "$MODPATH" >&2
+  unzip -oj "$ZIPFILE" 'common/apply_blur.sh' -d "$MODPATH" >&2
+  unzip -oj "$ZIPFILE" 'common/apply_120hz.sh' -d "$MODPATH" >&2
+  unzip -oj "$ZIPFILE" 'common/apply_sounds.sh' -d "$MODPATH" >&2
+  unzip -oj "$ZIPFILE" 'common/apply_unlock.sh' -d "$MODPATH" >&2
+  unzip -oj "$ZIPFILE" 'common/apply_emoji.sh' -d "$MODPATH" >&2
+}
+
 print_modname() {
   ui_print " "
   ui_print "  ╔══════════════════════════════════════════╗"
+  ui_print "  ║                                          ║"
   ui_print "  ║    ✨  TRANSSION FLAGSHIP 16             ║"
-  ui_print "  ║    XOS · HiOS · iTel OS 16  ·  V2.5      ║"
+  ui_print "  ║    XOS · HiOS · iTel OS 16  ·  V2.6      ║"
+  ui_print "  ║                                          ║"
   ui_print "  ╚══════════════════════════════════════════╝"
   ui_print " "
 }
@@ -362,7 +373,7 @@ detect_os16() {
 
 check_module_conflicts() {
   local self_id="transsion-flagship-16"
-  local conflict_paths="system/media/audio/ui system/product/media/audio/ui system/product/media/audio/bootsound system/overlay/Icons_Signal_wifi system/product/overlay/Icons_Signal_wifi system/product/apm/config system/product/theme/charge system/product/theme/animations system/product/theme/sounds system/tr_product/etc/vconfig/magellan system/fonts/NotoColorEmoji.ttf"
+  local conflict_paths="system/media/audio/ui system/product/media/audio/ui system/product/media/audio/bootsound system/overlay/Icons_Signal_wifi system/product/overlay/Icons_Signal_wifi system/product/apm/config system/product/theme/charge system/product/theme/animations system/product/theme/sounds system/tr_product/etc/vconfig/magellan"
   local conflict_props="ro.surface_flinger.supports_background_blur ro.os.recent.blur ro.transsion_launcher_gaussian_blur_support tr_launcher.gaussianblur.support ro.tran.effectengine.dynamicblur.support ro.tr_display.liquidglass.support"
   local found=""
   local d m p k
@@ -425,8 +436,6 @@ on_install() {
   detect_os16
   ui_info "OS    : $OS_TYPE $OS_VER"
   ui_info "Android: $(getprop ro.build.version.release 2>/dev/null)"
-  ui_info "/tr_product : $([ -d /tr_product ] && echo present || echo missing)"
-
   if [ "$OS_VER" != "16" ]; then
     ui_warn "Could not confirm OS 16 — this module is built for Transsion OS 16."
     ui_warn "Continuing anyway if you flashed it on purpose."
@@ -437,7 +446,7 @@ on_install() {
   OLD=/data/adb/modules/transsion-flagship
   if [ -d "$OLD" ] && [ ! -f "$OLD/disable" ]; then
     touch "$OLD/disable"
-    ui_warn "Disabled Flagship 15 (transsion-flagship) so it cannot fight this module."
+    ui_warn "Disabled Flagship 15 so it cannot fight this module."
     ui_info "Uninstall Flagship 15 from Magisk/KSU after reboot."
   fi
 
@@ -449,26 +458,20 @@ on_install() {
 
   ui_print " "
   ui_div
-  ui_step "Injecting files..."
+  ui_step "Installing files..."
   ui_div
-  # Keep KernelSU-extracted bootanim zips — re-unzipping them OOMs the installer.
+
   have_zips=false
   if [ -f "$MODPATH/system/product/theme/animations/bootanim_hios16.zip" ] \
       && [ -f "$MODPATH/system/product/theme/animations/bootanim_default.zip" ]; then
     have_zips=true
   fi
   if [ "$KEEP_EXTRACT" = true ] || [ "$have_zips" = true ]; then
-    ui_ok "Boot animation zips already extracted"
-    ui_info "Refreshing scripts, webroot, and emoji font"
+    ui_ok "Boot animation already extracted"
     unzip -o "$ZIPFILE" 'webroot/*' -d "$MODPATH" >&2
     unzip -o "$ZIPFILE" 'config.json' -d "$MODPATH" >&2
     unzip -o "$ZIPFILE" 'CHANGELOG.md' -d "$MODPATH" >&2
-    unzip -oj "$ZIPFILE" 'common/system.prop' -d "$MODPATH" >&2
-    unzip -oj "$ZIPFILE" 'common/apply_blur.sh' -d "$MODPATH" >&2
-    unzip -oj "$ZIPFILE" 'common/apply_120hz.sh' -d "$MODPATH" >&2
-    unzip -oj "$ZIPFILE" 'common/apply_sounds.sh' -d "$MODPATH" >&2
-    unzip -oj "$ZIPFILE" 'common/apply_unlock.sh' -d "$MODPATH" >&2
-    unzip -oj "$ZIPFILE" 'common/apply_emoji.sh' -d "$MODPATH" >&2
+    unzip_mod_scripts
     unzip -o "$ZIPFILE" 'system/fonts/*' -d "$MODPATH" >&2
     unzip -o "$ZIPFILE" 'apm_120hz_bypass/*' -d "$MODPATH" >&2
     unzip -o "$ZIPFILE" 'magellan/*' -d "$MODPATH" >&2
@@ -476,24 +479,18 @@ on_install() {
     unzip -o "$ZIPFILE" 'system/tr_product/*' -d "$MODPATH" >&2
     unzip -o "$ZIPFILE" 'tr_product/*' -d "$MODPATH" >&2
   else
-    ui_info "Extracting module files from zip"
+    ui_info "Extracting module files"
     unzip -o "$ZIPFILE" 'system/*' -d "$MODPATH" >&2
     unzip -o "$ZIPFILE" 'tr_product/*' -d "$MODPATH" >&2
     unzip -o "$ZIPFILE" 'webroot/*' -d "$MODPATH" >&2
     unzip -o "$ZIPFILE" 'config.json' -d "$MODPATH" >&2
     unzip -o "$ZIPFILE" 'CHANGELOG.md' -d "$MODPATH" >&2
-    unzip -oj "$ZIPFILE" 'common/system.prop' -d "$MODPATH" >&2
-    unzip -oj "$ZIPFILE" 'common/apply_blur.sh' -d "$MODPATH" >&2
-    unzip -oj "$ZIPFILE" 'common/apply_120hz.sh' -d "$MODPATH" >&2
-    unzip -oj "$ZIPFILE" 'common/apply_sounds.sh' -d "$MODPATH" >&2
-    unzip -oj "$ZIPFILE" 'common/apply_unlock.sh' -d "$MODPATH" >&2
-    unzip -oj "$ZIPFILE" 'common/apply_emoji.sh' -d "$MODPATH" >&2
+    unzip_mod_scripts
     unzip -o "$ZIPFILE" 'apm_120hz_bypass/*' -d "$MODPATH" >&2
     unzip -o "$ZIPFILE" 'magellan/*' -d "$MODPATH" >&2
     unzip -o "$ZIPFILE" 'system/product/apm/*' -d "$MODPATH" >&2
   fi
 
-  # Drop failed charging-animation / boot-sound packs. Keep custom UI sounds.
   rm -rf "$MODPATH/system/product/theme/charge" \
          "$MODPATH/tr_product/theme/charge" \
          "$MODPATH/product/theme/charge" \
@@ -506,21 +503,19 @@ on_install() {
          /mnt/vendor/mountify/product/theme/charge \
          /mnt/vendor/mountify/tr_product/media/audio/bootsound
   rm -f /data/local/bootaudio.mp3 /data/local/shutaudio.mp3
-  ui_ok "Removed unused charging-animation and boot-sound files"
 
   OLD16=/data/adb/modules/transsion-flagship-16
   if [ -d "$OLD16/system/product/media/audio/ui" ]; then
     mkdir -p "$MODPATH/system/product/media/audio/ui"
     cp -a "$OLD16/system/product/media/audio/ui/"*_custom.* "$MODPATH/system/product/media/audio/ui/" 2>/dev/null
-    ui_ok "Kept uploaded UI sounds"
+    ui_ok "Kept your custom sounds"
   fi
   if [ -f "$OLD16/system/fonts/NotoColorEmoji_custom.ttf" ]; then
     mkdir -p "$MODPATH/system/fonts"
     cp -a "$OLD16/system/fonts/NotoColorEmoji_custom.ttf" "$MODPATH/system/fonts/" 2>/dev/null
-    ui_ok "Kept uploaded emoji font"
+    ui_ok "Kept your custom emoji font"
   fi
 
-  # Drop bundled status-bar overlays; keep a custom upload.
   rm -rf "$MODPATH/system/overlay/Icons_Signal_wifi" \
          "$MODPATH/system/product/overlay/Icons_Signal_wifi" \
          "$MODPATH/product/overlay/Icons_Signal_wifi" \
@@ -539,11 +534,10 @@ on_install() {
         /mnt/vendor/mountify/system/product/overlay/SystemUISignalOverlay.apk.disabled \
         /mnt/vendor/mountify/product/overlay/SystemUISignalOverlay.apk \
         /mnt/vendor/mountify/product/overlay/SystemUISignalOverlay.apk.disabled
-  ui_ok "Removed bundled status-bar overlay APKs"
 
   CFG=/data/adb/modules/transsion-flagship-16/config.json
   if [ -f "$CFG" ]; then
-    ui_ok "Existing Flagship 16 config preserved"
+    ui_ok "Existing config preserved"
     cp "$CFG" "$MODPATH/config.json"
     sed -i -e 's/"statusbar_style": *"ios"/"statusbar_style": "off"/' \
            -e 's/"statusbar_style": *"xos16"/"statusbar_style": "off"/' \
@@ -554,9 +548,9 @@ on_install() {
            -e '/"blur_os16_level"/d' \
            "$MODPATH/config.json"
   else
-    ui_ok "Default config: XOS boot + reboot, AI + gaming + anim/blur on, emoji on, dynamic bar off, status bar stock"
+    ui_ok "Default config written"
   fi
-  # One-time: V2.2 ships XOS as the default boot/reboot pack (was HiOS 16).
+
   if [ -f /data/adb/modules/transsion-flagship-16/.xos_boot_v22 ]; then
     cp /data/adb/modules/transsion-flagship-16/.xos_boot_v22 "$MODPATH/.xos_boot_v22"
   else
@@ -569,11 +563,9 @@ on_install() {
         -e 's/"bootanim_style"[[:space:]]*:[[:space:]]*"hios16"/"bootanim_style": "default"/' \
         -e 's/"rebootanim_style"[[:space:]]*:[[:space:]]*"hios16"/"rebootanim_style": "default"/' \
         "$MODPATH/config.json"
-      ui_info "Boot animation default is now XOS (one-time)"
     fi
     : > "$MODPATH/.xos_boot_v22"
   fi
-  # One-time: force Dynamic bar extras off for upgrades, then leave the toggle.
   if [ -f /data/adb/modules/transsion-flagship-16/.dynbar_off_v173 ]; then
     cp /data/adb/modules/transsion-flagship-16/.dynbar_off_v173 "$MODPATH/.dynbar_off_v173"
   else
@@ -581,12 +573,10 @@ on_install() {
       sed -i 's/"dynamicbar_os16":[[:space:]]*true/"dynamicbar_os16": false/' "$MODPATH/config.json"
     fi
     : > "$MODPATH/.dynbar_off_v173"
-    ui_info "Dynamic bar default is now off (one-time)"
   fi
   if [ -f /data/adb/modules/transsion-flagship-16/.force_120hz ]; then
     cp /data/adb/modules/transsion-flagship-16/.force_120hz "$MODPATH/.force_120hz"
   fi
-  # One-time: Pixel UI sounds become the default except keypress. Keep Custom.
   if [ -f /data/adb/modules/transsion-flagship-16/.pixel_sounds_v179 ]; then
     cp /data/adb/modules/transsion-flagship-16/.pixel_sounds_v179 "$MODPATH/.pixel_sounds_v179"
   else
@@ -602,7 +592,6 @@ on_install() {
       done
     fi
     : > "$MODPATH/.pixel_sounds_v179"
-    ui_info "Pixel sounds set as default"
   fi
   write_os16_ai_prop "$MODPATH/config.json" "$MODPATH/system.prop"
   ui_ok "Feature keys written"
@@ -617,20 +606,17 @@ on_install() {
         os16_strip_dynamicbar_systemprop
       fi
       write_os16_ai_prop "$MODPATH/config.json" "$MODPATH/system.prop"
-      ui_info "Stripped dynamicbar=0 from system.prop (stock bar restored on reboot)"
     fi
     : > "$MODPATH/.dynbar_fix_v186"
   fi
 
-  ui_ok "Boot animation"
-  ui_ok "Reboot animation"
-  ui_ok "Status bar: upload your own overlay, or leave stock"
+  ui_ok "Boot + reboot animation"
   ui_ok "Sounds"
   ui_ok "Emoji font"
+  ui_ok "WebUI"
 }
 
 set_permissions() {
-  # Magisk copies zip system.prop after on_install. Rewrite from config.
   write_os16_ai_prop "$MODPATH/config.json" "$MODPATH/system.prop"
   if [ -f "$MODPATH/apply_120hz.sh" ]; then
     MODDIR="$MODPATH"
@@ -650,11 +636,12 @@ set_permissions() {
   done
   ui_print " "
   ui_div
-  ui_print "  ✨  FLAGSHIP 16  ·  V2.5"
+  ui_print "  ✨  INSTALLATION COMPLETE"
+  ui_info "Module : Transsion Flagship 16 V2.6"
   ui_info "OS     : $OS_TYPE $OS_VER"
-  ui_info "Feature: boot + reboot + overlay + AI + gaming + anim/blur + AOD + Dynamic bar + Force 120Hz + UI sounds + emoji"
   ui_div
   ui_print "  📲  t.me/Just_LilGXX"
-  ui_print "  Reboot, then open WebUI in Magisk/KSU."
+  ui_print " "
+  ui_print "  ⚡ Reboot, then open WebUI in Magisk/KSU"
   ui_print " "
 }
