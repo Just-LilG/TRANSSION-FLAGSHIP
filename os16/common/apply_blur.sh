@@ -191,15 +191,21 @@ os16_blur_vals() {
     [ "$anim" = "true" ] || [ "$anim" = "1" ] && LAUNCHER_ASYNC=1
   fi
 
-  # Only global platform_level=2 makes the notification panel solid on X6886.
-  # V1.96 gaussian-2 vconfig broke Parallel; perf models stay 3 + union/async on.
+  # Global platform 2 solidifies the shade on X6886. WM may still read getprop, so
+  # launcher/wm package vconfig gets platform 3 while SystemUI stays at 2.
   if [ "$GLASS" = "1" ]; then
     ALVL=3
+    MOTION_PLAT=3
   elif [ "$SOLID_SHADE" = "1" ]; then
     ALVL=2
-    [ "$anim" = "true" ] || [ "$anim" = "1" ] && UNION=1
+    if [ "$anim" = "true" ] || [ "$anim" = "1" ]; then
+      MOTION_PLAT=3
+    else
+      MOTION_PLAT=2
+    fi
   else
     ALVL=0
+    MOTION_PLAT=0
   fi
 
   SHADE_PLAT=$ALVL
@@ -466,6 +472,34 @@ os16_apply_aod_vconfig() {
   os16_bind_vconfig_pkg "$staged" com.transsion.aod
 }
 
+os16_motion_vconfig_keys() {
+  f="$1"
+  plat="$2"
+  [ -n "$plat" ] || return 0
+  [ "$plat" != "0" ] || return 0
+  os16_vconfig_upsert "$f" "ro.tr_animation.platform_level" "$plat"
+  os16_vconfig_upsert "$f" "ro.tr_perf.launch_start_exit.model" "$plat"
+  os16_vconfig_upsert "$f" "ro.tr_perf.power_keyguard_animation.model" "$plat"
+  os16_vconfig_upsert "$f" "ro.tr_perf.recent_animation.model" "$plat"
+  os16_vconfig_upsert "$f" "ro.tr_perf.unlock_mode.model" "$plat"
+  os16_vconfig_upsert "$f" "ro.transsion_launch_start_exit_support" "$plat"
+  os16_vconfig_upsert "$f" "ro.transsion_power_keyguard_animation_support" "$plat"
+  os16_vconfig_upsert "$f" "ro.transsion.recent_animation.model" "$plat"
+  os16_vconfig_upsert "$f" "ro.transsion_unlock_mode_support" "$plat"
+}
+
+os16_apply_motion_pkg_vconfig() {
+  os16_blur_vals
+  [ "$MOTION_PLAT" = "3" ] || return 0
+  for pkg in com.transsion.wm com.android.wm com.android.shell com.transsion.perf; do
+    staged=$(os16_seed_vconfig_pkg "$pkg")
+    stock="${staged}.stock"
+    [ -s "$stock" ] || continue
+    os16_motion_vconfig_keys "$staged" "$MOTION_PLAT"
+    os16_bind_vconfig_pkg "$staged" "$pkg"
+  done
+}
+
 os16_apply_launcher_vconfig_all() {
   os16_blur_vals
   staged=$(os16_seed_vconfig_pkg com.transsion.launcher3)
@@ -475,6 +509,7 @@ os16_apply_launcher_vconfig_all() {
     os16_vconfig_upsert "$staged" "tr_launcher.gaussianblur.support" "$BLVL"
     os16_vconfig_upsert "$staged" "ro.transsion_async_animation_support" "$LAUNCHER_ASYNC"
     os16_vconfig_upsert "$staged" "ro.tran_display_unionrender.support" "$UNION"
+    os16_motion_vconfig_keys "$staged" "$MOTION_PLAT"
   else
     if [ "$DOCK_BLUR" = "1" ]; then
       os16_vconfig_upsert "$staged" "tr_launcher.gaussianblur.support" "$BLVL"
@@ -491,6 +526,7 @@ os16_apply_launcher_vconfig_all() {
     os16_vconfig_upsert "$staged" "ro.os.recent.blur" "0"
     os16_vconfig_upsert "$staged" "ro.transsion_launcher_gaussian_blur_support" "$BLVL"
     os16_vconfig_upsert "$staged" "ro.tran_display_unionrender.support" "$UNION"
+    os16_motion_vconfig_keys "$staged" "$MOTION_PLAT"
   fi
   bar=$(os16_cfg_01 dynamicbar_os16 false)
   if [ "$bar" = "1" ]; then
@@ -551,6 +587,7 @@ os16_apply_blur_stack() {
   os16_apply_tr_product_blur_buildprop
   os16_apply_dynamicbar_props
   os16_apply_launcher_vconfig_all
+  os16_apply_motion_pkg_vconfig
   os16_apply_systemui_vconfig
 }
 
@@ -800,7 +837,6 @@ if [ "${0##*/}" = "apply_blur.sh" ]; then
       fi
       os16_apply_blur_runtime
       os16_refresh_systemui_on_apply
-      os16_refresh_launcher_on_apply
       ;;
   esac
 fi

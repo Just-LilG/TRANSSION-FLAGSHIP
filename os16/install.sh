@@ -131,13 +131,13 @@ write_os16_ai_prop() {
   # Blur tiers: 1=Smart solid, 2=partial (dock blur, solid shade), 3=full glass.
   if [ "$blur" = "true" ]; then
     case "$blvl" in
-      1) b01=0; sfdis=1; gblur=0; dynblur=0; blurv2=0; exp=0; launcher_async=$a01; union=$a01; light_cc=0; light_feat=0 ;;
-      2) b01=0; sfdis=1; gblur=2; dynblur=0; blurv2=0; exp=0; launcher_async=$a01; union=$a01; light_cc=0; light_feat=1 ;;
+      1) b01=0; sfdis=1; gblur=0; dynblur=0; blurv2=0; exp=0; launcher_async=$a01; union=0; light_cc=0; light_feat=0 ;;
+      2) b01=0; sfdis=1; gblur=2; dynblur=0; blurv2=0; exp=0; launcher_async=$a01; union=0; light_cc=0; light_feat=1 ;;
       3) b01=1; sfdis=0; gblur=3; dynblur=1; blurv2=1; exp=1; launcher_async=$a01; union=$a01; light_cc=1; light_feat=1 ;;
-      *) b01=0; sfdis=1; gblur=2; dynblur=0; blurv2=0; exp=0; launcher_async=$a01; union=$a01; light_cc=0; light_feat=1 ;;
+      *) b01=0; sfdis=1; gblur=2; dynblur=0; blurv2=0; exp=0; launcher_async=$a01; union=0; light_cc=0; light_feat=1 ;;
     esac
   else
-    b01=0; sfdis=1; gblur=0; dynblur=0; blurv2=0; exp=0; launcher_async=$a01; union=$a01; light_cc=0; light_feat=0
+    b01=0; sfdis=1; gblur=0; dynblur=0; blurv2=0; exp=0; launcher_async=$a01; union=0; light_cc=0; light_feat=0
   fi
   if [ "$blur" = "true" ] && [ "$blvl" = "3" ]; then
     alvl=3

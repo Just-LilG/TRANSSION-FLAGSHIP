@@ -351,14 +351,14 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
           <div class="setting-row">
             <div class="row-text">
               <div class="row-title">Parallel animations</div>
-              <div class="row-sub">Parallel platform 3 on all levels. Glass is controlled by the blur level below.</div>
+              <div class="row-sub">Global platform 2 for solid shade on X6886. Launcher/wm vconfig platform 3 keeps Parallel motion.</div>
             </div>
             <label class="toggle"><input type="checkbox" id="feat-anim" checked onchange="setAnimBlur('anim_os16',this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
           </div>
           <div class="setting-row">
             <div class="row-text">
               <div class="row-title">Dynamic blur</div>
-              <div class="row-sub">1 = Smart solid (no glass). 2 = your device default (dock blur, solid shade). 3 = glass everywhere.</div>
+              <div class="row-sub">1 = Smart solid (no glass). 2 = dock blur, solid shade. 3 = glass everywhere. Level 1/2 need global platform 2 for solid panel on G99.</div>
             </div>
             <label class="toggle"><input type="checkbox" id="feat-blur" checked onchange="setAnimBlur('blur_os16',this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
           </div>
@@ -820,6 +820,12 @@ function perfLvl(){
   if(cfg.anim_os16===false) return '0';
   return '3';
 }
+function motionPlatform(){
+  if(cfg.anim_os16===false) return '0';
+  if(glassOn()) return '3';
+  if(solidShade()) return '3';
+  return '0';
+}
 function sysuiPlatform(){
   return animLvl();
 }
@@ -828,7 +834,8 @@ function vcfgGaussian(){
 }
 function unionOn(){
   if(cfg.anim_os16===false) return '0';
-  return '1';
+  if(glassOn()) return '1';
+  return '0';
 }
 function solidShade(){ return !blurOn() || blurLevel()<=2; }
 function dockBlurOn(){ return blurOn() && blurLevel()>=2; }
@@ -1337,7 +1344,7 @@ async function dumpAi(){
   lines.push(home||'EMPTY');
   lines.push('');
   lines.push('=== launcher blur settings ===');
-  lines.push('blur_level  '+blurLevel()+'  glass='+String(glassOn())+'  solid_shade='+String(solidShade())+'  dock_blur='+String(dockBlurOn())+'  platform='+animLvl()+'  perf_model='+perfLvl()+'  sysui_platform='+sysuiPlatform()+'  vconfig_gaussian='+vcfgGaussian()+'  lighting_cc='+lightingCc()+'  lighting_feat='+lightingFeat());
+  lines.push('blur_level  '+blurLevel()+'  glass='+String(glassOn())+'  solid_shade='+String(solidShade())+'  dock_blur='+String(dockBlurOn())+'  platform='+animLvl()+'  motion_platform='+motionPlatform()+'  perf_model='+perfLvl()+'  sysui_platform='+sysuiPlatform()+'  vconfig_gaussian='+vcfgGaussian()+'  lighting_cc='+lightingCc()+'  lighting_feat='+lightingFeat());
   const lg=await g('getprop ro.tr_display.liquidglass.support');
   const sfb=await g('getprop ro.surface_flinger.supports_background_blur');
   const dyn=await g('getprop ro.tran.effectengine.dynamicblur.support');
@@ -1348,6 +1355,10 @@ async function dumpAi(){
   lines.push('perf launch_start_exit model  '+(perfm||'EMPTY'));
   const sysuiv=await g('grep -m1 ^ro.tr_animation.platform_level= /tr_product/etc/vconfig/com.android.systemui/build.prop 2>/dev/null');
   lines.push('systemui vconfig platform  '+(sysuiv||'EMPTY'));
+  const lmpv=await g('grep -m1 ^ro.tr_animation.platform_level= /tr_product/etc/vconfig/com.transsion.launcher3/build.prop 2>/dev/null');
+  lines.push('launcher vconfig platform  '+(lmpv||'EMPTY'));
+  const wmpv=await g('grep -m1 ^ro.tr_animation.platform_level= /tr_product/etc/vconfig/com.transsion.wm/build.prop 2>/dev/null');
+  lines.push('wm vconfig platform  '+(wmpv||'EMPTY'));
   const union=await g('getprop ro.tran_display_unionrender.support');
   const asyncp=await g('getprop ro.transsion_async_animation_support');
   lines.push('unionrender  '+describeAiFlag(union));
