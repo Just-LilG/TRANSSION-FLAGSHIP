@@ -187,7 +187,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
         </div>
         <div class="hero-card">
           <div class="hero-title">Transsion Flagship 16</div>
-          <div class="hero-sub" id="module-version-sub">V2.2 · OS 16</div>
+          <div class="hero-sub" id="module-version-sub">V2.3 · OS 16</div>
         </div>
         <div class="h8"></div>
         <div class="author-card">
@@ -407,14 +407,14 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
           <div class="setting-row">
             <div class="row-text">
               <div class="row-title">Parallel animations</div>
-              <div class="row-sub">App open and close. Does not add shade glass.</div>
+              <div class="row-sub">App open and close. Needs a reboot after Apply.</div>
             </div>
             <label class="toggle"><input type="checkbox" id="feat-anim" checked onchange="setAnimBlur('anim_os16',this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
           </div>
           <div class="setting-row">
             <div class="row-text">
               <div class="row-title">Dynamic blur</div>
-              <div class="row-sub">Shade and lock glass. Off restores the blur your phone already had.</div>
+              <div class="row-sub">Flagship shade and lock glass. Off keeps stock blur; Parallel stays on.</div>
             </div>
             <label class="toggle"><input type="checkbox" id="feat-blur" checked onchange="setAnimBlur('blur_os16',this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
           </div>
@@ -1135,8 +1135,10 @@ async function writeAiSystemProp(){
   lines.push('ro.transsion_launch_start_exit_support='+perf);
   lines.push('ro.transsion_power_keyguard_animation_support='+perf);
   lines.push('ro.transsion.recent_animation.model='+perf);
-  if(blurOn()){
+  if(animOn()){
     lines.push('ro.tr_animation.platform_level='+alvl);
+  }
+  if(blurOn()){
     const union=unionOn();
     lines.push('ro.tran_display_unionrender.support='+union);
     lines.push('ro.tr_display.liquidglass.support=1');
@@ -1668,7 +1670,7 @@ async function handleStatusbar(input){
 }
 async function loadDevice(){
   const prop=await g('cat "'+MOD+'/module.prop" 2>/dev/null');
-  const ver=(prop.match(/^version=(.+)$/m)||[])[1]||'V2.2';
+  const ver=(prop.match(/^version=(.+)$/m)||[])[1]||'V2.3';
   n('module-version-sub', ver+' · OS 16');
   let type=await g('getprop ro.tran.os.type');
   let verOs=await g('getprop ro.transsion.os.version');

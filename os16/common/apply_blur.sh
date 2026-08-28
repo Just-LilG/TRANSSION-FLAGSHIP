@@ -69,6 +69,27 @@ os16_read_stock_prop() {
   return 1
 }
 
+# Shade/lock read SystemUI vconfig. App open/close reads the global prop.
+os16_stock_platform_level() {
+  for f in \
+    "$MODDIR/vconfig/com.android.systemui/build.prop.stock" \
+    "$MODDIR/tr_product/etc/build.prop.stock"
+  do
+    [ -f "$f" ] || continue
+    line=$(grep -m1 "^ro.tr_animation.platform_level=" "$f" 2>/dev/null)
+    if [ -n "$line" ]; then
+      echo "${line#*=}"
+      return 0
+    fi
+  done
+  stock=$(os16_read_stock_prop ro.tr_animation.platform_level)
+  if [ -n "$stock" ]; then
+    echo "$stock"
+    return 0
+  fi
+  echo 2
+}
+
 os16_strip_dynamicbar_systemprop() {
   sp="$MODDIR/system.prop"
   [ -f "$sp" ] || return 0
@@ -163,6 +184,14 @@ os16_blur_vals() {
 
   SHADE_PLAT=$ALVL
   SYSUI_PLAT=$ALVL
+  if [ "$SKIP_BLUR" = "1" ]; then
+    stock_plat=$(os16_stock_platform_level)
+    case "$stock_plat" in
+      0|1|2) SYSUI_PLAT=$stock_plat ;;
+      *) SYSUI_PLAT=2 ;;
+    esac
+    SHADE_PLAT=$SYSUI_PLAT
+  fi
   BLUR_ON=$on
   BLUR_LVL=3
   ANIM_ON=$anim
@@ -207,15 +236,14 @@ os16_restore_stock_blur() {
     persist.tr_lighting.feature.support \
     ro.tr_lighting.controlcenter.feature.support \
     ro.tr_lighting.feature.support \
-    ro.tran_display_unionrender.support \
-    ro.tr_animation.platform_level
+    ro.tran_display_unionrender.support
   do
     os16_restore_stock_blur_key "$k"
   done
 }
 
-# Parallel = ro.tr_perf.* + launcher/wm vconfig platform_level.
-# Global ro.tr_animation.platform_level=3 is shade/lock glass — blur ON only.
+# Parallel needs global platform_level=3 (WindowManager). Shade glass is
+# isolated in SystemUI vconfig when Dynamic blur is off.
 os16_apply_anim_props() {
   os16_blur_vals
   os16_rp_overwrite ro.tr_perf.launch_start_exit.model "$PERF_LVL"
@@ -229,10 +257,10 @@ os16_apply_anim_props() {
   os16_rp ro.transsion_launch_start_exit_support "$PERF_LVL"
   os16_rp ro.transsion_power_keyguard_animation_support "$PERF_LVL"
   os16_rp ro.transsion.recent_animation.model "$PERF_LVL"
-  if [ "$SKIP_BLUR" = "1" ]; then
-    os16_restore_stock_blur_key ro.tr_animation.platform_level
-  else
+  if [ "$A01" = "1" ]; then
     os16_rp_overwrite ro.tr_animation.platform_level "$ALVL"
+  else
+    os16_restore_stock_blur_key ro.tr_animation.platform_level
   fi
 }
 
@@ -548,8 +576,19 @@ os16_apply_launcher_vconfig_all() {
 os16_apply_systemui_vconfig() {
   os16_blur_vals
   if [ "$SKIP_BLUR" = "1" ]; then
-    os16_unbind_vconfig_pkg com.android.systemui
-    os16_unbind_vconfig_pkg com.transsion.systemui
+    staged=$(os16_seed_vconfig_pkg com.android.systemui)
+    stock="${staged}.stock"
+    if [ -f "$stock" ]; then
+      cp -f "$stock" "$staged"
+    fi
+    os16_vconfig_upsert "$staged" "ro.tr_animation.platform_level" "$SYSUI_PLAT"
+    if [ -s "$staged" ]; then
+      os16_bind_vconfig_pkg "$staged" com.android.systemui
+      os16_bind_vconfig_pkg "$staged" com.transsion.systemui
+    else
+      os16_unbind_vconfig_pkg com.android.systemui
+      os16_unbind_vconfig_pkg com.transsion.systemui
+    fi
     return 0
   fi
   staged=$(os16_seed_vconfig_pkg com.android.systemui)
@@ -599,7 +638,6 @@ os16_strip_blur_systemprop() {
   sp="$MODDIR/system.prop"
   [ -f "$sp" ] || return 0
   for k in \
-    ro.tr_animation.platform_level \
     ro.tran_display_unionrender.support \
     ro.tr_display.liquidglass.support \
     ro.surface_flinger.supports_background_blur \
@@ -628,8 +666,10 @@ os16_apply_blur_stack() {
   if [ "$SKIP_BLUR" = "1" ]; then
     os16_strip_blur_systemprop
     os16_restore_stock_blur
+    os16_apply_anim_props
     os16_apply_motion_pkg_vconfig
     os16_apply_launcher_vconfig_all
+    os16_apply_systemui_vconfig
   else
     os16_apply_blur_props
     os16_apply_tr_product_blur_buildprop
@@ -823,6 +863,9 @@ os16_apply_blur_runtime() {
   os16_blur_vals
   if [ "$SKIP_BLUR" = "1" ]; then
     os16_clear_blur_runtime_settings
+    device_config put systemui notification_shade_blur false >/dev/null 2>&1
+    device_config put systemui enable_blur_on_windows false >/dev/null 2>&1
+    device_config put systemui shade_blur_radius 0 >/dev/null 2>&1
     return 0
   fi
   os16_settings_put global disable_window_blurs "$DIS"
@@ -899,6 +942,7 @@ if [ "${0##*/}" = "apply_blur.sh" ]; then
       fi
       os16_apply_blur_runtime
       os16_refresh_systemui_on_apply
+      os16_refresh_launcher_on_apply
       ;;
   esac
 fi
