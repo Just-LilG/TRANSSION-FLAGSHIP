@@ -352,7 +352,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
           <div class="setting-row">
             <div class="row-text">
               <div class="row-title">Parallel animations</div>
-              <div class="row-sub">App open/close, recents, unlock. Stays on at blur level 1. Apply + reboot.</div>
+              <div class="row-sub">App open/close, recents, unlock. Level 1 uses platform 2 (Smart solid). Levels 2/3 use platform 3 glass.</div>
             </div>
             <label class="toggle"><input type="checkbox" id="feat-anim" checked onchange="setAnimBlur('anim_os16',this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
           </div>
@@ -366,7 +366,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
           <div class="setting-row">
             <div class="row-text">
               <div class="row-title">Blur level</div>
-              <div class="row-sub">1 = solid (unionrender off, gaussian 0). 2 = medium glass (unionrender on, gaussian 2). 3 = full glass (gaussian 3, dynamic blur).</div>
+              <div class="row-sub">1 = Smart solid (platform 2, compositor off). 2 = medium glass (platform 3). 3 = full flagship glass.</div>
             </div>
           </div>
           <div class="segmented" id="blur-level">
@@ -825,15 +825,19 @@ function blurLevel(){
 }
 function glassOn(){ return blurOn() && blurLevel()>=2; }
 function gaussianLvl(){
-  if(!blurOn() || blurLevel()===1) return '0';
+  if(solidShade()) return '2';
   return String(blurLevel());
+}
+function animLvl(){
+  if(cfg.anim_os16===false) return '0';
+  if(solidShade()) return '2';
+  return '3';
 }
 function unionOn(){
   if(!glassOn() || cfg.anim_os16===false) return '0';
   return '1';
 }
 function solidShade(){ return !blurOn() || blurLevel()===1; }
-function animLvl(){ return cfg.anim_os16!==false?'3':'0'; }
 function anim01(){ return cfg.anim_os16!==false?'1':'0'; }
 function launcherAsync(){
   if(solidShade()) return '0';
@@ -1327,11 +1331,13 @@ async function dumpAi(){
   lines.push(home||'EMPTY');
   lines.push('');
   lines.push('=== launcher blur settings ===');
-  lines.push('blur_level  '+blurLevel()+'  glass='+String(glassOn())+'  solid='+String(solidShade()));
+  lines.push('blur_level  '+blurLevel()+'  glass='+String(glassOn())+'  solid='+String(solidShade())+'  platform='+animLvl());
   const lg=await g('getprop ro.tr_display.liquidglass.support');
   const sfb=await g('getprop ro.surface_flinger.supports_background_blur');
   const dyn=await g('getprop ro.tran.effectengine.dynamicblur.support');
   const bv2=await g('getprop ro.os_xos16_blur_v2_support');
+  const plat=await g('getprop ro.tr_animation.platform_level');
+  lines.push('platform_level  '+(plat||'EMPTY'));
   const union=await g('getprop ro.tran_display_unionrender.support');
   const asyncp=await g('getprop ro.transsion_async_animation_support');
   lines.push('unionrender  '+describeAiFlag(union));
@@ -1354,7 +1360,7 @@ async function dumpAi(){
   lines.push('disable_window_blurs  '+(dw||'EMPTY'));
   lines.push('accessibility_reduce_transparency  '+(rt||'EMPTY'));
   lines.push('wm disable-blur  '+(wm||'EMPTY'));
-  const lvc=await g('grep -E "gaussian|recent.blur|async_animation" /tr_product/etc/vconfig/com.transsion.launcher3/build.prop 2>/dev/null');
+  const lvc=await g('grep -E "gaussian|blurrecent|recent.blur|async_animation|spring" /tr_product/etc/vconfig/com.transsion.launcher3/build.prop 2>/dev/null');
   lines.push('launcher3 vconfig');
   lines.push(lvc||'EMPTY');
   const tpb=await g('grep -E "liquidglass|background_blur|gaussian|dynamicblur|xos16_blur" /tr_product/etc/build.prop 2>/dev/null');

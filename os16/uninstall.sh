@@ -2,7 +2,7 @@
 LOG=/data/adb/transflagship16_uninstall.log
 log_msg() { echo "[$(date '+%H:%M:%S')] $1" >> "$LOG"; }
 MODDIR=/data/adb/modules/transsion-flagship-16
-log_msg "=== TransFlagship 16 V1.89 uninstall start ==="
+log_msg "=== TransFlagship 16 V1.90 uninstall start ==="
 if [ -f "$MODDIR/apply_blur.sh" ]; then
   . "$MODDIR/apply_blur.sh"
   os16_unbind_vconfig_pkg com.transsion.launcher3
@@ -101,4 +101,4 @@ cmd window disable-blur 0 2>/dev/null
 rm -f /data/adb/modules/transsion-flagship-16/system/tr_product/etc/vconfig/magellan/refresh_rate_config.xml 2>/dev/null
 rm -f /data/magellan/refresh_rate_config.xml 2>/dev/null
 rm -f /mnt/vendor/mountify/tr_product/etc/vconfig/magellan/refresh_rate_config.xml 2>/dev/null
-log_msg "=== TransFlagship 16 V1.89 uninstall complete — reboot ==="
+log_msg "=== TransFlagship 16 V1.90 uninstall complete — reboot ==="

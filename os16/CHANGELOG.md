@@ -1,5 +1,8 @@
 # Transsion Flagship 16
 
+## v1.90
+- **Level 1 matches Disable-blur-XOS16 (SenzaProject).** That module does **not** zero gaussian — it sets **`ro.tr_animation.platform_level=2`** and launcher vconfig **`tr_launcher.gaussianblur.support=2`** + **`tr_launcher.blurrecent.support=1`** (compositor stays off). We were keeping platform 3 + gaussian 0, which left the shade glassy on X6886. Level 1 / blur off now use platform **2** + the reference vconfig. Levels 2/3 stay platform **3** with glass. Apply + reboot. Dump should show `platform_level=2` and vconfig `gaussianblur.support=2` at level 1.
+
 ## v1.89
 - **Level 1 solid shade: unionrender off.** Your dump showed every blur flag correct at level 1 (liquidglass 0, gaussian 0, disable_blurs 1) but **`ro.tran_display_unionrender.support` was still 1** — on X6886 that renderer path keeps the notification shade glassy even when compositor blur is off. Level 1 / blur off now sets unionrender **0** (Parallel platform 3 stays). Levels 2/3 turn unionrender back on with glass. Apply + reboot, then compare shade at 1 vs 3. Dump should show `unionrender = 0` at level 1.
 
