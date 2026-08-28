@@ -1,5 +1,8 @@
 # Transsion Flagship 16
 
+## v1.95
+- **Notification shade solid panel — Glow Space lighting keys.** V1.94 had every compositor blur flag correct at level 1 but the notification / QS panel stayed glassy. That path is Transsion **Glow Space**, not launcher gaussian. This build writes **`persist.tr_lighting.controlcenter.feature.support=0`** (and **`ro.tr_lighting.*`**) whenever the shade should stay solid (levels 1/2 + blur off), restores them at level 3, binds **`com.android.systemui` vconfig** blur/glass keys from your stock file when present, and **force-stops SystemUI on WebUI Apply only** (not at boot — V1.59 crash reboot). Apply + reboot, then pull the shade at **level 1** — should be solid colors like Smart series. Dump shows `lighting_cc`, `lighting_feat`, and systemui vconfig lines.
+
 ## v1.94
 - **Blur tiers remapped — level 2 is your G99 default, not level 1.** We had level 2 wired like full glass (unionrender 1, compositor on), and kept shuffling Disable-blur props onto level 1. Correct mapping now:
   - **Level 1** = Smart-series solid — no glass anywhere (solid lock clock + shade), gaussian 0, compositor off, Parallel platform 3.

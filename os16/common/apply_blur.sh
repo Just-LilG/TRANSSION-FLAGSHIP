@@ -190,6 +190,21 @@ os16_blur_vals() {
     BLUR_RECENT=0
   fi
 
+  # Glow Space / notification shade solid panel (X6858 stock: CC lighting = 1).
+  # Level 1 / blur off: both off. Level 2: CC off, main lighting on (dock blur).
+  # Level 3: both on (full glass shade).
+  if [ "$SOLID_SHADE" = "1" ]; then
+    LIGHT_CC=0
+    if [ "$DOCK_BLUR" = "1" ]; then
+      LIGHT_FEAT=1
+    else
+      LIGHT_FEAT=0
+    fi
+  else
+    LIGHT_CC=1
+    LIGHT_FEAT=1
+  fi
+
   BLUR_ON=$on
   BLUR_LVL=$lvl
   ANIM_ON=$anim
@@ -223,6 +238,10 @@ os16_apply_blur_props() {
   os16_rp persist.sysui.disableBlur "$SFDIS"
   os16_rp persist.sysui.disable_blur "$SFDIS"
   os16_rp ro.sf.blurs_are_expensive "$EXP"
+  os16_rp persist.tr_lighting.controlcenter.feature.support "$LIGHT_CC"
+  os16_rp persist.tr_lighting.feature.support "$LIGHT_FEAT"
+  os16_rp_overwrite ro.tr_lighting.controlcenter.feature.support "$LIGHT_CC"
+  os16_rp_overwrite ro.tr_lighting.feature.support "$LIGHT_FEAT"
 }
 
 os16_cfg_01() {
@@ -387,6 +406,8 @@ os16_apply_tr_product_blur_buildprop() {
   os16_vconfig_upsert "$staged" "ro.sf.blurs_are_expensive" "$EXP"
   os16_vconfig_upsert "$staged" "ro.transsion_async_animation_support" "$LAUNCHER_ASYNC"
   os16_vconfig_upsert "$staged" "ro.tran_display_unionrender.support" "$UNION"
+  os16_vconfig_upsert "$staged" "ro.tr_lighting.controlcenter.feature.support" "$LIGHT_CC"
+  os16_vconfig_upsert "$staged" "ro.tr_lighting.feature.support" "$LIGHT_FEAT"
   mkdir -p "$MODDIR/system/tr_product/etc"
   cp -f "$staged" "$MODDIR/system/tr_product/etc/build.prop"
   for dest in \
@@ -460,11 +481,34 @@ os16_apply_launcher_vconfig_all() {
   os16_bind_vconfig_pkg "$staged" com.transsion.launcher3
 }
 
+os16_apply_systemui_vconfig() {
+  os16_blur_vals
+  staged=$(os16_seed_vconfig_pkg com.android.systemui)
+  stock="${staged}.stock"
+  if [ -f "$stock" ]; then
+    keys=$(grep -iE 'blur|glass|glow|lighting|transparen|liquid|shade' "$stock" 2>/dev/null)
+    if [ -n "$keys" ]; then
+      printf '%s\n' "$keys" | while IFS= read -r line; do
+        k="${line%%=*}"
+        [ -n "$k" ] || continue
+        if [ "$SOLID_SHADE" = "1" ]; then
+          os16_vconfig_upsert "$staged" "$k" "0"
+        else
+          val="${line#*=}"
+          os16_vconfig_upsert "$staged" "$k" "$val"
+        fi
+      done
+    fi
+  fi
+  os16_bind_vconfig_pkg "$staged" com.android.systemui
+}
+
 os16_apply_blur_stack() {
   os16_apply_blur_props
   os16_apply_tr_product_blur_buildprop
   os16_apply_dynamicbar_props
   os16_apply_launcher_vconfig_all
+  os16_apply_systemui_vconfig
 }
 
 os16_clear_dynamicbar_props() {
@@ -616,10 +660,15 @@ os16_clear_failed_feature_leftovers() {
   done
 }
 
+os16_refresh_systemui_on_apply() {
+  # SystemUI caches shade blur until the process dies. Flagship 15 force-stops
+  # on Apply; V1.59 am crash at boot caused a cold reboot — never at boot.
+  [ "$OS16_BOOT" = "1" ] && return 0
+  am force-stop com.android.systemui >/dev/null 2>&1
+}
+
 os16_restart_systemui() {
-  # Do not am crash / killall SystemUI. V1.59 did that at boot and the phone
-  # came up then cold-rebooted.
-  :
+  os16_refresh_systemui_on_apply
 }
 
 os16_restart_surfaceflinger() {
@@ -655,11 +704,14 @@ os16_apply_blur_runtime() {
   fi
   wm disable-blur "$DIS" >/dev/null 2>&1
   cmd window disable-blur "$DIS" >/dev/null 2>&1
-  device_config put systemui notification_shade_blur "$([ "$GLASS" = "1" ] && echo true || echo false)" >/dev/null 2>&1
-  if [ "$GLASS" = "1" ] && [ "$BLVL" = "3" ]; then
+  if [ "$GLASS" = "1" ]; then
+    device_config put systemui notification_shade_blur true >/dev/null 2>&1
+    device_config put systemui enable_blur_on_windows true >/dev/null 2>&1
     device_config put systemui shade_blur_radius 80 >/dev/null 2>&1
   else
-    device_config delete systemui shade_blur_radius >/dev/null 2>&1
+    device_config put systemui notification_shade_blur false >/dev/null 2>&1
+    device_config put systemui enable_blur_on_windows false >/dev/null 2>&1
+    device_config put systemui shade_blur_radius 0 >/dev/null 2>&1
   fi
 }
 
@@ -667,7 +719,12 @@ if [ "${0##*/}" = "apply_blur.sh" ]; then
   mode="${1:-all}"
   case "$mode" in
     props) os16_apply_blur_stack; os16_apply_aod_props; os16_apply_os16_extras_props ;;
-    runtime) os16_apply_blur_runtime; os16_apply_aod_settings; os16_apply_dynamicbar_runtime ;;
+    runtime)
+      os16_apply_blur_runtime
+      os16_apply_aod_settings
+      os16_apply_dynamicbar_runtime
+      os16_refresh_systemui_on_apply
+      ;;
     *)
       os16_apply_blur_stack
       os16_apply_aod_props
@@ -680,6 +737,7 @@ if [ "${0##*/}" = "apply_blur.sh" ]; then
         os16_apply_unlock
       fi
       os16_apply_blur_runtime
+      os16_refresh_systemui_on_apply
       ;;
   esac
 fi

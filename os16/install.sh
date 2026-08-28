@@ -126,16 +126,18 @@ write_os16_ai_prop() {
   blurv2=0
   exp=0
   launcher_async=0
+  light_cc=0
+  light_feat=0
   # Blur tiers: 1=Smart solid, 2=partial (dock blur, solid shade), 3=full glass.
   if [ "$blur" = "true" ]; then
     case "$blvl" in
-      1) b01=0; sfdis=1; gblur=0; dynblur=0; blurv2=0; exp=0; launcher_async=0; union=0 ;;
-      2) b01=0; sfdis=1; gblur=2; dynblur=0; blurv2=0; exp=0; launcher_async=$a01; union=0 ;;
-      3) b01=1; sfdis=0; gblur=3; dynblur=1; blurv2=1; exp=1; launcher_async=$a01; union=$a01 ;;
-      *) b01=0; sfdis=1; gblur=2; dynblur=0; blurv2=0; exp=0; launcher_async=$a01; union=0 ;;
+      1) b01=0; sfdis=1; gblur=0; dynblur=0; blurv2=0; exp=0; launcher_async=0; union=0; light_cc=0; light_feat=0 ;;
+      2) b01=0; sfdis=1; gblur=2; dynblur=0; blurv2=0; exp=0; launcher_async=$a01; union=0; light_cc=0; light_feat=1 ;;
+      3) b01=1; sfdis=0; gblur=3; dynblur=1; blurv2=1; exp=1; launcher_async=$a01; union=$a01; light_cc=1; light_feat=1 ;;
+      *) b01=0; sfdis=1; gblur=2; dynblur=0; blurv2=0; exp=0; launcher_async=$a01; union=0; light_cc=0; light_feat=1 ;;
     esac
   else
-    b01=0; sfdis=1; gblur=0; dynblur=0; blurv2=0; exp=0; launcher_async=0; union=0
+    b01=0; sfdis=1; gblur=0; dynblur=0; blurv2=0; exp=0; launcher_async=0; union=0; light_cc=0; light_feat=0
   fi
   aod=$(json_bool "$cfg" aod_os16 true)
   dbar=$(json_bool "$cfg" dynamicbar_os16 false)
@@ -231,6 +233,10 @@ persist.sys.disable_blur=$sfdis
 persist.sysui.disableBlur=$sfdis
 persist.sysui.disable_blur=$sfdis
 ro.sf.blurs_are_expensive=$exp
+persist.tr_lighting.controlcenter.feature.support=$light_cc
+persist.tr_lighting.feature.support=$light_feat
+ro.tr_lighting.controlcenter.feature.support=$light_cc
+ro.tr_lighting.feature.support=$light_feat
 ro.tr_aod.feature.support=$aod
 ro.tr_aod.doze.brightness.feature.support=$aod
 ro.tr_aod.half.screen.feature.support=$aod
