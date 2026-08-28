@@ -351,21 +351,21 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
           <div class="setting-row">
             <div class="row-text">
               <div class="row-title">Parallel animations</div>
-              <div class="row-sub">App open/close, recents, unlock. Level 1 uses platform 2 (Smart solid). Levels 2/3 use platform 3 glass.</div>
+              <div class="row-sub">Parallel platform 3 on all levels. Glass is controlled by the blur level below.</div>
             </div>
             <label class="toggle"><input type="checkbox" id="feat-anim" checked onchange="setAnimBlur('anim_os16',this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
           </div>
           <div class="setting-row">
             <div class="row-text">
               <div class="row-title">Dynamic blur</div>
-              <div class="row-sub">Off / level 1 = solid Smart shade (no glass). Level 2 = lighter glass. Level 3 = full flagship glass.</div>
+              <div class="row-sub">1 = Smart solid (no glass). 2 = your device default (dock blur, solid shade). 3 = glass everywhere.</div>
             </div>
             <label class="toggle"><input type="checkbox" id="feat-blur" checked onchange="setAnimBlur('blur_os16',this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
           </div>
           <div class="setting-row">
             <div class="row-text">
               <div class="row-title">Blur level</div>
-              <div class="row-sub">1 = Smart solid (platform 2, compositor off). 2 = medium glass (platform 3). 3 = full flagship glass.</div>
+              <div class="row-sub">1 = Smart series (solid lock clock + shade). 2 = partial glass (G99 default). 3 = full flagship glass.</div>
             </div>
           </div>
           <div class="segmented" id="blur-level">
@@ -805,23 +805,25 @@ function blurLevel(){
   const n=parseInt(cfg.blur_os16_level,10);
   return (n>=1 && n<=3)?n:2;
 }
-function glassOn(){ return blurOn() && blurLevel()>=2; }
+function glassOn(){ return blurOn() && blurLevel()===3; }
 function gaussianLvl(){
-  if(solidShade()) return '0';
-  return String(blurLevel());
+  if(!blurOn() || blurLevel()===1) return '0';
+  if(blurLevel()===2) return '2';
+  return '3';
 }
 function animLvl(){
   if(cfg.anim_os16===false) return '0';
   return '3';
 }
 function unionOn(){
-  if(!glassOn() || cfg.anim_os16===false) return '0';
+  if(blurLevel()!==3 || cfg.anim_os16===false) return '0';
   return '1';
 }
-function solidShade(){ return !blurOn() || blurLevel()===1; }
+function solidShade(){ return !blurOn() || blurLevel()<=2; }
+function dockBlurOn(){ return blurOn() && blurLevel()>=2; }
 function anim01(){ return cfg.anim_os16!==false?'1':'0'; }
 function launcherAsync(){
-  if(solidShade()) return '0';
+  if(!dockBlurOn()) return '0';
   return anim01();
 }
 function blurDisable(){ return solidShade()?'1':'0'; }
@@ -830,7 +832,7 @@ function blurDyn(){ return (blurOn() && blurLevel()===3)?'1':'0'; }
 function blurV2(){ return (blurOn() && blurLevel()===3)?'1':'0'; }
 function blurExpensive(){ return (blurOn() && blurLevel()===3)?'1':'0'; }
 function blurRadius(){
-  if(!glassOn()) return 0;
+  if(!dockBlurOn()) return 0;
   if(blurLevel()===3) return 80;
   if(blurLevel()===2) return 25;
   return 0;
@@ -1310,7 +1312,7 @@ async function dumpAi(){
   lines.push(home||'EMPTY');
   lines.push('');
   lines.push('=== launcher blur settings ===');
-  lines.push('blur_level  '+blurLevel()+'  glass='+String(glassOn())+'  solid='+String(solidShade())+'  platform='+animLvl());
+  lines.push('blur_level  '+blurLevel()+'  glass='+String(glassOn())+'  solid_shade='+String(solidShade())+'  dock_blur='+String(dockBlurOn())+'  platform='+animLvl());
   const lg=await g('getprop ro.tr_display.liquidglass.support');
   const sfb=await g('getprop ro.surface_flinger.supports_background_blur');
   const dyn=await g('getprop ro.tran.effectengine.dynamicblur.support');
