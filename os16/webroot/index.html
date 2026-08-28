@@ -118,7 +118,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
 .splash-loader{width:28px;height:28px;margin:16px auto 0;border:2.5px solid rgba(167,139,250,.22);border-top-color:var(--accent);
   border-radius:50%;animation:spin .7s linear infinite;}
 .page{display:none;}
-.page.active{display:block;animation:pageIn .38s cubic-bezier(.2,.8,.2,1);}
+.page.active{display:block;animation:pageIn .48s cubic-bezier(.2,.8,.2,1);}
 .toggle-track{transition:background .22s ease,border-color .22s ease,box-shadow .22s ease;}
 .toggle-thumb{transition:transform .22s cubic-bezier(.2,.8,.2,1);}
 .segmented-opt{transition:background .2s ease,color .2s ease,transform .15s ease;}
@@ -144,7 +144,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
   text-decoration:none;}
 .author-link:active{opacity:.75;}
 @keyframes spin{to{transform:rotate(360deg);}}
-@keyframes pageIn{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:none;}}
+@keyframes pageIn{from{opacity:0;transform:translateY(18px) scale(.985);}to{opacity:1;transform:none;}}
 @keyframes splashIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:none;}}
 @keyframes cardIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
 @media (prefers-reduced-motion:reduce){
@@ -755,11 +755,22 @@ function showBusy(msg){
   const el=document.getElementById('busy');
   const t=document.getElementById('busy-text');
   if(t) t.textContent=msg||'Working';
-  if(el){ el.classList.add('show'); el.setAttribute('aria-hidden','false'); }
+  if(el){
+    clearTimeout(el._hide);
+    el._shownAt=Date.now();
+    el.classList.add('show');
+    el.setAttribute('aria-hidden','false');
+  }
 }
 function hideBusy(){
   const el=document.getElementById('busy');
-  if(el){ el.classList.remove('show'); el.setAttribute('aria-hidden','true'); }
+  if(!el) return;
+  const wait=Math.max(0, 420-(Date.now()-(el._shownAt||0)));
+  clearTimeout(el._hide);
+  el._hide=setTimeout(()=>{
+    el.classList.remove('show');
+    el.setAttribute('aria-hidden','true');
+  }, wait);
 }
 function openTelegram(e){
   if(e) e.preventDefault();
@@ -1796,6 +1807,7 @@ async function loadCfg(){
   renderSounds();
 }
 async function init(){
+  const t0=Date.now();
   try{
     const bridge=await import('./bridge.js');
     _exec=bridge.exec;
@@ -1805,6 +1817,8 @@ async function init(){
   await loadCfg();
   await loadDevice();
   checkInstallTimeConflicts();
+  const wait=Math.max(0, 780-(Date.now()-t0));
+  if(wait) await new Promise(r=>setTimeout(r,wait));
   document.getElementById('splash').classList.add('hide');
 }
 init();
