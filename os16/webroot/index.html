@@ -50,7 +50,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
 .row-text{flex:1;min-width:0;}
 .row-title{font-size:15px;font-weight:500;line-height:1.2;}
 .row-sub{font-size:12px;color:var(--text2);margin-top:1px;}
-.segmented{display:flex;gap:4px;background:rgba(255,255,255,0.06);border-radius:12px;padding:4px;margin:0 16px 14px;}
+.segmented{display:flex;flex-wrap:wrap;gap:4px;background:rgba(255,255,255,0.06);border-radius:12px;padding:4px;margin:0 16px 14px;}
 .segmented-opt{flex:1;text-align:center;padding:9px 4px;border-radius:9px;font-size:12.5px;font-weight:600;color:#9aa;cursor:pointer;}
 .segmented-opt.active{background:var(--accent);color:#fff;}
 .segmented.disabled{opacity:0.45;pointer-events:none;}
@@ -172,7 +172,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
             <li class="next">Outdoor boost — Magisk keys stay (GT dump 1 = on)</li>
             <li>Gallery Live — GT dump 0 = off; Magisk keys stay</li>
             <li class="next">Air Transfer — Magisk keys stay (GT dump 1)</li>
-            <li class="next">Sounds — charging, unlock, and other UI sounds (upload)</li>
+            <li class="on">Sounds — Pixel default (not keypress); charging Huawei / iOS / S25</li>
             <li>Social Turbo — removed (stock already had call tools)</li>
             <li>Display extras — removed (OS 16 Settings hid DC / HDR / reading)</li>
           </ul>
@@ -478,7 +478,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
         <div class="page-header">
           <div class="eyebrow">Customise</div>
           <h1>Sounds</h1>
-          <div class="sub">Upload .ogg (best). V1.76 wiped uploads on reboot — re-upload after this build. Apply + reboot. Boot sound is not in this build.</div>
+          <div class="sub">Pixel is the default except keypress (those stay stock). Charging also has Huawei, iOS, and S25. Custom upload still works. Screenshot remaining dests later.</div>
         </div>
         <div id="sounds-root"></div>
         <div class="h8"></div>
@@ -515,42 +515,57 @@ let cfg={bootanim_style:'hios16',bootanim_file:'',rebootanim_style:'hios16',rebo
 let _exec=null;
 let _saving=false;
 const SOUND_SLOTS=[
-  {id:'chargesound', dest:'ChargingStarted', title:'Wired charging', group:'Charging'},
-  {id:'wirelesschargesound', dest:'WirelessChargingStarted', title:'Wireless charging', group:'Charging'},
-  {id:'sound_Unlock', dest:'Unlock', title:'Unlock', group:'Lock screen'},
-  {id:'sound_Lock', dest:'Lock', title:'Lock', group:'Lock screen'},
-  {id:'sound_Screenshots', dest:'Screenshots', title:'Screenshot', group:'Feedback', sub:'camera_click.ogg (SystemUI) + Screenshots.ogg'},
-  {id:'sound_Effect_Tick', dest:'Effect_Tick', title:'Tick', group:'Feedback'},
+  {id:'chargesound', dest:'ChargingStarted', title:'Wired charging', group:'Charging', pack:'charge'},
+  {id:'wirelesschargesound', dest:'WirelessChargingStarted', title:'Wireless charging', group:'Charging', pack:'charge'},
+  {id:'sound_Unlock', dest:'Unlock', title:'Unlock', group:'Lock screen', pack:'pixel'},
+  {id:'sound_Lock', dest:'Lock', title:'Lock', group:'Lock screen', pack:'pixel'},
+  {id:'sound_Screenshots', dest:'Screenshots', title:'Screenshot', group:'Feedback', pack:'pixel', sub:'camera_click.ogg (SystemUI) + Screenshots.ogg'},
+  {id:'sound_Effect_Tick', dest:'Effect_Tick', title:'Tick', group:'Feedback', pack:'pixel'},
   {id:'sound_Fail', dest:'Fail', title:'Fail', group:'Feedback'},
   {id:'sound_Success', dest:'Success', title:'Success', group:'Feedback'},
   {id:'sound_Sent_Success', dest:'Sent_Success', title:'Sent', group:'Feedback'},
-  {id:'sound_sent_message_success', dest:'sent_message_success', title:'Message sent', group:'Feedback'},
-  {id:'sound_LowBattery', dest:'LowBattery', title:'Low battery', group:'Feedback'},
+  {id:'sound_LowBattery', dest:'LowBattery', title:'Low battery', group:'Feedback', pack:'pixel'},
   {id:'sound_KeypressStandard', dest:'KeypressStandard', title:'Keypress', group:'Keypress'},
   {id:'sound_KeypressDelete', dest:'KeypressDelete', title:'Delete key', group:'Keypress'},
   {id:'sound_KeypressReturn', dest:'KeypressReturn', title:'Return key', group:'Keypress'},
   {id:'sound_KeypressSpacebar', dest:'KeypressSpacebar', title:'Spacebar', group:'Keypress'},
-  {id:'sound_KeypressInvalid', dest:'KeypressInvalid', title:'Invalid key', group:'Keypress'},
   {id:'sound_delete', dest:'delete', title:'Delete', group:'Keypress'},
   {id:'sound_Disconnect', dest:'Disconnect', title:'Disconnect', group:'Connection'},
-  {id:'sound_InCallNotification', dest:'InCallNotification', title:'In-call', group:'Connection'},
+  {id:'sound_InCallNotification', dest:'InCallNotification', title:'In-call', group:'Connection', pack:'pixel'},
   {id:'sound_Gear', dest:'Gear', title:'Gear', group:'Other'},
   {id:'sound_Calculagraph', dest:'Calculagraph', title:'Timer tick', group:'Other'},
   {id:'sound_beep_once', dest:'beep_once', title:'Beep once', group:'Other'},
   {id:'sound_beep_twice', dest:'beep_twice', title:'Beep twice', group:'Other'},
   {id:'sound_Second_Hand', dest:'Second_Hand', title:'Second hand', group:'Other'},
-  {id:'sound_Cobalt', dest:'Cobalt', title:'Cobalt', group:'Other'},
-  {id:'sound_Dock', dest:'Dock', title:'Dock', group:'Other'},
-  {id:'sound_Trusted', dest:'Trusted', title:'Trusted', group:'Other'},
-  {id:'sound_Undock', dest:'Undock', title:'Undock', group:'Other'}
+  {id:'sound_Dock', dest:'Dock', title:'Dock', group:'Other', pack:'pixel'},
+  {id:'sound_Undock', dest:'Undock', title:'Undock', group:'Other', pack:'pixel'}
 ];
-function soundStyleOf(id){ return cfg[id+'_style']||'stock'; }
+function soundDefaultOf(s){ return (s.pack==='charge'||s.pack==='pixel')?'pixel':'stock'; }
+function soundStyleOf(id){
+  const s=SOUND_SLOTS.find(x=>x.id===id);
+  return cfg[id+'_style']||(s?soundDefaultOf(s):'stock');
+}
 function soundFileOf(id){ return cfg[id+'_file']||''; }
 function setSoundStyle(id,val){
   cfg[id+'_style']=val;
   document.querySelectorAll('#'+id+'-style-picker .segmented-opt').forEach(o=>{
     o.classList.toggle('active', o.dataset.val===val);
   });
+}
+function soundPickerHtml(s){
+  const st=soundStyleOf(s.id);
+  const fn=soundFileOf(s.id);
+  let opts;
+  if(s.pack==='charge') opts=[['pixel','Pixel'],['huawei','Huawei'],['ios','iOS'],['s25','S25'],['stock','Stock']];
+  else if(s.pack==='pixel') opts=[['pixel','Pixel'],['stock','Stock']];
+  else opts=[['stock','Stock']];
+  let html='<div class="segmented" id="'+s.id+'-style-picker">';
+  opts.forEach(([v,l])=>{
+    html+='<div class="segmented-opt'+(st===v?' active':'')+'" data-val="'+v+'" onclick="setSoundStyle(\''+s.id+'\',\''+v+'\')">'+l+'</div>';
+  });
+  html+='<div class="segmented-opt'+(st==='custom'?' active':'')+'" data-val="custom" onclick="setSoundStyle(\''+s.id+'\',\'custom\')" id="'+s.id+'-custom-opt"'+(fn?'':' style="display:none"')+'>Custom</div>';
+  html+='</div>';
+  return html;
 }
 function renderSounds(){
   const root=document.getElementById('sounds-root');
@@ -565,13 +580,9 @@ function renderSounds(){
     }else{
       html+='<div style="border-top:1px solid var(--glass-b)"></div>';
     }
-    const st=soundStyleOf(s.id);
     const fn=soundFileOf(s.id);
     html+='<div class="setting-row"><div class="row-text" style="margin-left:0"><div class="row-title">'+s.title+'</div><div class="row-sub">'+(s.sub||(s.dest+'.ogg'))+'</div></div></div>';
-    html+='<div class="segmented" id="'+s.id+'-style-picker">';
-    html+='<div class="segmented-opt'+(st==='stock'?' active':'')+'" data-val="stock" onclick="setSoundStyle(\''+s.id+'\',\'stock\')">Stock</div>';
-    html+='<div class="segmented-opt'+(st==='custom'?' active':'')+'" data-val="custom" onclick="setSoundStyle(\''+s.id+'\',\'custom\')" id="'+s.id+'-custom-opt"'+(fn?'':' style="display:none"')+'>Custom</div>';
-    html+='</div>';
+    html+=soundPickerHtml(s);
     html+='<div class="file-row"><label class="file-btn">Upload .ogg / .mp3 / .wav<input type="file" accept=".ogg,.mp3,.wav,.m4a,audio/*" onchange="handleSoundUpload(\''+s.id+'\',\''+s.dest+'\',this)"></label>';
     html+='<div class="file-name" id="media-'+s.id+'-name">'+(fn?('Custom: '+fn):'No custom sound uploaded')+'</div></div>';
   });
@@ -1352,7 +1363,7 @@ async function loadCfg(){
   if(cfg.dynamicbar_os16===undefined) cfg.dynamicbar_os16=false;
   if(cfg.force_120hz===undefined) cfg.force_120hz=false;
   SOUND_SLOTS.forEach(s=>{
-    if(cfg[s.id+'_style']===undefined) cfg[s.id+'_style']='stock';
+    if(cfg[s.id+'_style']===undefined) cfg[s.id+'_style']=soundDefaultOf(s);
     if(cfg[s.id+'_file']===undefined) cfg[s.id+'_file']='';
   });
   if(cfg.force_refresh_hz===120||cfg.force_refresh_hz===144) cfg.force_120hz=true;

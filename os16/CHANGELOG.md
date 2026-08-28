@@ -1,5 +1,10 @@
 # Transsion Flagship 16
 
+## v1.79
+- **Pixel sounds are the default** except keypress (those stay stock). Packed from the Pixel UI zip: charge, lock/unlock, tick, low battery, in-call, dock/undock, screenshot (`camera_click.ogg`).
+- **Charging picker:** Pixel / Huawei / iOS / S25 / Stock / Custom (same Huawei/iOS/S25 files as Flagship 15). Wireless Pixel uses the Pixel wireless clip.
+- Remaining broken dests (screenshot if still stock on some paths, etc.) stay for a later pass.
+
 ## v1.78
 - **Screenshot sound.** Charging / lock / keypress already hit GT `/tr_product/media/audio/ui/*.ogg`. Screenshot does not — Android SystemUI plays AOSP `camera_click.ogg` from `/product/media/audio/ui` or `/system/media/audio/ui` (`config_cameraShutterSound` / MediaActionSound), not `Screenshots.ogg`. Custom screenshot now also replaces `camera_click.ogg` on those paths (and still binds `Screenshots.ogg` on `/tr_product`). Re-Apply screenshot, reboot, then capture.
 

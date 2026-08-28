@@ -230,24 +230,62 @@ os16_umount_sounds() {
   done
 }
 
+os16_snd_pack_file() {
+  echo "$MODDIR/system/product/theme/sounds/$1"
+}
+
+os16_snd_default_style() {
+  case "$1" in
+    chargesound|wirelesschargesound|sound_Unlock|sound_Lock|sound_Screenshots|sound_Effect_Tick|sound_LowBattery|sound_InCallNotification|sound_Dock|sound_Undock)
+      echo pixel ;;
+    *) echo stock ;;
+  esac
+}
+
+os16_snd_resolve_src() {
+  destbase="$1"
+  style="$2"
+  case "$style" in
+    custom)
+      os16_snd_custom_src "$destbase"
+      return
+      ;;
+    pixel)
+      if [ "$destbase" = "ChargingStarted" ]; then
+        os16_snd_pack_file "charging/pixel.ogg"
+      elif [ "$destbase" = "WirelessChargingStarted" ]; then
+        os16_snd_pack_file "charging/pixel_wireless.ogg"
+      elif [ "$destbase" = "Screenshots" ]; then
+        os16_snd_pack_file "pixel/camera_click.ogg"
+      else
+        os16_snd_pack_file "pixel/${destbase}.ogg"
+      fi
+      ;;
+    huawei|ios|s25|default)
+      os16_snd_pack_file "charging/${style}.ogg"
+      ;;
+  esac
+}
+
 os16_apply_sounds() {
   os16_snd_slots | while read -r id destbase; do
     [ -n "$id" ] || continue
-    style=$(os16_snd_cfg "${id}_style" stock)
-    if [ "$style" != "custom" ]; then
+    def=$(os16_snd_default_style "$id")
+    style=$(os16_snd_cfg "${id}_style" "$def")
+    if [ "$style" = "stock" ] || [ "$style" = "off" ]; then
       os16_snd_umount_names "$destbase"
       os16_snd_unstage "$destbase"
       os16_snd_log "$id stock (no bind)"
       continue
     fi
-    src=$(os16_snd_custom_src "$destbase")
-    if [ -z "$src" ]; then
-      os16_snd_log "$id custom but no ${destbase}_custom.* uploaded"
+    src=$(os16_snd_resolve_src "$destbase" "$style")
+    if [ -z "$src" ] || [ ! -f "$src" ]; then
+      os16_snd_log "$id style=$style missing src"
       continue
     fi
     os16_snd_stage "$src" "$destbase"
     os16_snd_bind_names "$src" "$destbase"
-    os16_snd_log "$id custom src=$src size=$(wc -c < "$src" 2>/dev/null)"
+    os16_snd_log "$id $style src=$src size=$(wc -c < "$src" 2>/dev/null)"
   done
 }
 

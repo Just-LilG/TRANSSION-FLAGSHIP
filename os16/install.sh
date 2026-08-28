@@ -217,7 +217,7 @@ print_modname() {
   ui_print " "
   ui_print "  ╔══════════════════════════════════════════╗"
   ui_print "  ║    TRANSSION FLAGSHIP 16                 ║"
-  ui_print "  ║    XOS · HiOS · iTel OS 16  ·  V1.78     ║"
+  ui_print "  ║    XOS · HiOS · iTel OS 16  ·  V1.79     ║"
   ui_print "  ╚══════════════════════════════════════════╝"
   ui_print " "
 }
@@ -414,13 +414,31 @@ on_install() {
   if [ -f /data/adb/modules/transsion-flagship-16/.force_120hz ]; then
     cp /data/adb/modules/transsion-flagship-16/.force_120hz "$MODPATH/.force_120hz"
   fi
+  # One-time: Pixel UI sounds become the default except keypress. Keep Custom.
+  if [ -f /data/adb/modules/transsion-flagship-16/.pixel_sounds_v179 ]; then
+    cp /data/adb/modules/transsion-flagship-16/.pixel_sounds_v179 "$MODPATH/.pixel_sounds_v179"
+  else
+    CFGJSON="$MODPATH/config.json"
+    if [ -f "$CFGJSON" ]; then
+      for k in chargesound wirelesschargesound sound_Unlock sound_Lock sound_Screenshots sound_Effect_Tick sound_LowBattery sound_InCallNotification sound_Dock sound_Undock; do
+        if grep -q "\"${k}_style\"[[:space:]]*:[[:space:]]*\"custom\"" "$CFGJSON"; then
+          continue
+        fi
+        if grep -q "\"${k}_style\"" "$CFGJSON"; then
+          sed -i "s/\"${k}_style\"[[:space:]]*:[[:space:]]*\"[^\"]*\"/\"${k}_style\": \"pixel\"/" "$CFGJSON"
+        fi
+      done
+    fi
+    : > "$MODPATH/.pixel_sounds_v179"
+    ui_info "Pixel sounds are now the default except keypress (one-time)"
+  fi
   write_os16_ai_prop "$MODPATH/config.json" "$MODPATH/system.prop"
   ui_ok "OS 16 keys written from config (reboot to apply)"
 
   ui_ok "Boot animation"
   ui_ok "Reboot animation"
   ui_ok "Status bar: upload your own overlay, or leave stock"
-  ui_ok "Sounds: charging, unlock, and other UI sounds — Sounds tab, upload, Apply, reboot"
+  ui_ok "Sounds: Pixel default (not keypress); charging Huawei / iOS / S25"
 }
 
 set_permissions() {
@@ -448,7 +466,7 @@ set_permissions() {
   done
   ui_print " "
   ui_div
-  ui_print "  ✨  FLAGSHIP 16  ·  V1.78"
+  ui_print "  ✨  FLAGSHIP 16  ·  V1.79"
   ui_info "OS     : $OS_TYPE $OS_VER"
   ui_info "Feature: boot + reboot + overlay + AI + gaming + anim/blur + AOD + Dynamic bar + Force 120Hz + UI sounds"
   ui_div
