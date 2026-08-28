@@ -106,7 +106,6 @@ write_os16_ai_prop() {
   glive=$(json_bool "$cfg" gallerylive_os16 true)
   airt=$(json_bool "$cfg" airtransfer_os16 true)
   [ "$aod" = "false" ] && aod=0 || aod=1
-  [ "$dbar" = "false" ] && dbar=0 || dbar=1
   [ "$sr" = "false" ] && sr=0 || sr=1
   [ "$sv" = "false" ] && sv=false || sv=true
   [ "$box" = "false" ] && box=0 || box=1
@@ -184,11 +183,6 @@ ro.tr_aod.always.show.feature.support=$aod
 ro.aod_alwaysshow_support=$aod
 ro.tran_aod_v3_support=$aod
 ro.tran_doze_brightness_support=$aod
-ro.tr_dynamicbar.support=$dbar
-ro.os_dynamicbar_ai_translation_support=$dbar
-ro.os_dynamic_bar_resident_plane_support=$dbar
-ro.os.tran_hide_status_bar_for_land_recent=$dbar
-ro.tran_hios_dynamic_bar_support=$dbar
 persist.tr_video.ai_super_resolution.support=$sr
 ro.tr_video.ai_super_resolution.support=$sr
 tr_video.ai_super_resolution.support=$sr
@@ -211,6 +205,15 @@ ro.surface_flinger.game_default_frame_rate_override=120
 debug.graphics.game_default_frame_rate.disabled=true
 persist.graphics.game_default_frame_rate.enabled=false
 EOF
+  if [ "$dbar" = "true" ]; then
+    cat >> "$dest" <<EOF
+ro.tr_dynamicbar.support=1
+ro.os_dynamicbar_ai_translation_support=1
+ro.os_dynamic_bar_resident_plane_support=1
+ro.os.tran_hide_status_bar_for_land_recent=1
+ro.tran_hios_dynamic_bar_support=1
+EOF
+  fi
 }
 
 print_modname() {

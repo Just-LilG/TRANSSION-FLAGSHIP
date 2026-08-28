@@ -44,6 +44,19 @@ os16_rp() {
   setprop "$k" "$v" >/dev/null 2>&1
 }
 
+os16_rp_delete() {
+  k="$1"
+  if [ -x /data/adb/magisk/resetprop ]; then
+    /data/adb/magisk/resetprop --delete "$k" >/dev/null 2>&1
+  fi
+  if command -v resetprop >/dev/null 2>&1; then
+    resetprop --delete "$k" >/dev/null 2>&1
+  fi
+  if [ -x /data/adb/ksud ]; then
+    /data/adb/ksud resetprop --delete "$k" >/dev/null 2>&1
+  fi
+}
+
 os16_rp_overwrite() {
   k="$1"; v="$2"
   if [ -x /data/adb/magisk/resetprop ]; then
@@ -223,6 +236,22 @@ os16_bind_vconfig_pkg() {
   done
 }
 
+os16_unbind_vconfig_pkg() {
+  pkg="$1"
+  NS=$(os16_vconfig_nsenter)
+  for dest in \
+    /tr_product/etc/vconfig/$pkg/build.prop \
+    /system/tr_product/etc/vconfig/$pkg/build.prop \
+    /product/etc/vconfig/$pkg/build.prop \
+    /system/product/etc/vconfig/$pkg/build.prop
+  do
+    [ -n "$NS" ] && $NS umount -l "$dest" 2>/dev/null
+    umount -l "$dest" 2>/dev/null
+  done
+  rm -rf "$MODDIR/system/tr_product/etc/vconfig/$pkg"
+  rm -f "$MODDIR/vconfig/$pkg/build.prop"
+}
+
 os16_seed_vconfig_pkg() {
   pkg="$1"
   staged="$MODDIR/vconfig/$pkg/build.prop"
@@ -271,11 +300,23 @@ os16_apply_aod_vconfig() {
 }
 
 os16_apply_launcher_vconfig() {
-  bar=$(os16_cfg_01 dynamicbar_os16 false)
   staged=$(os16_seed_vconfig_pkg com.transsion.launcher3)
   # Flagship 15 XOS 16 wrote this into launcher3 vconfig, not only system.prop.
-  os16_vconfig_upsert "$staged" "ro.os.tran_hide_status_bar_for_land_recent" "$bar"
+  os16_vconfig_upsert "$staged" "ro.os.tran_hide_status_bar_for_land_recent" "1"
   os16_bind_vconfig_pkg "$staged" com.transsion.launcher3
+}
+
+os16_clear_dynamicbar_props() {
+  for k in \
+    ro.tr_dynamicbar.support \
+    ro.os_dynamicbar_ai_translation_support \
+    ro.os_dynamic_bar_resident_plane_support \
+    ro.os.tran_hide_status_bar_for_land_recent \
+    ro.tran_hios_dynamic_bar_support
+  do
+    os16_rp_delete "$k"
+  done
+  os16_unbind_vconfig_pkg com.transsion.launcher3
 }
 
 os16_apply_aod_props() {
@@ -365,17 +406,20 @@ os16_apply_aod_settings() {
 }
 
 os16_apply_dynamicbar_props() {
-  bar=$(os16_cfg_01 dynamicbar_os16 false)
-  os16_rp_overwrite ro.tr_dynamicbar.support "$bar"
-  os16_rp_overwrite ro.os_dynamicbar_ai_translation_support "$bar"
-  os16_rp_overwrite ro.tran_hios_dynamic_bar_support "$bar"
-  # This support flag unhides Settings → Dynamic Bar → Always Show Background.
-  # V1.59 set it to 0 and hid the row. The Settings toggle (not this prop)
-  # is what should turn the empty pill off.
-  os16_rp_overwrite ro.os_dynamic_bar_resident_plane_support "$bar"
-  # Flagship 15 extra: hide the landscape-recents status-bar overlay (empty
-  # pill / "bug not a feature" in recents). Same key as TransFlagship 15.
-  os16_rp_overwrite ro.os.tran_hide_status_bar_for_land_recent "$bar"
+  bar=$(os16_cfg_bool dynamicbar_os16 false)
+  if [ "$bar" != "true" ] && [ "$bar" != "1" ]; then
+    # Off must not write ro.tr_dynamicbar.support=0 — that kills the stock
+    # Dynamic Bar this phone already had. Drop module overrides only.
+    os16_clear_dynamicbar_props
+    return 0
+  fi
+  os16_rp_overwrite ro.tr_dynamicbar.support 1
+  os16_rp_overwrite ro.os_dynamicbar_ai_translation_support 1
+  os16_rp_overwrite ro.tran_hios_dynamic_bar_support 1
+  # Unhides Settings → Dynamic Bar → Always Show Background.
+  os16_rp_overwrite ro.os_dynamic_bar_resident_plane_support 1
+  # Landscape-recents status-bar overlay (empty pill in recents).
+  os16_rp_overwrite ro.os.tran_hide_status_bar_for_land_recent 1
   os16_apply_launcher_vconfig
 }
 

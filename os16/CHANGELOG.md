@@ -1,5 +1,8 @@
 # Transsion Flagship 16
 
+## v1.81
+- **Dynamic bar off no longer kills your stock bar.** V1.80 and older wrote `ro.tr_dynamicbar.support=0` when the WebUI toggle was off. That disabled the Dynamic Bar your phone already had — Settings still looked on, but the pill stopped working. Off now **removes** module overrides only (stock ROM props stay). On still adds Flagship extras (Always Show Background row, landscape recents fix). Apply + reboot.
+
 ## v1.80
 - **Custom emoji font (last feature).** Same Flagship 15 iOS-style `NotoColorEmoji.ttf` (one copy under `system/fonts`). GT dump dest is `/system/fonts/NotoColorEmoji.ttf`. Toggle on by default; upload your own `.ttf` if you want. Off leaves the ROM font. Per-file bind (and Mountify overlay). Does not touch `NotoColorEmojiFlags.ttf`. Apply + reboot, then open Messages / keyboard. Dump **=== emoji font ===**.
 
