@@ -74,9 +74,9 @@ Use **one** module. Do not run Flagship 15 and Flagship 16 together.
 | Module | Path in this repo | Flash zip | OS |
 |---|---|---|---|
 | **Transsion Flagship** (this README) | repo root | `TransFlagship_V4.xx.zip` | XOS / HiOS / iTel **15** |
-| **Transsion Flagship 16** | [`os16/`](os16/) | `TransFlagship16_V1.xx.zip` | Transsion **OS 16** (XOS / HiOS / iTel) |
+| **Transsion Flagship 16** | [`os16/`](os16/) | `TransFlagship16_V2.0.zip` | Transsion **OS 16** (XOS / HiOS / iTel) |
 
-Flagship 16 has its own WebUI. Features are added **one at a time** after they are verified on a real OS 16 device. **V1.21** turns off the OS 16 AI keys from the device dump (not Flagship 15 names). Boot/reboot animation and custom status-bar overlay upload are unchanged. Installer disables Flagship 15 if it is still active.
+**Flagship 16 V2.0** is the first official stable release for OS 16. See [`os16/README.md`](os16/README.md) for features, known limitations, and install steps. Flagship 16 has its own WebUI. The installer disables Flagship 15 if it is still active.
 
 See [`os16/CHANGELOG.md`](os16/CHANGELOG.md) for Flagship 16 versions.
 

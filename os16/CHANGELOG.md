@@ -1,5 +1,30 @@
 # Transsion Flagship 16
 
+## v2.0 — Official release
+
+First **official stable release** for Transsion OS 16 (XOS / HiOS / iTel). Tested on **Infinix X6886 (G99)**.
+
+### Included & working
+- Boot / reboot animation packs + custom upload
+- System sounds (Pixel default; Huawei / iOS / S25 charging packs)
+- AI Suite, AI Call Summary (Ella), AI Video Enhancement (VEE)
+- Gaming: eSports touch, bypass charging, GT triggers in XArena
+- Force 120Hz / 144Hz Magellan refresh picker
+- Always-on Display (AOD)
+- Super volume
+- Parallel animations + blur tiers (**default level 2**)
+- Social Turbo, unlock extras (scale-up, GT apps, Circle to Search), outdoor boost, air transfer — keys applied for devices that need them
+
+### Known limitations (documented in `os16/README.md`)
+- Display HDR Settings row may not show on some G99 builds
+- Cute Pet may not unhide on G99
+- AI Gallery Art/Studio needs GT editor not on G99
+- Blur level 1: solid shade vs Parallel tradeoff on X6886 — use level 2 for best balance
+- Status bar: custom APK upload only
+
+### Install
+Flash `TransFlagship16_V2.0.zip` → reboot → WebUI → Apply & Save → reboot. Removes/disable Flagship 15 if present.
+
 ## v1.100
 - **Fix Parallel blur linger at solid shade — per-package platform split.** V1.99 restored global `platform_level=2` (shade solid ✓) but Parallel broke again — blur stuck under closing apps, icons late (same as V1.96). V1.99 also turned **unionrender=1** at levels 1/2, which may worsen transition blur at platform 2. This build keeps **global platform 2** for the notification panel, drops **union to 0** at levels 1/2 (level 3 only), and writes **`platform_level=3` + perf models into launcher3 vconfig** plus any existing **wm/shell/perf** vconfig packages on your device. SystemUI vconfig stays **platform 2**. Stops force-stopping launcher on Apply (SystemUI only). Apply + reboot — shade should stay solid, app open/close should clear blur normally. Dump: global `platform=2`, `launcher vconfig platform=3`, `unionrender=0`, `perf_model=3`.
 

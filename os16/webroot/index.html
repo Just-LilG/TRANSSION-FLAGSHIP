@@ -143,10 +143,13 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
         </div>
         <div class="hero-card">
           <div class="hero-title">Transsion Flagship 16</div>
-          <div class="hero-sub" id="module-version-sub">V1.42 · OS 16</div>
+          <div class="hero-sub" id="module-version-sub">V2.0 · OS 16</div>
         </div>
         <div class="h8"></div>
         <div class="warn-card" id="old-mod-warn">Flagship 15 is still installed. This installer disables it. Remove it from Magisk/KSU so the two modules do not fight.</div>
+        <div class="warn-card" id="release-limits" style="display:block;margin-bottom:12px;padding:12px 14px;border-radius:14px;background:rgba(167,139,250,0.08);border:1px solid rgba(167,139,250,0.22);font-size:12.5px;color:var(--text2);line-height:1.45;">
+          <strong style="color:var(--accent);">V2.0 official</strong> — Some features depend on your device. HDR Settings row, Cute Pet, and AI Gallery Art/Studio may not appear on G99. Blur level <strong>2</strong> is recommended (level 1 can affect Parallel on some phones). See repo <code style="font-size:11px;">os16/README.md</code>.
+        </div>
         <div class="section-label">Device</div>
         <div class="info-grid">
           <div class="info-cell"><div class="lbl">OS</div><div class="val acc" id="info-os">—</div></div>
@@ -243,7 +246,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
           <div class="setting-row">
             <div class="row-text">
               <div class="row-title">AI Gallery</div>
-              <div class="row-sub">Art, Studio, Eraser, Expand, HD, and the rest. For show.</div>
+              <div class="row-sub">Eraser, Expand, HD, and related OS 16 gallery keys. Art/Studio need GT editor on some devices.</div>
             </div>
             <label class="toggle"><input type="checkbox" id="feat-ai-gallery" checked onchange="setAi('ai_gallery',this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
           </div>
@@ -330,7 +333,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
           <div class="setting-row">
             <div class="row-text">
               <div class="row-title">Social Turbo</div>
-              <div class="row-sub">OS 16 ro.tr_social.* from GT dump. Restored for retest after clean reinstall. Apply + reboot.</div>
+              <div class="row-sub">OS 16 ro.tr_social.* keys. Apply + reboot.</div>
             </div>
             <label class="toggle"><input type="checkbox" id="feat-social" checked onchange="setSocial('social_master',this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
           </div>
@@ -352,14 +355,14 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
           <div class="setting-row">
             <div class="row-text">
               <div class="row-title">Parallel animations</div>
-              <div class="row-sub">Global platform 2 for solid shade on X6886. Launcher/wm vconfig platform 3 keeps Parallel motion.</div>
+              <div class="row-sub">Platform 3 app open/close. Blur level controls glass separately. Level 2 recommended.</div>
             </div>
             <label class="toggle"><input type="checkbox" id="feat-anim" checked onchange="setAnimBlur('anim_os16',this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
           </div>
           <div class="setting-row">
             <div class="row-text">
               <div class="row-title">Dynamic blur</div>
-              <div class="row-sub">1 = Smart solid (no glass). 2 = dock blur, solid shade. 3 = glass everywhere. Level 1/2 need global platform 2 for solid panel on G99.</div>
+              <div class="row-sub">1 = Smart solid. 2 = dock blur (default). 3 = full glass. Level 1 may affect Parallel on some devices.</div>
             </div>
             <label class="toggle"><input type="checkbox" id="feat-blur" checked onchange="setAnimBlur('blur_os16',this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
           </div>
@@ -375,7 +378,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
             <div class="segmented-opt" data-val="3" onclick="setBlurLevel(3)">3</div>
           </div>
         </div>
-        <div class="section-label">Unlock extras (retest)</div>
+        <div class="section-label">Unlock extras</div>
         <div class="glass-card">
           <div class="setting-row">
             <div class="row-text">
@@ -411,7 +414,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
           <div class="setting-row">
             <div class="row-text">
               <div class="row-title">DC Dimming</div>
-              <div class="row-sub">Flicker-free low brightness. Restored for retest.</div>
+              <div class="row-sub">Flicker-free low brightness. May not show in Settings on all OS 16 builds.</div>
             </div>
             <label class="toggle"><input type="checkbox" id="feat-dc" checked onchange="setDisplay('display_dc',this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
           </div>
@@ -425,7 +428,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
           <div class="setting-row">
             <div class="row-text">
               <div class="row-title">HDR Display</div>
-              <div class="row-sub">Also sets has_HDR_display. Restored for retest.</div>
+              <div class="row-sub">SDR2HDR / XDR keys + has_HDR_display. Settings row may not appear on G99.</div>
             </div>
             <label class="toggle"><input type="checkbox" id="feat-hdr" checked onchange="setDisplay('display_hdr',this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
           </div>
@@ -1445,7 +1448,7 @@ async function dumpAi(){
   lines.push('gallerylive_os16  '+String(cfg.gallerylive_os16!==false));
   lines.push('airtransfer_os16  '+String(cfg.airtransfer_os16!==false));
   lines.push('');
-  lines.push('=== unlock extras (retest) ===');
+  lines.push('=== unlock extras ===');
   lines.push('social_master  '+String(cfg.social_master!==false));
   lines.push('display_dc  '+String(cfg.display_dc!==false));
   lines.push('display_color  '+String(cfg.display_color!==false));
@@ -1645,7 +1648,7 @@ async function handleStatusbar(input){
 }
 async function loadDevice(){
   const prop=await g('cat "'+MOD+'/module.prop" 2>/dev/null');
-  const ver=(prop.match(/^version=(.+)$/m)||[])[1]||'V1.42';
+  const ver=(prop.match(/^version=(.+)$/m)||[])[1]||'V2.0';
   n('module-version-sub', ver+' · OS 16');
   let type=await g('getprop ro.tran.os.type');
   let verOs=await g('getprop ro.transsion.os.version');
