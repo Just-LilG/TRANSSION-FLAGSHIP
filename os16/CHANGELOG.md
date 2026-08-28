@@ -1,5 +1,8 @@
 # Transsion Flagship 16
 
+## v1.83
+- **Unlock extras restored for retest.** After a clean uninstall + reinstall, Super volume worked on X6886 — so Social Turbo, Display extras (DC / color / HDR / reading), resolution scale-up, GT app vconfigs, and Circle to Search are back in Features. New `apply_unlock.sh` runs at boot and on Apply (no SystemUI kill). Defaults on. Apply + reboot, then check Settings / Social Turbo / long-press home for Circle. Dump **=== unlock extras (retest) ===** and paste if a row still hides.
+
 ## v1.82
 - **Blur level 1 is solid again, not see-through.** V1.81 wrote `gaussian_blur_support=1` at level 1, which half-blurred notifications/QS instead of a Smart-style solid panel. Level 1 now matches TranOS Anim Only lv3: gaussian **0**, compositor glass off, `accessibility_reduce_transparency=1`, launcher vconfig blur **0**. Parallel + unionrender stay on; glass is levels **2/3** only. Apply + reboot, then pull shade at level 1 vs 3.
 

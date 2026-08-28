@@ -59,6 +59,33 @@ write_os16_ai_prop() {
   gbypass=$(ai_01 "$cfg" "$gmaster" game_bypass_charge true)
   gtrig=$(ai_01 "$cfg" "$gmaster" game_gt_triggers true)
   gtrig_tf=$(ai_tf "$cfg" "$gmaster" game_gt_triggers true)
+  smaster=$(json_bool "$cfg" social_master true)
+  srec=$(ai_01 "$cfg" "$smaster" social_record true)
+  strans=$(ai_01 "$cfg" "$smaster" social_translate true)
+  sbeau=$(ai_01 "$cfg" "$smaster" social_beauty true)
+  smode=0
+  sdefoff=1
+  sbeau_dis=1
+  if [ "$smaster" = "true" ]; then
+    smode=1
+    sdefoff=0
+  fi
+  [ "$sbeau" = "1" ] && sbeau_dis=0
+  ddc=$(json_bool "$cfg" display_dc true)
+  dcol=$(json_bool "$cfg" display_color true)
+  dhdr=$(json_bool "$cfg" display_hdr true)
+  dread=$(json_bool "$cfg" display_reading false)
+  [ "$ddc" = "false" ] && ddc=0 || ddc=1
+  [ "$dcol" = "false" ] && dcol=0 || dcol=1
+  [ "$dhdr" = "false" ] && dhdr=0 || dhdr=1
+  [ "$dread" = "true" ] && dread=1 || dread=0
+  scale=$(json_bool "$cfg" scale_os16 true)
+  [ "$scale" = "false" ] && scale=false || scale=true
+  gt=$(json_bool "$cfg" gt_apps_os16 true)
+  circle=$(json_bool "$cfg" circle_os16 true)
+  [ "$gt" = "false" ] && gt01=0 || gt01=1
+  [ "$gt" = "false" ] && gttrue=false || gttrue=true
+  [ "$circle" = "false" ] && circle=0 || circle=1
   glvl=$(json_int "$cfg" game_esports_level 3)
   [ "$glvl" -ge 1 ] 2>/dev/null || glvl=3
   [ "$glvl" -le 3 ] 2>/dev/null || glvl=3
@@ -155,6 +182,23 @@ ro.tr_game.esportsvirtualctrl.support=$gtrig
 ro.tr_game.screen_buttons.support=$gtrig
 ro.tr_game.magic_button.support=$gtrig
 ro.tr_smartbutton.shoulderbutton20.feature.support=$gtrig_tf
+ro.tr_social.turbo_mode.support=$smode
+ro.tr_social.record.support=$srec
+ro.tr_social.call_translator.support=$strans
+ro.tr_social.call_summary.support=$strans
+ro.tr_social.sound_change.support=$srec
+ro.tr_socialturbo.makeup.support=$sbeau
+ro.tr_social.beauty_disable.support=$sbeau_dis
+ro.tr_social.default_off.support=$sdefoff
+ro.tr_display.sdr2hdr.support=$dhdr
+ro.tr_light.xdr.support=$dhdr
+ro.tr_light.xdr.v2.support=$dhdr
+ro.tran.display_hdr_support=$dhdr
+ro.tran.display_dc_dimming_support=$ddc
+ro.surface_flinger.has_HDR_display=$([ "$dhdr" = "1" ] && echo true || echo false)
+ro.tr_display.colormode.feature.support=$dcol
+ro.tr_display.color.temperature.feature.support=$dcol
+persist.tr_display.color.temperature.aosp.support=$dcol
 ro.tr_animation.platform_level=$alvl
 ro.tr_perf.launch_start_exit.model=$alvl
 ro.tr_perf.power_keyguard_animation.model=$alvl
@@ -208,6 +252,41 @@ ro.tr_gallery.live.support=$glive
 ro.tr_gallery.live.slow.support=$glive
 ro.tr_airtransfer.feature.support=$airt
 tr_airtransfer.feature.support=$airt
+tr_display.resolution.scalingup.support=$scale
+ro.tr_display.resolution.scalingup.support=$scale
+tr_gallery.custom.fliters.support=$gt01
+tr_gallery.drag.sort.support=$gt01
+tr_gallery.easypic.support=$gt01
+tr_gallery.matting.support=$gt01
+tr_gallery.photo.16grid.support=$gt01
+tr_gallery.photo.8grid.support=$gt01
+tr_gallery.photo.cover.support=$gt01
+tr_gallery.photo.feature.support=$gt01
+tr_gallery.search.support=$gt01
+tr_gallery.soft.player.support=$gt01
+tr_soundrecorder.speech.feature.support=$gt01
+tr_smartscan.ar_measure.support=$gttrue
+tr_smartscan.document_scan.support=$gttrue
+tr_smartscan.medicine_verification.support=$gttrue
+tr_smartscan.recharge.support=$gttrue
+tr_microIntelligence.gesture_functions.feature.support=$gt01
+ro.tr_microIntelligence.gesture_functions.feature.support=$gt01
+ro.tr_microIntelligence.microIntelligence.feature.support=$gt01
+tr_pcconnect.backup.feature.support=$gt01
+tr_pcconnect.gesture_file_transfer.feature.support=$gt01
+tr_pcconnect.network_sharing.feature.support=$gt01
+tr_pcconnect.pc_mouse_button.feature.support=$gt01
+ro.tr_pcconnect.feature.support=$gt01
+tr_zeroscreen.ai.card.support=$gt01
+tr_globalsearch.easypic.support=$gt01
+ro.tr_smartpanel.os_smartpanel.support=$gt01
+ro.tr_smartpanel.os_slider_panel.support=$gt01
+ro.tr_smartpanel.os_slider_panel_default_close.config=0
+ro.tr_smartpanel.os_smart_hub_def_off.config=0
+ro.tr_dialer.contact.carlcare.feature.support=$gt01
+ro.tr_microIntelligence.circle_to_search.feature.support=$circle
+tr_microIntelligence.circle_to_search.feature.support=$circle
+ro.os_ai_circle_to_search_support=$circle
 ro.surface_flinger.game_default_frame_rate_override=120
 debug.graphics.game_default_frame_rate.disabled=true
 persist.graphics.game_default_frame_rate.enabled=false
@@ -227,7 +306,7 @@ print_modname() {
   ui_print " "
   ui_print "  ╔══════════════════════════════════════════╗"
   ui_print "  ║    TRANSSION FLAGSHIP 16                 ║"
-    ui_print "  ║    XOS · HiOS · iTel OS 16  ·  V1.82     ║"
+    ui_print "  ║    XOS · HiOS · iTel OS 16  ·  V1.83     ║"
   ui_print "  ╚══════════════════════════════════════════╝"
   ui_print " "
 }
@@ -331,6 +410,7 @@ on_install() {
     unzip -oj "$ZIPFILE" 'common/apply_120hz.sh' -d "$MODPATH" >&2
     unzip -oj "$ZIPFILE" 'common/apply_sounds.sh' -d "$MODPATH" >&2
     unzip -oj "$ZIPFILE" 'common/apply_emoji.sh' -d "$MODPATH" >&2
+    unzip -oj "$ZIPFILE" 'common/apply_unlock.sh' -d "$MODPATH" >&2
     unzip -o "$ZIPFILE" 'system/fonts/*' -d "$MODPATH" >&2
     unzip -o "$ZIPFILE" 'apm_120hz_bypass/*' -d "$MODPATH" >&2
     unzip -o "$ZIPFILE" 'magellan/*' -d "$MODPATH" >&2
@@ -349,6 +429,7 @@ on_install() {
     unzip -oj "$ZIPFILE" 'common/apply_120hz.sh' -d "$MODPATH" >&2
     unzip -oj "$ZIPFILE" 'common/apply_sounds.sh' -d "$MODPATH" >&2
     unzip -oj "$ZIPFILE" 'common/apply_emoji.sh' -d "$MODPATH" >&2
+    unzip -oj "$ZIPFILE" 'common/apply_unlock.sh' -d "$MODPATH" >&2
     unzip -o "$ZIPFILE" 'apm_120hz_bypass/*' -d "$MODPATH" >&2
     unzip -o "$ZIPFILE" 'magellan/*' -d "$MODPATH" >&2
     unzip -o "$ZIPFILE" 'system/product/apm/*' -d "$MODPATH" >&2
@@ -479,12 +560,12 @@ set_permissions() {
   fi
   touch "$MODPATH/skip_mount"
   set_perm_recursive "$MODPATH" 0 0 0755 0644
-  for sh in "$MODPATH/post-fs-data.sh" "$MODPATH/service.sh" "$MODPATH/uninstall.sh" "$MODPATH/apply_blur.sh" "$MODPATH/apply_120hz.sh" "$MODPATH/apply_sounds.sh" "$MODPATH/apply_emoji.sh"; do
+  for sh in "$MODPATH/post-fs-data.sh" "$MODPATH/service.sh" "$MODPATH/uninstall.sh" "$MODPATH/apply_blur.sh" "$MODPATH/apply_120hz.sh" "$MODPATH/apply_sounds.sh" "$MODPATH/apply_emoji.sh" "$MODPATH/apply_unlock.sh"; do
     [ -f "$sh" ] && set_perm "$sh" 0 0 0755
   done
   ui_print " "
   ui_div
-  ui_print "  ✨  FLAGSHIP 16  ·  V1.82"
+  ui_print "  ✨  FLAGSHIP 16  ·  V1.83"
   ui_info "OS     : $OS_TYPE $OS_VER"
   ui_info "Feature: boot + reboot + overlay + AI + gaming + anim/blur + AOD + Dynamic bar + Force 120Hz + UI sounds + emoji"
   ui_div

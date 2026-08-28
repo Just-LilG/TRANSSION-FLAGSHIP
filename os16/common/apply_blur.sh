@@ -459,7 +459,11 @@ os16_apply_dynamicbar_runtime() {
 }
 
 os16_clear_failed_feature_leftovers() {
-  # V1.52–1.55 Social Turbo / Display extras never unhid OS 16 UI.
+  # Legacy cleanup only when display extras are all off.
+  if os16_cfg_bool display_dc true || os16_cfg_bool display_color true \
+      || os16_cfg_bool display_hdr true || os16_cfg_bool display_reading false; then
+    return 0
+  fi
   for ns in system global; do
     settings delete "$ns" tran_dc_dimming_enable >/dev/null 2>&1
     settings delete "$ns" tran_display_color_enhance >/dev/null 2>&1
@@ -526,6 +530,10 @@ if [ "${0##*/}" = "apply_blur.sh" ]; then
       os16_clear_failed_feature_leftovers
       os16_apply_aod_settings
       os16_apply_dynamicbar_runtime
+      if [ -f "$MODDIR/apply_unlock.sh" ]; then
+        . "$MODDIR/apply_unlock.sh"
+        os16_apply_unlock
+      fi
       os16_apply_blur_runtime
       ;;
   esac
