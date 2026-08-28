@@ -30,5 +30,15 @@
   "gallerylive_os16": true,
   "airtransfer_os16": true,
   "dynamicbar_os16": false,
-  "force_120hz": false
+  "force_120hz": false,
+  "chargesound_style": "pixel",
+  "wirelesschargesound_style": "pixel",
+  "sound_Unlock_style": "pixel",
+  "sound_Lock_style": "pixel",
+  "sound_Screenshots_style": "pixel",
+  "sound_Effect_Tick_style": "pixel",
+  "sound_LowBattery_style": "pixel",
+  "sound_InCallNotification_style": "pixel",
+  "sound_Dock_style": "pixel",
+  "sound_Undock_style": "pixel"
 }
