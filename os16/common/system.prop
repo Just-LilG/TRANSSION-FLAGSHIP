@@ -54,20 +54,8 @@ ro.transsion_launch_start_exit_support=3
 ro.transsion_power_keyguard_animation_support=3
 ro.transsion.recent_animation.model=3
 ro.tran_display_unionrender.support=1
-# Blur — notifications/QS need SurfaceFlinger restart. Level 1 disables
-# compositor (Smart solid). Level 2/3 enable flagship glass.
-ro.tr_display.liquidglass.support=1
-ro.surface_flinger.supports_background_blur=1
-ro.os.recent.blur=1
-ro.transsion_launcher_gaussian_blur_support=2
-tr_launcher.gaussianblur.support=2
-ro.tran.effectengine.dynamicblur.support=1
-ro.os_xos16_blur_v2_support=1
-persist.sys.sf.disable_blurs=0
-persist.sys.disable_blur=0
-persist.sysui.disableBlur=0
-persist.sysui.disable_blur=0
-ro.sf.blurs_are_expensive=0
+# Blur tier keys are written from config (Apply / install). Off or level 1 = solid.
+# Level 2 = partial glass. Level 3 = full glass + dynamic blur engine.
 # AOD — OS 16 keys from GT dump. half.screen is stock 0 on GT.
 # These live in /tr_product/etc/build.prop so apply_blur.sh overwrites.
 ro.tr_aod.feature.support=1

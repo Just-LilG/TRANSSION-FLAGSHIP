@@ -1,5 +1,8 @@
 # Transsion Flagship 16
 
+## v1.87
+- **Blur levels 1 / 2 / 3 actually differ now.** Level 1 matches TranOS Anim Only lv3: compositor glass off, gaussian 0, global + launcher vconfig async 0, solid shade. Level 2 = medium glass (gaussian 2, radius 25, no dynamic-blur engine). Level 3 = full glass (gaussian 3, radius 80, dynamicblur + xos16_blur_v2). Bundled `system.prop` no longer ships hardcoded glass=1. Apply + reboot, then compare shade at 1 vs 2 vs 3. Dump **=== launcher blur settings ===**.
+
 ## v1.86
 - **Dynamic bar off actually leaves stock bar alone now.** V1.81 logic was correct in scripts, but the zip `system.prop` template still shipped `ro.tr_dynamicbar.support=0`, and the installer copied that file **after** `on_install` rewrote props — so Magisk kept loading 0 and killed your pill. Off now: no dynamicbar keys in the template, installer skips copying the template, boot strips any leftover lines from `system.prop`, and `resetprop` restores stock values from `/tr_product/etc/build.prop`. Apply + reboot with **Dynamic bar extras** off — pill should work again. Dump shows `stock tr_product` vs live `ro.tr_dynamicbar.support`.
 
