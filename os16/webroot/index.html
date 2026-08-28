@@ -519,7 +519,7 @@ const SOUND_SLOTS=[
   {id:'wirelesschargesound', dest:'WirelessChargingStarted', title:'Wireless charging', group:'Charging'},
   {id:'sound_Unlock', dest:'Unlock', title:'Unlock', group:'Lock screen'},
   {id:'sound_Lock', dest:'Lock', title:'Lock', group:'Lock screen'},
-  {id:'sound_Screenshots', dest:'Screenshots', title:'Screenshot', group:'Feedback'},
+  {id:'sound_Screenshots', dest:'Screenshots', title:'Screenshot', group:'Feedback', sub:'camera_click.ogg (SystemUI) + Screenshots.ogg'},
   {id:'sound_Effect_Tick', dest:'Effect_Tick', title:'Tick', group:'Feedback'},
   {id:'sound_Fail', dest:'Fail', title:'Fail', group:'Feedback'},
   {id:'sound_Success', dest:'Success', title:'Success', group:'Feedback'},
@@ -567,7 +567,7 @@ function renderSounds(){
     }
     const st=soundStyleOf(s.id);
     const fn=soundFileOf(s.id);
-    html+='<div class="setting-row"><div class="row-text" style="margin-left:0"><div class="row-title">'+s.title+'</div><div class="row-sub">'+s.dest+'.ogg</div></div></div>';
+    html+='<div class="setting-row"><div class="row-text" style="margin-left:0"><div class="row-title">'+s.title+'</div><div class="row-sub">'+(s.sub||(s.dest+'.ogg'))+'</div></div></div>';
     html+='<div class="segmented" id="'+s.id+'-style-picker">';
     html+='<div class="segmented-opt'+(st==='stock'?' active':'')+'" data-val="stock" onclick="setSoundStyle(\''+s.id+'\',\'stock\')">Stock</div>';
     html+='<div class="segmented-opt'+(st==='custom'?' active':'')+'" data-val="custom" onclick="setSoundStyle(\''+s.id+'\',\'custom\')" id="'+s.id+'-custom-opt"'+(fn?'':' style="display:none"')+'>Custom</div>';
@@ -1166,7 +1166,7 @@ async function dumpAi(){
   SOUND_SLOTS.forEach(s=>{
     lines.push(s.id+'  style='+soundStyleOf(s.id)+'  file='+(soundFileOf(s.id)||'EMPTY'));
   });
-  const uilive=await g('ls -l /tr_product/media/audio/ui/ChargingStarted.ogg /tr_product/media/audio/ui/Unlock.ogg /tr_product/media/audio/ui/Lock.ogg /tr_product/media/audio/ui/Screenshots.ogg /product/media/audio/ui/ChargingStarted.ogg /system/product/media/audio/ui/ChargingStarted.ogg 2>/dev/null');
+  const uilive=await g('ls -l /tr_product/media/audio/ui/ChargingStarted.ogg /tr_product/media/audio/ui/Unlock.ogg /tr_product/media/audio/ui/Lock.ogg /tr_product/media/audio/ui/Screenshots.ogg /tr_product/media/audio/ui/camera_click.ogg /product/media/audio/ui/camera_click.ogg /system/media/audio/ui/camera_click.ogg /system/product/media/audio/ui/camera_click.ogg 2>/dev/null');
   lines.push(uilive||'no live ui oggs');
   const uimod=await g('ls -l "'+MOD+'/system/product/media/audio/ui" 2>/dev/null');
   lines.push('module ui dir: '+(uimod||'EMPTY — uploads missing'));

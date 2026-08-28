@@ -45,12 +45,14 @@ os16_snd_bind() {
   dest="$2"
   [ -f "$src" ] || return 1
   ns=$(os16_snd_nsenter)
+  parent=$(dirname "$dest")
+  if [ ! -d "$parent" ]; then
+    mkdir -p "$parent" 2>/dev/null
+    [ -n "$ns" ] && $ns mkdir -p "$parent" 2>/dev/null
+  fi
   if [ ! -e "$dest" ]; then
-    parent=$(dirname "$dest")
-    if [ -d "$parent" ]; then
-      touch "$dest" 2>/dev/null
-      [ -n "$ns" ] && $ns touch "$dest" 2>/dev/null
-    fi
+    touch "$dest" 2>/dev/null
+    [ -e "$dest" ] || { [ -n "$ns" ] && $ns touch "$dest" 2>/dev/null; }
   fi
   [ -e "$dest" ] || { os16_snd_log "bind skip (no dest) $dest"; return 1; }
   chcon --reference="$dest" "$src" 2>/dev/null
@@ -114,6 +116,12 @@ os16_snd_alias_names() {
   if [ "$destbase" = "Unlock" ]; then
     echo "Unlock.mp3"
   fi
+  # SystemUI screenshot is AOSP camera shutter, not Transsion Screenshots.ogg.
+  # MediaActionSound / config_cameraShutterSound: /product|/system/media/audio/ui/camera_click.ogg
+  if [ "$destbase" = "Screenshots" ]; then
+    echo "camera_click.ogg"
+    echo "screenshot.ogg"
+  fi
 }
 
 os16_snd_stage() {
@@ -163,7 +171,7 @@ os16_snd_bind_names() {
   os16_snd_alias_names "$destbase" | while read -r name; do
     [ -n "$name" ] || continue
     os16_snd_live_dirs | while read -r dir; do
-      [ -d "$dir" ] || continue
+      [ -n "$dir" ] || continue
       os16_snd_bind "$src" "$dir/$name"
     done
   done
