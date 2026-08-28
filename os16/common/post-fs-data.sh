@@ -151,9 +151,9 @@ log_pfd "ANIM_DIR=$ANIM_DIR"
 log_pfd "live /tr_product/media:"
 ls -la /tr_product/media >> "$PFD_LOG" 2>/dev/null
 
-BA_STYLE=$(cfg_get bootanim_style "hios16")
-RA_STYLE=$(cfg_get rebootanim_style "hios16")
-[ -z "$RA_STYLE" ] && RA_STYLE=$(cfg_get shutdownanim_style "hios16")
+BA_STYLE=$(cfg_get bootanim_style "default")
+RA_STYLE=$(cfg_get rebootanim_style "default")
+[ -z "$RA_STYLE" ] && RA_STYLE=$(cfg_get shutdownanim_style "default")
 log_pfd "bootanim_style=$BA_STYLE rebootanim_style=$RA_STYLE"
 
 pick_pack_zip() {

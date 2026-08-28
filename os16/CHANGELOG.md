@@ -1,5 +1,11 @@
 # Transsion Flagship 16
 
+## v2.2
+- **Parallel no longer forces shade glass.** `ro.tr_animation.platform_level=3` is flagship blur (notification shade / lock glass). Parallel only writes motion keys (`ro.tr_perf.*`, launch/unlock/recent, launcher/wm vconfig). Dynamic blur **off** restores stock `platform_level` and skips that key in Magisk `system.prop`. Apply also force-stops SystemUI when blur is off so cached glass clears. Apply + reboot.
+- **XOS boot animation is the default** (boot and reboot packs). HiOS 16 is still in the picker. Existing installs still on the old HiOS 16 default switch once on update; custom uploads are left alone.
+- **WebUI motion.** Page load, tab switch, toggles, buttons, splash loader, and busy spinner on Save / Dump / conflict scan.
+- **Author in WebUI.** Home card for **Lil G** — Telegram [@Just_LilGXX](https://t.me/Just_LilGXX).
+
 ## v2.1
 - **Blur is on/off only.** Removed the 1/2/3 level picker. On (default) applies flagship glass. Off does **not** strip stock blur — the module skips blur props so Transsion’s own blur stays. Parallel animations stay at platform 3 when enabled.
 - **144Hz Magellan no longer needs Force 120Hz.** Magellan XML is always staged and bound. Force 120Hz only locks 120Hz settings.

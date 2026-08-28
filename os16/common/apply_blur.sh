@@ -207,15 +207,17 @@ os16_restore_stock_blur() {
     persist.tr_lighting.feature.support \
     ro.tr_lighting.controlcenter.feature.support \
     ro.tr_lighting.feature.support \
-    ro.tran_display_unionrender.support
+    ro.tran_display_unionrender.support \
+    ro.tr_animation.platform_level
   do
     os16_restore_stock_blur_key "$k"
   done
 }
 
+# Parallel = ro.tr_perf.* + launcher/wm vconfig platform_level.
+# Global ro.tr_animation.platform_level=3 is shade/lock glass — blur ON only.
 os16_apply_anim_props() {
   os16_blur_vals
-  os16_rp_overwrite ro.tr_animation.platform_level "$ALVL"
   os16_rp_overwrite ro.tr_perf.launch_start_exit.model "$PERF_LVL"
   os16_rp_overwrite ro.tr_perf.power_keyguard_animation.model "$PERF_LVL"
   os16_rp_overwrite ro.tr_perf.recent_animation.model "$PERF_LVL"
@@ -227,6 +229,11 @@ os16_apply_anim_props() {
   os16_rp ro.transsion_launch_start_exit_support "$PERF_LVL"
   os16_rp ro.transsion_power_keyguard_animation_support "$PERF_LVL"
   os16_rp ro.transsion.recent_animation.model "$PERF_LVL"
+  if [ "$SKIP_BLUR" = "1" ]; then
+    os16_restore_stock_blur_key ro.tr_animation.platform_level
+  else
+    os16_rp_overwrite ro.tr_animation.platform_level "$ALVL"
+  fi
 }
 
 os16_apply_blur_props() {
@@ -491,7 +498,15 @@ os16_apply_launcher_vconfig_all() {
     stock="${staged}.stock"
     if [ -f "$stock" ]; then
       cp -f "$stock" "$staged"
+    fi
+    if [ "$MOTION_PLAT" = "3" ]; then
+      os16_motion_vconfig_keys "$staged" "$MOTION_PLAT"
+      os16_vconfig_upsert "$staged" "ro.transsion_async_animation_support" "$LAUNCHER_ASYNC"
       os16_bind_vconfig_pkg "$staged" com.transsion.launcher3
+    elif [ -f "$stock" ]; then
+      os16_bind_vconfig_pkg "$staged" com.transsion.launcher3
+    else
+      os16_unbind_vconfig_pkg com.transsion.launcher3
     fi
     return 0
   fi
@@ -580,11 +595,41 @@ os16_apply_systemui_vconfig() {
   os16_bind_vconfig_pkg "$staged" com.transsion.systemui
 }
 
+os16_strip_blur_systemprop() {
+  sp="$MODDIR/system.prop"
+  [ -f "$sp" ] || return 0
+  for k in \
+    ro.tr_animation.platform_level \
+    ro.tran_display_unionrender.support \
+    ro.tr_display.liquidglass.support \
+    ro.surface_flinger.supports_background_blur \
+    ro.os.recent.blur \
+    ro.transsion_launcher_gaussian_blur_support \
+    tr_launcher.gaussianblur.support \
+    ro.tran.effectengine.dynamicblur.support \
+    ro.os_xos16_blur_v2_support \
+    persist.sys.sf.disable_blurs \
+    persist.sys.disable_blur \
+    persist.sysui.disableBlur \
+    persist.sysui.disable_blur \
+    ro.sf.blurs_are_expensive \
+    persist.tr_lighting.controlcenter.feature.support \
+    persist.tr_lighting.feature.support \
+    ro.tr_lighting.controlcenter.feature.support \
+    ro.tr_lighting.feature.support
+  do
+    sed -i "/^${k}=/d" "$sp" 2>/dev/null
+  done
+}
+
 os16_apply_blur_stack() {
   os16_blur_vals
   os16_apply_anim_props
   if [ "$SKIP_BLUR" = "1" ]; then
+    os16_strip_blur_systemprop
     os16_restore_stock_blur
+    os16_apply_motion_pkg_vconfig
+    os16_apply_launcher_vconfig_all
   else
     os16_apply_blur_props
     os16_apply_tr_product_blur_buildprop
@@ -839,8 +884,7 @@ if [ "${0##*/}" = "apply_blur.sh" ]; then
       os16_apply_blur_runtime
       os16_apply_aod_settings
       os16_apply_dynamicbar_runtime
-      os16_blur_vals
-      [ "$SKIP_BLUR" = "1" ] || os16_refresh_systemui_on_apply
+      os16_refresh_systemui_on_apply
       ;;
     *)
       os16_apply_blur_stack
@@ -854,8 +898,7 @@ if [ "${0##*/}" = "apply_blur.sh" ]; then
         os16_apply_unlock
       fi
       os16_apply_blur_runtime
-      os16_blur_vals
-      [ "$SKIP_BLUR" = "1" ] || os16_refresh_systemui_on_apply
+      os16_refresh_systemui_on_apply
       ;;
   esac
 fi

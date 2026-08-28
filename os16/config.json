@@ -1,7 +1,7 @@
 {
-  "bootanim_style": "hios16",
+  "bootanim_style": "default",
   "bootanim_file": "",
-  "rebootanim_style": "hios16",
+  "rebootanim_style": "default",
   "rebootanim_file": "",
   "statusbar_style": "off",
   "statusbarcustom_file": "",

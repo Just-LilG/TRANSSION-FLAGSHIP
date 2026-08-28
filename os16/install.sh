@@ -293,6 +293,7 @@ persist.graphics.game_default_frame_rate.enabled=false
 EOF
   if [ "$blur" != "true" ]; then
     sed -i \
+      -e '/^ro.tr_animation.platform_level=/d' \
       -e '/^ro.tran_display_unionrender.support=/d' \
       -e '/^ro.tr_display.liquidglass.support=/d' \
       -e '/^ro.surface_flinger.supports_background_blur=/d' \
@@ -327,7 +328,7 @@ print_modname() {
   ui_print " "
   ui_print "  ╔══════════════════════════════════════════╗"
   ui_print "  ║    TRANSSION FLAGSHIP 16                 ║"
-    ui_print "  ║    XOS · HiOS · iTel OS 16  ·  V2.1      ║"
+    ui_print "  ║    XOS · HiOS · iTel OS 16  ·  V2.2      ║"
   ui_print "  ╚══════════════════════════════════════════╝"
   ui_print " "
 }
@@ -563,7 +564,24 @@ on_install() {
            -e '/"blur_os16_level"/d' \
            "$MODPATH/config.json"
   else
-    ui_ok "Default config: HiOS 16 boot + reboot, AI + gaming + anim/blur on, dynamic bar off, status bar stock"
+    ui_ok "Default config: XOS boot + reboot, AI + gaming + anim/blur on, dynamic bar off, status bar stock"
+  fi
+  # One-time: V2.2 ships XOS as the default boot/reboot pack (was HiOS 16).
+  if [ -f /data/adb/modules/transsion-flagship-16/.xos_boot_v22 ]; then
+    cp /data/adb/modules/transsion-flagship-16/.xos_boot_v22 "$MODPATH/.xos_boot_v22"
+  else
+    ba=$(json_bool "$MODPATH/config.json" bootanim_style default)
+    ra=$(json_bool "$MODPATH/config.json" rebootanim_style default)
+    bafile=$(json_bool "$MODPATH/config.json" bootanim_file "")
+    rafile=$(json_bool "$MODPATH/config.json" rebootanim_file "")
+    if [ "$ba" = "hios16" ] && [ "$ra" = "hios16" ] && [ -z "$bafile" ] && [ -z "$rafile" ]; then
+      sed -i \
+        -e 's/"bootanim_style"[[:space:]]*:[[:space:]]*"hios16"/"bootanim_style": "default"/' \
+        -e 's/"rebootanim_style"[[:space:]]*:[[:space:]]*"hios16"/"rebootanim_style": "default"/' \
+        "$MODPATH/config.json"
+      ui_info "Boot animation default is now XOS (one-time)"
+    fi
+    : > "$MODPATH/.xos_boot_v22"
   fi
   # One-time: force Dynamic bar extras off for upgrades, then leave the toggle.
   if [ -f /data/adb/modules/transsion-flagship-16/.dynbar_off_v173 ]; then
@@ -638,7 +656,7 @@ set_permissions() {
   done
   ui_print " "
   ui_div
-  ui_print "  ✨  FLAGSHIP 16  ·  V2.1"
+  ui_print "  ✨  FLAGSHIP 16  ·  V2.2"
   ui_info "OS     : $OS_TYPE $OS_VER"
   ui_info "Feature: boot + reboot + overlay + AI + gaming + anim/blur + AOD + Dynamic bar + Force 120Hz + UI sounds"
   ui_div
