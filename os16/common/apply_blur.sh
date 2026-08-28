@@ -200,7 +200,6 @@ os16_apply_blur_props() {
   os16_rp_overwrite tr_launcher.gaussianblur.support "$BLVL"
   os16_rp_overwrite ro.tran.effectengine.dynamicblur.support "$DYNBLUR"
   os16_rp_overwrite ro.os_xos16_blur_v2_support "$BLURV2"
-  os16_apply_launcher_blur_vconfig
   os16_rp persist.sys.sf.disable_blurs "$SFDIS"
   os16_rp persist.sys.disable_blur "$DIS"
   os16_rp persist.sysui.disableBlur "$SFDIS"
@@ -315,11 +314,79 @@ os16_seed_vconfig_pkg() {
     done
     if [ -n "$dest" ]; then
       cat "$dest" > "$staged"
+      cp -f "$staged" "${staged}.stock"
     else
       : > "$staged"
     fi
   fi
   echo "$staged"
+}
+
+os16_restore_vconfig_key_from_stock() {
+  f="$1"
+  k="$2"
+  stock="${f}.stock"
+  if [ -f "$stock" ] && grep -q "^${k}=" "$stock" 2>/dev/null; then
+    val=$(grep -m1 "^${k}=" "$stock" | cut -d= -f2-)
+    os16_vconfig_upsert "$f" "$k" "$val"
+  else
+    sed -i "/^${k}=/d" "$f" 2>/dev/null
+  fi
+}
+
+os16_tr_product_blur_stock() {
+  echo "$MODDIR/tr_product/etc/build.prop.stock"
+}
+
+os16_seed_tr_product_buildprop() {
+  stock=$(os16_tr_product_blur_stock)
+  [ -s "$stock" ] && return 0
+  mkdir -p "$(dirname "$stock")"
+  src=""
+  for p in /tr_product/etc/build.prop /system/tr_product/etc/build.prop; do
+    [ -f "$p" ] || continue
+    src="$p"
+    break
+  done
+  [ -n "$src" ] || return 1
+  cp -f "$src" "$stock"
+}
+
+os16_apply_tr_product_blur_buildprop() {
+  os16_blur_vals
+  stock=$(os16_tr_product_blur_stock)
+  os16_seed_tr_product_buildprop || return 0
+  staged="$MODDIR/tr_product/etc/build.prop"
+  mkdir -p "$(dirname "$staged")"
+  cp -f "$stock" "$staged"
+  os16_vconfig_upsert "$staged" "ro.tr_display.liquidglass.support" "$B01"
+  os16_vconfig_upsert "$staged" "ro.surface_flinger.supports_background_blur" "$B01"
+  os16_vconfig_upsert "$staged" "ro.os.recent.blur" "$B01"
+  os16_vconfig_upsert "$staged" "ro.transsion_launcher_gaussian_blur_support" "$BLVL"
+  os16_vconfig_upsert "$staged" "tr_launcher.gaussianblur.support" "$BLVL"
+  os16_vconfig_upsert "$staged" "ro.tran.effectengine.dynamicblur.support" "$DYNBLUR"
+  os16_vconfig_upsert "$staged" "ro.os_xos16_blur_v2_support" "$BLURV2"
+  os16_vconfig_upsert "$staged" "ro.sf.blurs_are_expensive" "$EXP"
+  os16_vconfig_upsert "$staged" "ro.transsion_async_animation_support" "$LAUNCHER_ASYNC"
+  mkdir -p "$MODDIR/system/tr_product/etc"
+  cp -f "$staged" "$MODDIR/system/tr_product/etc/build.prop"
+  for dest in \
+    /tr_product/etc/build.prop \
+    /system/tr_product/etc/build.prop
+  do
+    os16_bind_file "$staged" "$dest"
+  done
+}
+
+os16_unbind_tr_product_blur_buildprop() {
+  NS=$(os16_vconfig_nsenter)
+  for dest in \
+    /tr_product/etc/build.prop \
+    /system/tr_product/etc/build.prop
+  do
+    [ -n "$NS" ] && $NS umount -l "$dest" 2>/dev/null
+    umount -l "$dest" 2>/dev/null
+  done
 }
 
 os16_cfg_tf() {
@@ -344,15 +411,8 @@ os16_apply_aod_vconfig() {
   os16_bind_vconfig_pkg "$staged" com.transsion.aod
 }
 
-os16_apply_launcher_vconfig() {
-  bar=$(os16_cfg_01 dynamicbar_os16 false)
-  [ "$bar" = "1" ] || return 0
-  staged=$(os16_seed_vconfig_pkg com.transsion.launcher3)
-  os16_vconfig_upsert "$staged" "ro.os.tran_hide_status_bar_for_land_recent" "1"
-  os16_bind_vconfig_pkg "$staged" com.transsion.launcher3
-}
-
-os16_apply_launcher_blur_vconfig() {
+os16_apply_launcher_vconfig_all() {
+  os16_blur_vals
   staged=$(os16_seed_vconfig_pkg com.transsion.launcher3)
   if [ "$GLASS" = "1" ]; then
     os16_vconfig_upsert "$staged" "ro.os.recent.blur" "1"
@@ -366,7 +426,20 @@ os16_apply_launcher_blur_vconfig() {
     os16_vconfig_upsert "$staged" "tr_launcher.gaussianblur.support" "0"
     os16_vconfig_upsert "$staged" "ro.transsion_async_animation_support" "0"
   fi
+  bar=$(os16_cfg_01 dynamicbar_os16 false)
+  if [ "$bar" = "1" ]; then
+    os16_vconfig_upsert "$staged" "ro.os.tran_hide_status_bar_for_land_recent" "1"
+  else
+    os16_restore_vconfig_key_from_stock "$staged" "ro.os.tran_hide_status_bar_for_land_recent"
+  fi
   os16_bind_vconfig_pkg "$staged" com.transsion.launcher3
+}
+
+os16_apply_blur_stack() {
+  os16_apply_blur_props
+  os16_apply_tr_product_blur_buildprop
+  os16_apply_dynamicbar_props
+  os16_apply_launcher_vconfig_all
 }
 
 os16_clear_dynamicbar_props() {
@@ -385,7 +458,7 @@ os16_clear_dynamicbar_props() {
       os16_rp_delete "$k"
     fi
   done
-  os16_unbind_vconfig_pkg com.transsion.launcher3
+  # Do not unbind launcher3 vconfig — blur tier keys live in the same file.
 }
 
 os16_apply_aod_props() {
@@ -489,7 +562,6 @@ os16_apply_dynamicbar_props() {
   os16_rp_overwrite ro.os_dynamic_bar_resident_plane_support 1
   # Landscape-recents status-bar overlay (empty pill in recents).
   os16_rp_overwrite ro.os.tran_hide_status_bar_for_land_recent 1
-  os16_apply_launcher_vconfig
 }
 
 os16_apply_dynamicbar_runtime() {
@@ -571,13 +643,12 @@ os16_apply_blur_runtime() {
 if [ "${0##*/}" = "apply_blur.sh" ]; then
   mode="${1:-all}"
   case "$mode" in
-    props) os16_apply_blur_props; os16_apply_aod_props; os16_apply_os16_extras_props; os16_apply_dynamicbar_props ;;
+    props) os16_apply_blur_stack; os16_apply_aod_props; os16_apply_os16_extras_props ;;
     runtime) os16_apply_blur_runtime; os16_apply_aod_settings; os16_apply_dynamicbar_runtime ;;
     *)
-      os16_apply_blur_props
+      os16_apply_blur_stack
       os16_apply_aod_props
       os16_apply_os16_extras_props
-      os16_apply_dynamicbar_props
       os16_clear_failed_feature_leftovers
       os16_apply_aod_settings
       os16_apply_dynamicbar_runtime

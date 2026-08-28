@@ -1,5 +1,8 @@
 # Transsion Flagship 16
 
+## v1.88
+- **Blur tiers actually stick now (real fix).** V1.87 logic was correct but never applied: with **Dynamic bar extras off** (default), cleanup was **unbinding** `com.transsion.launcher3` vconfig right after blur wrote it — so gaussian/async stayed stock (level 1 still glass, 2 = 3). This build merges blur + dynamic-bar launcher vconfig, applies it **last**, and never unbinds it when the bar toggle is off. Also **binds** `/tr_product/etc/build.prop` blur keys (Mountify was re-loading stock `liquidglass=1` over resetprop). Apply + reboot, then dump **=== launcher blur settings ===** — vconfig gaussian should match your level (0 / 2 / 3).
+
 ## v1.87
 - **Blur levels 1 / 2 / 3 actually differ now.** Level 1 matches TranOS Anim Only lv3: compositor glass off, gaussian 0, global + launcher vconfig async 0, solid shade. Level 2 = medium glass (gaussian 2, radius 25, no dynamic-blur engine). Level 3 = full glass (gaussian 3, radius 80, dynamicblur + xos16_blur_v2). Bundled `system.prop` no longer ships hardcoded glass=1. Apply + reboot, then compare shade at 1 vs 2 vs 3. Dump **=== launcher blur settings ===**.
 

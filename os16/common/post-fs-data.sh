@@ -335,16 +335,15 @@ log_pfd "custom overlay: $have_custom"
 # zygote) and again from service.sh after overlay.
 if [ -f "$MODDIR/apply_blur.sh" ]; then
   . "$MODDIR/apply_blur.sh"
-  os16_apply_blur_props
+  os16_apply_blur_stack
   os16_apply_aod_props
   os16_apply_os16_extras_props
-  os16_apply_dynamicbar_props
   if [ -f "$MODDIR/apply_unlock.sh" ]; then
     . "$MODDIR/apply_unlock.sh"
     os16_apply_unlock
     log_pfd "unlock social=$(getprop ro.tr_social.turbo_mode.support 2>/dev/null) circle=$(getprop ro.tr_microIntelligence.circle_to_search.feature.support 2>/dev/null) scale=$(getprop tr_display.resolution.scalingup.support 2>/dev/null)"
   fi
-  log_pfd "blur props resetprop liquidglass=$(getprop ro.tr_display.liquidglass.support 2>/dev/null) sf_disable=$(getprop persist.sys.sf.disable_blurs 2>/dev/null)"
+  log_pfd "blur props resetprop liquidglass=$(getprop ro.tr_display.liquidglass.support 2>/dev/null) gaussian=$(getprop ro.transsion_launcher_gaussian_blur_support 2>/dev/null) vconfig=$(grep gaussian_blur /tr_product/etc/vconfig/com.transsion.launcher3/build.prop 2>/dev/null | head -1) sf_disable=$(getprop persist.sys.sf.disable_blurs 2>/dev/null)"
   log_pfd "aod vconfig=$(cat /tr_product/etc/vconfig/com.transsion.aod/build.prop 2>/dev/null | tr '\n' ' ') extras videosr=$(getprop persist.tr_video.ai_super_resolution.support 2>/dev/null) cutepet=$(getprop ro.tr_cutepet.feature.support 2>/dev/null) outdoor=$(getprop ro.tr_outdoorboost.feature.support 2>/dev/null) gallerylive=$(getprop tr_gallery.live.support 2>/dev/null) airtransfer=$(getprop ro.tr_airtransfer.feature.support 2>/dev/null)"
 else
   log_pfd "apply_blur.sh missing"
