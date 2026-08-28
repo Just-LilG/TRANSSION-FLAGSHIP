@@ -5,6 +5,8 @@
   "rebootanim_file": "",
   "statusbar_style": "off",
   "statusbarcustom_file": "",
+  "emoji_font": true,
+  "emoji_file": "",
   "ai_master": true,
   "ai_subtitles": true,
   "ai_call_summary": true,

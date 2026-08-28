@@ -327,8 +327,8 @@ EOF
 print_modname() {
   ui_print " "
   ui_print "  ╔══════════════════════════════════════════╗"
-  ui_print "  ║    TRANSSION FLAGSHIP 16                 ║"
-    ui_print "  ║    XOS · HiOS · iTel OS 16  ·  V2.4      ║"
+  ui_print "  ║    ✨  TRANSSION FLAGSHIP 16             ║"
+  ui_print "  ║    XOS · HiOS · iTel OS 16  ·  V2.5      ║"
   ui_print "  ╚══════════════════════════════════════════╝"
   ui_print " "
 }
@@ -362,7 +362,7 @@ detect_os16() {
 
 check_module_conflicts() {
   local self_id="transsion-flagship-16"
-  local conflict_paths="system/media/audio/ui system/product/media/audio/ui system/product/media/audio/bootsound system/overlay/Icons_Signal_wifi system/product/overlay/Icons_Signal_wifi system/product/apm/config system/product/theme/charge system/product/theme/animations system/product/theme/sounds system/tr_product/etc/vconfig/magellan"
+  local conflict_paths="system/media/audio/ui system/product/media/audio/ui system/product/media/audio/bootsound system/overlay/Icons_Signal_wifi system/product/overlay/Icons_Signal_wifi system/product/apm/config system/product/theme/charge system/product/theme/animations system/product/theme/sounds system/tr_product/etc/vconfig/magellan system/fonts/NotoColorEmoji.ttf"
   local conflict_props="ro.surface_flinger.supports_background_blur ro.os.recent.blur ro.transsion_launcher_gaussian_blur_support tr_launcher.gaussianblur.support ro.tran.effectengine.dynamicblur.support ro.tr_display.liquidglass.support"
   local found=""
   local d m p k
@@ -434,17 +434,6 @@ on_install() {
     ui_ok "Transsion OS 16 detected"
   fi
 
-  {
-    echo "install_time_utc=$(date -u '+%Y-%m-%d %H:%M:%S' 2>/dev/null)"
-    echo "raw_ro.tran.os.type=$(getprop ro.tran.os.type 2>/dev/null)"
-    echo "raw_ro.transsion.os.version=$(getprop ro.transsion.os.version 2>/dev/null)"
-    echo "raw_ro.product.brand=$(getprop ro.product.brand 2>/dev/null)"
-    echo "raw_ro.build.description=$(getprop ro.build.description 2>/dev/null)"
-    echo "detected_OS_TYPE=$OS_TYPE"
-    echo "detected_OS_VER=$OS_VER"
-    echo "tr_product=$([ -d /tr_product ] && echo yes || echo no)"
-  } > "$MODPATH/install_diagnostic.txt"
-
   OLD=/data/adb/modules/transsion-flagship
   if [ -d "$OLD" ] && [ ! -f "$OLD/disable" ]; then
     touch "$OLD/disable"
@@ -462,7 +451,7 @@ on_install() {
   ui_div
   ui_step "Injecting files..."
   ui_div
-  # Do not re-unzip bootanim archives (OOM on KernelSU).
+  # Keep KernelSU-extracted bootanim zips — re-unzipping them OOMs the installer.
   have_zips=false
   if [ -f "$MODPATH/system/product/theme/animations/bootanim_hios16.zip" ] \
       && [ -f "$MODPATH/system/product/theme/animations/bootanim_default.zip" ]; then
@@ -470,7 +459,7 @@ on_install() {
   fi
   if [ "$KEEP_EXTRACT" = true ] || [ "$have_zips" = true ]; then
     ui_ok "Boot animation zips already extracted"
-    ui_info "Refreshing scripts and webroot"
+    ui_info "Refreshing scripts, webroot, and emoji font"
     unzip -o "$ZIPFILE" 'webroot/*' -d "$MODPATH" >&2
     unzip -o "$ZIPFILE" 'config.json' -d "$MODPATH" >&2
     unzip -o "$ZIPFILE" 'CHANGELOG.md' -d "$MODPATH" >&2
@@ -479,6 +468,8 @@ on_install() {
     unzip -oj "$ZIPFILE" 'common/apply_120hz.sh' -d "$MODPATH" >&2
     unzip -oj "$ZIPFILE" 'common/apply_sounds.sh' -d "$MODPATH" >&2
     unzip -oj "$ZIPFILE" 'common/apply_unlock.sh' -d "$MODPATH" >&2
+    unzip -oj "$ZIPFILE" 'common/apply_emoji.sh' -d "$MODPATH" >&2
+    unzip -o "$ZIPFILE" 'system/fonts/*' -d "$MODPATH" >&2
     unzip -o "$ZIPFILE" 'apm_120hz_bypass/*' -d "$MODPATH" >&2
     unzip -o "$ZIPFILE" 'magellan/*' -d "$MODPATH" >&2
     unzip -o "$ZIPFILE" 'system/product/apm/*' -d "$MODPATH" >&2
@@ -496,6 +487,7 @@ on_install() {
     unzip -oj "$ZIPFILE" 'common/apply_120hz.sh' -d "$MODPATH" >&2
     unzip -oj "$ZIPFILE" 'common/apply_sounds.sh' -d "$MODPATH" >&2
     unzip -oj "$ZIPFILE" 'common/apply_unlock.sh' -d "$MODPATH" >&2
+    unzip -oj "$ZIPFILE" 'common/apply_emoji.sh' -d "$MODPATH" >&2
     unzip -o "$ZIPFILE" 'apm_120hz_bypass/*' -d "$MODPATH" >&2
     unzip -o "$ZIPFILE" 'magellan/*' -d "$MODPATH" >&2
     unzip -o "$ZIPFILE" 'system/product/apm/*' -d "$MODPATH" >&2
@@ -522,6 +514,11 @@ on_install() {
     cp -a "$OLD16/system/product/media/audio/ui/"*_custom.* "$MODPATH/system/product/media/audio/ui/" 2>/dev/null
     ui_ok "Kept uploaded UI sounds"
   fi
+  if [ -f "$OLD16/system/fonts/NotoColorEmoji_custom.ttf" ]; then
+    mkdir -p "$MODPATH/system/fonts"
+    cp -a "$OLD16/system/fonts/NotoColorEmoji_custom.ttf" "$MODPATH/system/fonts/" 2>/dev/null
+    ui_ok "Kept uploaded emoji font"
+  fi
 
   # Drop bundled status-bar overlays; keep a custom upload.
   rm -rf "$MODPATH/system/overlay/Icons_Signal_wifi" \
@@ -544,13 +541,6 @@ on_install() {
         /mnt/vendor/mountify/product/overlay/SystemUISignalOverlay.apk.disabled
   ui_ok "Removed bundled status-bar overlay APKs"
 
-  # Strip leftover emoji font from older builds.
-  rm -rf "$MODPATH/system/fonts" \
-         /mnt/vendor/mountify/system/fonts/NotoColorEmoji.ttf \
-         /mnt/vendor/mountify/system/fonts/NotoColorEmoji_custom.ttf
-  rm -f "$MODPATH/apply_emoji.sh" "$MODPATH/emoji_custom.ttf"
-  ui_ok "Removed emoji font leftovers"
-
   CFG=/data/adb/modules/transsion-flagship-16/config.json
   if [ -f "$CFG" ]; then
     ui_ok "Existing Flagship 16 config preserved"
@@ -564,7 +554,7 @@ on_install() {
            -e '/"blur_os16_level"/d' \
            "$MODPATH/config.json"
   else
-    ui_ok "Default config: XOS boot + reboot, AI + gaming + anim/blur on, dynamic bar off, status bar stock"
+    ui_ok "Default config: XOS boot + reboot, AI + gaming + anim/blur on, emoji on, dynamic bar off, status bar stock"
   fi
   # One-time: V2.2 ships XOS as the default boot/reboot pack (was HiOS 16).
   if [ -f /data/adb/modules/transsion-flagship-16/.xos_boot_v22 ]; then
@@ -636,6 +626,7 @@ on_install() {
   ui_ok "Reboot animation"
   ui_ok "Status bar: upload your own overlay, or leave stock"
   ui_ok "Sounds"
+  ui_ok "Emoji font"
 }
 
 set_permissions() {
@@ -651,15 +642,19 @@ set_permissions() {
   fi
   touch "$MODPATH/skip_mount"
   set_perm_recursive "$MODPATH" 0 0 0755 0644
-  for sh in "$MODPATH/post-fs-data.sh" "$MODPATH/service.sh" "$MODPATH/uninstall.sh" "$MODPATH/apply_blur.sh" "$MODPATH/apply_120hz.sh" "$MODPATH/apply_sounds.sh" "$MODPATH/apply_unlock.sh"; do
+  for sh in "$MODPATH/post-fs-data.sh" "$MODPATH/service.sh" "$MODPATH/uninstall.sh" "$MODPATH/apply_blur.sh" "$MODPATH/apply_120hz.sh" "$MODPATH/apply_sounds.sh" "$MODPATH/apply_unlock.sh" "$MODPATH/apply_emoji.sh"; do
     [ -f "$sh" ] && set_perm "$sh" 0 0 0755
+  done
+  for f in "$MODPATH/system/fonts/NotoColorEmoji.ttf" "$MODPATH/system/fonts/NotoColorEmoji_custom.ttf"; do
+    [ -f "$f" ] && set_perm "$f" 0 0 0644
   done
   ui_print " "
   ui_div
-  ui_print "  ✨  FLAGSHIP 16  ·  V2.4"
+  ui_print "  ✨  FLAGSHIP 16  ·  V2.5"
   ui_info "OS     : $OS_TYPE $OS_VER"
-  ui_info "Feature: boot + reboot + overlay + AI + gaming + anim/blur + AOD + Dynamic bar + Force 120Hz + UI sounds"
+  ui_info "Feature: boot + reboot + overlay + AI + gaming + anim/blur + AOD + Dynamic bar + Force 120Hz + UI sounds + emoji"
   ui_div
+  ui_print "  📲  t.me/Just_LilGXX"
   ui_print "  Reboot, then open WebUI in Magisk/KSU."
   ui_print " "
 }

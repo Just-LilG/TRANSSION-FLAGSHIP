@@ -1,5 +1,10 @@
 # Transsion Flagship 16
 
+## v2.5
+- **KernelSU / Magisk in-app Update is back.** `module.prop` again includes `updateJson` (it was dropped after V1.80, which is why Manager never showed Update — even on an older zip). Flash V2.5 once; later builds appear as in-app updates.
+- **Installer cleaned up.** Removed the install diagnostic dump and the leftover “strip emoji” test path. Banner and `module.prop` match a stable release (`minMagisk=20400`, emoji in the description).
+- **Emoji font restored.** Packed `NotoColorEmoji.ttf`, Media-tab toggle + custom `.ttf` upload, bind on `/system/fonts` (does not touch `NotoColorEmojiFlags.ttf`). Off = stock ROM font. Apply + reboot.
+
 ## v2.4
 - **Blur off writes no blur props.** No stock restore, no SystemUI `platform_level=2`, no `device_config` shade flags. The module deletes Magisk’s blur keys (including global `platform_level`) and unbinds SystemUI / tr_product blur overlays so it is as if those props were never applied. Parallel still uses motion keys only (`ro.tr_perf.*`, launch/unlock/recent, async). Apply + reboot.
 

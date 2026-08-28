@@ -14,7 +14,7 @@ Optional: **Mountify** or similar if you use `/tr_product` overlays (not bundled
 
 ## Installation
 
-1. Download `TransFlagship16_V2.4.zip` from [Releases](https://github.com/Just-LilG/TRANSSION-FLAGSHIP/releases)
+1. Download `TransFlagship16_V2.5.zip` from [Releases](https://github.com/Just-LilG/TRANSSION-FLAGSHIP/releases)
 2. Flash in Magisk / KernelSU Manager
 3. Reboot
 4. Open the module **WebUI** → configure → **Apply & Save** → reboot when prompted
@@ -31,6 +31,7 @@ Optional: **Mountify** or similar if you use `/tr_product` overlays (not bundled
 | Always-on Display (AOD) | Working |
 | Super volume | Working |
 | Parallel animations + flagship blur (off leaves stock blur) | Working |
+| Custom emoji font (packed NotoColorEmoji + upload) | Working |
 | Social Turbo / Unlock extras / Outdoor boost / Air Transfer | Keys applied *(may already exist on stock)* |
 
 ## Known limitations
@@ -52,7 +53,7 @@ Features your phone already had from stock will not look “new” — keys are 
 
 - **Home** — device info, Support (Dump flags, conflict check, boot log)
 - **Features** — AI, gaming, social, blur, AOD, display, unlock extras, 120Hz
-- **Media** — boot and reboot animation
+- **Media** — boot and reboot animation, emoji font
 - **Sounds** — system sounds
 
 ## Troubleshooting

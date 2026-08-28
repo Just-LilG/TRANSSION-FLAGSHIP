@@ -1,6 +1,8 @@
 id=transsion-flagship-16
 name=Transsion Flagship 16
-version=V2.4
-versionCode=2400
+version=V2.5
+versionCode=2500
 author=Lil G
-description=Transsion Flagship 16 — OS 16 AI, gaming, AOD, blur, sounds, boot anim, unlock extras. XOS / HiOS / iTel.
+description=Transsion Flagship 16 — OS 16 AI, gaming, AOD, blur, sounds, boot anim, emoji font, unlock extras. XOS / HiOS / iTel.
+minMagisk=20400
+updateJson=https://raw.githubusercontent.com/Just-LilG/TRANSSION-FLAGSHIP/main/os16/update.json
