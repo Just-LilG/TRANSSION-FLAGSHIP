@@ -1331,7 +1331,13 @@ async function dumpAi(){
   lines.push('');
   lines.push('=== aod / dynamic bar ===');
   lines.push('aod_os16  '+String(cfg.aod_os16!==false));
-  lines.push('dynamicbar_os16  '+String(cfg.dynamicbar_os16===true)+' (off = stock Dynamic Bar untouched)');
+  lines.push('dynamicbar_os16  '+String(cfg.dynamicbar_os16===true)+' (off = stock Dynamic Bar restored from tr_product)');
+  const barLive=await g('getprop ro.tr_dynamicbar.support');
+  lines.push('ro.tr_dynamicbar.support  '+describeAiFlag(barLive));
+  const barStock=await g('grep -m1 ^ro.tr_dynamicbar.support= /tr_product/etc/build.prop 2>/dev/null');
+  lines.push('stock tr_product  '+(barStock||'EMPTY'));
+  const barMag=await g('grep ro.tr_dynamicbar.support "'+MOD+'/system.prop" 2>/dev/null');
+  lines.push('module system.prop  '+(barMag||'EMPTY — good when toggle off'));
   const plane=await g('getprop ro.os_dynamic_bar_resident_plane_support');
   lines.push('ro.os_dynamic_bar_resident_plane_support  '+describeAiFlag(plane));
   const hideLand=await g('getprop ro.os.tran_hide_status_bar_for_land_recent');

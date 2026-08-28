@@ -312,7 +312,7 @@ print_modname() {
   ui_print " "
   ui_print "  ╔══════════════════════════════════════════╗"
   ui_print "  ║    TRANSSION FLAGSHIP 16                 ║"
-    ui_print "  ║    XOS · HiOS · iTel OS 16  ·  V1.85     ║"
+    ui_print "  ║    XOS · HiOS · iTel OS 16  ·  V1.86     ║"
   ui_print "  ╚══════════════════════════════════════════╝"
   ui_print " "
 }
@@ -540,6 +540,21 @@ on_install() {
   write_os16_ai_prop "$MODPATH/config.json" "$MODPATH/system.prop"
   ui_ok "OS 16 keys written from config (reboot to apply)"
 
+  if [ ! -f "$MODPATH/.dynbar_fix_v186" ]; then
+    if ! grep -q '"dynamicbar_os16"[[:space:]]*:[[:space:]]*true' "$MODPATH/config.json" 2>/dev/null; then
+      if [ -f "$MODPATH/apply_blur.sh" ]; then
+        MODDIR="$MODPATH"
+        CFG="$MODPATH/config.json"
+        export MODDIR CFG
+        . "$MODPATH/apply_blur.sh"
+        os16_strip_dynamicbar_systemprop
+      fi
+      write_os16_ai_prop "$MODPATH/config.json" "$MODPATH/system.prop"
+      ui_info "Stripped dynamicbar=0 from system.prop (stock bar restored on reboot)"
+    fi
+    : > "$MODPATH/.dynbar_fix_v186"
+  fi
+
   ui_ok "Boot animation"
   ui_ok "Reboot animation"
   ui_ok "Status bar: upload your own overlay, or leave stock"
@@ -571,7 +586,7 @@ set_permissions() {
   done
   ui_print " "
   ui_div
-  ui_print "  ✨  FLAGSHIP 16  ·  V1.84"
+  ui_print "  ✨  FLAGSHIP 16  ·  V1.86"
   ui_info "OS     : $OS_TYPE $OS_VER"
   ui_info "Feature: boot + reboot + overlay + AI + gaming + anim/blur + AOD + Dynamic bar + Force 120Hz + UI sounds + emoji"
   ui_div

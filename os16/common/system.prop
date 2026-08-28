@@ -80,12 +80,7 @@ ro.tr_aod.always.show.feature.support=1
 ro.aod_alwaysshow_support=1
 ro.tran_aod_v3_support=1
 ro.tran_doze_brightness_support=1
-# Dynamic bar — off by default (empty pill leftover on this G99).
-ro.tr_dynamicbar.support=0
-ro.os_dynamicbar_ai_translation_support=0
-ro.os_dynamic_bar_resident_plane_support=0
-ro.os.tran_hide_status_bar_for_land_recent=0
-ro.tran_hios_dynamic_bar_support=0
+# Dynamic bar extras — not in this file when off. Toggle on in WebUI to append.
 # OS 16 extras — Magisk + resetprop for every Trans OS 16 device.
 persist.tr_video.ai_super_resolution.support=1
 ro.tr_video.ai_super_resolution.support=1

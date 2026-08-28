@@ -57,6 +57,34 @@ os16_rp_delete() {
   fi
 }
 
+os16_read_stock_prop() {
+  k="$1"
+  for f in /tr_product/etc/build.prop /tr_product/build.prop \
+      /system/tr_product/etc/build.prop /system/tr_product/build.prop; do
+    [ -f "$f" ] || continue
+    line=$(grep -m1 "^${k}=" "$f" 2>/dev/null)
+    if [ -n "$line" ]; then
+      echo "${line#*=}"
+      return 0
+    fi
+  done
+  return 1
+}
+
+os16_strip_dynamicbar_systemprop() {
+  sp="$MODDIR/system.prop"
+  [ -f "$sp" ] || return 0
+  for k in \
+    ro.tr_dynamicbar.support \
+    ro.os_dynamicbar_ai_translation_support \
+    ro.os_dynamic_bar_resident_plane_support \
+    ro.os.tran_hide_status_bar_for_land_recent \
+    ro.tran_hios_dynamic_bar_support
+  do
+    sed -i "/^${k}=/d" "$sp" 2>/dev/null
+  done
+}
+
 os16_rp_overwrite() {
   k="$1"; v="$2"
   if [ -x /data/adb/magisk/resetprop ]; then
@@ -332,6 +360,7 @@ os16_apply_launcher_blur_vconfig() {
 }
 
 os16_clear_dynamicbar_props() {
+  os16_strip_dynamicbar_systemprop
   for k in \
     ro.tr_dynamicbar.support \
     ro.os_dynamicbar_ai_translation_support \
@@ -339,7 +368,12 @@ os16_clear_dynamicbar_props() {
     ro.os.tran_hide_status_bar_for_land_recent \
     ro.tran_hios_dynamic_bar_support
   do
-    os16_rp_delete "$k"
+    stock=$(os16_read_stock_prop "$k")
+    if [ -n "$stock" ]; then
+      os16_rp "$k" "$stock"
+    else
+      os16_rp_delete "$k"
+    fi
   done
   os16_unbind_vconfig_pkg com.transsion.launcher3
 }
