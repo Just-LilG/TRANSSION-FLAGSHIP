@@ -478,7 +478,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
         <div class="page-header">
           <div class="eyebrow">Customise</div>
           <h1>Sounds</h1>
-          <div class="sub">Upload replaces GT UI files under /tr_product/media/audio/ui. Stock leaves the ROM file. Apply + reboot. Boot sound is not in this build.</div>
+          <div class="sub">Upload .ogg (best). V1.76 wiped uploads on reboot — re-upload after this build. Apply + reboot. Boot sound is not in this build.</div>
         </div>
         <div id="sounds-root"></div>
         <div class="h8"></div>
@@ -1166,8 +1166,10 @@ async function dumpAi(){
   SOUND_SLOTS.forEach(s=>{
     lines.push(s.id+'  style='+soundStyleOf(s.id)+'  file='+(soundFileOf(s.id)||'EMPTY'));
   });
-  const uilive=await g('ls -l /tr_product/media/audio/ui/ChargingStarted.ogg /tr_product/media/audio/ui/Unlock.ogg /tr_product/media/audio/ui/Lock.ogg /tr_product/media/audio/ui/Screenshots.ogg 2>/dev/null');
+  const uilive=await g('ls -l /tr_product/media/audio/ui/ChargingStarted.ogg /tr_product/media/audio/ui/Unlock.ogg /tr_product/media/audio/ui/Lock.ogg /tr_product/media/audio/ui/Screenshots.ogg /product/media/audio/ui/ChargingStarted.ogg /system/product/media/audio/ui/ChargingStarted.ogg 2>/dev/null');
   lines.push(uilive||'no live ui oggs');
+  const uimod=await g('ls -l "'+MOD+'/system/product/media/audio/ui" 2>/dev/null');
+  lines.push('module ui dir: '+(uimod||'EMPTY — uploads missing'));
   const uimount=await g('mount 2>/dev/null | grep "audio/ui" | head -20');
   lines.push(uimount||'(no audio/ui binds)');
   lines.push('');

@@ -1,7 +1,8 @@
 #!/system/bin/sh
 # Custom UI sounds. GT dump lives at /tr_product/media/audio/ui/*.ogg
 # Mountify does not overlay tr_product — per-file bind like bootanim.
-# Stock style = do not bind (leave ROM file). Custom = bind uploaded file.
+# Also stage dest-named .ogg under module system/product so Mountify can
+# overlay /product (Flagship 15 path). Stock = no bind, remove staged dest.
 # Do not bind-dir /tr_product. Do not pack Waltz / bootsound / theme/charge.
 
 if [ -z "$MODDIR" ]; then
@@ -12,6 +13,8 @@ fi
 os16_snd_log() {
   if [ -n "$PFD_LOG" ]; then
     echo "[$(date '+%H:%M:%S')] sounds: $1" >> "$PFD_LOG"
+  elif [ -n "$LOG" ]; then
+    echo "[$(date '+%H:%M:%S')] sounds: $1" >> "$LOG"
   fi
 }
 
@@ -49,7 +52,7 @@ os16_snd_bind() {
       [ -n "$ns" ] && $ns touch "$dest" 2>/dev/null
     fi
   fi
-  [ -e "$dest" ] || return 1
+  [ -e "$dest" ] || { os16_snd_log "bind skip (no dest) $dest"; return 1; }
   chcon --reference="$dest" "$src" 2>/dev/null
   chmod 644 "$src" 2>/dev/null
   os16_snd_umount "$dest"
@@ -70,6 +73,7 @@ os16_snd_custom_src() {
   for dir in \
       "$MODDIR/system/product/media/audio/ui" \
       "$MODDIR/system/media/audio/ui" \
+      "$MODDIR/product/media/audio/ui" \
       "$MODDIR/tr_product/media/audio/ui"; do
     for f in "$dir/${destbase}_custom".*; do
       [ -f "$f" ] && { echo "$f"; return 0; }
@@ -78,11 +82,102 @@ os16_snd_custom_src() {
   return 1
 }
 
+os16_snd_stage_dirs() {
+  echo "$MODDIR/system/product/media/audio/ui"
+  echo "$MODDIR/system/media/audio/ui"
+  echo "$MODDIR/product/media/audio/ui"
+}
+
+os16_snd_mountify_dirs() {
+  echo "/mnt/vendor/mountify/product/media/audio/ui"
+  echo "/mnt/vendor/mountify/system/product/media/audio/ui"
+  echo "/mnt/vendor/mountify/tr_product/media/audio/ui"
+}
+
 os16_snd_live_dirs() {
   echo "/tr_product/media/audio/ui"
   echo "/product/media/audio/ui"
   echo "/system/product/media/audio/ui"
   echo "/system/media/audio/ui"
+}
+
+os16_snd_alias_names() {
+  destbase="$1"
+  echo "${destbase}.ogg"
+  if [ "$destbase" = "ChargingStarted" ]; then
+    echo "charging_sound.ogg"
+    echo "ChargingStarted.mp3"
+  fi
+  if [ "$destbase" = "WirelessChargingStarted" ]; then
+    echo "WirelessChargingStarted.mp3"
+  fi
+  if [ "$destbase" = "Unlock" ]; then
+    echo "Unlock.mp3"
+  fi
+}
+
+os16_snd_stage() {
+  src="$1"
+  destbase="$2"
+  [ -f "$src" ] || return 1
+  os16_snd_stage_dirs | while read -r dir; do
+    [ -n "$dir" ] || continue
+    mkdir -p "$dir"
+    os16_snd_alias_names "$destbase" | while read -r name; do
+      [ -n "$name" ] || continue
+      cp -f "$src" "$dir/$name"
+      chmod 644 "$dir/$name" 2>/dev/null
+    done
+  done
+  os16_snd_mountify_dirs | while read -r dir; do
+    [ -d /mnt/vendor/mountify ] || continue
+    mkdir -p "$dir" 2>/dev/null
+    [ -d "$dir" ] || continue
+    os16_snd_alias_names "$destbase" | while read -r name; do
+      [ -n "$name" ] || continue
+      cp -f "$src" "$dir/$name" 2>/dev/null
+      chmod 644 "$dir/$name" 2>/dev/null
+    done
+  done
+}
+
+os16_snd_unstage() {
+  destbase="$1"
+  os16_snd_stage_dirs | while read -r dir; do
+    os16_snd_alias_names "$destbase" | while read -r name; do
+      [ -n "$name" ] || continue
+      rm -f "$dir/$name"
+    done
+  done
+  os16_snd_mountify_dirs | while read -r dir; do
+    os16_snd_alias_names "$destbase" | while read -r name; do
+      [ -n "$name" ] || continue
+      rm -f "$dir/$name"
+    done
+  done
+}
+
+os16_snd_bind_names() {
+  src="$1"
+  destbase="$2"
+  os16_snd_alias_names "$destbase" | while read -r name; do
+    [ -n "$name" ] || continue
+    os16_snd_live_dirs | while read -r dir; do
+      [ -d "$dir" ] || continue
+      os16_snd_bind "$src" "$dir/$name"
+    done
+  done
+}
+
+os16_snd_umount_names() {
+  destbase="$1"
+  os16_snd_alias_names "$destbase" | while read -r name; do
+    [ -n "$name" ] || continue
+    os16_snd_live_dirs | while read -r dir; do
+      [ -n "$dir" ] || continue
+      os16_snd_umount "$dir/$name"
+    done
+  done
 }
 
 # id destbase  (dest file is destbase.ogg on device)
@@ -122,10 +217,8 @@ EOF
 os16_umount_sounds() {
   os16_snd_slots | while read -r id destbase; do
     [ -n "$id" ] || continue
-    os16_snd_live_dirs | while read -r dir; do
-      [ -n "$dir" ] || continue
-      os16_snd_umount "$dir/${destbase}.ogg"
-    done
+    os16_snd_umount_names "$destbase"
+    os16_snd_unstage "$destbase"
   done
 }
 
@@ -133,12 +226,9 @@ os16_apply_sounds() {
   os16_snd_slots | while read -r id destbase; do
     [ -n "$id" ] || continue
     style=$(os16_snd_cfg "${id}_style" stock)
-    live_ogg="${destbase}.ogg"
     if [ "$style" != "custom" ]; then
-      os16_snd_live_dirs | while read -r dir; do
-        [ -n "$dir" ] || continue
-        os16_snd_umount "$dir/$live_ogg"
-      done
+      os16_snd_umount_names "$destbase"
+      os16_snd_unstage "$destbase"
       os16_snd_log "$id stock (no bind)"
       continue
     fi
@@ -147,10 +237,9 @@ os16_apply_sounds() {
       os16_snd_log "$id custom but no ${destbase}_custom.* uploaded"
       continue
     fi
-    os16_snd_live_dirs | while read -r dir; do
-      [ -d "$dir" ] || continue
-      os16_snd_bind "$src" "$dir/$live_ogg"
-    done
+    os16_snd_stage "$src" "$destbase"
+    os16_snd_bind_names "$src" "$destbase"
+    os16_snd_log "$id custom src=$src size=$(wc -c < "$src" 2>/dev/null)"
   done
 }
 
