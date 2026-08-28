@@ -1,7 +1,8 @@
 #!/system/bin/sh
 # Parallel motion = platform_level 3 whenever Parallel is on.
-# Blur tiers follow Disable-blur-XOS16 (SenzaProject) at level 1: platform 2 +
-# tr_launcher.gaussianblur=2 / blurrecent=1 — not gaussian 0. Levels 2/3 use platform 3 glass.
+# Level 1 / blur off: solid shade without glass — unionrender 0, compositor off,
+# Disable-blur-XOS16 launcher vconfig (gaussian 2 / blurrecent 1). Do NOT drop
+# platform to 2 or Parallel animations die. Levels 2/3 add glass back.
 
 if [ -z "$MODDIR" ]; then
   MODDIR=${0%/*}
@@ -143,8 +144,8 @@ os16_blur_vals() {
     case "$lvl" in
       1)
         SOLID=1
-        # Disable-blur-XOS16.zip: platform 2 + launcher vconfig gaussian 2 / blurrecent 1.
-        [ "$anim" = "true" ] || [ "$anim" = "1" ] && ALVL=2
+        # Solid shade: compositor + unionrender off; launcher vconfig from Disable-blur-XOS16.
+        # Keep ALVL=3 when Parallel is on — platform 2 kills Parallel motion.
         BLVL=2
         BLUR_RECENT=1
         ;;
@@ -177,9 +178,8 @@ os16_blur_vals() {
         ;;
     esac
   else
-    # Blur off — same solid profile as level 1 (Disable-blur-XOS16).
+    # Blur off — same solid profile as level 1.
     SOLID=1
-    [ "$anim" = "true" ] || [ "$anim" = "1" ] && ALVL=2
     BLVL=2
     BLUR_RECENT=1
   fi

@@ -1,5 +1,8 @@
 # Transsion Flagship 16
 
+## v1.92
+- **Level 1 keeps Parallel animations.** V1.90 matched Disable-blur-XOS16 by dropping `platform_level` to **2** at level 1 — that removed blur but killed Parallel motion. Level 1 / blur off now stay at **platform 3** when Parallel is on, and turn glass off via unionrender **0**, compositor blur off, and the Disable-blur launcher vconfig (`gaussianblur=2`, `blurrecent=1`). Apply + reboot, then check app open/close at blur 1 — Parallel should stay, shade should stay solid.
+
 ## v1.91
 - **Emoji font removed for testing.** The bundled `NotoColorEmoji.ttf` was ~34MB — module zip drops from ~55MB to ~21MB for faster downloads while we finish testing other features. WebUI toggle, upload, binds, and `apply_emoji.sh` are gone. Your ROM emoji font stays. Re-flash or update to strip any leftover font files from an older install.
 
