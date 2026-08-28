@@ -5,7 +5,7 @@ LOG="$MODDIR/transflagship16_service.log"
 rm -f "$LOG"
 log_p() { echo "[$(date '+%H:%M:%S')] $1" >> "$LOG"; }
 
-log_p "=== TransFlagship 16 V1.82 ==="
+log_p "=== TransFlagship 16 V1.83 ==="
 log_p "Device : $(getprop ro.product.model 2>/dev/null)"
 log_p "Brand  : $(getprop ro.product.brand 2>/dev/null)"
 log_p "Android: $(getprop ro.build.version.release 2>/dev/null)"
@@ -28,6 +28,10 @@ if [ -f "$MODDIR/apply_blur.sh" ]; then
   os16_clear_failed_feature_leftovers
   os16_apply_aod_settings
   os16_apply_dynamicbar_runtime
+  if [ -f "$MODDIR/apply_unlock.sh" ]; then
+    . "$MODDIR/apply_unlock.sh"
+    os16_apply_unlock
+  fi
   os16_apply_blur_runtime
   # Do not restart SurfaceFlinger or force-stop home/AOD here. That is the
   # post-boot soft reboot.
@@ -114,6 +118,10 @@ log_p "  home=$(cmd package resolve-activity --brief -a android.intent.action.MA
   os16_apply_dynamicbar_props
   os16_apply_aod_settings
   os16_apply_dynamicbar_runtime
+  if [ -f "$MODDIR/apply_unlock.sh" ]; then
+    . "$MODDIR/apply_unlock.sh"
+    os16_apply_unlock
+  fi
     echo "[$(date '+%H:%M:%S')] blur props after settle liquidglass=$(getprop ro.tr_display.liquidglass.support 2>/dev/null) aod_always=$(getprop ro.aod_alwaysshow_support 2>/dev/null) bar=$(getprop ro.tr_dynamicbar.support 2>/dev/null) plane=$(getprop ro.os_dynamic_bar_resident_plane_support 2>/dev/null)" >> "$LOG"
   if [ -f "$MODDIR/apply_120hz.sh" ]; then
     . "$MODDIR/apply_120hz.sh"
