@@ -1,8 +1,8 @@
 #!/system/bin/sh
-# Parallel motion = platform_level 3 whenever Parallel is on.
-# Level 1 / blur off: solid shade — platform 3 + gaussian 0 + unionrender 0 +
-# compositor off. Disable-blur gaussian 2 only works with platform 2 (kills Parallel).
-# Levels 2/3 add glass back (unionrender 1, gaussian 2/3).
+# Blur tiers (X6886 / Trans OS 16):
+#   1 = Smart-series — no glass anywhere (solid lock clock + shade), Parallel platform 3
+#   2 = device default — dock/recents blur only, shade solid (Disable-blur partial)
+#   3 = flagship — glass everywhere (unionrender + compositor on)
 
 if [ -z "$MODDIR" ]; then
   MODDIR=${0%/*}
@@ -116,8 +116,9 @@ os16_blur_vals() {
   [ "$lvl" -ge 1 ] 2>/dev/null || lvl=2
   [ "$lvl" -le 3 ] 2>/dev/null || lvl=2
 
-  # Default tier = level 1 solid (TranOS Anim Only lv3 reference).
-  SOLID=1
+  # Safe defaults = level 1 Smart solid.
+  SOLID_SHADE=1
+  DOCK_BLUR=0
   GLASS=0
   BLVL=0
   EN=0
@@ -143,42 +144,48 @@ os16_blur_vals() {
   if [ "$on" = "true" ] || [ "$on" = "1" ]; then
     case "$lvl" in
       1)
-        SOLID=1
-        # Platform 3 keeps Parallel; gaussian 0 + unionrender 0 removes glass.
+        # Smart 20 style — solid everywhere, no dock blur, Parallel stays.
+        SOLID_SHADE=1
+        DOCK_BLUR=0
+        GLASS=0
         BLVL=0
         BLUR_RECENT=0
         ;;
       2)
-        SOLID=0
-        GLASS=1
+        # G99 stock partial — gaussian 2 on dock/recents, shade stays solid.
+        SOLID_SHADE=1
+        DOCK_BLUR=1
+        GLASS=0
         BLVL=2
+        BLUR_RECENT=1
         EN=1
         RAD=25
-        B01=1
-        SFDIS=0
-        DIS=0
         LAUNCHER_ASYNC=1
-        [ "$anim" = "true" ] || [ "$anim" = "1" ] && UNION=1
         ;;
       3)
-        SOLID=0
+        # Full flagship glass — shade + dock + unionrender.
+        SOLID_SHADE=0
+        DOCK_BLUR=1
         GLASS=1
         BLVL=3
+        BLUR_RECENT=1
         EN=1
         RAD=80
         B01=1
-        DYNBLUR=1
-        BLURV2=1
         SFDIS=0
         DIS=0
+        DYNBLUR=1
+        BLURV2=1
         EXP=1
         LAUNCHER_ASYNC=1
         [ "$anim" = "true" ] || [ "$anim" = "1" ] && UNION=1
         ;;
     esac
   else
-    # Blur off — same solid profile as level 1.
-    SOLID=1
+    # Blur off — same as level 1 Smart solid.
+    SOLID_SHADE=1
+    DOCK_BLUR=0
+    GLASS=0
     BLVL=0
     BLUR_RECENT=0
   fi
@@ -433,7 +440,7 @@ os16_apply_launcher_vconfig_all() {
     os16_vconfig_upsert "$staged" "ro.transsion_async_animation_support" "$LAUNCHER_ASYNC"
     os16_vconfig_upsert "$staged" "ro.tran_display_unionrender.support" "$UNION"
   else
-    # Solid tier: gaussian 0, compositor off, unionrender 0. Keep spring keys only.
+    # Level 2 partial = dock blur only; shade solid (Disable-blur vconfig path).
     os16_vconfig_upsert "$staged" "tr_launcher.gaussianblur.support" "$BLVL"
     os16_vconfig_upsert "$staged" "tr_launcher.blurrecent.support" "$BLUR_RECENT"
     os16_vconfig_upsert "$staged" "ro.os.tran_recent_dismiss_single_task_spring_support" "1"
@@ -626,12 +633,8 @@ os16_apply_blur_runtime() {
   os16_blur_vals
   os16_settings_put global disable_window_blurs "$DIS"
   os16_settings_put system disable_window_blurs "$DIS"
-  if [ "$SOLID" = "1" ]; then
+  if [ "$SOLID_SHADE" = "1" ]; then
     os16_settings_put secure accessibility_reduce_transparency 1
-    os16_settings_put global transsion_launcher_gaussian_blur_enable 0
-    os16_settings_put system transsion_launcher_gaussian_blur_enable 0
-    settings delete system transsion_launcher_blur_radius >/dev/null 2>&1
-    settings delete global transsion_launcher_blur_radius >/dev/null 2>&1
   else
     settings delete secure accessibility_reduce_transparency >/dev/null 2>&1
   fi
@@ -639,7 +642,7 @@ os16_apply_blur_runtime() {
   os16_settings_put system transsion_launcher_gaussian_blur_support "$BLVL"
   os16_settings_put global transsion_launcher_gaussian_support "$BLVL"
   os16_settings_put system transsion_launcher_gaussian_support "$BLVL"
-  if [ "$GLASS" = "1" ]; then
+  if [ "$DOCK_BLUR" = "1" ]; then
     os16_settings_put global transsion_launcher_gaussian_blur_enable "$EN"
     os16_settings_put system transsion_launcher_gaussian_blur_enable "$EN"
     os16_settings_put global transsion_launcher_blur_radius "$RAD"
@@ -653,9 +656,7 @@ os16_apply_blur_runtime() {
   wm disable-blur "$DIS" >/dev/null 2>&1
   cmd window disable-blur "$DIS" >/dev/null 2>&1
   device_config put systemui notification_shade_blur "$([ "$GLASS" = "1" ] && echo true || echo false)" >/dev/null 2>&1
-  if [ "$GLASS" = "1" ] && [ "$BLVL" = "2" ]; then
-    device_config put systemui shade_blur_radius 25 >/dev/null 2>&1
-  elif [ "$GLASS" = "1" ] && [ "$BLVL" = "3" ]; then
+  if [ "$GLASS" = "1" ] && [ "$BLVL" = "3" ]; then
     device_config put systemui shade_blur_radius 80 >/dev/null 2>&1
   else
     device_config delete systemui shade_blur_radius >/dev/null 2>&1

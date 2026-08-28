@@ -1,5 +1,12 @@
 # Transsion Flagship 16
 
+## v1.94
+- **Blur tiers remapped — level 2 is your G99 default, not level 1.** We had level 2 wired like full glass (unionrender 1, compositor on), and kept shuffling Disable-blur props onto level 1. Correct mapping now:
+  - **Level 1** = Smart-series solid — no glass anywhere (solid lock clock + shade), gaussian 0, compositor off, Parallel platform 3.
+  - **Level 2** = device default partial — dock/recents gaussian 2, shade stays solid (Disable-blur path: unionrender 0, compositor off, blurrecent 1). This is the default picker value.
+  - **Level 3** = full flagship glass everywhere (unionrender + compositor + gaussian 3).
+  Apply + reboot, then compare 1 vs **2** vs 3. Dump shows `solid_shade` and `dock_blur` lines.
+
 ## v1.93
 - **Level 1: Parallel + solid shade together.** V1.92 kept platform 3 (Parallel back) but still wrote gaussian **2** from the Disable-blur reference — that combo only works with platform 2, so blur came back. Level 1 / blur off now use platform **3** + gaussian **0** + unionrender **0** + compositor off. Spring recents keys stay; glass is levels 2/3 only. Apply + reboot, then check Parallel at blur 1 and pull the shade — should be solid, not glassy.
 
