@@ -143,10 +143,13 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
         </div>
         <div class="hero-card">
           <div class="hero-title">Transsion Flagship 16</div>
-          <div class="hero-sub" id="module-version-sub">V1.42 · OS 16</div>
+          <div class="hero-sub" id="module-version-sub">V2.0 · OS 16</div>
         </div>
         <div class="h8"></div>
         <div class="warn-card" id="old-mod-warn">Flagship 15 is still installed. This installer disables it. Remove it from Magisk/KSU so the two modules do not fight.</div>
+        <div class="warn-card" id="release-limits" style="display:block;margin-bottom:12px;padding:12px 14px;border-radius:14px;background:rgba(167,139,250,0.08);border:1px solid rgba(167,139,250,0.22);font-size:12.5px;color:var(--text2);line-height:1.45;">
+          <strong style="color:var(--accent);">V2.0 official</strong> — Some features depend on your device. HDR Settings row, Cute Pet, and AI Gallery Art/Studio may not appear on G99. Blur level <strong>2</strong> is recommended (level 1 can affect Parallel on some phones). See repo <code style="font-size:11px;">os16/README.md</code>.
+        </div>
         <div class="section-label">Device</div>
         <div class="info-grid">
           <div class="info-cell"><div class="lbl">OS</div><div class="val acc" id="info-os">—</div></div>
@@ -162,21 +165,22 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
             <li>Status bar overlay — upload your own APK</li>
             <li class="on">AI Suite — Features tab; verified OS 16 keys</li>
             <li class="on">AI Call Summary — Ella briefing</li>
-            <li class="next">AI Gallery — menus on; Art/Studio need a GT editor this phone does not have</li>
+            <li class="next">AI Gallery — menus show; Art/Studio not working (no GT editor on G99)</li>
             <li class="on">AI Video Enhancement — VEE flag on</li>
             <li class="on">Gaming — OS 16 GT triggers in XArena</li>
             <li class="on">Force 120Hz — 144 picker verified</li>
-            <li class="next">AOD — second try still hid Lock screen AOD</li>
+            <li class="on">AOD — verified working</li>
             <li>Dynamic bar extras — off = stock bar untouched</li>
-            <li class="next">Cute Pet — Magisk keys stay; this G99 did not unhide</li>
-            <li class="next">Outdoor boost — Magisk keys stay (GT dump 1 = on)</li>
+            <li class="next">Cute Pet — keys on; did not unhide on G99</li>
+            <li class="on">Outdoor boost — stock already had it; keys kept</li>
             <li>Gallery Live — GT dump 0 = off; Magisk keys stay</li>
-            <li class="next">Air Transfer — Magisk keys stay (GT dump 1)</li>
+            <li class="on">Air Transfer — stock already had it; keys kept</li>
             <li class="on">Sounds — Pixel default (not keypress); charging Huawei / iOS / S25</li>
-            <li class="next">Social Turbo — restored for retest (clean reinstall fixed Super volume)</li>
-            <li class="next">Display extras — restored (DC / color / HDR / reading)</li>
-            <li class="next">Unlock extras — scale-up, GT apps, Circle to Search restored</li>
+            <li class="on">Social Turbo — stock already had it; module keys kept</li>
+            <li class="next">Display extras — HDR Settings row not showing on G99 (flags may stick)</li>
+            <li class="on">Unlock extras — stock already had scale/GT/circle; keys kept</li>
             <li class="on">Super volume — working after clean reinstall</li>
+            <li class="next">Animations &amp; blur — shade/Parallel tradeoff on X6886; levels 2/3 OK</li>
           </ul>
         </div>
         <div class="h8"></div>
@@ -242,7 +246,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
           <div class="setting-row">
             <div class="row-text">
               <div class="row-title">AI Gallery</div>
-              <div class="row-sub">Art, Studio, Eraser, Expand, HD, and the rest. For show.</div>
+              <div class="row-sub">Eraser, Expand, HD, and related OS 16 gallery keys. Art/Studio need GT editor on some devices.</div>
             </div>
             <label class="toggle"><input type="checkbox" id="feat-ai-gallery" checked onchange="setAi('ai_gallery',this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
           </div>
@@ -329,7 +333,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
           <div class="setting-row">
             <div class="row-text">
               <div class="row-title">Social Turbo</div>
-              <div class="row-sub">OS 16 ro.tr_social.* from GT dump. Restored for retest after clean reinstall. Apply + reboot.</div>
+              <div class="row-sub">OS 16 ro.tr_social.* keys. Apply + reboot.</div>
             </div>
             <label class="toggle"><input type="checkbox" id="feat-social" checked onchange="setSocial('social_master',this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
           </div>
@@ -351,14 +355,14 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
           <div class="setting-row">
             <div class="row-text">
               <div class="row-title">Parallel animations</div>
-              <div class="row-sub">Parallel platform 3 on all levels. Glass is controlled by the blur level below.</div>
+              <div class="row-sub">Platform 3 app open/close. Blur level controls glass separately. Level 2 recommended.</div>
             </div>
             <label class="toggle"><input type="checkbox" id="feat-anim" checked onchange="setAnimBlur('anim_os16',this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
           </div>
           <div class="setting-row">
             <div class="row-text">
               <div class="row-title">Dynamic blur</div>
-              <div class="row-sub">1 = Smart solid (no glass). 2 = your device default (dock blur, solid shade). 3 = glass everywhere.</div>
+              <div class="row-sub">1 = Smart solid. 2 = dock blur (default). 3 = full glass. Level 1 may affect Parallel on some devices.</div>
             </div>
             <label class="toggle"><input type="checkbox" id="feat-blur" checked onchange="setAnimBlur('blur_os16',this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
           </div>
@@ -374,7 +378,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
             <div class="segmented-opt" data-val="3" onclick="setBlurLevel(3)">3</div>
           </div>
         </div>
-        <div class="section-label">Unlock extras (retest)</div>
+        <div class="section-label">Unlock extras</div>
         <div class="glass-card">
           <div class="setting-row">
             <div class="row-text">
@@ -410,7 +414,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
           <div class="setting-row">
             <div class="row-text">
               <div class="row-title">DC Dimming</div>
-              <div class="row-sub">Flicker-free low brightness. Restored for retest.</div>
+              <div class="row-sub">Flicker-free low brightness. May not show in Settings on all OS 16 builds.</div>
             </div>
             <label class="toggle"><input type="checkbox" id="feat-dc" checked onchange="setDisplay('display_dc',this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
           </div>
@@ -424,7 +428,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
           <div class="setting-row">
             <div class="row-text">
               <div class="row-title">HDR Display</div>
-              <div class="row-sub">Also sets has_HDR_display. Restored for retest.</div>
+              <div class="row-sub">SDR2HDR / XDR keys + has_HDR_display. Settings row may not appear on G99.</div>
             </div>
             <label class="toggle"><input type="checkbox" id="feat-hdr" checked onchange="setDisplay('display_hdr',this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
           </div>
@@ -813,24 +817,47 @@ function gaussianLvl(){
 }
 function animLvl(){
   if(cfg.anim_os16===false) return '0';
+  if(glassOn()) return '3';
+  return '2';
+}
+function perfLvl(){
+  if(cfg.anim_os16===false) return '0';
   return '3';
 }
+function motionPlatform(){
+  if(cfg.anim_os16===false) return '0';
+  if(glassOn()) return '3';
+  if(solidShade()) return '3';
+  return '0';
+}
+function sysuiPlatform(){
+  return animLvl();
+}
+function vcfgGaussian(){
+  return gaussianLvl();
+}
 function unionOn(){
-  if(blurLevel()!==3 || cfg.anim_os16===false) return '0';
-  return '1';
+  if(cfg.anim_os16===false) return '0';
+  if(glassOn()) return '1';
+  return '0';
 }
 function solidShade(){ return !blurOn() || blurLevel()<=2; }
 function dockBlurOn(){ return blurOn() && blurLevel()>=2; }
 function anim01(){ return cfg.anim_os16!==false?'1':'0'; }
 function launcherAsync(){
-  if(!dockBlurOn()) return '0';
-  return anim01();
+  if(cfg.anim_os16===false) return '0';
+  return '1';
 }
 function blurDisable(){ return solidShade()?'1':'0'; }
 function blur01(){ return glassOn()?'1':'0'; }
 function blurDyn(){ return (blurOn() && blurLevel()===3)?'1':'0'; }
 function blurV2(){ return (blurOn() && blurLevel()===3)?'1':'0'; }
 function blurExpensive(){ return (blurOn() && blurLevel()===3)?'1':'0'; }
+function lightingCc(){ return glassOn()?'1':'0'; }
+function lightingFeat(){
+  if(!blurOn() || blurLevel()===1) return '0';
+  return '1';
+}
 function blurRadius(){
   if(!dockBlurOn()) return 0;
   if(blurLevel()===3) return 80;
@@ -941,7 +968,11 @@ const BLUR_KEYS=[
   'persist.sys.disable_blur',
   'persist.sysui.disableBlur',
   'persist.sysui.disable_blur',
-  'ro.sf.blurs_are_expensive'
+  'ro.sf.blurs_are_expensive',
+  'persist.tr_lighting.controlcenter.feature.support',
+  'persist.tr_lighting.feature.support',
+  'ro.tr_lighting.controlcenter.feature.support',
+  'ro.tr_lighting.feature.support'
 ];
 const SOCIAL_KEYS=[
   'ro.tr_social.turbo_mode.support',
@@ -1075,22 +1106,23 @@ async function writeAiSystemProp(){
   lines.push('ro.tr_display.color.temperature.feature.support='+dcol);
   lines.push('persist.tr_display.color.temperature.aosp.support='+dcol);
   const alvl=animLvl();
+  const perf=perfLvl();
   const a01=anim01();
   const blvl=gaussianLvl();
   const b01=blur01();
   const union=unionOn();
   lines.push('ro.tr_animation.platform_level='+alvl);
-  lines.push('ro.tr_perf.launch_start_exit.model='+alvl);
-  lines.push('ro.tr_perf.power_keyguard_animation.model='+alvl);
-  lines.push('ro.tr_perf.recent_animation.model='+alvl);
-  lines.push('ro.tr_perf.unlock_mode.model='+alvl);
+  lines.push('ro.tr_perf.launch_start_exit.model='+perf);
+  lines.push('ro.tr_perf.power_keyguard_animation.model='+perf);
+  lines.push('ro.tr_perf.recent_animation.model='+perf);
+  lines.push('ro.tr_perf.unlock_mode.model='+perf);
   lines.push('ro.tr_livewallpaper.dreamanimation.support='+a01);
   lines.push('ro.tr_multiwindow.anim_arc.support='+a01);
   lines.push('ro.transsion_async_animation_support='+launcherAsync());
-  lines.push('ro.transsion_unlock_mode_support='+alvl);
-  lines.push('ro.transsion_launch_start_exit_support='+alvl);
-  lines.push('ro.transsion_power_keyguard_animation_support='+alvl);
-  lines.push('ro.transsion.recent_animation.model='+alvl);
+  lines.push('ro.transsion_unlock_mode_support='+perf);
+  lines.push('ro.transsion_launch_start_exit_support='+perf);
+  lines.push('ro.transsion_power_keyguard_animation_support='+perf);
+  lines.push('ro.transsion.recent_animation.model='+perf);
   lines.push('ro.tran_display_unionrender.support='+union);
   lines.push('ro.tr_display.liquidglass.support='+b01);
   lines.push('ro.surface_flinger.supports_background_blur='+b01);
@@ -1104,6 +1136,10 @@ async function writeAiSystemProp(){
   lines.push('persist.sysui.disableBlur='+blurDisable());
   lines.push('persist.sysui.disable_blur='+blurDisable());
   lines.push('ro.sf.blurs_are_expensive='+blurExpensive());
+  lines.push('persist.tr_lighting.controlcenter.feature.support='+lightingCc());
+  lines.push('persist.tr_lighting.feature.support='+lightingFeat());
+  lines.push('ro.tr_lighting.controlcenter.feature.support='+lightingCc());
+  lines.push('ro.tr_lighting.feature.support='+lightingFeat());
   lines.push('ro.tr_aod.feature.support='+feat01('aod_os16'));
   lines.push('ro.tr_aod.doze.brightness.feature.support='+feat01('aod_os16'));
   lines.push('ro.tr_aod.half.screen.feature.support='+feat01('aod_os16'));
@@ -1256,8 +1292,8 @@ async function saveAll(){
     if(!props){ toast('Saved config, but AI props failed to write'); _saving=false; return; }
     // ksu.exec has no timeout. apply_blur.sh all can hang on resetprop --delete
     // / vconfig bind and freeze the WebUI. Detach so Apply always returns.
-    exec('nohup sh "'+MOD+'/apply_blur.sh" all >/dev/null 2>&1 & nohup sh "'+MOD+'/apply_120hz.sh" >/dev/null 2>&1 & nohup sh "'+MOD+'/apply_sounds.sh" >/dev/null 2>&1 & nohup sh "'+MOD+'/apply_unlock.sh" >/dev/null 2>&1 & echo OK').catch(function(){});
-    toast('Saved. Reboot if Settings did not update.');
+    exec('nohup sh -c "sh \"'+MOD+'/apply_blur.sh\" all; sleep 1; am force-stop com.android.systemui" >/dev/null 2>&1 & nohup sh "'+MOD+'/apply_120hz.sh" >/dev/null 2>&1 & nohup sh "'+MOD+'/apply_sounds.sh" >/dev/null 2>&1 & nohup sh "'+MOD+'/apply_unlock.sh" >/dev/null 2>&1 & echo OK').catch(function(){});
+    toast('Saved. SystemUI will restart for shade blur. Reboot if Settings did not update.');
   }catch(e){
     toast('Save failed. Try again.');
   }
@@ -1312,13 +1348,21 @@ async function dumpAi(){
   lines.push(home||'EMPTY');
   lines.push('');
   lines.push('=== launcher blur settings ===');
-  lines.push('blur_level  '+blurLevel()+'  glass='+String(glassOn())+'  solid_shade='+String(solidShade())+'  dock_blur='+String(dockBlurOn())+'  platform='+animLvl());
+  lines.push('blur_level  '+blurLevel()+'  glass='+String(glassOn())+'  solid_shade='+String(solidShade())+'  dock_blur='+String(dockBlurOn())+'  platform='+animLvl()+'  motion_platform='+motionPlatform()+'  perf_model='+perfLvl()+'  sysui_platform='+sysuiPlatform()+'  vconfig_gaussian='+vcfgGaussian()+'  lighting_cc='+lightingCc()+'  lighting_feat='+lightingFeat());
   const lg=await g('getprop ro.tr_display.liquidglass.support');
   const sfb=await g('getprop ro.surface_flinger.supports_background_blur');
   const dyn=await g('getprop ro.tran.effectengine.dynamicblur.support');
   const bv2=await g('getprop ro.os_xos16_blur_v2_support');
   const plat=await g('getprop ro.tr_animation.platform_level');
-  lines.push('platform_level  '+(plat||'EMPTY'));
+  const perfm=await g('getprop ro.tr_perf.launch_start_exit.model');
+  lines.push('platform_level (global)  '+(plat||'EMPTY'));
+  lines.push('perf launch_start_exit model  '+(perfm||'EMPTY'));
+  const sysuiv=await g('grep -m1 ^ro.tr_animation.platform_level= /tr_product/etc/vconfig/com.android.systemui/build.prop 2>/dev/null');
+  lines.push('systemui vconfig platform  '+(sysuiv||'EMPTY'));
+  const lmpv=await g('grep -m1 ^ro.tr_animation.platform_level= /tr_product/etc/vconfig/com.transsion.launcher3/build.prop 2>/dev/null');
+  lines.push('launcher vconfig platform  '+(lmpv||'EMPTY'));
+  const wmpv=await g('grep -m1 ^ro.tr_animation.platform_level= /tr_product/etc/vconfig/com.transsion.wm/build.prop 2>/dev/null');
+  lines.push('wm vconfig platform  '+(wmpv||'EMPTY'));
   const union=await g('getprop ro.tran_display_unionrender.support');
   const asyncp=await g('getprop ro.transsion_async_animation_support');
   lines.push('unionrender  '+describeAiFlag(union));
@@ -1333,6 +1377,7 @@ async function dumpAi(){
   const gr=await g('settings get system transsion_launcher_blur_radius');
   const dw=await g('settings get global disable_window_blurs');
   const rt=await g('settings get secure accessibility_reduce_transparency');
+  const rbe=await g('settings get secure reduce_blur_effects');
   const wm=await g('wm disable-blur 2>/dev/null');
   lines.push('transsion_launcher_gaussian_blur_enable system  '+(ge||'EMPTY'));
   lines.push('transsion_launcher_gaussian_blur_enable global  '+(geg||'EMPTY'));
@@ -1340,11 +1385,29 @@ async function dumpAi(){
   lines.push('transsion_launcher_blur_radius  '+(gr||'EMPTY'));
   lines.push('disable_window_blurs  '+(dw||'EMPTY'));
   lines.push('accessibility_reduce_transparency  '+(rt||'EMPTY'));
+  lines.push('reduce_blur_effects  '+(rbe||'EMPTY'));
   lines.push('wm disable-blur  '+(wm||'EMPTY'));
+  const lcc=await g('getprop persist.tr_lighting.controlcenter.feature.support');
+  const lf=await g('getprop persist.tr_lighting.feature.support');
+  const lccRo=await g('getprop ro.tr_lighting.controlcenter.feature.support');
+  const lfRo=await g('getprop ro.tr_lighting.feature.support');
+  lines.push('persist.tr_lighting.controlcenter.feature.support  '+(lcc||'EMPTY'));
+  lines.push('persist.tr_lighting.feature.support  '+(lf||'EMPTY'));
+  lines.push('ro.tr_lighting.controlcenter.feature.support  '+(lccRo||'EMPTY'));
+  lines.push('ro.tr_lighting.feature.support  '+(lfRo||'EMPTY'));
+  const nsb=await g('device_config get systemui notification_shade_blur 2>/dev/null');
+  const ebow=await g('device_config get systemui enable_blur_on_windows 2>/dev/null');
+  const sbr=await g('device_config get systemui shade_blur_radius 2>/dev/null');
+  lines.push('device_config notification_shade_blur  '+(nsb||'EMPTY'));
+  lines.push('device_config enable_blur_on_windows  '+(ebow||'EMPTY'));
+  lines.push('device_config shade_blur_radius  '+(sbr||'EMPTY'));
   const lvc=await g('grep -E "gaussian|blurrecent|recent.blur|async_animation|spring" /tr_product/etc/vconfig/com.transsion.launcher3/build.prop 2>/dev/null');
   lines.push('launcher3 vconfig');
   lines.push(lvc||'EMPTY');
-  const tpb=await g('grep -E "liquidglass|background_blur|gaussian|dynamicblur|xos16_blur" /tr_product/etc/build.prop 2>/dev/null');
+  const svc=await g('grep -iE "blur|glass|glow|lighting|transparen|liquid|shade" /tr_product/etc/vconfig/com.android.systemui/build.prop 2>/dev/null');
+  lines.push('systemui vconfig blur/glow keys');
+  lines.push(svc||'EMPTY');
+  const tpb=await g('grep -E "liquidglass|background_blur|gaussian|dynamicblur|xos16_blur|lighting|platform_level" /tr_product/etc/build.prop 2>/dev/null');
   lines.push('tr_product build.prop blur keys');
   lines.push(tpb||'EMPTY');
   lines.push('');
@@ -1385,7 +1448,7 @@ async function dumpAi(){
   lines.push('gallerylive_os16  '+String(cfg.gallerylive_os16!==false));
   lines.push('airtransfer_os16  '+String(cfg.airtransfer_os16!==false));
   lines.push('');
-  lines.push('=== unlock extras (retest) ===');
+  lines.push('=== unlock extras ===');
   lines.push('social_master  '+String(cfg.social_master!==false));
   lines.push('display_dc  '+String(cfg.display_dc!==false));
   lines.push('display_color  '+String(cfg.display_color!==false));
@@ -1585,7 +1648,7 @@ async function handleStatusbar(input){
 }
 async function loadDevice(){
   const prop=await g('cat "'+MOD+'/module.prop" 2>/dev/null');
-  const ver=(prop.match(/^version=(.+)$/m)||[])[1]||'V1.42';
+  const ver=(prop.match(/^version=(.+)$/m)||[])[1]||'V2.0';
   n('module-version-sub', ver+' · OS 16');
   let type=await g('getprop ro.tran.os.type');
   let verOs=await g('getprop ro.transsion.os.version');

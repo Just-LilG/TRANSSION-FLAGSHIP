@@ -1,5 +1,48 @@
 # Transsion Flagship 16
 
+## v2.0 — Official release
+
+First **official stable release** for Transsion OS 16 (XOS / HiOS / iTel). Tested on **Infinix X6886 (G99)**.
+
+### Included & working
+- Boot / reboot animation packs + custom upload
+- System sounds (Pixel default; Huawei / iOS / S25 charging packs)
+- AI Suite, AI Call Summary (Ella), AI Video Enhancement (VEE)
+- Gaming: eSports touch, bypass charging, GT triggers in XArena
+- Force 120Hz / 144Hz Magellan refresh picker
+- Always-on Display (AOD)
+- Super volume
+- Parallel animations + blur tiers (**default level 2**)
+- Social Turbo, unlock extras (scale-up, GT apps, Circle to Search), outdoor boost, air transfer — keys applied for devices that need them
+
+### Known limitations (documented in `os16/README.md`)
+- Display HDR Settings row may not show on some G99 builds
+- Cute Pet may not unhide on G99
+- AI Gallery Art/Studio needs GT editor not on G99
+- Blur level 1: solid shade vs Parallel tradeoff on X6886 — use level 2 for best balance
+- Status bar: custom APK upload only
+
+### Install
+Flash `TransFlagship16_V2.0.zip` → reboot → WebUI → Apply & Save → reboot. Removes/disable Flagship 15 if present.
+
+## v1.100
+- **Fix Parallel blur linger at solid shade — per-package platform split.** V1.99 restored global `platform_level=2` (shade solid ✓) but Parallel broke again — blur stuck under closing apps, icons late (same as V1.96). V1.99 also turned **unionrender=1** at levels 1/2, which may worsen transition blur at platform 2. This build keeps **global platform 2** for the notification panel, drops **union to 0** at levels 1/2 (level 3 only), and writes **`platform_level=3` + perf models into launcher3 vconfig** plus any existing **wm/shell/perf** vconfig packages on your device. SystemUI vconfig stays **platform 2**. Stops force-stopping launcher on Apply (SystemUI only). Apply + reboot — shade should stay solid, app open/close should clear blur normally. Dump: global `platform=2`, `launcher vconfig platform=3`, `unionrender=0`, `perf_model=3`.
+
+## v1.99
+- **Solid shade back — global platform 2, Parallel kept via perf split.** V1.98 kept global `platform_level=3` so Parallel stayed but the notification panel stayed glassy (tr_product / SystemUI vconfig splits do not fix shade on X6886). This build restores **global `platform_level=2`** for blur levels 1/2 and blur off — the only path that solidifies the panel on your device. **`ro.tr_perf.*` models stay at 3** (V1.96 split restored). V1.96 also broke Parallel via **gaussian-2 SystemUI vconfig + async 0** — level 1 now uses **gaussian 0**, **blurrecent 0**, **async 1**, and **unionrender 1** when Parallel is on. Adds Android 16 **`reduce_blur_effects`** settings, SystemUI vconfig **platform 2**, and **force-stops launcher + SystemUI** on Apply and boot settle. Apply + reboot, pull shade at level 1 — should be solid Smart colors. Dump: `platform=2`, `perf_model=3`, `unionrender=1`, `async=1`, `reduce_blur_effects=1`. If Parallel breaks again, send Dump flags blur section.
+
+## v1.98
+- **Solid shade without killing Parallel — tr_product platform split.** V1.97 kept global `platform_level=3` (Parallel OK) but notification blur returned — SystemUI vconfig alone is not enough on X6886. V1.96 proved only **`platform_level=2`** makes the panel solid, but global 2 broke Parallel. This build keeps **global resetprop at 3** and writes **`platform_level=2` into the bound `/tr_product/etc/build.prop`** plus expanded **SystemUI vconfig** (platform 2, lighting off, Disable-blur gaussian 2). Glow-space settings aliases zeroed at runtime. Apply + reboot — Parallel should stay, shade should solid. Dump: global `platform=3`, tr_product `platform_level=2`, systemui vconfig platform 2.
+
+## v1.97
+- **Fix Parallel at blur 1/2 — shade tier moves to SystemUI vconfig only.** V1.96 global `platform_level=2` made the notification panel solid but broke Parallel (blur under closing app, icons a second late). Global **`platform_level=3`** is back for app open/close. Solid shade now writes **`platform_level=2` + lighting keys into `com.android.systemui` vconfig only** so SystemUI gets the Smart panel without downgrading launcher/wm animations. Level 1 launcher vconfig back to **gaussian 0** (not 2). Apply + reboot, test blur 1: Parallel should match level 3, shade should stay solid. Dump: `platform=3`, `sysui_platform=2`.
+
+## v1.96
+- **Notification shade: split platform_level from Parallel perf models.** V1.95 lighting keys did not fix the panel — your tests showed **`ro.tr_animation.platform_level=3` keeps the notification shade glassy** even when every other blur flag is off. Level 1 / 2 / blur off now write **`platform_level=2`** (Disable-blur solid shade path) while **`ro.tr_perf.*` models stay at 3** so Parallel animations remain. Launcher vconfig uses **gaussian 2 + blurrecent 1** for the shade path at level 1 (resetprop gaussian stays **0** so the dock stays solid). SystemUI is **force-stopped after boot settle** and on Apply so cached glass clears. Apply + reboot, pull shade at level 1 — dump should show `shade_platform=2` and `perf_model=3`.
+
+## v1.95
+- **Notification shade solid panel — Glow Space lighting keys.** V1.94 had every compositor blur flag correct at level 1 but the notification / QS panel stayed glassy. That path is Transsion **Glow Space**, not launcher gaussian. This build writes **`persist.tr_lighting.controlcenter.feature.support=0`** (and **`ro.tr_lighting.*`**) whenever the shade should stay solid (levels 1/2 + blur off), restores them at level 3, binds **`com.android.systemui` vconfig** blur/glass keys from your stock file when present, and **force-stops SystemUI on WebUI Apply only** (not at boot — V1.59 crash reboot). Apply + reboot, then pull the shade at **level 1** — should be solid colors like Smart series. Dump shows `lighting_cc`, `lighting_feat`, and systemui vconfig lines.
+
 ## v1.94
 - **Blur tiers remapped — level 2 is your G99 default, not level 1.** We had level 2 wired like full glass (unionrender 1, compositor on), and kept shuffling Disable-blur props onto level 1. Correct mapping now:
   - **Level 1** = Smart-series solid — no glass anywhere (solid lock clock + shade), gaussian 0, compositor off, Parallel platform 3.
