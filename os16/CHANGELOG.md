@@ -1,5 +1,8 @@
 # Transsion Flagship 16
 
+## v1.86
+- **Dynamic bar off actually leaves stock bar alone now.** V1.81 logic was correct in scripts, but the zip `system.prop` template still shipped `ro.tr_dynamicbar.support=0`, and the installer copied that file **after** `on_install` rewrote props — so Magisk kept loading 0 and killed your pill. Off now: no dynamicbar keys in the template, installer skips copying the template, boot strips any leftover lines from `system.prop`, and `resetprop` restores stock values from `/tr_product/etc/build.prop`. Apply + reboot with **Dynamic bar extras** off — pill should work again. Dump shows `stock tr_product` vs live `ro.tr_dynamicbar.support`.
+
 ## v1.85
 - **Version string fix.** V1.84 shipped motion sickness but `module.prop` still read V1.83. This build reports V1.85 everywhere (same features as V1.84).
 

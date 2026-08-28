@@ -32,7 +32,7 @@ imageless_magisk() {
 OUTFD=$2
 ZIPFILE=$3
 
-ui_print "- Flagship 16 V1.85 installer"
+ui_print "- Flagship 16 V1.86 installer"
 
 mount /data 2>/dev/null
 
@@ -127,8 +127,8 @@ else
   $SKIPMOUNT || touch $MODPATH/auto_mount
 fi
 
-# prop files
-$PROPFILE && cp -af $TMPDIR/system.prop $MODPATH/system.prop
+# prop files — on_install + set_permissions write system.prop from config.
+# Do not copy the zip template here; it must not contain dynamicbar=0 overrides.
 
 # Module info
 cp -af $TMPDIR/module.prop $MODPATH/module.prop
