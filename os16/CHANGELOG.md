@@ -1,5 +1,8 @@
 # Transsion Flagship 16
 
+## v1.89
+- **Level 1 solid shade: unionrender off.** Your dump showed every blur flag correct at level 1 (liquidglass 0, gaussian 0, disable_blurs 1) but **`ro.tran_display_unionrender.support` was still 1** — on X6886 that renderer path keeps the notification shade glassy even when compositor blur is off. Level 1 / blur off now sets unionrender **0** (Parallel platform 3 stays). Levels 2/3 turn unionrender back on with glass. Apply + reboot, then compare shade at 1 vs 3. Dump should show `unionrender = 0` at level 1.
+
 ## v1.88
 - **Blur tiers actually stick now (real fix).** V1.87 logic was correct but never applied: with **Dynamic bar extras off** (default), cleanup was **unbinding** `com.transsion.launcher3` vconfig right after blur wrote it — so gaussian/async stayed stock (level 1 still glass, 2 = 3). This build merges blur + dynamic-bar launcher vconfig, applies it **last**, and never unbinds it when the bar toggle is off. Also **binds** `/tr_product/etc/build.prop` blur keys (Mountify was re-loading stock `liquidglass=1` over resetprop). Apply + reboot, then dump **=== launcher blur settings ===** — vconfig gaussian should match your level (0 / 2 / 3).
 

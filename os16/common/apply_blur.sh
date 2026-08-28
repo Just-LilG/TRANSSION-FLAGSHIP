@@ -1,7 +1,7 @@
 #!/system/bin/sh
 # Parallel motion = platform_level 3 whenever Parallel is on.
 # Flagship glass = unionrender / liquid glass / compositor (blur 2/3).
-# Level 1 must not drop platform_level (that made Parallel become basic).
+# Level 1 / off: unionrender off on X6886 — platform 3 parallel stays, shade goes solid.
 
 if [ -z "$MODDIR" ]; then
   MODDIR=${0%/*}
@@ -132,12 +132,11 @@ os16_blur_vals() {
   if [ "$anim" = "true" ] || [ "$anim" = "1" ]; then
     A01=1
     ALVL=3
-    UNION=1
   else
     A01=0
     ALVL=0
-    UNION=0
   fi
+  UNION=0
 
   if [ "$on" = "true" ] || [ "$on" = "1" ]; then
     case "$lvl" in
@@ -154,6 +153,7 @@ os16_blur_vals() {
         SFDIS=0
         DIS=0
         LAUNCHER_ASYNC=1
+        [ "$anim" = "true" ] || [ "$anim" = "1" ] && UNION=1
         ;;
       3)
         SOLID=0
@@ -168,6 +168,7 @@ os16_blur_vals() {
         DIS=0
         EXP=1
         LAUNCHER_ASYNC=1
+        [ "$anim" = "true" ] || [ "$anim" = "1" ] && UNION=1
         ;;
     esac
   fi
@@ -368,6 +369,7 @@ os16_apply_tr_product_blur_buildprop() {
   os16_vconfig_upsert "$staged" "ro.os_xos16_blur_v2_support" "$BLURV2"
   os16_vconfig_upsert "$staged" "ro.sf.blurs_are_expensive" "$EXP"
   os16_vconfig_upsert "$staged" "ro.transsion_async_animation_support" "$LAUNCHER_ASYNC"
+  os16_vconfig_upsert "$staged" "ro.tran_display_unionrender.support" "$UNION"
   mkdir -p "$MODDIR/system/tr_product/etc"
   cp -f "$staged" "$MODDIR/system/tr_product/etc/build.prop"
   for dest in \
@@ -419,12 +421,14 @@ os16_apply_launcher_vconfig_all() {
     os16_vconfig_upsert "$staged" "ro.transsion_launcher_gaussian_blur_support" "$BLVL"
     os16_vconfig_upsert "$staged" "tr_launcher.gaussianblur.support" "$BLVL"
     os16_vconfig_upsert "$staged" "ro.transsion_async_animation_support" "$LAUNCHER_ASYNC"
+    os16_vconfig_upsert "$staged" "ro.tran_display_unionrender.support" "$UNION"
   else
     # TranOS Anim Only lv3: gaussian 0, recent blur 0, launcher async 0.
     os16_vconfig_upsert "$staged" "ro.os.recent.blur" "0"
     os16_vconfig_upsert "$staged" "ro.transsion_launcher_gaussian_blur_support" "0"
     os16_vconfig_upsert "$staged" "tr_launcher.gaussianblur.support" "0"
     os16_vconfig_upsert "$staged" "ro.transsion_async_animation_support" "0"
+    os16_vconfig_upsert "$staged" "ro.tran_display_unionrender.support" "0"
   fi
   bar=$(os16_cfg_01 dynamicbar_os16 false)
   if [ "$bar" = "1" ]; then
