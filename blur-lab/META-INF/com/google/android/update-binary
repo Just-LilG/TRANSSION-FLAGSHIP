@@ -1,0 +1,44 @@
+#!/sbin/sh
+umask 022
+ui_print() { echo "$1"; }
+OUTFD=$2
+ZIPFILE=$3
+mount /data 2>/dev/null
+if [ ! -f /data/adb/magisk/util_functions.sh ]; then
+  ui_print "Please install Magisk or flash this in KernelSU"
+  exit 1
+fi
+. /data/adb/magisk/util_functions.sh
+NVBASE=/data/adb
+setup_flashable
+mount_partitions
+api_level_arch_detect
+$BOOTMODE && boot_actions || recovery_actions
+TMP=/dev/tmp_blurlab
+rm -rf "$TMP"
+mkdir -p "$TMP"
+unzip -oj "$ZIPFILE" module.prop -d "$TMP" >&2
+[ -f "$TMP/module.prop" ] || abort "! Missing module.prop"
+. "$TMP/module.prop"
+if [ "$MAGISK_VER_CODE" -le 18100 ]; then
+  abort "! Magisk too old"
+fi
+$BOOTMODE && MODDIRNAME=modules_update || MODDIRNAME=modules
+MODULEROOT=$NVBASE/$MODDIRNAME
+MODID="$id"
+MODPATH=$MODULEROOT/$MODID
+rm -rf "$MODPATH"
+mkdir -p "$MODPATH"
+ui_print "- Extracting Blur Lab"
+unzip -o "$ZIPFILE" -x 'META-INF/*' -d "$MODPATH" >&2
+[ -f "$MODPATH/module.prop" ] || abort "! Extract failed"
+if [ -f "$MODPATH/customize.sh" ]; then
+  . "$MODPATH/customize.sh"
+fi
+set_perm_recursive "$MODPATH" 0 0 0755 0644
+for sh in "$MODPATH/post-fs-data.sh" "$MODPATH/service.sh" "$MODPATH/apply.sh"; do
+  [ -f "$sh" ] && set_perm "$sh" 0 0 0755
+done
+$BOOTMODE || recovery_cleanup
+rm -rf "$TMP"
+exit 0
