@@ -5,16 +5,13 @@ LOG="$MODDIR/transflagship16_service.log"
 rm -f "$LOG"
 log_p() { echo "[$(date '+%H:%M:%S')] $1" >> "$LOG"; }
 
-log_p "=== TransFlagship 16 V2.0 ==="
+log_p "=== TransFlagship 16 V2.8 ==="
 log_p "Device : $(getprop ro.product.model 2>/dev/null)"
 log_p "Brand  : $(getprop ro.product.brand 2>/dev/null)"
 log_p "Android: $(getprop ro.build.version.release 2>/dev/null)"
 log_p "ro.tran.os.type : $(getprop ro.tran.os.type 2>/dev/null)"
 log_p "ro.transsion.os.version: $(getprop ro.transsion.os.version 2>/dev/null)"
 log_p "tr_product: $([ -d /tr_product ] && echo yes || echo no)"
-if [ -f "$MODDIR/install_diagnostic.txt" ]; then
-    while IFS= read -r line; do log_p "$line"; done < "$MODDIR/install_diagnostic.txt"
-fi
 log_p "config: $([ -f "$MODDIR/config.json" ] && cat "$MODDIR/config.json" || echo missing)"
 
 if [ -f "$MODDIR/apply_blur.sh" ]; then
@@ -33,13 +30,7 @@ if [ -f "$MODDIR/apply_blur.sh" ]; then
   fi
   os16_apply_blur_runtime
   os16_blur_vals
-  if [ "$SOLID_SHADE" = "1" ]; then
-    os16_refresh_systemui_on_apply
-    log_p "systemui force-stop for solid shade"
-  fi
-  # Do not restart SurfaceFlinger or force-stop home/AOD here. That is the
-  # post-boot soft reboot.
-  log_p "blur apply: anim=$(os16_cfg_bool anim_os16 true) on=$(os16_cfg_bool blur_os16 true) lvl=$(os16_cfg_int blur_os16_level 2) liquidglass=$(getprop ro.tr_display.liquidglass.support 2>/dev/null) sf_blur=$(getprop ro.surface_flinger.supports_background_blur 2>/dev/null) gaussian=$(getprop ro.transsion_launcher_gaussian_blur_support 2>/dev/null) dynamicblur=$(getprop ro.tran.effectengine.dynamicblur.support 2>/dev/null) vconfig_gaussian=$(grep gaussian_blur /tr_product/etc/vconfig/com.transsion.launcher3/build.prop 2>/dev/null | head -1)"
+  log_p "blur apply: anim=$(os16_cfg_bool anim_os16 true) on=$(os16_cfg_bool blur_os16 true) skip=$SKIP_BLUR platform=$(getprop ro.tr_animation.platform_level 2>/dev/null)"
   log_p "aod apply: on=$(os16_cfg_bool aod_os16 true) feature=$(getprop ro.tr_aod.feature.support 2>/dev/null) always_show=$(getprop tr_aod.always.show.feature.support 2>/dev/null) vconfig=$(grep always.show /tr_product/etc/vconfig/com.transsion.aod/build.prop 2>/dev/null) doze_always=$(settings get secure doze_always_on 2>/dev/null)"
   log_p "extras apply: videosr=$(getprop persist.tr_video.ai_super_resolution.support 2>/dev/null) supervol=$(getprop ro.tr_audio.supervol.feature.support 2>/dev/null) treasure=$(getprop ro.tr_ai_treasure_box.feature.support 2>/dev/null) cutepet=$(getprop ro.tr_cutepet.feature.support 2>/dev/null) outdoor=$(getprop ro.tr_outdoorboost.feature.support 2>/dev/null) gallerylive=$(getprop tr_gallery.live.support 2>/dev/null) airtransfer=$(getprop ro.tr_airtransfer.feature.support 2>/dev/null)"
   log_p "dynamicbar apply: on=$(os16_cfg_bool dynamicbar_os16 false) bar=$(getprop ro.tr_dynamicbar.support 2>/dev/null) translate=$(getprop ro.os_dynamicbar_ai_translation_support 2>/dev/null) plane=$(getprop ro.os_dynamic_bar_resident_plane_support 2>/dev/null) hide_land=$(getprop ro.os.tran_hide_status_bar_for_land_recent 2>/dev/null) hios=$(getprop ro.tran_hios_dynamic_bar_support 2>/dev/null)"
@@ -62,6 +53,14 @@ if [ -f "$MODDIR/apply_sounds.sh" ]; then
   log_p "ui sounds charge=$(ls -l /tr_product/media/audio/ui/ChargingStarted.ogg 2>/dev/null | awk '{print $5,$NF}') unlock=$(ls -l /tr_product/media/audio/ui/Unlock.ogg 2>/dev/null | awk '{print $5,$NF}')"
 else
   log_p "apply_sounds.sh missing"
+fi
+
+if [ -f "$MODDIR/apply_emoji.sh" ]; then
+  . "$MODDIR/apply_emoji.sh"
+  os16_apply_emoji
+  log_p "emoji live=$(ls -l /system/fonts/NotoColorEmoji.ttf 2>/dev/null | awk '{print $5,$NF}')"
+else
+  log_p "apply_emoji.sh missing"
 fi
 
 log_p "OS 16 AI keys (read only):"
@@ -103,7 +102,8 @@ log_p "  sf_disable_blurs=$(getprop persist.sys.sf.disable_blurs 2>/dev/null)"
 log_p "  home=$(cmd package resolve-activity --brief -a android.intent.action.MAIN -c android.intent.category.HOME 2>/dev/null | tail -n 1)"
 
 # Mountify / tr_product overlay can rewrite liquidglass after post-fs-data.
-# Re-apply props once boot has settled. Do not kill SurfaceFlinger or home.
+# Re-bind overlays once boot has settled. Do not kill SurfaceFlinger or SystemUI.
+# Restart home only after the launcher3 overlay is rebound so dock/folder blur load.
 (
   sleep 8
   [ -f "$MODDIR/apply_blur.sh" ] || exit 0
@@ -121,14 +121,17 @@ log_p "  home=$(cmd package resolve-activity --brief -a android.intent.action.MA
   fi
   os16_apply_blur_runtime
   os16_blur_vals
-  if [ "$SOLID_SHADE" = "1" ]; then
-    os16_refresh_systemui_on_apply
-    echo "[$(date '+%H:%M:%S')] systemui force-stop solid shade" >> "$LOG"
+  if [ "$SKIP_BLUR" != "1" ]; then
+    os16_refresh_launcher_on_apply
   fi
-  echo "[$(date '+%H:%M:%S')] blur after settle lvl=$(os16_cfg_int blur_os16_level 2) platform=$(getprop ro.tr_animation.platform_level 2>/dev/null) perf=$(getprop ro.tr_perf.launch_start_exit.model 2>/dev/null) union=$(getprop ro.tran_display_unionrender.support 2>/dev/null) async=$(getprop ro.transsion_async_animation_support 2>/dev/null) liquidglass=$(getprop ro.tr_display.liquidglass.support 2>/dev/null) gaussian=$(getprop ro.transsion_launcher_gaussian_blur_support 2>/dev/null) vconfig=$(grep gaussian_blur /tr_product/etc/vconfig/com.transsion.launcher3/build.prop 2>/dev/null | head -1) reduce_blur=$(settings get secure reduce_blur_effects 2>/dev/null) aod_always=$(getprop ro.aod_alwaysshow_support 2>/dev/null) bar=$(getprop ro.tr_dynamicbar.support 2>/dev/null)" >> "$LOG"
+  echo "[$(date '+%H:%M:%S')] blur after settle skip=$SKIP_BLUR platform=$(getprop ro.tr_animation.platform_level 2>/dev/null) liquidglass=$(getprop ro.tr_display.liquidglass.support 2>/dev/null) folder=$(getprop tr_launcher.folderblur.support 2>/dev/null) gauss=$(getprop tr_launcher.gaussianblur.support 2>/dev/null)" >> "$LOG"
   if [ -f "$MODDIR/apply_120hz.sh" ]; then
     . "$MODDIR/apply_120hz.sh"
     os16_apply_game_fps_props
+    os16_generate_120hz_jsons
+    os16_copy_magellan_mountify
+    os16_bind_magellan_bootanim
+    os16_apply_120hz_settings
     os16_apply_120hz_settings
     echo "[$(date '+%H:%M:%S')] refresh after settle force=$(os16_cfg_bool force_120hz false) magellan=$(ls /tr_product/etc/vconfig/magellan/refresh_rate_config.xml 2>/dev/null && echo yes || echo missing) max144=$(grep -c 'max=\"144\"' /tr_product/etc/vconfig/magellan/refresh_rate_config.xml 2>/dev/null)" >> "$LOG"
   fi
@@ -136,6 +139,11 @@ log_p "  home=$(cmd package resolve-activity --brief -a android.intent.action.MA
     . "$MODDIR/apply_sounds.sh"
     os16_apply_sounds
     echo "[$(date '+%H:%M:%S')] ui sounds after settle charge=$(ls -l /tr_product/media/audio/ui/ChargingStarted.ogg 2>/dev/null | awk '{print $5}') unlock=$(ls -l /tr_product/media/audio/ui/Unlock.ogg 2>/dev/null | awk '{print $5}')" >> "$LOG"
+  fi
+  if [ -f "$MODDIR/apply_emoji.sh" ]; then
+    . "$MODDIR/apply_emoji.sh"
+    os16_apply_emoji
+    echo "[$(date '+%H:%M:%S')] emoji after settle live=$(ls -l /system/fonts/NotoColorEmoji.ttf 2>/dev/null | awk '{print $5}')" >> "$LOG"
   fi
 ) &
 

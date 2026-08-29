@@ -25,8 +25,6 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
 .pages{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;}
 .pages::-webkit-scrollbar{display:none;}
 .scroll-inner{padding:24px 16px calc(var(--tab-h) + 24px);max-width:480px;margin:0 auto;}
-.page{display:none;}
-.page.active{display:block;}
 .page-header{padding:20px 4px 16px;}
 .page-header .eyebrow{font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--accent);margin-bottom:5px;}
 .page-header h1{font-size:28px;font-weight:700;letter-spacing:-0.02em;}
@@ -74,9 +72,6 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
 .btn-ghost{background:rgba(167,139,250,0.12);border:1px solid rgba(167,139,250,0.28);color:var(--accent);}
 .h8{height:8px;}
 .warn-card{margin:0 0 12px;padding:12px 14px;border-radius:14px;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.28);font-size:12.5px;color:#fbbf24;line-height:1.45;display:none;}
-.roadmap li{font-size:13px;color:var(--text2);padding:8px 16px;border-top:1px solid var(--glass-b);list-style:none;}
-.roadmap li.on{color:var(--success);}
-.roadmap li.next{color:var(--accent);}
 .log-box{font-family:ui-monospace,monospace;font-size:11px;line-height:1.7;color:rgba(167,139,250,0.85);
   background:rgba(0,0,0,0.35);border-radius:12px;padding:12px;margin:10px 16px;max-height:280px;overflow-y:auto;
   white-space:pre-wrap;word-break:break-all;border:1px solid rgba(167,139,250,0.1);}
@@ -84,33 +79,77 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
   display:flex;justify-content:center;pointer-events:none;}
 .tab-bar{pointer-events:auto;display:flex;align-items:center;gap:2px;background:rgba(14,14,24,0.85);
   border:1px solid rgba(255,255,255,0.08);border-radius:20px;padding:6px;}
-.tab-item{display:flex;align-items:center;gap:4px;padding:10px 10px;border-radius:14px;cursor:pointer;}
-.tab-icon svg{width:19px;height:19px;fill:none;stroke:var(--text2);stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
-.tab-label{font-size:12.5px;font-weight:600;color:#fff;white-space:nowrap;max-width:0;overflow:hidden;opacity:0;}
+.tab-item{display:flex;align-items:center;gap:4px;padding:10px 10px;border-radius:14px;cursor:pointer;
+  transition:background .28s ease,transform .18s ease;}
+.tab-item:active{transform:scale(.96);}
+.tab-icon svg{width:19px;height:19px;fill:none;stroke:var(--text2);stroke-width:2;stroke-linecap:round;stroke-linejoin:round;
+  transition:stroke .22s;}
+.tab-label{font-size:12.5px;font-weight:600;color:#fff;white-space:nowrap;max-width:0;overflow:hidden;opacity:0;
+  transition:max-width .32s ease,opacity .22s ease,margin .32s ease;}
 .tab-item.active{background:var(--accent);}
 .tab-item.active .tab-icon svg{stroke:#fff;}
 .tab-item.active .tab-label{max-width:110px;opacity:1;}
 .toast{position:fixed;bottom:calc(var(--tab-h) + 14px);left:50%;transform:translateX(-50%) translateY(16px);
   background:rgba(22,22,42,0.95);border:1px solid var(--glass-b);border-radius:999px;padding:9px 20px;font-size:13px;
-  z-index:999;opacity:0;pointer-events:none;white-space:nowrap;transition:opacity .22s,transform .3s;}
+  z-index:999;opacity:0;pointer-events:none;white-space:nowrap;transition:opacity .22s,transform .3s cubic-bezier(.2,.8,.2,1);}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 .modal-backdrop{position:fixed;inset:0;background:rgba(6,6,14,0.72);z-index:1000;display:flex;align-items:center;justify-content:center;
-  opacity:0;pointer-events:none;padding:24px;}
+  opacity:0;pointer-events:none;padding:24px;transition:opacity .28s ease;}
 .modal-backdrop.show{opacity:1;pointer-events:auto;}
-.modal-box{background:rgba(22,22,42,0.98);border:1px solid var(--glass-b);border-radius:20px;padding:22px 20px;max-width:340px;width:100%;}
+.modal-box{background:rgba(22,22,42,0.98);border:1px solid var(--glass-b);border-radius:20px;padding:22px 20px;max-width:340px;width:100%;
+  transform:translateY(12px) scale(.96);transition:transform .32s cubic-bezier(.2,.8,.2,1);}
+.modal-backdrop.show .modal-box{transform:none;}
 .modal-title{font-size:16px;font-weight:700;margin-bottom:8px;}
 .modal-msg{font-size:13.5px;color:#9aa;line-height:1.5;margin-bottom:20px;}
 .modal-actions{display:flex;gap:10px;}
-.modal-btn{flex:1;padding:11px;border:none;border-radius:12px;font-weight:600;cursor:pointer;}
+.modal-btn{flex:1;padding:11px;border:none;border-radius:12px;font-weight:600;cursor:pointer;transition:transform .15s,filter .15s;}
+.modal-btn:active{transform:scale(.97);filter:brightness(1.08);}
 .modal-btn-cancel{background:rgba(255,255,255,0.08);color:#ccc;}
 .modal-btn-confirm{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;}
 .modal-btn-danger{background:linear-gradient(135deg,#f87171,#dc2626);color:#fff;}
-.splash{position:fixed;inset:0;z-index:999;display:flex;align-items:center;justify-content:center;background:var(--bg);transition:opacity .4s;}
+.splash{position:fixed;inset:0;z-index:2000;display:flex;align-items:center;justify-content:center;background:var(--bg);
+  transition:opacity .45s ease,visibility .45s;}
 .splash.hide{opacity:0;visibility:hidden;pointer-events:none;}
-.splash-title{font-size:28px;font-weight:800;}
+.splash-title{font-size:28px;font-weight:800;animation:splashIn .55s cubic-bezier(.2,.8,.2,1);}
 .splash-title span{background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;color:transparent;}
-.splash-tagline{font-size:13px;color:var(--text2);margin-top:6px;}
-.splash-status{font-size:11px;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;margin-top:18px;}
+.splash-tagline{font-size:13px;color:var(--text2);margin-top:6px;animation:splashIn .55s .08s both cubic-bezier(.2,.8,.2,1);}
+.splash-status{font-size:11px;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;margin-top:18px;
+  animation:splashIn .55s .14s both cubic-bezier(.2,.8,.2,1);}
+.splash-loader{width:28px;height:28px;margin:16px auto 0;border:2.5px solid rgba(167,139,250,.22);border-top-color:var(--accent);
+  border-radius:50%;animation:spin .7s linear infinite;}
+.page{display:none;}
+.page.active{display:block;animation:pageIn .48s cubic-bezier(.2,.8,.2,1);}
+.toggle-track{transition:background .22s ease,border-color .22s ease,box-shadow .22s ease;}
+.toggle-thumb{transition:transform .22s cubic-bezier(.2,.8,.2,1);}
+.segmented-opt{transition:background .2s ease,color .2s ease,transform .15s ease;}
+.segmented-opt:active{transform:scale(.97);}
+.action-btn{transition:transform .16s ease,filter .16s ease,box-shadow .22s ease;}
+.action-btn:active{transform:scale(.98);filter:brightness(1.08);}
+.glass-card,.hero-card,.info-grid,.author-card{animation:cardIn .45s cubic-bezier(.2,.8,.2,1);}
+.busy{position:fixed;inset:0;z-index:1800;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;
+  background:rgba(7,7,15,.55);opacity:0;pointer-events:none;transition:opacity .25s ease;}
+.busy.show{opacity:1;pointer-events:auto;}
+.busy-spin{width:32px;height:32px;border:3px solid rgba(167,139,250,.2);border-top-color:var(--accent);border-radius:50%;
+  animation:spin .7s linear infinite;}
+.busy-text{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--text2);}
+.author-card{display:flex;align-items:center;gap:14px;padding:16px 18px;border-radius:20px;
+  background:linear-gradient(135deg,rgba(167,139,250,.16) 0%,rgba(20,20,40,.9) 100%);
+  border:1px solid rgba(167,139,250,.22);}
+.author-avatar{width:46px;height:46px;border-radius:16px;flex-shrink:0;display:flex;align-items:center;justify-content:center;
+  font-size:15px;font-weight:800;letter-spacing:.02em;color:#fff;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));box-shadow:0 6px 18px var(--accent-glow);}
+.author-name{font-size:16px;font-weight:700;}
+.author-role{font-size:12px;color:var(--text2);margin-top:1px;}
+.author-link{display:inline-flex;align-items:center;gap:6px;margin-top:8px;font-size:12.5px;font-weight:600;color:var(--accent);
+  text-decoration:none;}
+.author-link:active{opacity:.75;}
+@keyframes spin{to{transform:rotate(360deg);}}
+@keyframes pageIn{from{opacity:0;transform:translateY(18px) scale(.985);}to{opacity:1;transform:none;}}
+@keyframes splashIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:none;}}
+@keyframes cardIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important;}
+}
 </style>
 </head>
 <body>
@@ -119,8 +158,13 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
   <div style="text-align:center">
     <div class="splash-title">Flagship <span>16</span></div>
     <div class="splash-tagline">Transsion OS 16</div>
+    <div class="splash-loader" aria-hidden="true"></div>
     <div class="splash-status" id="splash-status">Loading</div>
   </div>
+</div>
+<div class="busy" id="busy" aria-hidden="true">
+  <div class="busy-spin"></div>
+  <div class="busy-text" id="busy-text">Working</div>
 </div>
 <div class="modal-backdrop" id="modal-backdrop">
   <div class="modal-box">
@@ -143,13 +187,22 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
         </div>
         <div class="hero-card">
           <div class="hero-title">Transsion Flagship 16</div>
-          <div class="hero-sub" id="module-version-sub">V2.0 · OS 16</div>
+          <div class="hero-sub" id="module-version-sub">V2.8 · OS 16</div>
+        </div>
+        <div class="h8"></div>
+        <div class="author-card">
+          <div class="author-avatar">LG</div>
+          <div>
+            <div class="author-name">Lil G</div>
+            <div class="author-role">Author · Flagship 16</div>
+            <a class="author-link" href="https://t.me/Just_LilGXX" onclick="openTelegram(event)">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M9.04 15.3l-.37 5.2c.53 0 .76-.23 1.04-.5l2.5-2.4 5.18 3.8c.95.52 1.62.25 1.88-.88l3.4-16.02h.01c.3-1.4-.5-1.95-1.42-1.6L1.7 9.3c-1.36.53-1.34 1.28-.23 1.62l5.3 1.66L18.2 6.4c.62-.38 1.18-.17.72.21z"/></svg>
+              Telegram @Just_LilGXX
+            </a>
+          </div>
         </div>
         <div class="h8"></div>
         <div class="warn-card" id="old-mod-warn">Flagship 15 is still installed. This installer disables it. Remove it from Magisk/KSU so the two modules do not fight.</div>
-        <div class="warn-card" id="release-limits" style="display:block;margin-bottom:12px;padding:12px 14px;border-radius:14px;background:rgba(167,139,250,0.08);border:1px solid rgba(167,139,250,0.22);font-size:12.5px;color:var(--text2);line-height:1.45;">
-          <strong style="color:var(--accent);">V2.0 official</strong> — Some features depend on your device. HDR Settings row, Cute Pet, and AI Gallery Art/Studio may not appear on G99. Blur level <strong>2</strong> is recommended (level 1 can affect Parallel on some phones). See repo <code style="font-size:11px;">os16/README.md</code>.
-        </div>
         <div class="section-label">Device</div>
         <div class="info-grid">
           <div class="info-cell"><div class="lbl">OS</div><div class="val acc" id="info-os">—</div></div>
@@ -157,34 +210,33 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
           <div class="info-cell"><div class="lbl">Android</div><div class="val" id="info-android">—</div></div>
           <div class="info-cell"><div class="lbl">Overlay</div><div class="val" id="info-trp">—</div></div>
         </div>
-        <div class="section-label">Features</div>
-        <div class="glass-card roadmap">
-          <ul>
-            <li class="on">Boot animation — verified</li>
-            <li class="on">Reboot animation — verified</li>
-            <li>Status bar overlay — upload your own APK</li>
-            <li class="on">AI Suite — Features tab; verified OS 16 keys</li>
-            <li class="on">AI Call Summary — Ella briefing</li>
-            <li class="next">AI Gallery — menus show; Art/Studio not working (no GT editor on G99)</li>
-            <li class="on">AI Video Enhancement — VEE flag on</li>
-            <li class="on">Gaming — OS 16 GT triggers in XArena</li>
-            <li class="on">Force 120Hz — 144 picker verified</li>
-            <li class="on">AOD — verified working</li>
-            <li>Dynamic bar extras — off = stock bar untouched</li>
-            <li class="next">Cute Pet — keys on; did not unhide on G99</li>
-            <li class="on">Outdoor boost — stock already had it; keys kept</li>
-            <li>Gallery Live — GT dump 0 = off; Magisk keys stay</li>
-            <li class="on">Air Transfer — stock already had it; keys kept</li>
-            <li class="on">Sounds — Pixel default (not keypress); charging Huawei / iOS / S25</li>
-            <li class="on">Social Turbo — stock already had it; module keys kept</li>
-            <li class="next">Display extras — HDR Settings row not showing on G99 (flags may stick)</li>
-            <li class="on">Unlock extras — stock already had scale/GT/circle; keys kept</li>
-            <li class="on">Super volume — working after clean reinstall</li>
-            <li class="next">Animations &amp; blur — shade/Parallel tradeoff on X6886; levels 2/3 OK</li>
-          </ul>
+        <div class="section-label">Support</div>
+        <div class="glass-card">
+          <div class="setting-row">
+            <div class="row-text">
+              <div class="row-title">Dump flags</div>
+              <div class="row-sub">Copies live props for troubleshooting</div>
+            </div>
+          </div>
+          <div style="padding:0 12px 12px">
+            <button class="action-btn btn-primary" onclick="dumpAi()">Dump flags</button>
+          </div>
         </div>
         <div class="h8"></div>
-        <button class="action-btn btn-primary" onclick="dumpAi()">Dump flags</button>
+        <div class="glass-card">
+          <div class="setting-row">
+            <div class="row-text">
+              <div class="row-title">Module conflicts</div>
+              <div class="row-sub">Other modules that share paths or props with Flagship 16</div>
+            </div>
+          </div>
+          <div id="conflict-check-list" style="padding:4px 16px 8px">
+            <div style="font-size:12.5px;color:#666;padding:8px 0">Tap Check to scan…</div>
+          </div>
+          <div style="padding:0 12px 12px">
+            <button class="action-btn btn-ghost" style="width:100%" onclick="checkModuleConflicts()">Check for conflicts</button>
+          </div>
+        </div>
         <div class="section-label">Boot log</div>
         <div class="glass-card"><div class="log-box" id="pfd-log">—</div></div>
         <div class="h8"></div>
@@ -197,14 +249,14 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
         <div class="page-header">
           <div class="eyebrow">System</div>
           <h1>Features</h1>
-          <div class="sub">AI, gaming, animations, blur, AOD, Dynamic bar, Force 120Hz</div>
+          <div class="sub">Apply &amp; Save, then reboot</div>
         </div>
         <div class="section-label">AI Suite</div>
         <div class="glass-card">
           <div class="setting-row">
             <div class="row-text">
               <div class="row-title">AI Suite</div>
-              <div class="row-sub">OS 16 keys. Apply writes Magisk props — reboot to take effect.</div>
+              <div class="row-sub">Enable AI features</div>
             </div>
             <label class="toggle"><input type="checkbox" id="feat-ai" checked onchange="setAi('ai_master',this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
           </div>
@@ -218,7 +270,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
           <div class="setting-row">
             <div class="row-text">
               <div class="row-title">AI Call Summary</div>
-              <div class="row-sub">Ella briefing. On by default.</div>
+              <div class="row-sub">Call briefing</div>
             </div>
             <label class="toggle"><input type="checkbox" id="feat-ai-call" checked onchange="setAi('ai_call_summary',this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
           </div>
@@ -246,42 +298,42 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
           <div class="setting-row">
             <div class="row-text">
               <div class="row-title">AI Gallery</div>
-              <div class="row-sub">Eraser, Expand, HD, and related OS 16 gallery keys. Art/Studio need GT editor on some devices.</div>
+              <div class="row-sub">Eraser, Expand, HD, and related gallery tools</div>
             </div>
             <label class="toggle"><input type="checkbox" id="feat-ai-gallery" checked onchange="setAi('ai_gallery',this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
           </div>
           <div class="setting-row">
             <div class="row-text">
               <div class="row-title">AI Video Enhancement</div>
-              <div class="row-sub">Video Enhancement Engine (VEE). On by default.</div>
+              <div class="row-sub">Video Enhancement Engine</div>
             </div>
             <label class="toggle"><input type="checkbox" id="feat-ai-video" checked onchange="setAi('ai_video',this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
           </div>
           <div class="setting-row">
             <div class="row-text">
               <div class="row-title">Video Super Resolution</div>
-              <div class="row-sub">OS 16 persist.tr_video.ai_super_resolution. Apply + reboot, then the video player.</div>
+              <div class="row-sub">Sharper video playback</div>
             </div>
             <label class="toggle"><input type="checkbox" id="feat-videosr" checked onchange="cfg.videosr_os16=this.checked"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
           </div>
           <div class="setting-row">
             <div class="row-text">
               <div class="row-title">Gallery Live Photos</div>
-              <div class="row-sub">GT dump 0 = off. Magisk keys stay. Not a GT-on extra.</div>
+              <div class="row-sub">Live photos in Gallery</div>
             </div>
             <label class="toggle"><input type="checkbox" id="feat-gallerylive" checked onchange="cfg.gallerylive_os16=this.checked"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
           </div>
           <div class="setting-row">
             <div class="row-text">
               <div class="row-title">Air Transfer</div>
-              <div class="row-sub">OS 16 ro.tr_airtransfer.feature.support (GT dump 1 = on). Apply + reboot, then Share / Air Transfer. Dump that flag.</div>
+              <div class="row-sub">Nearby sharing</div>
             </div>
             <label class="toggle"><input type="checkbox" id="feat-airtransfer" checked onchange="cfg.airtransfer_os16=this.checked"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
           </div>
           <div class="setting-row">
             <div class="row-text">
               <div class="row-title">AI Treasure Box</div>
-              <div class="row-sub">OS 16 ro.tr_ai_treasure_box (GT dump stock 0). Kept for every Trans OS 16 device.</div>
+              <div class="row-sub">Treasure Box in AI features</div>
             </div>
             <label class="toggle"><input type="checkbox" id="feat-treasure" checked onchange="cfg.treasure_os16=this.checked"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
           </div>
@@ -291,14 +343,14 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
           <div class="setting-row">
             <div class="row-text">
               <div class="row-title">Gaming Suite</div>
-              <div class="row-sub">OS 16 keys. Apply, reboot, then check XArena.</div>
+              <div class="row-sub">Game Space and XArena</div>
             </div>
             <label class="toggle"><input type="checkbox" id="feat-game" checked onchange="setGame('game_master',this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
           </div>
           <div class="setting-row">
             <div class="row-text">
               <div class="row-title">GT Triggers</div>
-              <div class="row-sub">XArena option to add GT triggers. No physical buttons on this phone.</div>
+              <div class="row-sub">On-screen GT triggers in XArena</div>
             </div>
             <label class="toggle"><input type="checkbox" id="feat-game-triggers" checked onchange="setGame('game_gt_triggers',this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
           </div>
@@ -333,7 +385,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
           <div class="setting-row">
             <div class="row-text">
               <div class="row-title">Social Turbo</div>
-              <div class="row-sub">OS 16 ro.tr_social.* keys. Apply + reboot.</div>
+              <div class="row-sub">Call recording, translation, and beauty</div>
             </div>
             <label class="toggle"><input type="checkbox" id="feat-social" checked onchange="setSocial('social_master',this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
           </div>
@@ -355,27 +407,16 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
           <div class="setting-row">
             <div class="row-text">
               <div class="row-title">Parallel animations</div>
-              <div class="row-sub">Platform 3 app open/close. Blur level controls glass separately. Level 2 recommended.</div>
+              <div class="row-sub">App open and close</div>
             </div>
             <label class="toggle"><input type="checkbox" id="feat-anim" checked onchange="setAnimBlur('anim_os16',this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
           </div>
           <div class="setting-row">
             <div class="row-text">
               <div class="row-title">Dynamic blur</div>
-              <div class="row-sub">1 = Smart solid. 2 = dock blur (default). 3 = full glass. Level 1 may affect Parallel on some devices.</div>
+              <div class="row-sub">Off writes no blur props. Your ROM stays as it was.</div>
             </div>
             <label class="toggle"><input type="checkbox" id="feat-blur" checked onchange="setAnimBlur('blur_os16',this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
-          </div>
-          <div class="setting-row">
-            <div class="row-text">
-              <div class="row-title">Blur level</div>
-              <div class="row-sub">1 = Smart series (solid lock clock + shade). 2 = partial glass (G99 default). 3 = full flagship glass.</div>
-            </div>
-          </div>
-          <div class="segmented" id="blur-level">
-            <div class="segmented-opt" data-val="1" onclick="setBlurLevel(1)">1</div>
-            <div class="segmented-opt active" data-val="2" onclick="setBlurLevel(2)">2</div>
-            <div class="segmented-opt" data-val="3" onclick="setBlurLevel(3)">3</div>
           </div>
         </div>
         <div class="section-label">Unlock extras</div>
@@ -383,28 +424,28 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
           <div class="setting-row">
             <div class="row-text">
               <div class="row-title">Resolution scale-up</div>
-              <div class="row-sub">Settings vconfig tr_display.resolution.scalingup.support. Apply + reboot → Settings → Display.</div>
+              <div class="row-sub">Higher resolution option in Display settings</div>
             </div>
             <label class="toggle"><input type="checkbox" id="feat-scale" checked onchange="cfg.scale_os16=this.checked"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
           </div>
           <div class="setting-row">
             <div class="row-text">
               <div class="row-title">GT app extras</div>
-              <div class="row-sub">Smart Scan, Gallery extras (incl. 3D photo), Recorder speech, Motions gestures, PC Connect (incl. extend screen), Zero Screen, Smart Hub.</div>
+              <div class="row-sub">Smart Scan, Gallery extras, PC Connect, Smart Hub</div>
             </div>
             <label class="toggle"><input type="checkbox" id="feat-gtapps" checked onchange="cfg.gt_apps_os16=this.checked"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
           </div>
           <div class="setting-row">
             <div class="row-text">
               <div class="row-title">Circle to Search</div>
-              <div class="row-sub">ro.tr_microIntelligence.circle_to_search + Flagship 15 os_ai key. Long-press home / nav handle.</div>
+              <div class="row-sub">Long-press Home or the nav handle</div>
             </div>
             <label class="toggle"><input type="checkbox" id="feat-circle" checked onchange="cfg.circle_os16=this.checked"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
           </div>
           <div class="setting-row">
             <div class="row-text">
               <div class="row-title">Motion sickness relief</div>
-              <div class="row-sub">GT dump ro.tr_microIntelligence.motion_sickness (stock 0 on G99). Settings → Special functions. Not the same as Motions gestures in GT app extras.</div>
+              <div class="row-sub">Settings → Special functions</div>
             </div>
             <label class="toggle"><input type="checkbox" id="feat-motion-sick" checked onchange="cfg.motion_sick_os16=this.checked"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
           </div>
@@ -414,70 +455,70 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
           <div class="setting-row">
             <div class="row-text">
               <div class="row-title">DC Dimming</div>
-              <div class="row-sub">Flicker-free low brightness. May not show in Settings on all OS 16 builds.</div>
+              <div class="row-sub">Flicker-free at low brightness</div>
             </div>
             <label class="toggle"><input type="checkbox" id="feat-dc" checked onchange="setDisplay('display_dc',this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
           </div>
           <div class="setting-row">
             <div class="row-text">
               <div class="row-title">Color Enhancement</div>
-              <div class="row-sub">Vivid / color mode (OS 16 colormode keys).</div>
+              <div class="row-sub">Vivid color mode</div>
             </div>
             <label class="toggle"><input type="checkbox" id="feat-color" checked onchange="setDisplay('display_color',this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
           </div>
           <div class="setting-row">
             <div class="row-text">
               <div class="row-title">HDR Display</div>
-              <div class="row-sub">SDR2HDR / XDR keys + has_HDR_display. Settings row may not appear on G99.</div>
+              <div class="row-sub">HDR playback</div>
             </div>
             <label class="toggle"><input type="checkbox" id="feat-hdr" checked onchange="setDisplay('display_hdr',this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
           </div>
           <div class="setting-row">
             <div class="row-text">
               <div class="row-title">Reading Mode</div>
-              <div class="row-sub">Eye comfort filter. Off by default.</div>
+              <div class="row-sub">Eye comfort filter</div>
             </div>
             <label class="toggle"><input type="checkbox" id="feat-reading" onchange="setDisplay('display_reading',this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
           </div>
           <div class="setting-row">
             <div class="row-text">
               <div class="row-title">Always-On Display</div>
-              <div class="row-sub">Binds GT vconfig tr_aod.always.show.feature.support (Always Show AOD). Apply + reboot, then Lock screen / AOD.</div>
+              <div class="row-sub">Always Show AOD</div>
             </div>
             <label class="toggle"><input type="checkbox" id="feat-aod" checked onchange="cfg.aod_os16=this.checked"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
           </div>
           <div class="setting-row">
             <div class="row-text">
               <div class="row-title">Super volume</div>
-              <div class="row-sub">OS 16 ro.tr_audio.supervol (GT dump stock false). Magisk applies it for every Trans OS 16 device.</div>
+              <div class="row-sub">Louder speaker boost</div>
             </div>
             <label class="toggle"><input type="checkbox" id="feat-supervol" checked onchange="cfg.supervol_os16=this.checked"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
           </div>
           <div class="setting-row">
             <div class="row-text">
               <div class="row-title">Cute Pet</div>
-              <div class="row-sub">Magisk keys stay for other OS 16 devices. This G99 did not unhide Themes pet. Apply + reboot.</div>
+              <div class="row-sub">Themes pet</div>
             </div>
             <label class="toggle"><input type="checkbox" id="feat-cutepet" checked onchange="cfg.cutepet_os16=this.checked"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
           </div>
           <div class="setting-row">
             <div class="row-text">
               <div class="row-title">Outdoor boost</div>
-              <div class="row-sub">OS 16 ro.tr_outdoorboost. Magisk keys stay. Apply + reboot, then Display / outdoor.</div>
+              <div class="row-sub">Brighter outdoor display</div>
             </div>
             <label class="toggle"><input type="checkbox" id="feat-outdoor" checked onchange="cfg.outdoorboost_os16=this.checked"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
           </div>
           <div class="setting-row">
             <div class="row-text">
               <div class="row-title">Dynamic bar extras</div>
-              <div class="row-sub">Off leaves your stock Dynamic Bar alone (does not disable it). On adds Flagship extras: Always Show Background row + landscape recents fix. Apply + reboot.</div>
+              <div class="row-sub">Always Show Background and landscape recents. Off leaves stock Dynamic Bar alone</div>
             </div>
             <label class="toggle"><input type="checkbox" id="feat-dynamicbar" onchange="cfg.dynamicbar_os16=this.checked"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
           </div>
           <div class="setting-row">
             <div class="row-text">
               <div class="row-title">Force 120Hz</div>
-              <div class="row-sub">Default listed rate is 120 (picker still has 144). IME / control center stay high. Apply, then reboot.</div>
+              <div class="row-sub">Lock 120Hz. The 144Hz picker is always available</div>
             </div>
             <label class="toggle"><input type="checkbox" id="feat-force120hz" onchange="cfg.force_120hz=this.checked"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
           </div>
@@ -512,7 +553,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
         <div class="page-header">
           <div class="eyebrow">Media</div>
           <h1>Animations</h1>
-          <div class="sub">Reboot after Apply.</div>
+          <div class="sub">Boot, reboot, and emoji font — reboot after Apply</div>
         </div>
         <div class="glass-card">
           <div class="setting-row">
@@ -522,8 +563,8 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
             </div>
           </div>
           <div class="segmented" id="bootanim-style-picker">
-            <div class="segmented-opt" data-val="default" onclick="setStyle('default')">XOS</div>
-            <div class="segmented-opt active" data-val="hios16" onclick="setStyle('hios16')">HiOS 16</div>
+            <div class="segmented-opt active" data-val="default" onclick="setStyle('default')">XOS</div>
+            <div class="segmented-opt" data-val="hios16" onclick="setStyle('hios16')">HiOS 16</div>
             <div class="segmented-opt" data-val="custom" onclick="setStyle('custom')" id="bootanim-custom-opt" style="display:none">Custom</div>
             <div class="segmented-opt" data-val="off" onclick="setStyle('off')">Off</div>
           </div>
@@ -544,8 +585,8 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
             </div>
           </div>
           <div class="segmented" id="rebootanim-style-picker">
-            <div class="segmented-opt" data-val="default" onclick="setRebootStyle('default')">XOS</div>
-            <div class="segmented-opt active" data-val="hios16" onclick="setRebootStyle('hios16')">HiOS 16</div>
+            <div class="segmented-opt active" data-val="default" onclick="setRebootStyle('default')">XOS</div>
+            <div class="segmented-opt" data-val="hios16" onclick="setRebootStyle('hios16')">HiOS 16</div>
             <div class="segmented-opt" data-val="custom" onclick="setRebootStyle('custom')" id="rebootanim-custom-opt" style="display:none">Custom</div>
             <div class="segmented-opt" data-val="off" onclick="setRebootStyle('off')">Off</div>
           </div>
@@ -558,6 +599,23 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
           </div>
         </div>
         <div class="h8"></div>
+        <div class="glass-card">
+          <div class="setting-row">
+            <div class="row-text">
+              <div class="row-title">Custom emoji font</div>
+              <div class="row-sub">iOS-style high-res emoji. Off = stock. Upload a .ttf to replace the packed font.</div>
+            </div>
+            <label class="toggle"><input type="checkbox" id="media-emoji" checked onchange="cfg.emoji_font=this.checked"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+          </div>
+          <div class="file-row">
+            <label class="file-btn">
+              Upload custom .ttf
+              <input type="file" accept=".ttf,font/ttf" onchange="handleEmoji(this)">
+            </label>
+            <div class="file-name" id="media-emoji-name">Packed: NotoColorEmoji.ttf</div>
+          </div>
+        </div>
+        <div class="h8"></div>
         <button class="action-btn btn-primary" onclick="saveAll()">Apply &amp; Save</button>
       </div>
 
@@ -565,7 +623,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
         <div class="page-header">
           <div class="eyebrow">Customise</div>
           <h1>Sounds</h1>
-          <div class="sub">Pixel is the default except keypress (those stay stock). Charging also has Huawei, iOS, and S25. Custom upload still works. Screenshot remaining dests later.</div>
+          <div class="sub">Pixel, charging packs, or your own files</div>
         </div>
         <div id="sounds-root"></div>
         <div class="h8"></div>
@@ -598,7 +656,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
 <script type="module">
 const MOD='/data/adb/modules/transsion-flagship-16';
 const CONFIG_PATH=MOD+'/config.json';
-let cfg={bootanim_style:'hios16',bootanim_file:'',rebootanim_style:'hios16',rebootanim_file:'',statusbar_style:'off',statusbarcustom_file:'',ai_master:true,ai_subtitles:true,ai_call_summary:true,ai_writing:true,ai_sound_rec:true,ai_notes:true,ai_gallery:true,ai_video:true,game_master:true,game_esports_touch:true,game_esports_level:3,game_bypass_charge:true,game_gt_triggers:true,social_master:true,social_record:true,social_translate:true,social_beauty:true,anim_os16:true,blur_os16:true,blur_os16_level:2,display_dc:true,display_color:true,display_hdr:true,display_reading:false,aod_os16:true,scale_os16:true,gt_apps_os16:true,circle_os16:true,motion_sick_os16:true,videosr_os16:true,supervol_os16:true,treasure_os16:true,cutepet_os16:true,outdoorboost_os16:true,gallerylive_os16:true,airtransfer_os16:true,dynamicbar_os16:false,force_120hz:false};
+let cfg={bootanim_style:'default',bootanim_file:'',rebootanim_style:'default',rebootanim_file:'',statusbar_style:'off',statusbarcustom_file:'',ai_master:true,ai_subtitles:true,ai_call_summary:true,ai_writing:true,ai_sound_rec:true,ai_notes:true,ai_gallery:true,ai_video:true,game_master:true,game_esports_touch:true,game_esports_level:3,game_bypass_charge:true,game_gt_triggers:true,social_master:true,social_record:true,social_translate:true,social_beauty:true,anim_os16:true,blur_os16:true,display_dc:true,display_color:true,display_hdr:true,display_reading:false,aod_os16:true,scale_os16:true,gt_apps_os16:true,circle_os16:true,motion_sick_os16:true,videosr_os16:true,supervol_os16:true,treasure_os16:true,cutepet_os16:true,outdoorboost_os16:true,gallerylive_os16:true,airtransfer_os16:true,dynamicbar_os16:false,force_120hz:false,emoji_font:true,emoji_file:''};
 let _exec=null;
 let _saving=false;
 const SOUND_SLOTS=[
@@ -606,7 +664,7 @@ const SOUND_SLOTS=[
   {id:'wirelesschargesound', dest:'WirelessChargingStarted', title:'Wireless charging', group:'Charging', pack:'charge'},
   {id:'sound_Unlock', dest:'Unlock', title:'Unlock', group:'Lock screen', pack:'pixel'},
   {id:'sound_Lock', dest:'Lock', title:'Lock', group:'Lock screen', pack:'pixel'},
-  {id:'sound_Screenshots', dest:'Screenshots', title:'Screenshot', group:'Feedback', pack:'pixel', sub:'camera_click.ogg (SystemUI) + Screenshots.ogg'},
+  {id:'sound_Screenshots', dest:'Screenshots', title:'Screenshot', group:'Feedback', pack:'pixel'},
   {id:'sound_Effect_Tick', dest:'Effect_Tick', title:'Tick', group:'Feedback', pack:'pixel'},
   {id:'sound_Fail', dest:'Fail', title:'Fail', group:'Feedback'},
   {id:'sound_Success', dest:'Success', title:'Success', group:'Feedback'},
@@ -668,7 +726,7 @@ function renderSounds(){
       html+='<div style="border-top:1px solid var(--glass-b)"></div>';
     }
     const fn=soundFileOf(s.id);
-    html+='<div class="setting-row"><div class="row-text" style="margin-left:0"><div class="row-title">'+s.title+'</div><div class="row-sub">'+(s.sub||(s.dest+'.ogg'))+'</div></div></div>';
+    html+='<div class="setting-row"><div class="row-text" style="margin-left:0"><div class="row-title">'+s.title+'</div></div></div>';
     html+=soundPickerHtml(s);
     html+='<div class="file-row"><label class="file-btn">Upload .ogg / .mp3 / .wav<input type="file" accept=".ogg,.mp3,.wav,.m4a,audio/*" onchange="handleSoundUpload(\''+s.id+'\',\''+s.dest+'\',this)"></label>';
     html+='<div class="file-name" id="media-'+s.id+'-name">'+(fn?('Custom: '+fn):'No custom sound uploaded')+'</div></div>';
@@ -710,10 +768,42 @@ function toast(msg,dur=2400){
   el.textContent=msg; el.classList.add('show');
   clearTimeout(el._t); el._t=setTimeout(()=>el.classList.remove('show'),dur);
 }
+function showBusy(msg){
+  const el=document.getElementById('busy');
+  const t=document.getElementById('busy-text');
+  if(t) t.textContent=msg||'Working';
+  if(el){
+    clearTimeout(el._hide);
+    el._shownAt=Date.now();
+    el.classList.add('show');
+    el.setAttribute('aria-hidden','false');
+  }
+}
+function hideBusy(){
+  const el=document.getElementById('busy');
+  if(!el) return;
+  const wait=Math.max(0, 420-(Date.now()-(el._shownAt||0)));
+  clearTimeout(el._hide);
+  el._hide=setTimeout(()=>{
+    el.classList.remove('show');
+    el.setAttribute('aria-hidden','true');
+  }, wait);
+}
+function openTelegram(e){
+  if(e) e.preventDefault();
+  const url='https://t.me/Just_LilGXX';
+  try{ window.open(url,'_blank'); }catch(_){}
+  exec('am start -a android.intent.action.VIEW -d "'+url+'" >/dev/null 2>&1; echo OK').catch(()=>{});
+  toast('Telegram @Just_LilGXX');
+}
 function n(id,v){ const el=document.getElementById(id); if(el) el.textContent=v; }
 function switchTab(id,el){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  document.getElementById('page-'+id).classList.add('active');
+  const page=document.getElementById('page-'+id);
+  if(page){
+    void page.offsetWidth;
+    page.classList.add('active');
+  }
   document.querySelectorAll('.tab-item').forEach(t=>t.classList.remove('active'));
   el.classList.add('active');
   document.querySelector('.pages').scrollTop=0;
@@ -740,16 +830,10 @@ function setAi(key,el){ cfg[key]=el.checked; if(key==='ai_master') syncAiChildre
 function setGame(key,el){ cfg[key]=el.checked; if(key==='game_master'||key==='game_esports_touch') syncGameChildren(); }
 function setSocial(key,el){ cfg[key]=el.checked; if(key==='social_master') syncSocialChildren(); }
 function setDisplay(key,el){ cfg[key]=el.checked; }
-function setAnimBlur(key,el){ cfg[key]=el.checked; if(key==='blur_os16') syncBlurChildren(); }
+function setAnimBlur(key,el){ cfg[key]=el.checked; }
 function setEsportsLevel(val){
   cfg.game_esports_level=val;
   document.querySelectorAll('#game-esports-level .segmented-opt').forEach(o=>{
-    o.classList.toggle('active', String(o.dataset.val)===String(val));
-  });
-}
-function setBlurLevel(val){
-  cfg.blur_os16_level=val;
-  document.querySelectorAll('#blur-level .segmented-opt').forEach(o=>{
     o.classList.toggle('active', String(o.dataset.val)===String(val));
   });
 }
@@ -784,10 +868,6 @@ function syncSocialChildren(){
     if(el) el.disabled=!on;
   });
 }
-function syncBlurChildren(){
-  const lvl=document.getElementById('blur-level');
-  if(lvl) lvl.classList.toggle('disabled', cfg.blur_os16===false);
-}
 function ai01(key){ return aiOn(key)?'1':'0'; }
 function aiTf(key){ return aiOn(key)?'true':'false'; }
 function game01(key){ return gameOn(key)?'1':'0'; }
@@ -805,64 +885,19 @@ function describeAiFlag(v){
 }
 function animOn(){ return cfg.anim_os16!==false; }
 function blurOn(){ return cfg.blur_os16!==false; }
-function blurLevel(){
-  const n=parseInt(cfg.blur_os16_level,10);
-  return (n>=1 && n<=3)?n:2;
-}
-function glassOn(){ return blurOn() && blurLevel()===3; }
-function gaussianLvl(){
-  if(!blurOn() || blurLevel()===1) return '0';
-  if(blurLevel()===2) return '2';
-  return '3';
-}
 function animLvl(){
-  if(cfg.anim_os16===false) return '0';
-  if(glassOn()) return '3';
-  return '2';
+  return cfg.anim_os16===false?'0':'3';
 }
 function perfLvl(){
-  if(cfg.anim_os16===false) return '0';
-  return '3';
-}
-function motionPlatform(){
-  if(cfg.anim_os16===false) return '0';
-  if(glassOn()) return '3';
-  if(solidShade()) return '3';
-  return '0';
-}
-function sysuiPlatform(){
-  return animLvl();
-}
-function vcfgGaussian(){
-  return gaussianLvl();
+  return cfg.anim_os16===false?'0':'3';
 }
 function unionOn(){
   if(cfg.anim_os16===false) return '0';
-  if(glassOn()) return '1';
-  return '0';
+  return blurOn()?'1':'0';
 }
-function solidShade(){ return !blurOn() || blurLevel()<=2; }
-function dockBlurOn(){ return blurOn() && blurLevel()>=2; }
 function anim01(){ return cfg.anim_os16!==false?'1':'0'; }
 function launcherAsync(){
-  if(cfg.anim_os16===false) return '0';
-  return '1';
-}
-function blurDisable(){ return solidShade()?'1':'0'; }
-function blur01(){ return glassOn()?'1':'0'; }
-function blurDyn(){ return (blurOn() && blurLevel()===3)?'1':'0'; }
-function blurV2(){ return (blurOn() && blurLevel()===3)?'1':'0'; }
-function blurExpensive(){ return (blurOn() && blurLevel()===3)?'1':'0'; }
-function lightingCc(){ return glassOn()?'1':'0'; }
-function lightingFeat(){
-  if(!blurOn() || blurLevel()===1) return '0';
-  return '1';
-}
-function blurRadius(){
-  if(!dockBlurOn()) return 0;
-  if(blurLevel()===3) return 80;
-  if(blurLevel()===2) return 25;
-  return 0;
+  return cfg.anim_os16===false?'0':'1';
 }
 const GALLERY_KEYS=[
   'ro.tr_gallery.eraser.v2.support',
@@ -891,7 +926,6 @@ const GAME_KEYS=[
   'ro.tr_smartbutton.shoulderbutton20.feature.support'
 ];
 const ANIM_KEYS=[
-  'ro.tr_animation.platform_level',
   'ro.tr_perf.launch_start_exit.model',
   'ro.tr_perf.power_keyguard_animation.model',
   'ro.tr_perf.recent_animation.model',
@@ -902,8 +936,7 @@ const ANIM_KEYS=[
   'ro.transsion_unlock_mode_support',
   'ro.transsion_launch_start_exit_support',
   'ro.transsion_power_keyguard_animation_support',
-  'ro.transsion.recent_animation.model',
-  'ro.tran_display_unionrender.support'
+  'ro.transsion.recent_animation.model'
 ];
 const AOD_KEYS=[
   'ro.tr_aod.feature.support',
@@ -957,11 +990,17 @@ const VIDEOSR_KEYS=[
   'tr_video.ai_super_resolution.support'
 ];
 const BLUR_KEYS=[
+  'ro.tr_animation.platform_level',
+  'ro.tran_display_unionrender.support',
   'ro.tr_display.liquidglass.support',
   'ro.surface_flinger.supports_background_blur',
   'ro.os.recent.blur',
   'ro.transsion_launcher_gaussian_blur_support',
   'tr_launcher.gaussianblur.support',
+  'tr_launcher.blurrecent.support',
+  'tr_launcher.folderblur.support',
+  'ro.transsion_launcher_folder_blur_support',
+  'persist.sys.transsion_launcher_gaussian_blur_enable',
   'ro.tran.effectengine.dynamicblur.support',
   'ro.os_xos16_blur_v2_support',
   'persist.sys.sf.disable_blurs',
@@ -1051,9 +1090,7 @@ async function writeB64File(bytes, dests, tmp){
 }
 async function writeAiSystemProp(){
   const lines=[
-    '# Flagship 16 — OS 16 keys. Magisk loads this file at boot.',
-    '# Apply in WebUI rewrites this file from the Features toggles. Reboot to take effect.',
-    '# Not written from service.sh.',
+    '# Flagship 16',
     'ro.tr_aiservice.aicorespeech_subtitle.feature.support='+ai01('ai_subtitles'),
     'ro.tr_aiservice.aicorespeech_livecaption.feature.support='+ai01('ai_subtitles'),
     'ro.tr_soundrecorder.summary.feature.support='+ai01('ai_sound_rec'),
@@ -1108,10 +1145,6 @@ async function writeAiSystemProp(){
   const alvl=animLvl();
   const perf=perfLvl();
   const a01=anim01();
-  const blvl=gaussianLvl();
-  const b01=blur01();
-  const union=unionOn();
-  lines.push('ro.tr_animation.platform_level='+alvl);
   lines.push('ro.tr_perf.launch_start_exit.model='+perf);
   lines.push('ro.tr_perf.power_keyguard_animation.model='+perf);
   lines.push('ro.tr_perf.recent_animation.model='+perf);
@@ -1123,23 +1156,31 @@ async function writeAiSystemProp(){
   lines.push('ro.transsion_launch_start_exit_support='+perf);
   lines.push('ro.transsion_power_keyguard_animation_support='+perf);
   lines.push('ro.transsion.recent_animation.model='+perf);
-  lines.push('ro.tran_display_unionrender.support='+union);
-  lines.push('ro.tr_display.liquidglass.support='+b01);
-  lines.push('ro.surface_flinger.supports_background_blur='+b01);
-  lines.push('ro.os.recent.blur='+b01);
-  lines.push('ro.transsion_launcher_gaussian_blur_support='+blvl);
-  lines.push('tr_launcher.gaussianblur.support='+blvl);
-  lines.push('ro.tran.effectengine.dynamicblur.support='+blurDyn());
-  lines.push('ro.os_xos16_blur_v2_support='+blurV2());
-  lines.push('persist.sys.sf.disable_blurs='+blurDisable());
-  lines.push('persist.sys.disable_blur='+blurDisable());
-  lines.push('persist.sysui.disableBlur='+blurDisable());
-  lines.push('persist.sysui.disable_blur='+blurDisable());
-  lines.push('ro.sf.blurs_are_expensive='+blurExpensive());
-  lines.push('persist.tr_lighting.controlcenter.feature.support='+lightingCc());
-  lines.push('persist.tr_lighting.feature.support='+lightingFeat());
-  lines.push('ro.tr_lighting.controlcenter.feature.support='+lightingCc());
-  lines.push('ro.tr_lighting.feature.support='+lightingFeat());
+  if(blurOn()){
+    lines.push('ro.tr_animation.platform_level='+alvl);
+    const union=unionOn();
+    lines.push('ro.tran_display_unionrender.support='+union);
+    lines.push('ro.tr_display.liquidglass.support=1');
+    lines.push('ro.surface_flinger.supports_background_blur=1');
+    lines.push('ro.os.recent.blur=1');
+    lines.push('ro.transsion_launcher_gaussian_blur_support=3');
+    lines.push('tr_launcher.gaussianblur.support=3');
+    lines.push('tr_launcher.blurrecent.support=1');
+    lines.push('tr_launcher.folderblur.support=3');
+    lines.push('ro.transsion_launcher_folder_blur_support=3');
+    lines.push('persist.sys.transsion_launcher_gaussian_blur_enable=1');
+    lines.push('ro.tran.effectengine.dynamicblur.support=1');
+    lines.push('ro.os_xos16_blur_v2_support=1');
+    lines.push('persist.sys.sf.disable_blurs=0');
+    lines.push('persist.sys.disable_blur=0');
+    lines.push('persist.sysui.disableBlur=0');
+    lines.push('persist.sysui.disable_blur=0');
+    lines.push('ro.sf.blurs_are_expensive=1');
+    lines.push('persist.tr_lighting.controlcenter.feature.support=1');
+    lines.push('persist.tr_lighting.feature.support=1');
+    lines.push('ro.tr_lighting.controlcenter.feature.support=1');
+    lines.push('ro.tr_lighting.feature.support=1');
+  }
   lines.push('ro.tr_aod.feature.support='+feat01('aod_os16'));
   lines.push('ro.tr_aod.doze.brightness.feature.support='+feat01('aod_os16'));
   lines.push('ro.tr_aod.half.screen.feature.support='+feat01('aod_os16'));
@@ -1229,15 +1270,16 @@ async function writeAiSystemProp(){
 async function saveAll(){
   if(_saving) return;
   _saving=true;
+  showBusy('Saving');
   toast('Saving...');
   try{
     if(cfg.ai_writing===undefined) cfg.ai_writing=cfg.ai_notif_summary!==false;
     const hzEl=document.getElementById('feat-force120hz');
     if(hzEl) cfg.force_120hz=hzEl.checked;
     const slim={
-      bootanim_style:cfg.bootanim_style||'hios16',
+      bootanim_style:cfg.bootanim_style||'default',
       bootanim_file:cfg.bootanim_file||'',
-      rebootanim_style:cfg.rebootanim_style||'hios16',
+      rebootanim_style:cfg.rebootanim_style||'default',
       rebootanim_file:cfg.rebootanim_file||'',
       statusbar_style:cfg.statusbar_style||'off',
       statusbarcustom_file:cfg.statusbarcustom_file||'',
@@ -1268,7 +1310,6 @@ async function saveAll(){
       motion_sick_os16:cfg.motion_sick_os16!==false,
       anim_os16:cfg.anim_os16!==false,
       blur_os16:cfg.blur_os16!==false,
-      blur_os16_level:blurLevel(),
       aod_os16:cfg.aod_os16!==false,
       videosr_os16:cfg.videosr_os16!==false,
       supervol_os16:cfg.supervol_os16!==false,
@@ -1278,7 +1319,9 @@ async function saveAll(){
       gallerylive_os16:cfg.gallerylive_os16!==false,
       airtransfer_os16:cfg.airtransfer_os16!==false,
       dynamicbar_os16:cfg.dynamicbar_os16===true,
-      force_120hz:cfg.force_120hz===true
+      force_120hz:cfg.force_120hz===true,
+      emoji_font:cfg.emoji_font!==false,
+      emoji_file:cfg.emoji_file||''
     };
     SOUND_SLOTS.forEach(s=>{
       slim[s.id+'_style']=soundStyleOf(s.id);
@@ -1287,16 +1330,15 @@ async function saveAll(){
     const json=JSON.stringify(slim,null,2).replace(/'/g,"'\\''");
     const hzFlag=cfg.force_120hz===true?'1':'0';
     const r=await exec("printf '%s\\n' '"+json+"' > \""+CONFIG_PATH+"\" && printf '%s\\n' '"+hzFlag+"' > \""+MOD+"/.force_120hz\" && sync \""+CONFIG_PATH+"\" \""+MOD+"/.force_120hz\" && echo OK");
-    if(!(r.stdout||'').includes('OK')){ toast('Save failed — is the module installed?'); _saving=false; return; }
+    if(!(r.stdout||'').includes('OK')){ toast('Save failed — is the module installed?'); hideBusy(); _saving=false; return; }
     const props=await writeAiSystemProp();
-    if(!props){ toast('Saved config, but AI props failed to write'); _saving=false; return; }
-    // ksu.exec has no timeout. apply_blur.sh all can hang on resetprop --delete
-    // / vconfig bind and freeze the WebUI. Detach so Apply always returns.
-    exec('nohup sh -c "sh \"'+MOD+'/apply_blur.sh\" all; sleep 1; am force-stop com.android.systemui" >/dev/null 2>&1 & nohup sh "'+MOD+'/apply_120hz.sh" >/dev/null 2>&1 & nohup sh "'+MOD+'/apply_sounds.sh" >/dev/null 2>&1 & nohup sh "'+MOD+'/apply_unlock.sh" >/dev/null 2>&1 & echo OK').catch(function(){});
-    toast('Saved. SystemUI will restart for shade blur. Reboot if Settings did not update.');
+    if(!props){ toast('Saved config, but AI props failed to write'); _saving=false; hideBusy(); return; }
+    exec('nohup sh -c "sh \\"'+MOD+'/apply_blur.sh\\" all; sleep 1; am force-stop com.android.systemui" >/dev/null 2>&1 & nohup sh "'+MOD+'/apply_120hz.sh" >/dev/null 2>&1 & nohup sh "'+MOD+'/apply_sounds.sh" >/dev/null 2>&1 & nohup sh "'+MOD+'/apply_emoji.sh" >/dev/null 2>&1 & echo OK').catch(function(){});
+    toast('Saved. Reboot to finish applying.');
   }catch(e){
     toast('Save failed. Try again.');
   }
+  hideBusy();
   _saving=false;
 }
 async function applyBlurRuntime(){
@@ -1306,7 +1348,9 @@ async function apply120HzRuntime(){
   exec('nohup sh "'+MOD+'/apply_120hz.sh" >/dev/null 2>&1 & echo OK').catch(function(){});
 }
 async function dumpAi(){
+  showBusy('Reading flags');
   toast('Reading flags…', 8000);
+  try{
   const keys=[
     'ro.tr_aiservice.aicorespeech_subtitle.feature.support',
     'ro.tr_aiservice.aicorespeech_livecaption.feature.support',
@@ -1339,7 +1383,7 @@ async function dumpAi(){
     lines.push(k+'  '+describeAiFlag(v));
   }
   lines.push('');
-  lines.push('=== not written (ghosted recents on Flagship 15) ===');
+  lines.push('=== not written ===');
   const ghost=await g('getprop ro.transsion_recent_animation_support');
   lines.push('ro.transsion_recent_animation_support  '+describeAiFlag(ghost));
   lines.push('');
@@ -1348,7 +1392,7 @@ async function dumpAi(){
   lines.push(home||'EMPTY');
   lines.push('');
   lines.push('=== launcher blur settings ===');
-  lines.push('blur_level  '+blurLevel()+'  glass='+String(glassOn())+'  solid_shade='+String(solidShade())+'  dock_blur='+String(dockBlurOn())+'  platform='+animLvl()+'  motion_platform='+motionPlatform()+'  perf_model='+perfLvl()+'  sysui_platform='+sysuiPlatform()+'  vconfig_gaussian='+vcfgGaussian()+'  lighting_cc='+lightingCc()+'  lighting_feat='+lightingFeat());
+  lines.push('blur_os16  '+String(blurOn())+'  platform='+animLvl()+'  perf_model='+perfLvl());
   const lg=await g('getprop ro.tr_display.liquidglass.support');
   const sfb=await g('getprop ro.surface_flinger.supports_background_blur');
   const dyn=await g('getprop ro.tran.effectengine.dynamicblur.support');
@@ -1401,7 +1445,11 @@ async function dumpAi(){
   lines.push('device_config notification_shade_blur  '+(nsb||'EMPTY'));
   lines.push('device_config enable_blur_on_windows  '+(ebow||'EMPTY'));
   lines.push('device_config shade_blur_radius  '+(sbr||'EMPTY'));
-  const lvc=await g('grep -E "gaussian|blurrecent|recent.blur|async_animation|spring" /tr_product/etc/vconfig/com.transsion.launcher3/build.prop 2>/dev/null');
+  const lvc=await g('grep -E "gaussian|blurrecent|folderblur|folder_blur|recent.blur|async_animation|spring" /tr_product/etc/vconfig/com.transsion.launcher3/build.prop 2>/dev/null');
+  const foldp=await g('getprop tr_launcher.folderblur.support');
+  const gausp=await g('getprop tr_launcher.gaussianblur.support');
+  lines.push('tr_launcher.folderblur.support  '+(foldp||'EMPTY'));
+  lines.push('tr_launcher.gaussianblur.support  '+(gausp||'EMPTY'));
   lines.push('launcher3 vconfig');
   lines.push(lvc||'EMPTY');
   const svc=await g('grep -iE "blur|glass|glow|lighting|transparen|liquid|shade" /tr_product/etc/vconfig/com.android.systemui/build.prop 2>/dev/null');
@@ -1530,6 +1578,16 @@ async function dumpAi(){
   const uimount=await g('mount 2>/dev/null | grep "audio/ui" | head -20');
   lines.push(uimount||'(no audio/ui binds)');
   lines.push('');
+  lines.push('=== emoji font ===');
+  lines.push('emoji_font  '+String(cfg.emoji_font!==false));
+  lines.push('emoji_file  '+(cfg.emoji_file||'EMPTY'));
+  const empack=await g('wc -c < "'+MOD+'/system/fonts/NotoColorEmoji.ttf" 2>/dev/null');
+  const emcustom=await g('[ -f "'+MOD+'/system/fonts/NotoColorEmoji_custom.ttf" ] && echo yes || echo no');
+  const embound=await g('mount 2>/dev/null | grep NotoColorEmoji | grep -v Flags | wc -l');
+  lines.push('packed  '+(empack||'EMPTY'));
+  lines.push('custom_upload  '+emcustom);
+  lines.push('binds  '+(embound||'0'));
+  lines.push('');
   const apm=await g('ls -l /product/apm/config/refresh_rate_config.json /system/product/apm/config/refresh_rate_config.json /tr_product/etc/apm/config/refresh_rate_config.json 2>/dev/null; ls -l "'+MOD+'/system/product/apm/config/refresh_rate_config.json" 2>/dev/null');
   lines.push(apm||'no live /product/apm/config/refresh_rate_config.json (OS 16 uses Magellan, this is optional)');
   const head=await g('head -c 180 /product/apm/config/refresh_rate_config.json 2>/dev/null');
@@ -1551,6 +1609,9 @@ async function dumpAi(){
   await exec("printf '%s\\n' '"+text.replace(/'/g,"'\\''")+"' > \""+MOD+"/ai_dump.txt\"");
   const copied=await copyLog(true);
   toast(copied ? 'Dump copied — paste it here' : 'Dump ready — tap Copy log');
+  }finally{
+    hideBusy();
+  }
 }
 async function copyLog(silent){
   const text=(document.getElementById('pfd-log').textContent||'').trim();
@@ -1646,9 +1707,26 @@ async function handleStatusbar(input){
   toast('Custom overlay saved — reboot to apply');
   input.value='';
 }
+async function handleEmoji(input){
+  if(!input.files.length) return;
+  const file=input.files[0];
+  if(file.size>40*1024*1024){ toast('File too large (max 40MB)'); input.value=''; return; }
+  toast('Writing emoji font…', 20000);
+  const bytes=new Uint8Array(await file.arrayBuffer());
+  const dests=[MOD+'/system/fonts/NotoColorEmoji_custom.ttf'];
+  const ok=await writeB64File(bytes, dests, '/data/local/tmp/tf16_emoji.b64');
+  if(!ok){ toast('Write failed'); return; }
+  cfg.emoji_font=true;
+  cfg.emoji_file=file.name;
+  setT('media-emoji', true);
+  n('media-emoji-name','Custom: '+file.name);
+  await saveAll();
+  toast('Custom emoji saved — reboot to apply');
+  input.value='';
+}
 async function loadDevice(){
   const prop=await g('cat "'+MOD+'/module.prop" 2>/dev/null');
-  const ver=(prop.match(/^version=(.+)$/m)||[])[1]||'V2.0';
+  const ver=(prop.match(/^version=(.+)$/m)||[])[1]||'V2.8';
   n('module-version-sub', ver+' · OS 16');
   let type=await g('getprop ro.tran.os.type');
   let verOs=await g('getprop ro.transsion.os.version');
@@ -1709,7 +1787,6 @@ async function loadCfg(){
   if(cfg.motion_sick_os16===undefined) cfg.motion_sick_os16=true;
   if(cfg.anim_os16===undefined) cfg.anim_os16=true;
   if(cfg.blur_os16===undefined) cfg.blur_os16=true;
-  if(cfg.blur_os16_level===undefined) cfg.blur_os16_level=2;
   if(cfg.aod_os16===undefined) cfg.aod_os16=true;
   if(cfg.videosr_os16===undefined) cfg.videosr_os16=true;
   if(cfg.supervol_os16===undefined) cfg.supervol_os16=true;
@@ -1720,6 +1797,8 @@ async function loadCfg(){
   if(cfg.airtransfer_os16===undefined) cfg.airtransfer_os16=true;
   if(cfg.dynamicbar_os16===undefined) cfg.dynamicbar_os16=false;
   if(cfg.force_120hz===undefined) cfg.force_120hz=false;
+  if(cfg.emoji_font===undefined) cfg.emoji_font=true;
+  if(cfg.emoji_file===undefined) cfg.emoji_file='';
   SOUND_SLOTS.forEach(s=>{
     if(cfg[s.id+'_style']===undefined) cfg[s.id+'_style']=soundDefaultOf(s);
     if(cfg[s.id+'_file']===undefined) cfg[s.id+'_file']='';
@@ -1728,9 +1807,9 @@ async function loadCfg(){
   const hzFlag=await g('cat "'+MOD+'/.force_120hz" 2>/dev/null');
   if(hzFlag==='1'||hzFlag==='true') cfg.force_120hz=true;
   if(hzFlag==='0'||hzFlag==='false') cfg.force_120hz=false;
-  setStyle(cfg.bootanim_style||'hios16');
-  if(!cfg.rebootanim_style) cfg.rebootanim_style=cfg.shutdownanim_style||'hios16';
-  setRebootStyle(cfg.rebootanim_style||'hios16');
+  setStyle(cfg.bootanim_style||'default');
+  if(!cfg.rebootanim_style) cfg.rebootanim_style=cfg.shutdownanim_style||'default';
+  setRebootStyle(cfg.rebootanim_style||'default');
   if(cfg.statusbar_style==='ios' || cfg.statusbar_style==='xos16') cfg.statusbar_style='off';
   if(cfg.bootanim_file){
     document.getElementById('bootanim-custom-opt').style.display='';
@@ -1745,6 +1824,8 @@ async function loadCfg(){
     document.getElementById('statusbar-custom-opt').style.display='';
     n('statusbar-file-name','Custom overlay uploaded');
   }
+  setT('media-emoji', cfg.emoji_font!==false);
+  if(cfg.emoji_file) n('media-emoji-name','Custom: '+cfg.emoji_file);
   setT('feat-ai', cfg.ai_master===true);
   setT('feat-ai-sub', cfg.ai_subtitles!==false);
   setT('feat-ai-call', cfg.ai_call_summary!==false);
@@ -1782,14 +1863,13 @@ async function loadCfg(){
   setT('feat-dynamicbar', cfg.dynamicbar_os16===true);
   setT('feat-force120hz', cfg.force_120hz===true);
   setEsportsLevel(esportsLevel());
-  setBlurLevel(blurLevel());
   syncAiChildren();
   syncGameChildren();
   syncSocialChildren();
-  syncBlurChildren();
   renderSounds();
 }
 async function init(){
+  const t0=Date.now();
   try{
     const bridge=await import('./bridge.js');
     _exec=bridge.exec;
@@ -1798,11 +1878,107 @@ async function init(){
   document.getElementById('splash-status').textContent='Reading device';
   await loadCfg();
   await loadDevice();
+  checkInstallTimeConflicts();
+  const wait=Math.max(0, 780-(Date.now()-t0));
+  if(wait) await new Promise(r=>setTimeout(r,wait));
   document.getElementById('splash').classList.add('hide');
 }
 init();
+
+const CONFLICT_PROPS=[
+  'ro.surface_flinger.supports_background_blur',
+  'ro.os.recent.blur',
+  'ro.transsion_launcher_gaussian_blur_support',
+  'tr_launcher.gaussianblur.support',
+  'ro.tran.effectengine.dynamicblur.support',
+  'ro.tr_display.liquidglass.support'
+];
+const CONFLICT_PATHS=[
+  'system/media/audio/ui',
+  'system/product/media/audio/ui',
+  'system/product/media/audio/bootsound',
+  'system/overlay/Icons_Signal_wifi',
+  'system/product/overlay/Icons_Signal_wifi',
+  'system/product/apm/config',
+  'system/product/theme/charge',
+  'system/product/theme/animations',
+  'system/product/theme/sounds',
+  'system/tr_product/etc/vconfig/magellan'
+];
+async function checkInstallTimeConflicts(){
+  const r=await exec('cat /data/adb/transsion-flagship-16-staging/install_conflicts.txt 2>/dev/null').catch(()=>({stdout:''}));
+  const lines=(r.stdout||'').trim().split('\n').filter(l=>l.trim());
+  if(lines.length===0) return;
+  renderConflictLines(lines);
+}
+function renderConflictLines(lines){
+  const box=document.getElementById('conflict-check-list');
+  if(!box) return;
+  if(lines.length===0){
+    box.innerHTML='<div style="display:flex;align-items:center;gap:8px;padding:8px 0">'+
+      '<div style="width:7px;height:7px;border-radius:50%;background:#34d399;flex-shrink:0"></div>'+
+      '<div style="font-size:12.5px;color:#ddd">No conflicts found with other installed modules.</div>'+
+    '</div>';
+    return;
+  }
+  const byModule={};
+  for(const line of lines){
+    const [mod,path]=line.split('|');
+    if(!mod||!path) continue;
+    if(!byModule[mod]) byModule[mod]=[];
+    byModule[mod].push(path);
+  }
+  let html='<div style="font-size:12px;color:#f59e0b;margin-bottom:8px">'+Object.keys(byModule).length+' module(s) share paths with this one</div>';
+  for(const mod in byModule){
+    html+='<div style="padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05)">'+
+      '<div style="font-size:12.5px;color:#ddd;font-weight:600">'+mod+'</div>'+
+      '<div style="font-size:10.5px;color:#777;font-family:monospace;margin-top:2px">'+byModule[mod].join(', ')+'</div>'+
+      '<div style="display:flex;gap:8px;margin-top:8px">'+
+        '<button class="action-btn btn-ghost" style="flex:1;padding:6px;font-size:11px" onclick="disableConflictingModule(\''+mod+'\')">Disable</button>'+
+        '<button class="action-btn btn-ghost" style="flex:1;padding:6px;font-size:11px;color:#f87171" onclick="removeConflictingModule(\''+mod+'\')">Remove</button>'+
+      '</div>'+
+    '</div>';
+  }
+  html+='<div style="font-size:11px;color:#9aa;margin-top:10px;line-height:1.5">Sharing a path is not always a real problem. Disable first to test safely. Remove deletes the other module and cannot be undone.</div>';
+  box.innerHTML=html;
+}
+async function scanForConflicts(){
+  const selfId='transsion-flagship-16';
+  const pathCmd='for d in /data/adb/modules/*/; do m=$(basename "$d"); [ "$m" = "'+selfId+'" ] && continue; [ -f "${d}disable" ] && continue; for p in '+CONFLICT_PATHS.join(' ')+'; do if [ -e "${d}${p}" ]; then echo "$m|$p"; fi; done; done';
+  const propCmd='for d in /data/adb/modules/*/; do m=$(basename "$d"); [ "$m" = "'+selfId+'" ] && continue; [ -f "${d}disable" ] && continue; sp="${d}system.prop"; [ -f "$sp" ] || continue; for k in '+CONFLICT_PROPS.join(' ')+'; do if grep -q "^$k=" "$sp" 2>/dev/null; then echo "$m|prop:$k"; fi; done; done';
+  const [pathR,propR]=await Promise.all([exec(pathCmd),exec(propCmd)]);
+  const pathLines=(pathR.stdout||'').trim().split('\n').filter(l=>l.trim());
+  const propLines=(propR.stdout||'').trim().split('\n').filter(l=>l.trim());
+  return [...pathLines,...propLines];
+}
+async function checkModuleConflicts(){
+  const box=document.getElementById('conflict-check-list');
+  if(box) box.innerHTML='<div style="font-size:12.5px;color:#666;padding:8px 0">Scanning other modules...</div>';
+  showBusy('Scanning');
+  try{
+    const lines=await scanForConflicts();
+    renderConflictLines(lines);
+  }finally{
+    hideBusy();
+  }
+}
+async function disableConflictingModule(modId){
+  const ok=await showConfirm('Disable '+modId+'?','This turns the module off without deleting it. A reboot is needed to take effect.',{okLabel:'Disable',danger:false});
+  if(!ok) return;
+  await exec('touch /data/adb/modules/'+modId+'/disable').catch(()=>{});
+  toast('Disabled — reboot to apply');
+  checkModuleConflicts();
+}
+async function removeConflictingModule(modId){
+  const ok=await showConfirm('Remove '+modId+'?','This permanently deletes '+modId+' from your device. This cannot be undone.',{okLabel:'Delete permanently',danger:true});
+  if(!ok) return;
+  await exec('rm -rf /data/adb/modules/'+modId).catch(()=>{});
+  toast('Removed — reboot to apply');
+  checkModuleConflicts();
+}
 window.switchTab=switchTab;
 window.setStyle=setStyle;
+window.openTelegram=openTelegram;
 window.setRebootStyle=setRebootStyle;
 window.saveAll=saveAll;
 window.confirmReboot=confirmReboot;
@@ -1813,14 +1989,17 @@ window.setSocial=setSocial;
 window.setDisplay=setDisplay;
 window.setAnimBlur=setAnimBlur;
 window.setEsportsLevel=setEsportsLevel;
-window.setBlurLevel=setBlurLevel;
 window.handleBootanim=handleBootanim;
 window.handleRebootanim=handleRebootanim;
 window.handleStatusbar=handleStatusbar;
 window.dumpAi=dumpAi;
 window.copyLog=copyLog;
+window.checkModuleConflicts=checkModuleConflicts;
+window.disableConflictingModule=disableConflictingModule;
+window.removeConflictingModule=removeConflictingModule;
 window.setSoundStyle=setSoundStyle;
 window.handleSoundUpload=handleSoundUpload;
+window.handleEmoji=handleEmoji;
 </script>
 </body>
 </html>
