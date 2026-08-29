@@ -74,9 +74,9 @@ Use **one** module. Do not run Flagship 15 and Flagship 16 together.
 | Module | Path in this repo | Flash zip | OS |
 |---|---|---|---|
 | **Transsion Flagship** (this README) | repo root | `TransFlagship_V4.xx.zip` | XOS / HiOS / iTel **15** |
-| **Transsion Flagship 16** | [`os16/`](os16/) | `TransFlagship16_V2.0.zip` | Transsion **OS 16** (XOS / HiOS / iTel) |
+| **Transsion Flagship 16** | [`os16/`](os16/) | `TransFlagship16_V2.1.zip` | Transsion **OS 16** (XOS / HiOS / iTel) |
 
-**Flagship 16 V2.0** is the first official stable release for OS 16. See [`os16/README.md`](os16/README.md) for features, known limitations, and install steps. Flagship 16 has its own WebUI. The installer disables Flagship 15 if it is still active.
+**Flagship 16 V2.1** is the current OS 16 release. See [`os16/README.md`](os16/README.md) for features, known limitations, and install steps. Flagship 16 has its own WebUI. The installer disables Flagship 15 if it is still active.
 
 See [`os16/CHANGELOG.md`](os16/CHANGELOG.md) for Flagship 16 versions.
 

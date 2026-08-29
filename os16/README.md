@@ -2,7 +2,7 @@
 
 Magisk / KernelSU module for **Transsion OS 16** (XOS, HiOS, iTel OS) on Infinix, Tecno, and itel devices.
 
-Unlock GT-tier features, customize boot/reboot animations and system sounds, and tune animations & blur — all from the built-in WebUI. No manual `build.prop` editing.
+Unlock GT-tier features, customize boot/reboot animations and system sounds, and tune animations & blur — all from the built-in WebUI.
 
 ## Requirements
 
@@ -14,7 +14,7 @@ Optional: **Mountify** or similar if you use `/tr_product` overlays (not bundled
 
 ## Installation
 
-1. Download `TransFlagship16_V2.0.zip` from [Releases](https://github.com/Just-LilG/TRANSSION-FLAGSHIP/releases)
+1. Download `TransFlagship16_V2.8.zip` from [Releases](https://github.com/Just-LilG/TRANSSION-FLAGSHIP/releases)
 2. Flash in Magisk / KernelSU Manager
 3. Reboot
 4. Open the module **WebUI** → configure → **Apply & Save** → reboot when prompted
@@ -27,10 +27,11 @@ Optional: **Mountify** or similar if you use `/tr_product` overlays (not bundled
 | System sounds (Pixel / Huawei / iOS / S25 charging, etc.) | Working |
 | AI Suite (subtitles, call summary, notes, writing, VEE) | Working |
 | Gaming (eSports touch, bypass charge, GT triggers in XArena) | Working |
-| Force 120Hz / 144Hz Magellan picker | Working |
+| Magellan 144Hz picker (always on) + optional Force 120Hz | Working |
 | Always-on Display (AOD) | Working |
 | Super volume | Working |
-| Parallel animations + blur tiers (default **level 2**) | Working (see limits) |
+| Parallel animations + flagship blur (off leaves stock blur) | Working |
+| Custom emoji font (packed NotoColorEmoji + upload) | Working |
 | Social Turbo / Unlock extras / Outdoor boost / Air Transfer | Keys applied *(may already exist on stock)* |
 
 ## Known limitations
@@ -40,31 +41,27 @@ Device-dependent — tested primarily on **Infinix X6886 (G99, XOS 16)**:
 - **Display HDR** — props may stick but the Settings row may not appear on some G99 builds.
 - **Cute Pet** — feature flags apply; UI may not unhide on G99.
 - **AI Gallery Art / Studio** — menus may show; full editor requires GT hardware/software not on G99.
-- **Blur level 1** — solid notification shade vs Parallel animations tradeoff on some devices; **level 2** is the recommended default.
 - **Status bar overlay** — upload your own APK in the WebUI (no bundled iOS/XOS pack).
 
 Features your phone already had from stock will not look “new” — keys are kept so other OS 16 devices can benefit.
 
-## Blur levels
+## Blur
 
-| Level | Behavior |
-|-------|----------|
-| **1** | Smart-series solid (no dock glass). Shade/Parallel may conflict on some devices. |
-| **2** | **Default** — dock/recents blur, solid notification shade on G99. |
-| **3** | Full flagship glass (unionrender + compositor). |
+**Dynamic blur** is on by default and writes flagship glass props. Turning it **off** writes **nothing** — Magisk blur keys are deleted, SystemUI/tr_product overlays are unbound, and your ROM blur is whatever it already was. Parallel still uses motion keys (`ro.tr_perf.*`) only.
 
 ## WebUI tabs
 
-- **Home** — device info, feature roadmap, Dump flags, boot log
+- **Home** — device info, Support (Dump flags, conflict check, boot log)
 - **Features** — AI, gaming, social, blur, AOD, display, unlock extras, 120Hz
-- **Media** — boot/shutdown animation, charging animation, sounds
-- **Status bar** — custom overlay upload
+- **Media** — boot and reboot animation, emoji font
+- **Sounds** — system sounds
 
 ## Troubleshooting
 
 - **Apply & Save** writes runtime settings; most props need a **reboot**.
-- Use **Dump flags** on the Home tab and paste output when reporting issues.
+- Use **Dump flags** on the Home → Support section and paste output when reporting issues.
 - Boot log: `transflagship16_service.log` and `post_fs_data.log` in the module folder.
+- **Module conflicts** — the installer and Home Support section scan other modules that share paths or blur props.
 
 ## Changelog
 
@@ -72,4 +69,4 @@ See [CHANGELOG.md](CHANGELOG.md).
 
 ## Credits
 
-Just-LilG — [TRANSSION-FLAGSHIP](https://github.com/Just-LilG/TRANSSION-FLAGSHIP)
+**Lil G** ([@Just_LilGXX](https://t.me/Just_LilGXX)) — [TRANSSION-FLAGSHIP](https://github.com/Just-LilG/TRANSSION-FLAGSHIP)

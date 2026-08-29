@@ -1,5 +1,42 @@
 # Transsion Flagship 16
 
+## v2.8
+- **Fixes V2.7 dock/folder regression.** V2.7 reset launcher vconfig from `.stock` on every apply and bound extra launcher packages, then force-stopped Home after boot. That could replace a full overlay with a thin file and break more than dock blur. V2.8 goes back to in-place launcher3 upserts (same path as V2.6 shade/glass), still writes dock/folder keys, unbinds the extra V2.7 launcher overlays, and only restarts Home after the good overlay is rebound.
+
+## v2.7
+- **Dock + folder blur.** Dynamic blur on now writes launcher dock/folder keys (`tr_launcher.gaussianblur.support=3`, `tr_launcher.folderblur.support=3`, `tr_launcher.blurrecent.support=1`) to resetprop, launcher vconfig, Magisk `system.prop`, and settings. Home is restarted after Apply and after boot settle so the dock picks them up. Shade / recents / liquid glass were already working.
+- **Installer log is ASCII-only.** KernelSU-style `[OK]` `[*]` `[!]` `>` boxes. No emoji characters in the flash log. Emoji font install is unchanged.
+
+## v2.6
+- **Installer rewritten** for a stable release: no diagnostic path prints, no leftover test copy, quieter upgrades, Flagship 15-style complete banner.
+- **Emoji WebUI** no longer shows a filesystem path. Toggle + upload only: iOS-style high-res emoji, off = stock.
+
+## v2.5
+- **KernelSU / Magisk in-app Update is back.** `module.prop` again includes `updateJson` (it was dropped after V1.80, which is why Manager never showed Update — even on an older zip). Flash V2.5 once; later builds appear as in-app updates.
+- **Installer cleaned up.** Removed the install diagnostic dump and the leftover “strip emoji” test path. Banner and `module.prop` match a stable release (`minMagisk=20400`, emoji in the description).
+- **Emoji font restored.** Packed `NotoColorEmoji.ttf`, Media-tab toggle + custom `.ttf` upload, bind on `/system/fonts` (does not touch `NotoColorEmojiFlags.ttf`). Off = stock ROM font. Apply + reboot.
+
+## v2.4
+- **Blur off writes no blur props.** No stock restore, no SystemUI `platform_level=2`, no `device_config` shade flags. The module deletes Magisk’s blur keys (including global `platform_level`) and unbinds SystemUI / tr_product blur overlays so it is as if those props were never applied. Parallel still uses motion keys only (`ro.tr_perf.*`, launch/unlock/recent, async). Apply + reboot.
+
+## v2.3
+- **Parallel works again with Dynamic blur off.** V2.2 restored stock global `platform_level`, which made the shade look stock but broke app open/close — WindowManager reads that global key. V2.3 writes **global `platform_level=3` whenever Parallel is on**, and pins **SystemUI vconfig at stock/2** so the shade does not pick up flagship glass. Apply + reboot.
+
+## v2.2
+- **Parallel no longer forces shade glass.** `ro.tr_animation.platform_level=3` is flagship blur (notification shade / lock glass). Parallel only writes motion keys (`ro.tr_perf.*`, launch/unlock/recent, launcher/wm vconfig). Dynamic blur **off** restores stock `platform_level` and skips that key in Magisk `system.prop`. Apply also force-stops SystemUI when blur is off so cached glass clears. Apply + reboot.
+- **XOS boot animation is the default** (boot and reboot packs). HiOS 16 is still in the picker. Existing installs still on the old HiOS 16 default switch once on update; custom uploads are left alone.
+- **WebUI motion.** Page load, tab switch, toggles, buttons, splash loader, and busy spinner on Save / Dump / conflict scan.
+- **Author in WebUI.** Home card for **Lil G** — Telegram [@Just_LilGXX](https://t.me/Just_LilGXX).
+
+## v2.1
+- **Blur is on/off only.** Removed the 1/2/3 level picker. On (default) applies flagship glass. Off does **not** strip stock blur — the module skips blur props so Transsion’s own blur stays. Parallel animations stay at platform 3 when enabled.
+- **144Hz Magellan no longer needs Force 120Hz.** Magellan XML is always staged and bound. Force 120Hz only locks 120Hz settings.
+- **Conflicting module detection** like Flagship 15: installer scan plus WebUI Support section (disable / remove).
+- **WebUI cleanup.** Removed the Home features roadmap and testing copy. Dump flags lives in Support. Scripts and UI no longer show test-phase notes.
+
+## v2.0.1
+- **Pre-release debug fixes.** Display leftover cleanup had inverted shell logic (`display_reading false` was always truthy — stale DC/HDR settings never cleared). Force 120Hz Apply now runs full whitelist generation + refresh settings (not just file copy). Boot settle retries Magellan generation when PackageManager was not ready at post-fs. Installer/uninstall banners show V2.0.1. Removed duplicate `apply_unlock.sh` on WebUI Apply (already inside `apply_blur.sh all`).
+
 ## v2.0 — Official release
 
 First **official stable release** for Transsion OS 16 (XOS / HiOS / iTel). Tested on **Infinix X6886 (G99)**.

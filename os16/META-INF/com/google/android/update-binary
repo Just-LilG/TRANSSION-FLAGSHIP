@@ -32,7 +32,7 @@ imageless_magisk() {
 OUTFD=$2
 ZIPFILE=$3
 
-ui_print "- Flagship 16 V1.87 installer"
+ui_print "- Flagship 16 V2.8 installer"
 
 mount /data 2>/dev/null
 
@@ -60,11 +60,10 @@ $BOOTMODE && boot_actions || recovery_actions
 # Preparation
 ##########################################################################################
 
-# Extract only the tiny Magisk-template files. Busybox unzip + glob 'common/*'
-# on a 20MB zip can dump the bootanim zips into /dev/tmp (tmpfs) and OOM.
+# Extract installer scripts only (avoid dumping bootanim zips into tmpfs).
 ui_print "- Preparing Flagship 16 installer"
 for f in module.prop install.sh uninstall.sh \
-         common/post-fs-data.sh common/service.sh common/system.prop common/apply_blur.sh common/apply_120hz.sh common/apply_sounds.sh common/apply_unlock.sh
+         common/post-fs-data.sh common/service.sh common/system.prop common/apply_blur.sh common/apply_120hz.sh common/apply_sounds.sh common/apply_unlock.sh common/apply_emoji.sh
 do
   unzip -oj "$ZIPFILE" "$f" -d $TMPDIR >&2 || abort "! Missing $f in zip"
 done
@@ -98,9 +97,7 @@ ui_print "******************************"
 ##########################################################################################
 
 # Create mod paths.
-# KernelSU Manager extracts the zip into MODPATH *before* this script runs
-# ("Extracting module files"). Magisk does not. Deleting that tree and
-# unzipping bootanim_*.zip again is what printed "Killed" on V1.05.
+# KernelSU Manager extracts the zip into MODPATH before this script runs.
 mkdir -p $MODPATH
 if [ -f "$MODPATH/system/product/theme/animations/bootanim_hios16.zip" ] \
     && [ -f "$MODPATH/system/product/theme/animations/bootanim_default.zip" ]; then
@@ -153,6 +150,7 @@ $LATESTARTSERVICE && cp -af $TMPDIR/service.sh $MODPATH/service.sh
 [ -f $TMPDIR/apply_120hz.sh ] && cp -af $TMPDIR/apply_120hz.sh $MODPATH/apply_120hz.sh
 [ -f $TMPDIR/apply_sounds.sh ] && cp -af $TMPDIR/apply_sounds.sh $MODPATH/apply_sounds.sh
 [ -f $TMPDIR/apply_unlock.sh ] && cp -af $TMPDIR/apply_unlock.sh $MODPATH/apply_unlock.sh
+[ -f $TMPDIR/apply_emoji.sh ] && cp -af $TMPDIR/apply_emoji.sh $MODPATH/apply_emoji.sh
 
 # Handle replace folders
 for TARGET in $REPLACE; do

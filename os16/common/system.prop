@@ -1,16 +1,11 @@
-# Flagship 16 — OS 16 AI keys. Magisk loads this file at boot.
-# Apply in WebUI rewrites this file from the AI Suite toggles. Reboot to take effect.
-# Not written from service.sh.
+# Flagship 16
 ro.tr_aiservice.aicorespeech_subtitle.feature.support=1
 ro.tr_aiservice.aicorespeech_livecaption.feature.support=1
 ro.tr_soundrecorder.summary.feature.support=1
 ro.tr_note.ai_draw.support=1
 ro.os_ai_writing.support=1
-# Call summary / Ella briefing — user confirmed these flags unhide it.
 ro.tr_aiassistant.aiphone.feature.support=true
 ro.tr_aiassistant.aiphone_summany.feature.support=true
-# AI Gallery menus (for show). Tapping Art / Studio / HD / etc can still crash
-# AI Gallery Edit on this G99 — those tools need a GT editor + NPU models.
 ro.tr_gallery.eraser.v2.support=1
 ro.tr_gallery.ext.image.support=1
 ro.tr_gallery.ai_art.support=1
@@ -20,11 +15,7 @@ ro.tr_gallery.group.enhance.support=1
 ro.tr_gallery.shadow.enhance.support=1
 ro.tr_gallery.bokeh.support=1
 ro.tr_gallery.compose.support=1
-# Video Enhancement Engine — user confirmed this flag was working.
 ro.tr_video.vee.support=1
-# Gaming — OS 16 keys from GT 30 Pro dump (X6858). V1.29 Flagship 15 names
-# (ro.os_game_*) are EMPTY on this phone. Shoulder / smartbutton unhide
-# XArena GT trigger mapping. This G99 still has no physical trigger hardware.
 ro.tr_game.e_sport_mode.support=1
 ro.tr_game.game_mode.support=1
 ro.tr_game.tp_esports10.feature.support=1
@@ -38,9 +29,6 @@ ro.tr_game.esportsvirtualctrl.support=1
 ro.tr_game.screen_buttons.support=1
 ro.tr_game.magic_button.support=1
 ro.tr_smartbutton.shoulderbutton20.feature.support=true
-# Animations — OS 16 keys from GT 30 Pro dump (X6858). Dump stock is
-# model/level 2; this module writes 3 like Flagship 15 experimental.
-# Do not write ro.transsion_recent_animation_support — that doubled recents.
 ro.tr_animation.platform_level=3
 ro.tr_perf.launch_start_exit.model=3
 ro.tr_perf.power_keyguard_animation.model=3
@@ -48,16 +36,32 @@ ro.tr_perf.recent_animation.model=3
 ro.tr_perf.unlock_mode.model=3
 ro.tr_livewallpaper.dreamanimation.support=1
 ro.tr_multiwindow.anim_arc.support=1
-ro.transsion_async_animation_support=0
+ro.transsion_async_animation_support=1
 ro.transsion_unlock_mode_support=3
 ro.transsion_launch_start_exit_support=3
 ro.transsion_power_keyguard_animation_support=3
 ro.transsion.recent_animation.model=3
-ro.tran_display_unionrender.support=0
-# Blur tier keys are written from config (Apply / install).
-# Level 1 = Smart solid. Level 2 = partial (dock blur, solid shade). Level 3 = full glass.
-# AOD — OS 16 keys from GT dump. half.screen is stock 0 on GT.
-# These live in /tr_product/etc/build.prop so apply_blur.sh overwrites.
+ro.tran_display_unionrender.support=1
+ro.tr_display.liquidglass.support=1
+ro.surface_flinger.supports_background_blur=1
+ro.os.recent.blur=1
+ro.transsion_launcher_gaussian_blur_support=3
+tr_launcher.gaussianblur.support=3
+tr_launcher.blurrecent.support=1
+tr_launcher.folderblur.support=3
+ro.transsion_launcher_folder_blur_support=3
+persist.sys.transsion_launcher_gaussian_blur_enable=1
+ro.tran.effectengine.dynamicblur.support=1
+ro.os_xos16_blur_v2_support=1
+persist.sys.sf.disable_blurs=0
+persist.sys.disable_blur=0
+persist.sysui.disableBlur=0
+persist.sysui.disable_blur=0
+ro.sf.blurs_are_expensive=1
+persist.tr_lighting.controlcenter.feature.support=1
+persist.tr_lighting.feature.support=1
+ro.tr_lighting.controlcenter.feature.support=1
+ro.tr_lighting.feature.support=1
 ro.tr_aod.feature.support=1
 ro.tr_aod.doze.brightness.feature.support=1
 ro.tr_aod.half.screen.feature.support=1
@@ -68,8 +72,6 @@ ro.tr_aod.always.show.feature.support=1
 ro.aod_alwaysshow_support=1
 ro.tran_aod_v3_support=1
 ro.tran_doze_brightness_support=1
-# Dynamic bar extras — not in this file when off. Toggle on in WebUI to append.
-# OS 16 extras — Magisk + resetprop for every Trans OS 16 device.
 persist.tr_video.ai_super_resolution.support=1
 ro.tr_video.ai_super_resolution.support=1
 tr_video.ai_super_resolution.support=1

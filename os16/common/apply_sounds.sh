@@ -1,9 +1,5 @@
 #!/system/bin/sh
-# Custom UI sounds. GT dump lives at /tr_product/media/audio/ui/*.ogg
-# Mountify does not overlay tr_product — per-file bind like bootanim.
-# Also stage dest-named .ogg under module system/product so Mountify can
-# overlay /product (Flagship 15 path). Stock = no bind, remove staged dest.
-# Do not bind-dir /tr_product. Do not pack Waltz / bootsound / theme/charge.
+# Custom UI sounds. Per-file bind on /tr_product. Stock = no bind.
 
 if [ -z "$MODDIR" ]; then
   MODDIR=${0%/*}
