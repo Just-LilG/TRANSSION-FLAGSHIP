@@ -1,5 +1,9 @@
 # Transsion Flagship 16
 
+## v2.7
+- **Dock + folder blur.** Dynamic blur on now writes launcher dock/folder keys (`tr_launcher.gaussianblur.support=3`, `tr_launcher.folderblur.support=3`, `tr_launcher.blurrecent.support=1`) to resetprop, launcher vconfig, Magisk `system.prop`, and settings. Home is restarted after Apply and after boot settle so the dock picks them up. Shade / recents / liquid glass were already working.
+- **Installer log is ASCII-only.** KernelSU-style `[OK]` `[*]` `[!]` `>` boxes. No emoji characters in the flash log. Emoji font install is unchanged.
+
 ## v2.6
 - **Installer rewritten** for a stable release: no diagnostic path prints, no leftover test copy, quieter upgrades, Flagship 15-style complete banner.
 - **Emoji WebUI** no longer shows a filesystem path. Toggle + upload only: iOS-style high-res emoji, off = stock.

@@ -181,6 +181,10 @@ os16_drop_module_blur() {
     ro.os.recent.blur \
     ro.transsion_launcher_gaussian_blur_support \
     tr_launcher.gaussianblur.support \
+    tr_launcher.blurrecent.support \
+    tr_launcher.folderblur.support \
+    ro.transsion_launcher_folder_blur_support \
+    persist.sys.transsion_launcher_gaussian_blur_enable \
     ro.tran.effectengine.dynamicblur.support \
     ro.os_xos16_blur_v2_support \
     persist.sys.sf.disable_blurs \
@@ -228,6 +232,10 @@ os16_apply_blur_props() {
   os16_rp_overwrite ro.os.recent.blur "$B01"
   os16_rp_overwrite ro.transsion_launcher_gaussian_blur_support "$BLVL"
   os16_rp_overwrite tr_launcher.gaussianblur.support "$BLVL"
+  os16_rp_overwrite tr_launcher.blurrecent.support "$BLUR_RECENT"
+  os16_rp_overwrite tr_launcher.folderblur.support "$BLVL"
+  os16_rp_overwrite ro.transsion_launcher_folder_blur_support "$BLVL"
+  os16_rp persist.sys.transsion_launcher_gaussian_blur_enable "$EN"
   os16_rp_overwrite ro.tran.effectengine.dynamicblur.support "$DYNBLUR"
   os16_rp_overwrite ro.os_xos16_blur_v2_support "$BLURV2"
   os16_rp persist.sys.sf.disable_blurs "$SFDIS"
@@ -399,6 +407,10 @@ os16_apply_tr_product_blur_buildprop() {
   os16_vconfig_upsert "$staged" "ro.os.recent.blur" "$B01"
   os16_vconfig_upsert "$staged" "ro.transsion_launcher_gaussian_blur_support" "$BLVL"
   os16_vconfig_upsert "$staged" "tr_launcher.gaussianblur.support" "$BLVL"
+  os16_vconfig_upsert "$staged" "tr_launcher.blurrecent.support" "$BLUR_RECENT"
+  os16_vconfig_upsert "$staged" "tr_launcher.folderblur.support" "$BLVL"
+  os16_vconfig_upsert "$staged" "ro.transsion_launcher_folder_blur_support" "$BLVL"
+  os16_vconfig_upsert "$staged" "persist.sys.transsion_launcher_gaussian_blur_enable" "$EN"
   os16_vconfig_upsert "$staged" "ro.tran.effectengine.dynamicblur.support" "$DYNBLUR"
   os16_vconfig_upsert "$staged" "ro.os_xos16_blur_v2_support" "$BLURV2"
   os16_vconfig_upsert "$staged" "ro.sf.blurs_are_expensive" "$EXP"
@@ -479,56 +491,62 @@ os16_apply_motion_pkg_vconfig() {
   done
 }
 
+os16_launcher_vconfig_pkgs() {
+  echo com.transsion.launcher3
+  for pkg in com.transsion.hilauncher com.transsion.XOSLauncher com.transsion.launcher; do
+    for root in /tr_product/etc/vconfig /system/tr_product/etc/vconfig /product/etc/vconfig; do
+      if [ -f "$root/$pkg/build.prop" ]; then
+        echo "$pkg"
+        break
+      fi
+    done
+  done
+}
+
+os16_write_dock_folder_vconfig() {
+  f="$1"
+  os16_vconfig_upsert "$f" "ro.os.recent.blur" "1"
+  os16_vconfig_upsert "$f" "ro.transsion_launcher_gaussian_blur_support" "$BLVL"
+  os16_vconfig_upsert "$f" "tr_launcher.gaussianblur.support" "$BLVL"
+  os16_vconfig_upsert "$f" "tr_launcher.blurrecent.support" "$BLUR_RECENT"
+  os16_vconfig_upsert "$f" "tr_launcher.folderblur.support" "$BLVL"
+  os16_vconfig_upsert "$f" "ro.transsion_launcher_folder_blur_support" "$BLVL"
+  os16_vconfig_upsert "$f" "persist.sys.transsion_launcher_gaussian_blur_enable" "$EN"
+  os16_vconfig_upsert "$f" "ro.transsion_async_animation_support" "$LAUNCHER_ASYNC"
+  os16_vconfig_upsert "$f" "ro.tran_display_unionrender.support" "$UNION"
+}
+
 os16_apply_launcher_vconfig_all() {
   os16_blur_vals
+  bar=$(os16_cfg_01 dynamicbar_os16 false)
   if [ "$SKIP_BLUR" = "1" ]; then
-    staged=$(os16_seed_vconfig_pkg com.transsion.launcher3)
-    stock="${staged}.stock"
-    if [ -f "$stock" ]; then
-      cp -f "$stock" "$staged"
-    fi
-    if [ "$MOTION_PLAT" = "3" ]; then
-      os16_motion_vconfig_keys "$staged" "$MOTION_PLAT"
-      os16_vconfig_upsert "$staged" "ro.transsion_async_animation_support" "$LAUNCHER_ASYNC"
-      os16_bind_vconfig_pkg "$staged" com.transsion.launcher3
-    else
-      os16_unbind_vconfig_pkg com.transsion.launcher3
-    fi
+    for pkg in $(os16_launcher_vconfig_pkgs); do
+      staged=$(os16_seed_vconfig_pkg "$pkg")
+      stock="${staged}.stock"
+      [ -f "$stock" ] && cp -f "$stock" "$staged"
+      if [ "$MOTION_PLAT" = "3" ]; then
+        os16_motion_vconfig_keys "$staged" "$MOTION_PLAT"
+        os16_vconfig_upsert "$staged" "ro.transsion_async_animation_support" "$LAUNCHER_ASYNC"
+        os16_bind_vconfig_pkg "$staged" "$pkg"
+      else
+        os16_unbind_vconfig_pkg "$pkg"
+      fi
+    done
     return 0
   fi
-  staged=$(os16_seed_vconfig_pkg com.transsion.launcher3)
-  if [ "$GLASS" = "1" ]; then
-    os16_vconfig_upsert "$staged" "ro.os.recent.blur" "1"
-    os16_vconfig_upsert "$staged" "ro.transsion_launcher_gaussian_blur_support" "$BLVL"
-    os16_vconfig_upsert "$staged" "tr_launcher.gaussianblur.support" "$BLVL"
-    os16_vconfig_upsert "$staged" "ro.transsion_async_animation_support" "$LAUNCHER_ASYNC"
-    os16_vconfig_upsert "$staged" "ro.tran_display_unionrender.support" "$UNION"
+  for pkg in $(os16_launcher_vconfig_pkgs); do
+    staged=$(os16_seed_vconfig_pkg "$pkg")
+    stock="${staged}.stock"
+    [ -f "$stock" ] && cp -f "$stock" "$staged"
+    os16_write_dock_folder_vconfig "$staged"
     os16_motion_vconfig_keys "$staged" "$MOTION_PLAT"
-  else
-    if [ "$DOCK_BLUR" = "1" ]; then
-      os16_vconfig_upsert "$staged" "tr_launcher.gaussianblur.support" "$BLVL"
-      os16_vconfig_upsert "$staged" "tr_launcher.blurrecent.support" "$BLUR_RECENT"
-      os16_vconfig_upsert "$staged" "ro.transsion_async_animation_support" "$LAUNCHER_ASYNC"
+    if [ "$bar" = "1" ]; then
+      os16_vconfig_upsert "$staged" "ro.os.tran_hide_status_bar_for_land_recent" "1"
     else
-      os16_vconfig_upsert "$staged" "tr_launcher.gaussianblur.support" "0"
-      os16_vconfig_upsert "$staged" "tr_launcher.blurrecent.support" "0"
-      os16_vconfig_upsert "$staged" "ro.transsion_async_animation_support" "$LAUNCHER_ASYNC"
+      os16_restore_vconfig_key_from_stock "$staged" "ro.os.tran_hide_status_bar_for_land_recent"
     fi
-    os16_vconfig_upsert "$staged" "ro.os.tran_recent_dismiss_single_task_spring_support" "1"
-    os16_vconfig_upsert "$staged" "ro.os.tran_recent_drag_down_single_task_spring_support" "1"
-    os16_vconfig_upsert "$staged" "tr_launcher.hidefreezer.support" "1"
-    os16_vconfig_upsert "$staged" "ro.os.recent.blur" "0"
-    os16_vconfig_upsert "$staged" "ro.transsion_launcher_gaussian_blur_support" "$BLVL"
-    os16_vconfig_upsert "$staged" "ro.tran_display_unionrender.support" "$UNION"
-    os16_motion_vconfig_keys "$staged" "$MOTION_PLAT"
-  fi
-  bar=$(os16_cfg_01 dynamicbar_os16 false)
-  if [ "$bar" = "1" ]; then
-    os16_vconfig_upsert "$staged" "ro.os.tran_hide_status_bar_for_land_recent" "1"
-  else
-    os16_restore_vconfig_key_from_stock "$staged" "ro.os.tran_hide_status_bar_for_land_recent"
-  fi
-  os16_bind_vconfig_pkg "$staged" com.transsion.launcher3
+    os16_bind_vconfig_pkg "$staged" "$pkg"
+  done
 }
 
 os16_apply_systemui_vconfig() {
@@ -592,6 +610,10 @@ os16_strip_blur_systemprop() {
     ro.os.recent.blur \
     ro.transsion_launcher_gaussian_blur_support \
     tr_launcher.gaussianblur.support \
+    tr_launcher.blurrecent.support \
+    tr_launcher.folderblur.support \
+    ro.transsion_launcher_folder_blur_support \
+    persist.sys.transsion_launcher_gaussian_blur_enable \
     ro.tran.effectengine.dynamicblur.support \
     ro.os_xos16_blur_v2_support \
     persist.sys.sf.disable_blurs \
@@ -777,6 +799,7 @@ os16_refresh_launcher_on_apply() {
   am force-stop com.transsion.launcher3 >/dev/null 2>&1
   am force-stop com.transsion.hilauncher >/dev/null 2>&1
   am force-stop com.transsion.XOSLauncher >/dev/null 2>&1
+  am force-stop com.transsion.launcher >/dev/null 2>&1
 }
 
 os16_restart_systemui() {
@@ -801,6 +824,9 @@ os16_clear_blur_runtime_settings() {
     settings delete "$ns" transsion_launcher_gaussian_support >/dev/null 2>&1
     settings delete "$ns" transsion_launcher_gaussian_blur_enable >/dev/null 2>&1
     settings delete "$ns" transsion_launcher_blur_radius >/dev/null 2>&1
+    settings delete "$ns" transsion_launcher_folder_blur_support >/dev/null 2>&1
+    settings delete "$ns" transsion_launcher_folder_blur_enable >/dev/null 2>&1
+    settings delete "$ns" transsion_launcher_blurrecent_support >/dev/null 2>&1
   done
 }
 
@@ -845,6 +871,12 @@ os16_apply_blur_runtime() {
     os16_settings_put system transsion_launcher_gaussian_blur_enable "$EN"
     os16_settings_put global transsion_launcher_blur_radius "$RAD"
     os16_settings_put system transsion_launcher_blur_radius "$RAD"
+    os16_settings_put global transsion_launcher_folder_blur_support 3
+    os16_settings_put system transsion_launcher_folder_blur_support 3
+    os16_settings_put global transsion_launcher_folder_blur_enable 1
+    os16_settings_put system transsion_launcher_folder_blur_enable 1
+    os16_settings_put global transsion_launcher_blurrecent_support 1
+    os16_settings_put system transsion_launcher_blurrecent_support 1
   else
     os16_settings_put global transsion_launcher_gaussian_blur_enable 0
     os16_settings_put system transsion_launcher_gaussian_blur_enable 0

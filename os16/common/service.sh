@@ -5,7 +5,7 @@ LOG="$MODDIR/transflagship16_service.log"
 rm -f "$LOG"
 log_p() { echo "[$(date '+%H:%M:%S')] $1" >> "$LOG"; }
 
-log_p "=== TransFlagship 16 V2.6 ==="
+log_p "=== TransFlagship 16 V2.7 ==="
 log_p "Device : $(getprop ro.product.model 2>/dev/null)"
 log_p "Brand  : $(getprop ro.product.brand 2>/dev/null)"
 log_p "Android: $(getprop ro.build.version.release 2>/dev/null)"
@@ -102,7 +102,8 @@ log_p "  sf_disable_blurs=$(getprop persist.sys.sf.disable_blurs 2>/dev/null)"
 log_p "  home=$(cmd package resolve-activity --brief -a android.intent.action.MAIN -c android.intent.category.HOME 2>/dev/null | tail -n 1)"
 
 # Mountify / tr_product overlay can rewrite liquidglass after post-fs-data.
-# Re-apply props once boot has settled. Do not kill SurfaceFlinger or home.
+# Re-apply props once boot has settled. Do not kill SurfaceFlinger or SystemUI.
+# Restart the launcher so dock / folder blur pick up the new vconfig.
 (
   sleep 8
   [ -f "$MODDIR/apply_blur.sh" ] || exit 0
@@ -120,7 +121,10 @@ log_p "  home=$(cmd package resolve-activity --brief -a android.intent.action.MA
   fi
   os16_apply_blur_runtime
   os16_blur_vals
-  echo "[$(date '+%H:%M:%S')] blur after settle skip=$SKIP_BLUR platform=$(getprop ro.tr_animation.platform_level 2>/dev/null) liquidglass=$(getprop ro.tr_display.liquidglass.support 2>/dev/null)" >> "$LOG"
+  if [ "$SKIP_BLUR" != "1" ]; then
+    os16_refresh_launcher_on_apply
+  fi
+  echo "[$(date '+%H:%M:%S')] blur after settle skip=$SKIP_BLUR platform=$(getprop ro.tr_animation.platform_level 2>/dev/null) liquidglass=$(getprop ro.tr_display.liquidglass.support 2>/dev/null) folder=$(getprop tr_launcher.folderblur.support 2>/dev/null) gauss=$(getprop tr_launcher.gaussianblur.support 2>/dev/null)" >> "$LOG"
   if [ -f "$MODDIR/apply_120hz.sh" ]; then
     . "$MODDIR/apply_120hz.sh"
     os16_apply_game_fps_props

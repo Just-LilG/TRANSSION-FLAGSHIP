@@ -7,11 +7,12 @@ POSTFSDATA=true
 LATESTARTSERVICE=true
 REPLACE=""
 
-ui_ok()   { ui_print "  ✅ $1"; }
-ui_info() { ui_print "  ⚡ $1"; }
-ui_warn() { ui_print "  ⚠️  $1"; }
-ui_step() { ui_print "  ▶ $1"; }
-ui_div()  { ui_print "  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"; }
+ui_ok()    { ui_print "[OK] $1"; }
+ui_info()  { ui_print "[*] $1"; }
+ui_warn()  { ui_print "[!] $1"; }
+ui_step()  { ui_print "> $1"; }
+ui_div()   { ui_print "----------------------------------------"; }
+ui_thick() { ui_print "========================================"; }
 
 json_bool() {
   f="$1"; k="$2"; d="$3"
@@ -209,6 +210,10 @@ ro.surface_flinger.supports_background_blur=$b01
 ro.os.recent.blur=$b01
 ro.transsion_launcher_gaussian_blur_support=$gblur
 tr_launcher.gaussianblur.support=$gblur
+tr_launcher.blurrecent.support=$([ "$blur" = "true" ] && echo 1 || echo 0)
+tr_launcher.folderblur.support=$gblur
+ro.transsion_launcher_folder_blur_support=$gblur
+persist.sys.transsion_launcher_gaussian_blur_enable=$([ "$blur" = "true" ] && echo 1 || echo 0)
 ro.tran.effectengine.dynamicblur.support=$dynblur
 ro.os_xos16_blur_v2_support=$blurv2
 persist.sys.sf.disable_blurs=$sfdis
@@ -300,6 +305,10 @@ EOF
       -e '/^ro.os.recent.blur=/d' \
       -e '/^ro.transsion_launcher_gaussian_blur_support=/d' \
       -e '/^tr_launcher.gaussianblur.support=/d' \
+      -e '/^tr_launcher.blurrecent.support=/d' \
+      -e '/^tr_launcher.folderblur.support=/d' \
+      -e '/^ro.transsion_launcher_folder_blur_support=/d' \
+      -e '/^persist.sys.transsion_launcher_gaussian_blur_enable=/d' \
       -e '/^ro.tran.effectengine.dynamicblur.support=/d' \
       -e '/^ro.os_xos16_blur_v2_support=/d' \
       -e '/^persist.sys.sf.disable_blurs=/d' \
@@ -335,12 +344,12 @@ unzip_mod_scripts() {
 
 print_modname() {
   ui_print " "
-  ui_print "  ╔══════════════════════════════════════════╗"
-  ui_print "  ║                                          ║"
-  ui_print "  ║    ✨  TRANSSION FLAGSHIP 16             ║"
-  ui_print "  ║    XOS · HiOS · iTel OS 16  ·  V2.6      ║"
-  ui_print "  ║                                          ║"
-  ui_print "  ╚══════════════════════════════════════════╝"
+  ui_thick
+  ui_print "|                                      |"
+  ui_print "|   TRANSSION FLAGSHIP 16              |"
+  ui_print "|   XOS . HiOS . iTel OS 16 . V2.7     |"
+  ui_print "|                                      |"
+  ui_thick
   ui_print " "
 }
 
@@ -429,7 +438,7 @@ on_install() {
       ui_ok "Transsion device confirmed"
       ;;
     *)
-      abort "  ✖ Aborting — Infinix / Tecno / itel required"
+      abort "[!] Aborting - Infinix / Tecno / itel required"
       ;;
   esac
 
@@ -437,7 +446,7 @@ on_install() {
   ui_info "OS    : $OS_TYPE $OS_VER"
   ui_info "Android: $(getprop ro.build.version.release 2>/dev/null)"
   if [ "$OS_VER" != "16" ]; then
-    ui_warn "Could not confirm OS 16 — this module is built for Transsion OS 16."
+    ui_warn "Could not confirm OS 16 - this module is built for Transsion OS 16."
     ui_warn "Continuing anyway if you flashed it on purpose."
   else
     ui_ok "Transsion OS 16 detected"
@@ -635,13 +644,12 @@ set_permissions() {
     [ -f "$f" ] && set_perm "$f" 0 0 0644
   done
   ui_print " "
-  ui_div
-  ui_print "  ✨  INSTALLATION COMPLETE"
-  ui_info "Module : Transsion Flagship 16 V2.6"
+  ui_thick
+  ui_print "INSTALLATION COMPLETE"
+  ui_info "Module : Transsion Flagship 16 V2.7"
   ui_info "OS     : $OS_TYPE $OS_VER"
   ui_div
-  ui_print "  📲  t.me/Just_LilGXX"
-  ui_print " "
-  ui_print "  ⚡ Reboot, then open WebUI in Magisk/KSU"
-  ui_print " "
+  ui_print "t.me/Just_LilGXX"
+  ui_print "Reboot, then open WebUI in Magisk/KSU"
+  ui_print "- Done"
 }
