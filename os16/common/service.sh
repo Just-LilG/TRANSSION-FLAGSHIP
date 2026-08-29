@@ -5,7 +5,7 @@ LOG="$MODDIR/transflagship16_service.log"
 rm -f "$LOG"
 log_p() { echo "[$(date '+%H:%M:%S')] $1" >> "$LOG"; }
 
-log_p "=== TransFlagship 16 V2.7 ==="
+log_p "=== TransFlagship 16 V2.8 ==="
 log_p "Device : $(getprop ro.product.model 2>/dev/null)"
 log_p "Brand  : $(getprop ro.product.brand 2>/dev/null)"
 log_p "Android: $(getprop ro.build.version.release 2>/dev/null)"
@@ -102,8 +102,8 @@ log_p "  sf_disable_blurs=$(getprop persist.sys.sf.disable_blurs 2>/dev/null)"
 log_p "  home=$(cmd package resolve-activity --brief -a android.intent.action.MAIN -c android.intent.category.HOME 2>/dev/null | tail -n 1)"
 
 # Mountify / tr_product overlay can rewrite liquidglass after post-fs-data.
-# Re-apply props once boot has settled. Do not kill SurfaceFlinger or SystemUI.
-# Restart the launcher so dock / folder blur pick up the new vconfig.
+# Re-bind overlays once boot has settled. Do not kill SurfaceFlinger or SystemUI.
+# Restart home only after the launcher3 overlay is rebound so dock/folder blur load.
 (
   sleep 8
   [ -f "$MODDIR/apply_blur.sh" ] || exit 0

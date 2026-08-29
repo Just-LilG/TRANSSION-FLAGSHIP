@@ -347,7 +347,7 @@ print_modname() {
   ui_thick
   ui_print "|                                      |"
   ui_print "|   TRANSSION FLAGSHIP 16              |"
-  ui_print "|   XOS . HiOS . iTel OS 16 . V2.7     |"
+  ui_print "|   XOS . HiOS . iTel OS 16 . V2.8     |"
   ui_print "|                                      |"
   ui_thick
   ui_print " "
@@ -646,7 +646,7 @@ set_permissions() {
   ui_print " "
   ui_thick
   ui_print "INSTALLATION COMPLETE"
-  ui_info "Module : Transsion Flagship 16 V2.7"
+  ui_info "Module : Transsion Flagship 16 V2.8"
   ui_info "OS     : $OS_TYPE $OS_VER"
   ui_div
   ui_print "t.me/Just_LilGXX"

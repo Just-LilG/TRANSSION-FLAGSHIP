@@ -410,7 +410,6 @@ os16_apply_tr_product_blur_buildprop() {
   os16_vconfig_upsert "$staged" "tr_launcher.blurrecent.support" "$BLUR_RECENT"
   os16_vconfig_upsert "$staged" "tr_launcher.folderblur.support" "$BLVL"
   os16_vconfig_upsert "$staged" "ro.transsion_launcher_folder_blur_support" "$BLVL"
-  os16_vconfig_upsert "$staged" "persist.sys.transsion_launcher_gaussian_blur_enable" "$EN"
   os16_vconfig_upsert "$staged" "ro.tran.effectengine.dynamicblur.support" "$DYNBLUR"
   os16_vconfig_upsert "$staged" "ro.os_xos16_blur_v2_support" "$BLURV2"
   os16_vconfig_upsert "$staged" "ro.sf.blurs_are_expensive" "$EXP"
@@ -491,62 +490,46 @@ os16_apply_motion_pkg_vconfig() {
   done
 }
 
-os16_launcher_vconfig_pkgs() {
-  echo com.transsion.launcher3
-  for pkg in com.transsion.hilauncher com.transsion.XOSLauncher com.transsion.launcher; do
-    for root in /tr_product/etc/vconfig /system/tr_product/etc/vconfig /product/etc/vconfig; do
-      if [ -f "$root/$pkg/build.prop" ]; then
-        echo "$pkg"
-        break
-      fi
-    done
-  done
-}
-
-os16_write_dock_folder_vconfig() {
-  f="$1"
-  os16_vconfig_upsert "$f" "ro.os.recent.blur" "1"
-  os16_vconfig_upsert "$f" "ro.transsion_launcher_gaussian_blur_support" "$BLVL"
-  os16_vconfig_upsert "$f" "tr_launcher.gaussianblur.support" "$BLVL"
-  os16_vconfig_upsert "$f" "tr_launcher.blurrecent.support" "$BLUR_RECENT"
-  os16_vconfig_upsert "$f" "tr_launcher.folderblur.support" "$BLVL"
-  os16_vconfig_upsert "$f" "ro.transsion_launcher_folder_blur_support" "$BLVL"
-  os16_vconfig_upsert "$f" "persist.sys.transsion_launcher_gaussian_blur_enable" "$EN"
-  os16_vconfig_upsert "$f" "ro.transsion_async_animation_support" "$LAUNCHER_ASYNC"
-  os16_vconfig_upsert "$f" "ro.tran_display_unionrender.support" "$UNION"
-}
-
 os16_apply_launcher_vconfig_all() {
   os16_blur_vals
-  bar=$(os16_cfg_01 dynamicbar_os16 false)
   if [ "$SKIP_BLUR" = "1" ]; then
-    for pkg in $(os16_launcher_vconfig_pkgs); do
-      staged=$(os16_seed_vconfig_pkg "$pkg")
-      stock="${staged}.stock"
-      [ -f "$stock" ] && cp -f "$stock" "$staged"
-      if [ "$MOTION_PLAT" = "3" ]; then
-        os16_motion_vconfig_keys "$staged" "$MOTION_PLAT"
-        os16_vconfig_upsert "$staged" "ro.transsion_async_animation_support" "$LAUNCHER_ASYNC"
-        os16_bind_vconfig_pkg "$staged" "$pkg"
-      else
-        os16_unbind_vconfig_pkg "$pkg"
-      fi
-    done
+    staged=$(os16_seed_vconfig_pkg com.transsion.launcher3)
+    stock="${staged}.stock"
+    if [ -f "$stock" ]; then
+      cp -f "$stock" "$staged"
+    fi
+    if [ "$MOTION_PLAT" = "3" ]; then
+      os16_motion_vconfig_keys "$staged" "$MOTION_PLAT"
+      os16_vconfig_upsert "$staged" "ro.transsion_async_animation_support" "$LAUNCHER_ASYNC"
+      os16_bind_vconfig_pkg "$staged" com.transsion.launcher3
+    else
+      os16_unbind_vconfig_pkg com.transsion.launcher3
+    fi
+    os16_unbind_vconfig_pkg com.transsion.hilauncher
+    os16_unbind_vconfig_pkg com.transsion.XOSLauncher
+    os16_unbind_vconfig_pkg com.transsion.launcher
     return 0
   fi
-  for pkg in $(os16_launcher_vconfig_pkgs); do
-    staged=$(os16_seed_vconfig_pkg "$pkg")
-    stock="${staged}.stock"
-    [ -f "$stock" ] && cp -f "$stock" "$staged"
-    os16_write_dock_folder_vconfig "$staged"
-    os16_motion_vconfig_keys "$staged" "$MOTION_PLAT"
-    if [ "$bar" = "1" ]; then
-      os16_vconfig_upsert "$staged" "ro.os.tran_hide_status_bar_for_land_recent" "1"
-    else
-      os16_restore_vconfig_key_from_stock "$staged" "ro.os.tran_hide_status_bar_for_land_recent"
-    fi
-    os16_bind_vconfig_pkg "$staged" "$pkg"
-  done
+  staged=$(os16_seed_vconfig_pkg com.transsion.launcher3)
+  os16_vconfig_upsert "$staged" "ro.os.recent.blur" "1"
+  os16_vconfig_upsert "$staged" "ro.transsion_launcher_gaussian_blur_support" "$BLVL"
+  os16_vconfig_upsert "$staged" "tr_launcher.gaussianblur.support" "$BLVL"
+  os16_vconfig_upsert "$staged" "tr_launcher.blurrecent.support" "$BLUR_RECENT"
+  os16_vconfig_upsert "$staged" "tr_launcher.folderblur.support" "$BLVL"
+  os16_vconfig_upsert "$staged" "ro.transsion_launcher_folder_blur_support" "$BLVL"
+  os16_vconfig_upsert "$staged" "ro.transsion_async_animation_support" "$LAUNCHER_ASYNC"
+  os16_vconfig_upsert "$staged" "ro.tran_display_unionrender.support" "$UNION"
+  os16_motion_vconfig_keys "$staged" "$MOTION_PLAT"
+  bar=$(os16_cfg_01 dynamicbar_os16 false)
+  if [ "$bar" = "1" ]; then
+    os16_vconfig_upsert "$staged" "ro.os.tran_hide_status_bar_for_land_recent" "1"
+  else
+    os16_restore_vconfig_key_from_stock "$staged" "ro.os.tran_hide_status_bar_for_land_recent"
+  fi
+  os16_bind_vconfig_pkg "$staged" com.transsion.launcher3
+  os16_unbind_vconfig_pkg com.transsion.hilauncher
+  os16_unbind_vconfig_pkg com.transsion.XOSLauncher
+  os16_unbind_vconfig_pkg com.transsion.launcher
 }
 
 os16_apply_systemui_vconfig() {

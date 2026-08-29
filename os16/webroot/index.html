@@ -187,7 +187,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
         </div>
         <div class="hero-card">
           <div class="hero-title">Transsion Flagship 16</div>
-          <div class="hero-sub" id="module-version-sub">V2.7 · OS 16</div>
+          <div class="hero-sub" id="module-version-sub">V2.8 · OS 16</div>
         </div>
         <div class="h8"></div>
         <div class="author-card">
@@ -1445,7 +1445,11 @@ async function dumpAi(){
   lines.push('device_config notification_shade_blur  '+(nsb||'EMPTY'));
   lines.push('device_config enable_blur_on_windows  '+(ebow||'EMPTY'));
   lines.push('device_config shade_blur_radius  '+(sbr||'EMPTY'));
-  const lvc=await g('grep -E "gaussian|blurrecent|recent.blur|async_animation|spring" /tr_product/etc/vconfig/com.transsion.launcher3/build.prop 2>/dev/null');
+  const lvc=await g('grep -E "gaussian|blurrecent|folderblur|folder_blur|recent.blur|async_animation|spring" /tr_product/etc/vconfig/com.transsion.launcher3/build.prop 2>/dev/null');
+  const foldp=await g('getprop tr_launcher.folderblur.support');
+  const gausp=await g('getprop tr_launcher.gaussianblur.support');
+  lines.push('tr_launcher.folderblur.support  '+(foldp||'EMPTY'));
+  lines.push('tr_launcher.gaussianblur.support  '+(gausp||'EMPTY'));
   lines.push('launcher3 vconfig');
   lines.push(lvc||'EMPTY');
   const svc=await g('grep -iE "blur|glass|glow|lighting|transparen|liquid|shade" /tr_product/etc/vconfig/com.android.systemui/build.prop 2>/dev/null');
@@ -1722,7 +1726,7 @@ async function handleEmoji(input){
 }
 async function loadDevice(){
   const prop=await g('cat "'+MOD+'/module.prop" 2>/dev/null');
-  const ver=(prop.match(/^version=(.+)$/m)||[])[1]||'V2.7';
+  const ver=(prop.match(/^version=(.+)$/m)||[])[1]||'V2.8';
   n('module-version-sub', ver+' · OS 16');
   let type=await g('getprop ro.tran.os.type');
   let verOs=await g('getprop ro.transsion.os.version');

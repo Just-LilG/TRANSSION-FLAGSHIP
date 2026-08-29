@@ -1,5 +1,8 @@
 # Transsion Flagship 16
 
+## v2.8
+- **Fixes V2.7 dock/folder regression.** V2.7 reset launcher vconfig from `.stock` on every apply and bound extra launcher packages, then force-stopped Home after boot. That could replace a full overlay with a thin file and break more than dock blur. V2.8 goes back to in-place launcher3 upserts (same path as V2.6 shade/glass), still writes dock/folder keys, unbinds the extra V2.7 launcher overlays, and only restarts Home after the good overlay is rebound.
+
 ## v2.7
 - **Dock + folder blur.** Dynamic blur on now writes launcher dock/folder keys (`tr_launcher.gaussianblur.support=3`, `tr_launcher.folderblur.support=3`, `tr_launcher.blurrecent.support=1`) to resetprop, launcher vconfig, Magisk `system.prop`, and settings. Home is restarted after Apply and after boot settle so the dock picks them up. Shade / recents / liquid glass were already working.
 - **Installer log is ASCII-only.** KernelSU-style `[OK]` `[*]` `[!]` `>` boxes. No emoji characters in the flash log. Emoji font install is unchanged.
