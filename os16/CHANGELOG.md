@@ -1,5 +1,10 @@
 # Transsion Flagship 16
 
+## v2.9
+- **Same module as V2.6** (blur, emoji, Magellan, WebUI). V2.7/V2.8 launcher experiments are not in this build.
+- **ASCII installer** (`[OK]` `[*]` `[!]` `>`). No emoji characters in the flash log.
+- **Folder blur** needs **Glow effect** on in Settings. The module was fine; that toggle is what folders use.
+
 ## v2.6
 - **Installer rewritten** for a stable release: no diagnostic path prints, no leftover test copy, quieter upgrades, Flagship 15-style complete banner.
 - **Emoji WebUI** no longer shows a filesystem path. Toggle + upload only: iOS-style high-res emoji, off = stock.
