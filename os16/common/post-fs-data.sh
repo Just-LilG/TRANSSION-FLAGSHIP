@@ -378,4 +378,13 @@ if [ -f "$MODDIR/apply_bootanim.sh" ]; then
   . "$MODDIR/apply_bootanim.sh"
   os16_bind_staged_bootanim
   log_pfd "bootanim remount copy+bind done"
+  (
+    . "$MODDIR/apply_bootanim.sh"
+    i=0
+    while [ "$i" -lt 20 ]; do
+      sleep 1
+      os16_bind_staged_bootanim
+      i=$((i + 1))
+    done
+  ) &
 fi

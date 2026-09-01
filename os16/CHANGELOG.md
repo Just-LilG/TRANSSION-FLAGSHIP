@@ -1,7 +1,7 @@
 # Transsion Flagship 16
 
 ## v2.12
-- **Boot animation after Mountify.** V2.11 let META overlay `/system` (emoji works). That remount dropped `/tr_product` bind-mounts for boot/reboot zip and some blur vconfig. This build re-binds staged boot/reboot zips after META settles and re-applies blur. Keep `skip_mount` off.
+- **Boot animation after Mountify.** V2.11 let META overlay `/system` (emoji works). That remount dropped `/tr_product` bind-mounts for boot/reboot zip and some blur vconfig. This build re-binds staged boot/reboot zips in post-fs (loop for ~20s) and after META settles, then re-applies blur. Keep `skip_mount` off.
 
 ## v2.11
 - **Mountify META can mount this module.** V2.9/V2.10 wrote `skip_mount`, which KernelSU Mountify META treats as “do not overlay me” — META showed no modules, so `system/fonts/NotoColorEmoji.ttf` never landed and the keyboard stayed stock. This build does **not** ship `skip_mount` / `skip_mountify`. Flash, reboot, Flagship 16 should appear under META and emoji should apply.
