@@ -181,6 +181,7 @@ os16_drop_module_blur() {
     ro.os.recent.blur \
     ro.transsion_launcher_gaussian_blur_support \
     tr_launcher.gaussianblur.support \
+    tr_launcher.blurrecent.support \
     ro.tran.effectengine.dynamicblur.support \
     ro.os_xos16_blur_v2_support \
     persist.sys.sf.disable_blurs \
@@ -228,6 +229,7 @@ os16_apply_blur_props() {
   os16_rp_overwrite ro.os.recent.blur "$B01"
   os16_rp_overwrite ro.transsion_launcher_gaussian_blur_support "$BLVL"
   os16_rp_overwrite tr_launcher.gaussianblur.support "$BLVL"
+  os16_rp_overwrite tr_launcher.blurrecent.support "$BLUR_RECENT"
   os16_rp_overwrite ro.tran.effectengine.dynamicblur.support "$DYNBLUR"
   os16_rp_overwrite ro.os_xos16_blur_v2_support "$BLURV2"
   os16_rp persist.sys.sf.disable_blurs "$SFDIS"
@@ -399,6 +401,7 @@ os16_apply_tr_product_blur_buildprop() {
   os16_vconfig_upsert "$staged" "ro.os.recent.blur" "$B01"
   os16_vconfig_upsert "$staged" "ro.transsion_launcher_gaussian_blur_support" "$BLVL"
   os16_vconfig_upsert "$staged" "tr_launcher.gaussianblur.support" "$BLVL"
+  os16_vconfig_upsert "$staged" "tr_launcher.blurrecent.support" "$BLUR_RECENT"
   os16_vconfig_upsert "$staged" "ro.tran.effectengine.dynamicblur.support" "$DYNBLUR"
   os16_vconfig_upsert "$staged" "ro.os_xos16_blur_v2_support" "$BLURV2"
   os16_vconfig_upsert "$staged" "ro.sf.blurs_are_expensive" "$EXP"
@@ -501,6 +504,7 @@ os16_apply_launcher_vconfig_all() {
     os16_vconfig_upsert "$staged" "ro.os.recent.blur" "1"
     os16_vconfig_upsert "$staged" "ro.transsion_launcher_gaussian_blur_support" "$BLVL"
     os16_vconfig_upsert "$staged" "tr_launcher.gaussianblur.support" "$BLVL"
+    os16_vconfig_upsert "$staged" "tr_launcher.blurrecent.support" "$BLUR_RECENT"
     os16_vconfig_upsert "$staged" "ro.transsion_async_animation_support" "$LAUNCHER_ASYNC"
     os16_vconfig_upsert "$staged" "ro.tran_display_unionrender.support" "$UNION"
     os16_motion_vconfig_keys "$staged" "$MOTION_PLAT"
@@ -592,6 +596,7 @@ os16_strip_blur_systemprop() {
     ro.os.recent.blur \
     ro.transsion_launcher_gaussian_blur_support \
     tr_launcher.gaussianblur.support \
+    tr_launcher.blurrecent.support \
     ro.tran.effectengine.dynamicblur.support \
     ro.os_xos16_blur_v2_support \
     persist.sys.sf.disable_blurs \

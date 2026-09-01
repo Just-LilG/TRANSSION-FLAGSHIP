@@ -210,6 +210,7 @@ ro.surface_flinger.supports_background_blur=$b01
 ro.os.recent.blur=$b01
 ro.transsion_launcher_gaussian_blur_support=$gblur
 tr_launcher.gaussianblur.support=$gblur
+tr_launcher.blurrecent.support=$([ "$blur" = "true" ] && echo 1 || echo 0)
 ro.tran.effectengine.dynamicblur.support=$dynblur
 ro.os_xos16_blur_v2_support=$blurv2
 persist.sys.sf.disable_blurs=$sfdis
@@ -301,6 +302,7 @@ EOF
       -e '/^ro.os.recent.blur=/d' \
       -e '/^ro.transsion_launcher_gaussian_blur_support=/d' \
       -e '/^tr_launcher.gaussianblur.support=/d' \
+      -e '/^tr_launcher.blurrecent.support=/d' \
       -e '/^ro.tran.effectengine.dynamicblur.support=/d' \
       -e '/^ro.os_xos16_blur_v2_support=/d' \
       -e '/^persist.sys.sf.disable_blurs=/d' \
@@ -339,7 +341,7 @@ print_modname() {
   ui_thick
   ui_print "|                                      |"
   ui_print "|   TRANSSION FLAGSHIP 16              |"
-  ui_print "|   XOS . HiOS . iTel OS 16 . V2.9     |"
+  ui_print "|   XOS . HiOS . iTel OS 16 . V2.10    |"
   ui_print "|                                      |"
   ui_thick
   ui_print " "
@@ -638,7 +640,7 @@ set_permissions() {
   ui_print " "
   ui_thick
   ui_print "INSTALLATION COMPLETE"
-  ui_info "Module : Transsion Flagship 16 V2.9"
+  ui_info "Module : Transsion Flagship 16 V2.10"
   ui_info "OS     : $OS_TYPE $OS_VER"
   ui_div
   ui_print "t.me/Just_LilGXX"

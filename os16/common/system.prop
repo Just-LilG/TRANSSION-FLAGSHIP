@@ -47,6 +47,7 @@ ro.surface_flinger.supports_background_blur=1
 ro.os.recent.blur=1
 ro.transsion_launcher_gaussian_blur_support=3
 tr_launcher.gaussianblur.support=3
+tr_launcher.blurrecent.support=1
 ro.tran.effectengine.dynamicblur.support=1
 ro.os_xos16_blur_v2_support=1
 persist.sys.sf.disable_blurs=0

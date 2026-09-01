@@ -1,5 +1,8 @@
 # Transsion Flagship 16
 
+## v2.10
+- **Recents / app-drawer blur key.** Dump on X6886 showed launcher vconfig still at stock `tr_launcher.blurrecent.support=0` while gaussian was 3. Dynamic blur on now upserts that key to **1** (no overlay wipe). Keep Glow effect on in Settings for folders.
+
 ## v2.9
 - **Same module as V2.6** (blur, emoji, Magellan, WebUI). V2.7/V2.8 launcher experiments are not in this build.
 - **ASCII installer** (`[OK]` `[*]` `[!]` `>`). No emoji characters in the flash log.
