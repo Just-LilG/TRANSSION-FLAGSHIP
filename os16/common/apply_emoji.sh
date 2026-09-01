@@ -127,6 +127,13 @@ os16_apply_emoji() {
     return 1
   fi
   chmod 644 "$src" 2>/dev/null
+  if [ -d /mnt/vendor/mountify ]; then
+    for d in /mnt/vendor/mountify/system/fonts /mnt/vendor/mountify/system/system/fonts; do
+      mkdir -p "$d" 2>/dev/null
+      cp -f "$src" "$d/NotoColorEmoji.ttf" 2>/dev/null
+    done
+    os16_emoji_log "staged TTF for Mountify overlay"
+  fi
   os16_emoji_dests | while read -r dest; do
     [ -e "$dest" ] || continue
     case "$dest" in

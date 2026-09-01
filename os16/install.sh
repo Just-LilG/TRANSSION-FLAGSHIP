@@ -1,7 +1,9 @@
 
-# Mountify copies system/* itself. Magisk magic-mount of /system fights that
-# overlay and still never reaches /tr_product (bootanim already bind-mounts).
-SKIPMOUNT=true
+# Magisk skip_mount is also how KernelSU Mountify META skips a module.
+# If we create it, META shows "no modules mounted" and never overlays
+# system/fonts — emoji bind then loses to the empty OverlayFS.
+# Leave skip_mount off so META copies system/ (it will add skip_mount itself).
+SKIPMOUNT=false
 PROPFILE=true
 POSTFSDATA=true
 LATESTARTSERVICE=true
@@ -336,12 +338,26 @@ unzip_mod_scripts() {
   unzip -oj "$ZIPFILE" 'common/apply_emoji.sh' -d "$MODPATH" >&2
 }
 
+os16_register_mountify() {
+  local id="transsion-flagship-16"
+  local f
+  for f in /data/adb/mountify/modules.txt \
+           /data/adb/modules/mountify/modules.txt \
+           /data/adb/modules/mountify_meta/modules.txt; do
+    [ -f "$f" ] || continue
+    if ! grep -qx "$id" "$f" 2>/dev/null; then
+      printf '%s\n' "$id" >> "$f"
+      ui_ok "Added to Mountify list ($(basename "$(dirname "$f")"))"
+    fi
+  done
+}
+
 print_modname() {
   ui_print " "
   ui_thick
   ui_print "|                                      |"
   ui_print "|   TRANSSION FLAGSHIP 16              |"
-  ui_print "|   XOS . HiOS . iTel OS 16 . V2.10    |"
+  ui_print "|   XOS . HiOS . iTel OS 16 . V2.11    |"
   ui_print "|                                      |"
   ui_thick
   ui_print " "
@@ -617,6 +633,7 @@ on_install() {
   ui_ok "Sounds"
   ui_ok "Emoji font"
   ui_ok "WebUI"
+  ui_ok "Mountify META can overlay this module"
 }
 
 set_permissions() {
@@ -629,7 +646,11 @@ set_permissions() {
     os16_generate_120hz_jsons
     os16_copy_magellan_mountify
   fi
-  touch "$MODPATH/skip_mount"
+  # Drop leftover skip flags from V2.9 and earlier so Mountify META includes us.
+  rm -f "$MODPATH/skip_mount" "$MODPATH/skip_mountify"
+  rm -f /data/adb/modules/transsion-flagship-16/skip_mount
+  rm -f /data/adb/modules/transsion-flagship-16/skip_mountify
+  os16_register_mountify
   set_perm_recursive "$MODPATH" 0 0 0755 0644
   for sh in "$MODPATH/post-fs-data.sh" "$MODPATH/service.sh" "$MODPATH/uninstall.sh" "$MODPATH/apply_blur.sh" "$MODPATH/apply_120hz.sh" "$MODPATH/apply_sounds.sh" "$MODPATH/apply_unlock.sh" "$MODPATH/apply_emoji.sh"; do
     [ -f "$sh" ] && set_perm "$sh" 0 0 0755
@@ -640,7 +661,7 @@ set_permissions() {
   ui_print " "
   ui_thick
   ui_print "INSTALLATION COMPLETE"
-  ui_info "Module : Transsion Flagship 16 V2.10"
+  ui_info "Module : Transsion Flagship 16 V2.11"
   ui_info "OS     : $OS_TYPE $OS_VER"
   ui_div
   ui_print "t.me/Just_LilGXX"

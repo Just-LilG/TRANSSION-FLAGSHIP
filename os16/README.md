@@ -14,7 +14,7 @@ Optional: **Mountify** or similar if you use `/tr_product` overlays (not bundled
 
 ## Installation
 
-1. Download `TransFlagship16_V2.10.zip` from [Releases](https://github.com/Just-LilG/TRANSSION-FLAGSHIP/releases)
+1. Download `TransFlagship16_V2.11.zip` from [Releases](https://github.com/Just-LilG/TRANSSION-FLAGSHIP/releases)
 2. Flash in Magisk / KernelSU Manager
 3. Reboot
 4. Open the module **WebUI** → configure → **Apply & Save** → reboot when prompted

@@ -1,5 +1,8 @@
 # Transsion Flagship 16
 
+## v2.11
+- **Mountify META can mount this module.** V2.9/V2.10 wrote `skip_mount`, which KernelSU Mountify META treats as “do not overlay me” — META showed no modules, so `system/fonts/NotoColorEmoji.ttf` never landed and the keyboard stayed stock. This build does **not** ship `skip_mount` / `skip_mountify`. Flash, reboot, Flagship 16 should appear under META and emoji should apply.
+
 ## v2.10
 - **Recents / app-drawer blur key.** Dump on X6886 showed launcher vconfig still at stock `tr_launcher.blurrecent.support=0` while gaussian was 3. Dynamic blur on now upserts that key to **1** (no overlay wipe). Keep Glow effect on in Settings for folders.
 
