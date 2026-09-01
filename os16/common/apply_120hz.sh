@@ -1,9 +1,6 @@
 #!/system/bin/sh
-# Flagship 16 Force 120Hz = the working TranOS 16 custom refresh.zip:
-# ONLY Magellan XML at $MODDIR/system/tr_product/etc/vconfig/magellan/refresh_rate_config.xml
-# Mountify copies system/* then overlays /tr_product. Do not umount/bind that dest
-# (that fights Mountify). Do not rewrite auto/high/touch — listed 90 is the OEM
-# saved default; max="144" is what puts 144 in Customize App Refresh.
+# Magellan XML always unlocks 144 in Customize App Refresh.
+# Force 120Hz only writes 120Hz settings and swaps APM JSON.
 
 if [ -z "$MODDIR" ]; then
   MODDIR=${0%/*}
@@ -39,8 +36,6 @@ os16_hz_on() {
 }
 
 os16_apply_game_fps_props() {
-  # Developer options: "Disable limiting the maximum frame rate for games at 120 Hz"
-  # Same keys as Flagship 15. resetprop so OEM 60 in tr_product build.prop does not win.
   resetprop ro.surface_flinger.game_default_frame_rate_override 120 >/dev/null 2>&1
   resetprop persist.sys.surface_flinger.game_default_frame_rate_override 120 >/dev/null 2>&1
   resetprop debug.graphics.game_default_frame_rate.disabled true >/dev/null 2>&1
@@ -140,8 +135,6 @@ os16_swap_magisk_apm() {
 }
 
 os16_bind_120hz_files() {
-  # Product APM JSON is leftover XOS 15 overlay. OS 16 Magellan does not use it
-  # for the 144 picker. Never umount /tr_product Magellan — that unmounts Mountify.
   os16_swap_magisk_apm
 }
 
@@ -227,9 +220,6 @@ os16_json_replace_top_array() {
 }
 
 os16_generate_magellan_xml() {
-  # Exact TranOS 16 custom refresh.xml. Do not rewrite existing items
-  # (V1.43–1.46 forced auto=120 and touch=0; Magellan then differed from the
-  # zip that actually unlocked 144). Append only packages not already listed.
   mkdir -p "$(dirname "$MAGELLAN_XML")" "$MAGELLAN_DIR"
   [ -f "$MAGELLAN_TEMPLATE" ] || return 1
   tmp="$HZDIR/.pkgs.txt"
@@ -280,10 +270,6 @@ os16_copy_magellan_mountify() {
   prod_xml=$(os16_product_magellan_xml)
   dest_mfy_tr="/mnt/vendor/mountify/tr_product/etc/vconfig/magellan/refresh_rate_config.xml"
   dest_mfy_pr="/mnt/vendor/mountify/product/etc/vconfig/magellan/refresh_rate_config.xml"
-  if ! os16_hz_on; then
-    rm -f "$MAGELLAN_XML" "$prod_xml" "$dest_mfy_tr" "$dest_mfy_pr"
-    return 0
-  fi
   mkdir -p "$(dirname "$MAGELLAN_XML")" "$(dirname "$prod_xml")"
   if [ ! -f "$MAGELLAN_XML" ] && [ -f "$MAGELLAN_TEMPLATE" ]; then
     cp -f "$MAGELLAN_TEMPLATE" "$MAGELLAN_XML"
@@ -302,8 +288,6 @@ os16_copy_magellan_mountify() {
 }
 
 os16_bind_magellan_bootanim() {
-  # Mountify never overlays /tr_product (not in its target list). Bootanim
-  # reaches it with a per-file nsenter bind. Magellan must use the same path.
   src="$MAGELLAN_XML"
   [ -f "$src" ] || src=$(os16_product_magellan_xml)
   [ -f "$src" ] || src="$MAGELLAN_TEMPLATE"
@@ -329,12 +313,10 @@ os16_bind_magellan_bootanim() {
 }
 
 os16_copy_magellan_data() {
-  # Working zip never writes /data/magellan. Do not overwrite magellan.db json.
   return 0
 }
 
 os16_generate_120hz_jsons() {
-  os16_hz_on || return 0
   mkdir -p "$APM_BYPASS" "$APM_CONFIG" "$MAGELLAN_DIR"
   arr="$HZDIR/.all_pkgs.jsonarray"
   empty="$HZDIR/.empty.jsonarray"
@@ -382,7 +364,6 @@ os16_apply_120hz_settings() {
   os16_put_hz global default_app_refresh_rate 120
   os16_put_hz global tran_other_app_refresh_rate 120
   resetprop ro.tr_display.refreshrate.default_refreshmode.config 120 >/dev/null 2>&1
-  # Listed 90 is Magellan's saved per-app choice. Drop those prefs so XML auto=120 is used.
   for pkg in com.android.settings com.transsion.ossettingsext com.transsion.trsettings; do
     for dir in /data/user_de/0/$pkg/shared_prefs /data/user/0/$pkg/shared_prefs /data/data/$pkg/shared_prefs; do
       rm -f "$dir/flagship16_app_refresh_rate.xml" \
@@ -403,17 +384,19 @@ os16_apply_120hz_all() {
   os16_apply_120hz_settings
 }
 
-# WebUI Apply: copy the TranOS XML into the module tree for the next Mountify
-# boot. Do not wipe package_cache (that soft-reboots and can lose config.json),
-# do not force-stop Settings, do not call pm.
 os16_webui_apply_120hz() {
-  if os16_hz_on && [ -f "$MAGELLAN_TEMPLATE" ]; then
+  if [ -f "$MAGELLAN_TEMPLATE" ]; then
     mkdir -p "$(dirname "$MAGELLAN_XML")"
     cp -f "$MAGELLAN_TEMPLATE" "$MAGELLAN_XML"
     chmod 644 "$MAGELLAN_XML" 2>/dev/null
   fi
+  os16_generate_120hz_jsons
   os16_copy_magellan_mountify
+  os16_bind_magellan_bootanim
   os16_swap_magisk_apm
+  if os16_hz_on; then
+    os16_apply_120hz_settings
+  fi
 }
 
 if [ "${0##*/}" = "apply_120hz.sh" ]; then
