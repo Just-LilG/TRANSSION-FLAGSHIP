@@ -336,6 +336,7 @@ unzip_mod_scripts() {
   unzip -oj "$ZIPFILE" 'common/apply_sounds.sh' -d "$MODPATH" >&2
   unzip -oj "$ZIPFILE" 'common/apply_unlock.sh' -d "$MODPATH" >&2
   unzip -oj "$ZIPFILE" 'common/apply_emoji.sh' -d "$MODPATH" >&2
+  unzip -oj "$ZIPFILE" 'common/apply_bootanim.sh' -d "$MODPATH" >&2
 }
 
 os16_register_mountify() {
@@ -357,7 +358,7 @@ print_modname() {
   ui_thick
   ui_print "|                                      |"
   ui_print "|   TRANSSION FLAGSHIP 16              |"
-  ui_print "|   XOS . HiOS . iTel OS 16 . V2.11    |"
+  ui_print "|   XOS . HiOS . iTel OS 16 . V2.12    |"
   ui_print "|                                      |"
   ui_thick
   ui_print " "
@@ -652,7 +653,7 @@ set_permissions() {
   rm -f /data/adb/modules/transsion-flagship-16/skip_mountify
   os16_register_mountify
   set_perm_recursive "$MODPATH" 0 0 0755 0644
-  for sh in "$MODPATH/post-fs-data.sh" "$MODPATH/service.sh" "$MODPATH/uninstall.sh" "$MODPATH/apply_blur.sh" "$MODPATH/apply_120hz.sh" "$MODPATH/apply_sounds.sh" "$MODPATH/apply_unlock.sh" "$MODPATH/apply_emoji.sh"; do
+  for sh in "$MODPATH/post-fs-data.sh" "$MODPATH/service.sh" "$MODPATH/uninstall.sh" "$MODPATH/apply_blur.sh" "$MODPATH/apply_120hz.sh" "$MODPATH/apply_sounds.sh" "$MODPATH/apply_unlock.sh" "$MODPATH/apply_emoji.sh" "$MODPATH/apply_bootanim.sh"; do
     [ -f "$sh" ] && set_perm "$sh" 0 0 0755
   done
   for f in "$MODPATH/system/fonts/NotoColorEmoji.ttf" "$MODPATH/system/fonts/NotoColorEmoji_custom.ttf"; do
@@ -661,7 +662,7 @@ set_permissions() {
   ui_print " "
   ui_thick
   ui_print "INSTALLATION COMPLETE"
-  ui_info "Module : Transsion Flagship 16 V2.11"
+  ui_info "Module : Transsion Flagship 16 V2.12"
   ui_info "OS     : $OS_TYPE $OS_VER"
   ui_div
   ui_print "t.me/Just_LilGXX"

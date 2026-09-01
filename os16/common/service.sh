@@ -5,7 +5,7 @@ LOG="$MODDIR/transflagship16_service.log"
 rm -f "$LOG"
 log_p() { echo "[$(date '+%H:%M:%S')] $1" >> "$LOG"; }
 
-log_p "=== TransFlagship 16 V2.11 ==="
+log_p "=== TransFlagship 16 V2.12 ==="
 log_p "Device : $(getprop ro.product.model 2>/dev/null)"
 log_p "Brand  : $(getprop ro.product.brand 2>/dev/null)"
 log_p "Android: $(getprop ro.build.version.release 2>/dev/null)"
@@ -63,6 +63,14 @@ else
   log_p "apply_emoji.sh missing"
 fi
 
+if [ -f "$MODDIR/apply_bootanim.sh" ]; then
+  . "$MODDIR/apply_bootanim.sh"
+  os16_bind_staged_bootanim
+  log_p "bootanim live=$(ls -l /tr_product/media/bootanimation.zip 2>/dev/null | awk '{print $5,$NF}') reboot=$(ls -l /tr_product/media/rebootanimation.zip 2>/dev/null | awk '{print $5,$NF}')"
+else
+  log_p "apply_bootanim.sh missing"
+fi
+
 log_p "OS 16 AI keys (read only):"
 log_p "  subtitle=$(getprop ro.tr_aiservice.aicorespeech_subtitle.feature.support 2>/dev/null)"
 log_p "  livecaption=$(getprop ro.tr_aiservice.aicorespeech_livecaption.feature.support 2>/dev/null)"
@@ -101,10 +109,10 @@ log_p "  sf_disable_blurs=$(getprop persist.sys.sf.disable_blurs 2>/dev/null)"
   log_p "  lighting_feat=$(getprop persist.tr_lighting.feature.support 2>/dev/null)"
 log_p "  home=$(cmd package resolve-activity --brief -a android.intent.action.MAIN -c android.intent.category.HOME 2>/dev/null | tail -n 1)"
 
-# Mountify / tr_product overlay can rewrite liquidglass after post-fs-data.
-# Re-apply props once boot has settled. Do not kill SurfaceFlinger or home.
+# Mountify META remounts overlays after post-fs binds. Re-apply bootanim,
+# blur, Magellan, sounds, emoji after settle. Do not kill SurfaceFlinger.
 (
-  sleep 8
+  sleep 12
   [ -f "$MODDIR/apply_blur.sh" ] || exit 0
   . "$MODDIR/apply_blur.sh"
   OS16_BOOT=1
@@ -140,6 +148,24 @@ log_p "  home=$(cmd package resolve-activity --brief -a android.intent.action.MA
     . "$MODDIR/apply_emoji.sh"
     os16_apply_emoji
     echo "[$(date '+%H:%M:%S')] emoji after settle live=$(ls -l /system/fonts/NotoColorEmoji.ttf 2>/dev/null | awk '{print $5}')" >> "$LOG"
+  fi
+  if [ -f "$MODDIR/apply_bootanim.sh" ]; then
+    . "$MODDIR/apply_bootanim.sh"
+    os16_bind_staged_bootanim
+    echo "[$(date '+%H:%M:%S')] bootanim after settle live=$(ls -l /tr_product/media/bootanimation.zip 2>/dev/null | awk '{print $5}')" >> "$LOG"
+  fi
+  sleep 4
+  if [ -f "$MODDIR/apply_blur.sh" ]; then
+    . "$MODDIR/apply_blur.sh"
+    OS16_BOOT=1
+    export OS16_BOOT
+    os16_apply_blur_stack
+    os16_apply_blur_runtime
+    echo "[$(date '+%H:%M:%S')] blur late skip=$SKIP_BLUR platform=$(getprop ro.tr_animation.platform_level 2>/dev/null) liquidglass=$(getprop ro.tr_display.liquidglass.support 2>/dev/null)" >> "$LOG"
+  fi
+  if [ -f "$MODDIR/apply_bootanim.sh" ]; then
+    . "$MODDIR/apply_bootanim.sh"
+    os16_bind_staged_bootanim
   fi
 ) &
 

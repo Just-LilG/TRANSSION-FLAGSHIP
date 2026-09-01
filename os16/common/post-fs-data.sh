@@ -373,3 +373,9 @@ if [ -f "$MODDIR/apply_emoji.sh" ]; then
 else
   log_pfd "apply_emoji.sh missing"
 fi
+
+if [ -f "$MODDIR/apply_bootanim.sh" ]; then
+  . "$MODDIR/apply_bootanim.sh"
+  os16_bind_staged_bootanim
+  log_pfd "bootanim remount copy+bind done"
+fi
